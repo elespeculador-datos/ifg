@@ -1,0 +1,59 @@
+name: IFG diario
+
+on:
+  schedule:
+    - cron: "28 6 * * 1-5"
+    - cron: "28 7 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      forzar:
+        description: "Publicar aunque no sean las 8:30 en Madrid"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ifg-diario
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Actualizar GDELT
+        continue-on-error: true
+        run: python backfill_gdelt.py --cada 7 --incremental
+
+      - name: Calcular y publicar
+        run: |
+          if [ "${{ inputs.forzar }}" = "true" ]; then
+            python publicar_diario.py --ahora
+          else
+            python publicar_diario.py
+          fi
+
+      - name: Guardar el resultado en el repositorio
+        run: |
+          if [ -z "$(git status --porcelain docs datos)" ]; then
+            echo "Sin cambios: la ejecucion no tocaba o no produjo nada."
+            exit 0
+          fi
+          git config user.name "IFG bot"
+          git config user.email "actions@github.com"
+          git add docs datos
+          git commit -m "IFG $(date -u +%Y-%m-%d)"
+          git push
