@@ -1,18 +1,26 @@
 name: IFG diario
 
+# De madrugada, no a las 8:30: el pipeline editorial que genera "Antes de la
+# apertura" corre sobre las 5:00, así que el índice tiene que estar publicado
+# antes o el texto de cada mañana citaría el valor de la víspera.
+#
+# Dos horarios porque GitHub Actions solo entiende UTC y España cambia de hora
+# dos veces al año. El script comprueba la hora local y si ya publicó hoy, así
+# que de las dos ejecuciones solo una escribe. Sin mantenimiento en marzo ni
+# en octubre.
 on:
   schedule:
-    - cron: "28 6 * * 1-5"
-    - cron: "28 7 * * 1-5"
-  workflow_dispatch:
+    - cron: "15 1 * * 1-5"    # 03:15 en Madrid con horario de verano
+    - cron: "15 2 * * 1-5"    # 03:15 en Madrid con horario de invierno
+  workflow_dispatch:          # botón para lanzarlo a mano
     inputs:
       forzar:
-        description: "Publicar aunque no sean las 8:30 en Madrid"
+        description: "Publicar aunque no sea la madrugada en Madrid"
         type: boolean
         default: true
 
 permissions:
-  contents: write
+  contents: write             # necesario para guardar el resultado en el repo
 
 concurrency:
   group: ifg-diario
@@ -35,6 +43,9 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Actualizar GDELT
+        # Solo los días que falten desde la última vez. Si falla, el índice
+        # se calcula igual y reparte el peso: una fuente caída no puede
+        # tumbar la publicación.
         continue-on-error: true
         run: python backfill_gdelt.py --cada 7 --incremental
 
@@ -49,7 +60,7 @@ jobs:
       - name: Guardar el resultado en el repositorio
         run: |
           if [ -z "$(git status --porcelain docs datos)" ]; then
-            echo "Sin cambios: la ejecucion no tocaba o no produjo nada."
+            echo "Sin cambios: la ejecución no tocaba o no produjo nada."
             exit 0
           fi
           git config user.name "IFG bot"
@@ -57,3 +68,7 @@ jobs:
           git add docs datos
           git commit -m "IFG $(date -u +%Y-%m-%d)"
           git push
+
+      - name: Avisar si ha fallado
+        if: failure()
+        run: echo "::error::La publicación del IFG ha fallado. Revisa el registro."
