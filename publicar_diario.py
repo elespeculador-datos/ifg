@@ -2,22 +2,32 @@
 """
 Publicación diaria del Índice de Fricción Global.
 
-Lo ejecuta GitHub Actions cada día hábil. Recalcula la serie completa,
-escribe el valor del día en docs/ifg.json y añade la fila a
+Lo ejecuta GitHub Actions cada día hábil de madrugada. Recalcula la serie
+completa, escribe el valor del día en docs/ifg.json y añade la fila a
 docs/ifg_serie.csv. GitHub Pages sirve esa carpeta, así que el JSON queda
 en una URL pública que Make puede leer.
 
+POR QUÉ DE MADRUGADA Y NO A LAS 8:30. La especificación original fijaba las
+8:30 CET, pero el pipeline editorial que genera "Antes de la apertura" corre
+sobre las 5:00. Publicando después, el texto de cada mañana citaría siempre
+el valor de la víspera. Publicar a las 3:30 además es MÁS fiel al criterio
+de la propia especificación —hora de corte coherente con el cierre de Wall
+Street del día anterior—, porque el índice queda fijado antes de que abra
+ningún mercado europeo y no mezcla sesiones.
+
 POR QUÉ RECALCULA TODO CADA DÍA en vez de añadir solo la fila nueva: los
 z-scores necesitan la ventana de 750 sesiones y la escala necesita la sigma
-expansiva. Recalcular cuesta dos o tres minutos y garantiza que la serie
-publicada es siempre coherente consigo misma. Como no hay look-ahead, los
-valores pasados no cambian al recalcular: eso ya está comprobado.
+expansiva. Recalcular cuesta doce minutos y garantiza que la serie publicada
+es siempre coherente consigo misma. Como no hay look-ahead, los valores
+pasados no cambian al recalcular: eso está comprobado.
 
-GUARDIA HORARIA: GitHub Actions solo entiende UTC, y España cambia de hora
-dos veces al año. En vez de mantener dos calendarios, el flujo se dispara a
-las 06:30 y a las 07:30 UTC y este script se planta salvo que en Madrid sean
-las ocho y algo. Así la publicación cae a la misma hora local todo el año
-sin tocar nada.
+GUARDIA HORARIA. GitHub Actions solo entiende UTC y España cambia de hora dos
+veces al año, así que el flujo se dispara dos veces y este script se planta
+salvo que en Madrid sea la madrugada. Se acepta una VENTANA de dos horas en
+vez de una hora exacta, porque las tareas programadas de GitHub se retrasan
+con frecuencia y un retraso de media hora no puede impedir la publicación
+del día. Que la ventana admita las dos ejecuciones en verano no duplica
+nada: la segunda encuentra la fila de hoy en el registro y se planta.
 
 Uso:
     python publicar_diario.py            # con guardia horaria
@@ -46,8 +56,21 @@ logging.basicConfig(level=logging.INFO,
 log = logging.getLogger("publicar")
 
 DIR_PUBLICO = "docs"
-HORA_PUBLICACION = 8          # hora local de Madrid
+REGISTRO = f"{DIR_PUBLICO}/registro_publicaciones.csv"
+VENTANA_PUBLICACION = (3, 5)      # horas locales de Madrid: vale las 3 y las 4
 ZONA = ZoneInfo("Europe/Madrid")
+
+
+def ya_publicado_hoy() -> bool:
+    """¿Hay ya una fila de hoy en el registro de publicaciones?"""
+    if not os.path.exists(REGISTRO):
+        return False
+    hoy = datetime.now(ZONA).date().isoformat()
+    try:
+        with open(REGISTRO, encoding="utf-8") as fh:
+            return any(linea.startswith(hoy) for linea in fh)
+    except OSError:
+        return False
 
 
 def toca_publicar() -> bool:
@@ -55,10 +78,13 @@ def toca_publicar() -> bool:
     if ahora.weekday() >= 5:
         log.info("Fin de semana en Madrid (%s). No se publica.", ahora.date())
         return False
-    if ahora.hour != HORA_PUBLICACION:
-        log.info("En Madrid son las %02d:%02d. La publicación es a las %02d:30. "
-                 "Esta ejecución no toca.", ahora.hour, ahora.minute,
-                 HORA_PUBLICACION)
+    if not VENTANA_PUBLICACION[0] <= ahora.hour < VENTANA_PUBLICACION[1]:
+        log.info("En Madrid son las %02d:%02d, fuera de la ventana de "
+                 "publicación (%02d:00-%02d:00). Esta ejecución no toca.",
+                 ahora.hour, ahora.minute, *VENTANA_PUBLICACION)
+        return False
+    if ya_publicado_hoy():
+        log.info("Ya hay una publicación registrada hoy. No se repite.")
         return False
     return True
 
@@ -108,11 +134,11 @@ def main() -> int:
 
     # Registro de ejecuciones: la prueba de que se publica sin fallos, que es
     # el requisito 5 de la sección 4, y la base de la validación prospectiva.
+    # También es lo que evita publicar dos veces el mismo día.
     linea = (f"{ultimo['generado']},{ultimo['fecha']},{ultimo['valor']},"
              f"{ultimo['tramo']},{ultimo['cobertura']}\n")
-    registro = f"{DIR_PUBLICO}/registro_publicaciones.csv"
-    nuevo = not os.path.exists(registro)
-    with open(registro, "a", encoding="utf-8") as fh:
+    nuevo = not os.path.exists(REGISTRO)
+    with open(REGISTRO, "a", encoding="utf-8") as fh:
         if nuevo:
             fh.write("ejecutado,fecha_dato,valor,tramo,cobertura\n")
         fh.write(linea)
