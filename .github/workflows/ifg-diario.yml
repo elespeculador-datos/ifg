@@ -43,9 +43,6 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Actualizar GDELT
-        # Solo los días que falten desde la última vez. Si falla, el índice
-        # se calcula igual y reparte el peso: una fuente caída no puede
-        # tumbar la publicación.
         continue-on-error: true
         run: python backfill_gdelt.py --cada 7 --incremental
 
@@ -57,10 +54,13 @@ jobs:
             python publicar_diario.py
           fi
 
+      - name: Verificar que la serie no se revisa
+        run: python verificar_estabilidad.py
+
       - name: Guardar el resultado en el repositorio
         run: |
           if [ -z "$(git status --porcelain docs datos)" ]; then
-            echo "Sin cambios: la ejecución no tocaba o no produjo nada."
+            echo "Sin cambios: la ejecucion no tocaba o no produjo nada."
             exit 0
           fi
           git config user.name "IFG bot"
@@ -71,4 +71,4 @@ jobs:
 
       - name: Avisar si ha fallado
         if: failure()
-        run: echo "::error::La publicación del IFG ha fallado. Revisa el registro."
+        run: echo "::error::La publicacion del IFG ha fallado. Revisa el registro."
