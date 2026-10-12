@@ -259,14 +259,25 @@ def construir_componentes(precios: pd.DataFrame,
 
     # --- 10. GDELT ---------------------------------------------------------
     if gdelt is not None and not gdelt.empty:
-        # IMPRESCINDIBLE interpolar al calendario de precios ANTES del
+        # IMPRESCINDIBLE llevar la serie al calendario de precios ANTES del
         # z-score. La ventana está expresada en SESIONES: aplicada a una
         # serie muestreada semanalmente, 750 sesiones pasan a significar 750
         # semanas y el mínimo de 375 se convierte en siete años, con lo que
         # el componente no aparece hasta 2020 y se pierde toda la
-        # calibración. Interpolando primero, arranca donde debe.
+        # calibración.
+        #
+        # SE ARRASTRA EL ÚLTIMO VALOR, NO SE INTERPOLA. Interpolar parece más
+        # fino y es un look-ahead encubierto: el valor de un miércoles saldría
+        # de promediar la muestra del lunes anterior con la del lunes
+        # siguiente, que todavía no existe cuando se publica. Al llegar esa
+        # muestra, el valor ya publicado cambiaba hasta 2 puntos. Arrastrando,
+        # cada día usa la última lectura conocida y nada se revisa.
+        #
+        # El límite de 10 sesiones evita que una GDELT caída siga inyectando
+        # su último valor indefinidamente: pasado ese plazo el componente
+        # desaparece y su peso se reparte.
         g = (gdelt.reindex(gdelt.index.union(precios.index))
-                  .interpolate(method="time")
+                  .ffill(limit=10)
                   .reindex(precios.index))
         comp["gdelt"] = zscore(g.rolling(3, min_periods=1).mean())
         detalle["gdelt"] = ["conflicto material MM3(+)"]
