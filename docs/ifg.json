@@ -1,9 +1,9 @@
 {
   "fecha": "2026-10-09",
   "version": "0.9.0",
-  "valor": 63.48,
-  "valor_crudo": 60.86,
-  "variacion": -2.62,
+  "valor": 63.41,
+  "valor_crudo": 60.71,
+  "variacion": -2.69,
   "tramo": "Tensión",
   "cobertura": 0.955,
   "parcial": false,
@@ -35,5 +35,5 @@
   "licencia": "CC BY 4.0. Cita: el especulador.com, Índice de Fricción Global, versión 0.9.0.",
   "aviso": "Contenido informativo y educativo. No constituye asesoramiento financiero ni recomendación de inversión.",
   "estado": "preliminar: reglas congeladas, índice en validación prospectiva, no publicado como referencia citable",
-  "generado": "2026-10-11T19:26:14+02:00"
+  "generado": "2026-10-12T03:35:29+02:00"
 }
