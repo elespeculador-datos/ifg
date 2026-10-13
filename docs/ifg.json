@@ -1,22 +1,22 @@
 {
-  "fecha": "2026-10-09",
+  "fecha": "2026-10-12",
   "version": "0.9.0",
-  "valor": 63.69,
-  "valor_crudo": 61.09,
-  "variacion": -2.59,
+  "valor": 55.69,
+  "valor_crudo": 51.3,
+  "variacion": -4.39,
   "tramo": "Tensión",
   "cobertura": 0.955,
   "parcial": false,
   "motores": [
     {
-      "componente": "grano",
-      "aporte_cambio": -0.1895,
-      "aporte_nivel": -0.3522
+      "componente": "refugios",
+      "aporte_cambio": -0.3033,
+      "aporte_nivel": -0.1843
     },
     {
-      "componente": "gas",
-      "aporte_cambio": 0.141,
-      "aporte_nivel": 0.3753
+      "componente": "fletes",
+      "aporte_cambio": 0.2454,
+      "aporte_nivel": 0.7229
     }
   ],
   "componentes_activos": [
@@ -35,5 +35,6 @@
   "licencia": "CC BY 4.0. Cita: el especulador.com, Índice de Fricción Global, versión 0.9.0.",
   "aviso": "Contenido informativo y educativo. No constituye asesoramiento financiero ni recomendación de inversión.",
   "estado": "preliminar: reglas congeladas, índice en validación prospectiva, no publicado como referencia citable",
-  "generado": "2026-10-12T07:51:22+02:00"
+  "revisiones": "La serie publicada no se revisa. El recálculo diario solo añade fechas nuevas; la deriva observada se publica en revisiones.csv.",
+  "generado": "2026-10-13T03:35:21+02:00"
 }
