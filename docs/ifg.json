@@ -1,22 +1,22 @@
 {
-  "fecha": "2026-10-12",
+  "fecha": "2026-10-13",
   "version": "0.9.0",
-  "valor": 55.69,
-  "valor_crudo": 51.3,
-  "variacion": -4.39,
+  "valor": 66.19,
+  "valor_crudo": 67.82,
+  "variacion": 1.63,
   "tramo": "Tensión",
-  "cobertura": 0.955,
+  "cobertura": 1.0,
   "parcial": false,
   "motores": [
     {
-      "componente": "refugios",
-      "aporte_cambio": -0.3033,
-      "aporte_nivel": -0.1843
+      "componente": "gpr",
+      "aporte_cambio": 0.2729,
+      "aporte_nivel": 0.5434
     },
     {
-      "componente": "fletes",
-      "aporte_cambio": 0.2454,
-      "aporte_nivel": 0.7229
+      "componente": "grano",
+      "aporte_cambio": -0.1901,
+      "aporte_nivel": -0.6055
     }
   ],
   "componentes_activos": [
@@ -36,5 +36,5 @@
   "aviso": "Contenido informativo y educativo. No constituye asesoramiento financiero ni recomendación de inversión.",
   "estado": "preliminar: reglas congeladas, índice en validación prospectiva, no publicado como referencia citable",
   "revisiones": "La serie publicada no se revisa. El recálculo diario solo añade fechas nuevas; la deriva observada se publica en revisiones.csv.",
-  "generado": "2026-10-13T03:35:21+02:00"
+  "generado": "2026-10-14T03:41:55+02:00"
 }
