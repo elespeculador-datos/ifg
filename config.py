@@ -53,6 +53,27 @@ MODO_TRANSFORMACION = "mixto"
 # parte del componente explicada por el mercado y quedarse con el residuo.
 NEUTRALIZAR_BETA = True
 FACTOR_MERCADO = "acwi"      # serie que representa el riesgo de mercado común
+#
+# DEFECTO CONOCIDO, PENDIENTE DE CORREGIR CON VERSIÓN NUEVA.
+# ACWI es un ETF que cotiza desde el 28 de marzo de 2008, y esta serie se usa
+# para neutralizar la beta de TODOS los componentes dentro de limpio(). Su
+# fecha de salida a bolsa se propaga, a través de la neutralización y del
+# z-score posterior, al inicio de cada componente: medido sustituyéndola por
+# el Stoxx 600 (15 meses más de historia), los componentes adelantan su
+# primera sesión entre 411 y 467 días, casi uno a uno con la historia añadida
+# al factor. La era degradada de 2010-2011, con cobertura del 15-25 %, no es
+# falta de datos: los precios están desde 2007. Es el coste de calentamiento
+# de una variable de control mal elegida. Ver validacion_eras.py y la sección
+# 11.1 de PROTOCOLO_VALIDACION.md.
+#
+# EL CAMBIO A "sp500" NO SE HACE AQUÍ SIN MÁS, Y A PROPÓSITO. Cambiar esta
+# constante altera el valor de toda la serie histórica. Si se toca sin más, la
+# ejecución diaria siguiente produce valores distintos para fechas ya
+# publicadas, verificar_estabilidad.py falla —que es lo que tiene que hacer— y
+# la publicación se detiene. La corrección exige, en este orden: numerar
+# versión nueva, descargar el histórico extendido, recalcular la serie
+# completa, republicarla declarando la discontinuidad, y solo entonces
+# cambiar esta línea.
 VENTANA_BETA = 250           # sesiones para estimar la beta móvil
 MIN_PERIODOS_BETA = 120
 
@@ -126,6 +147,9 @@ TICKERS = {
     # Referencias de bolsa
     "stoxx600":     "^STOXX",
     "ibex":         "^IBEX",
+    # Factor de mercado de largo historial. SE DESCARGA PERO NO SE USA
+    # TODAVÍA: ver la advertencia junto a FACTOR_MERCADO.
+    "sp500":        "^GSPC",
     # Gas europeo (incorporación tardía: el TTF arranca en octubre de 2017)
     "gas_ttf":      "TTF=F",
     # Grano: corredores del mar Negro
