@@ -292,10 +292,15 @@ def main() -> int:
     fecha_dia = nueva.index[-1]
     ultimo = indice.descomponer_dia(res, fecha_dia)
     ultimo["estado_dato"] = str(nueva.loc[fecha_dia, "estado"])
-    ultimo["generado"] = generado
-    ultimo["revisiones"] = (
-        f"Serie recalculada al pasar de {args.version_anterior} a "
-        f"{config.VERSION}. Ver revision_version.md y docs/historico/.")
+    # Licencia, aviso legal, estado y sello: los pone sellar_foto(), la misma
+    # función que usa la publicación diaria. No se duplican aquí a mano, que
+    # es exactamente el error que dejó la primera republicación de la 0.10.0
+    # sin 'licencia', sin 'aviso' y sin 'estado'.
+    pub.sellar_foto(
+        ultimo, generado,
+        revisiones=(f"Serie recalculada al pasar de {args.version_anterior} a "
+                    f"{config.VERSION}. Ver revision_version.md y "
+                    f"docs/historico/."))
     with open(f"{pub.DIR_PUBLICO}/ifg.json", "w", encoding="utf-8") as fh:
         json.dump(ultimo, fh, ensure_ascii=False, indent=2)
     log.info("Foto del día reescrita.")

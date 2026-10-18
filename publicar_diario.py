@@ -165,6 +165,39 @@ def leer_serie_publicada() -> pd.DataFrame | None:
     return previo
 
 
+def sellar_foto(ultimo: dict, generado: str,
+                revisiones: str | None = None) -> dict:
+    """
+    Pone en la foto del día las claves que no vienen del cálculo: licencia,
+    aviso legal, estado del índice, política de revisiones y sello temporal.
+
+    POR QUÉ ES UNA FUNCIÓN Y NO CUATRO LÍNEAS SUELTAS. Estaban escritas a mano
+    aquí, y cuando republicar_version.py pasó a escribir también ifg.json se
+    quedó sin ellas: la republicación de la 0.10.0 publicó un JSON sin
+    'licencia', sin 'aviso' y sin 'estado'. El plugin de la web lee
+    'licencia', y 'aviso' es el encuadre legal, que no es opcional. Un dato
+    duplicado a mano en dos sitios se desincroniza siempre; en cuanto hay dos
+    caminos de escritura, esto tiene que vivir en uno solo.
+
+    'revisiones' se puede sobrescribir, porque la republicación por cambio de
+    versión tiene que contar otra cosa que la publicación diaria.
+    """
+    ultimo["licencia"] = ("CC BY 4.0. Cita: el especulador.com, Índice de "
+                          f"Fricción Global, versión {config.VERSION}.")
+    ultimo["aviso"] = ("Contenido informativo y educativo. No constituye "
+                       "asesoramiento financiero ni recomendación de inversión.")
+    ultimo["estado"] = ("preliminar: reglas congeladas, índice en validación "
+                        "prospectiva, no publicado como referencia citable")
+    ultimo["revisiones"] = revisiones or (
+        "Un valor definitivo no se revisa nunca. Un valor provisional —al que "
+        f"le falta algún componente— queda abierto {VENTANA_PROVISIONAL} "
+        "sesiones por si la fuente vuelve, y toda corrección aplicada se "
+        "publica en correcciones.csv. La deriva observada entre el recálculo "
+        "y lo ya cerrado se publica en revisiones.csv.")
+    ultimo["generado"] = generado
+    return ultimo
+
+
 def comprobar_version() -> bool:
     """
     La versión del código tiene que coincidir con la de la serie publicada.
@@ -554,19 +587,7 @@ def main() -> int:
     ultimo["tramo"] = fila["tramo"]
     ultimo["estado_dato"] = str(fila["estado"])
 
-    ultimo["licencia"] = ("CC BY 4.0. Cita: el especulador.com, Índice de "
-                          f"Fricción Global, versión {config.VERSION}.")
-    ultimo["aviso"] = ("Contenido informativo y educativo. No constituye "
-                       "asesoramiento financiero ni recomendación de inversión.")
-    ultimo["estado"] = ("preliminar: reglas congeladas, índice en validación "
-                        "prospectiva, no publicado como referencia citable")
-    ultimo["revisiones"] = (
-        "Un valor definitivo no se revisa nunca. Un valor provisional —al que "
-        f"le falta algún componente— queda abierto {VENTANA_PROVISIONAL} "
-        "sesiones por si la fuente vuelve, y toda corrección aplicada se "
-        "publica en correcciones.csv. La deriva observada entre el recálculo "
-        "y lo ya cerrado se publica en revisiones.csv.")
-    ultimo["generado"] = generado
+    sellar_foto(ultimo, generado)
 
     with open(f"{DIR_PUBLICO}/ifg.json", "w", encoding="utf-8") as fh:
         json.dump(ultimo, fh, ensure_ascii=False, indent=2)
