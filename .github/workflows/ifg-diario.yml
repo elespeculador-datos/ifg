@@ -21,6 +21,7 @@ on:
 
 permissions:
   contents: write             # necesario para guardar el resultado en el repo
+  issues: write               # para abrir una incidencia si la publicacion falla
 
 concurrency:
   group: ifg-diario
@@ -69,6 +70,70 @@ jobs:
           git commit -m "IFG $(date -u +%Y-%m-%d)"
           git push
 
-      - name: Avisar si ha fallado
+      # UN INDICE DIARIO QUE DEJA DE PUBLICARSE EN SILENCIO ES EL PEOR FALLO
+      # QUE PUEDE TENER. El requisito 5 del proyecto es puntualidad, y la
+      # puntualidad no se demuestra: se vigila. Un "::error::" en el registro
+      # solo lo ve quien entra a mirar, y nadie entra a mirar un flujo que
+      # lleva meses saliendo bien.
+      #
+      # Una incidencia deja rastro permanente y dispara la notificacion de
+      # GitHub por su cuenta, sin servicios externos ni claves que custodiar.
+      #
+      # NO SE ABRE UNA POR DIA. Si ya hay una abierta con la etiqueta
+      # publicacion-fallida, se comenta en ella: un fallo que dura una semana
+      # son siete comentarios en un hilo, no siete incidencias que hay que ir
+      # cerrando a mano.
+      - name: Abrir incidencia si ha fallado
         if: failure()
-        run: echo "::error::La publicacion del IFG ha fallado. Revisa el registro."
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          echo "::error::La publicacion del IFG ha fallado. Revisa $EJECUCION"
+
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=publicacion-fallida" \
+            --jq '.[0].number // empty' 2>/dev/null || true)
+
+          cuerpo="La ejecucion del $(date -u +%Y-%m-%d) ha fallado.
+
+          Registro: $EJECUCION
+
+          Mientras no se arregle, la serie no avanza y la web sigue mostrando el ultimo valor bueno con su fecha, que es el comportamiento correcto pero NO es publicacion puntual.
+
+          Que mirar primero, por orden de probabilidad:
+          1. una fuente caida -> el indice deberia publicarse igual, marcado como provisional;
+          2. verificar_estabilidad.py se ha negado -> algo intento mover una fila ya cerrada, y hace bien en pararlo;
+          3. desajuste de version -> config.py y docs/ifg.json no coinciden: hay que republicar, no saltarse la guardia."
+
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" \
+              -f body="$cuerpo" >/dev/null
+            echo "Comentada la incidencia abierta #$abierta"
+          else
+            gh api --method POST "repos/${{ github.repository }}/labels" \
+              -f name=publicacion-fallida -f color=b60205 \
+              -f description="La publicacion diaria del IFG ha fallado" >/dev/null 2>&1 || true
+            gh api --method POST "repos/${{ github.repository }}/issues" \
+              -f title="El IFG no se ha publicado el $(date -u +%Y-%m-%d)" \
+              -f body="$cuerpo" \
+              -f 'labels[]=publicacion-fallida' >/dev/null
+            echo "Abierta una incidencia nueva"
+          fi
+
+      # Si la publicacion ha salido bien y habia una incidencia abierta por un
+      # fallo anterior, se cierra sola. Una alerta que hay que apagar a mano
+      # acaba ignorandose.
+      - name: Cerrar la incidencia si ya se publica bien
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=publicacion-fallida" \
+            --jq '.[0].number // empty' 2>/dev/null || true)
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" \
+              -f body="Publicacion correcta el $(date -u +%Y-%m-%d). Se cierra." >/dev/null
+            gh api --method PATCH "repos/${{ github.repository }}/issues/$abierta" \
+              -f state=closed >/dev/null
+            echo "Cerrada la incidencia #$abierta"
+          fi
