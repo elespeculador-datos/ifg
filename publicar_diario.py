@@ -231,9 +231,11 @@ def fusionar(recalculada: pd.DataFrame,
     # Deriva: solo sobre lo cerrado. Es la cifra que responde a "¿se mueve el
     # pasado?". Incluir los provisionales la ensuciaría con lo que sí tiene
     # permiso para moverse.
+    # Desde la 0.10.0 se mide sobre "ifg", que es el valor oficial. Antes se
+    # medía sobre el suavizado porque el suavizado era el titular.
     comunes = firmes.index.intersection(recalculada.index)
-    deriva = (recalculada.loc[comunes, "ifg_suavizado"]
-              - firmes.loc[comunes, "ifg_suavizado"]).dropna()
+    deriva = (recalculada.loc[comunes, "ifg"]
+              - firmes.loc[comunes, "ifg"]).dropna()
 
     # Correcciones: provisionales que el recálculo mejora.
     correcciones = []
@@ -245,11 +247,11 @@ def fusionar(recalculada: pd.DataFrame,
         fila = ahora.copy()
         fila["estado"] = estado_de(float(ahora["cobertura"]), f in ventana)
         rehechas.append(fila)
-        if abs(float(ahora["ifg_suavizado"]) - float(antes["ifg_suavizado"])) > 0.005:
+        if abs(float(ahora["ifg"]) - float(antes["ifg"])) > 0.005:
             correcciones.append({
                 "fecha": str(f.date()),
-                "valor_anterior": round(float(antes["ifg_suavizado"]), 2),
-                "valor_nuevo": round(float(ahora["ifg_suavizado"]), 2),
+                "valor_anterior": round(float(antes["ifg"]), 2),
+                "valor_nuevo": round(float(ahora["ifg"]), 2),
                 "cobertura_anterior": round(float(antes["cobertura"]), 3),
                 "cobertura_nueva": round(float(ahora["cobertura"]), 3),
                 "estado_nuevo": fila["estado"],
@@ -387,7 +389,14 @@ def escribir_serie_panel(final: pd.DataFrame, res: dict, generado: str,
     NO SE TOCA docs/ifg.json en su forma. Los pipelines de Make ya leen ese
     archivo y cualquier cambio de estructura podría romperlos.
     """
-    serie = final["ifg_suavizado"].dropna().tail(SESIONES_PANEL)
+    # El gráfico pinta el valor OFICIAL desde la 0.10.0, para que su último
+    # punto coincida con el titular. Si pintara el suavizado mientras el
+    # titular es el crudo, el lector vería dos cifras distintas para el mismo
+    # día. La línea de tendencia viaja aparte, en "valores_tendencia", lista
+    # para cuando el plugin la dibuje; añadir una clave no rompe nada, y
+    # quitarla sí.
+    serie = final["ifg"].dropna().tail(SESIONES_PANEL)
+    tendencia = final["ifg_suavizado"].reindex(serie.index)
     tramos = final["tramo"].reindex(serie.index)
 
     # Desglose del último día. Se recalcula; ver el límite conocido anotado
@@ -402,6 +411,8 @@ def escribir_serie_panel(final: pd.DataFrame, res: dict, generado: str,
         "sesiones": int(len(serie)),
         "fechas": [str(f.date()) for f in serie.index],
         "valores": [round(float(v), 2) for v in serie.values],
+        "valores_tendencia": [None if pd.isna(v) else round(float(v), 2)
+                              for v in tendencia.values],
         "maximo": {"fecha": str(serie.idxmax().date()),
                    "valor": round(float(serie.max()), 2)},
         "minimo": {"fecha": str(serie.idxmin().date()),
@@ -483,7 +494,11 @@ def main() -> int:
     # Si esta fecha ya estaba publicada, estos tres campos vienen de la
     # publicación original, no del recálculo de hoy. Es justo el punto de
     # toda la regla.
-    ultimo["valor"] = None if pd.isna(fila["ifg_suavizado"]) else float(fila["ifg_suavizado"])
+    # El índice oficial es el crudo desde la 0.10.0; el suavizado viaja como
+    # "valor_tendencia". Ninguna clave desaparece: ver indice.descomponer_dia.
+    ultimo["valor"] = None if pd.isna(fila["ifg"]) else float(fila["ifg"])
+    ultimo["valor_tendencia"] = (None if pd.isna(fila["ifg_suavizado"])
+                                 else float(fila["ifg_suavizado"]))
     ultimo["valor_crudo"] = None if pd.isna(fila["ifg"]) else float(fila["ifg"])
     ultimo["variacion"] = None if pd.isna(fila["variacion"]) else float(fila["variacion"])
     ultimo["tramo"] = fila["tramo"]

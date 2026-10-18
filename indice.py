@@ -122,6 +122,59 @@ def cesta_equiponderada(precios: pd.DataFrame, columnas: list[str]) -> pd.Series
     return np.exp(media.fillna(0).cumsum())
 
 
+def empalmar(precios: pd.DataFrame, principal: str, respaldo: str) -> pd.Series:
+    """
+    Serie principal extendida hacia atrás con el respaldo, SOBRE
+    RENTABILIDADES y no sobre niveles.
+
+    POR QUÉ NO SE PEGAN LOS NIVELES. El Brent y el WTI no cotizan al mismo
+    precio: el diferencial entre ambos ha llegado a superar los 25 dólares.
+    Pegar las dos series por el nivel mete un salto artificial justo en la
+    junta, y como los componentes se construyen con variaciones a 5 días y
+    desviaciones respecto a la media de 60, ese salto se convertiría en un
+    pico de fricción inventado en julio de 2007, que es exactamente el tipo de
+    artefacto que arruina un índice histórico.
+
+    Lo que se hace es reencadenar: se toman las rentabilidades logarítmicas
+    del respaldo en el tramo anterior y se acumulan HACIA ATRÁS desde el
+    primer nivel conocido de la principal. El resultado tiene el nivel de la
+    principal y la forma del respaldo, sin discontinuidad en la junta.
+
+    Si falta cualquiera de las dos series, devuelve la que haya.
+    """
+    if principal not in precios.columns:
+        return (precios[respaldo].copy() if respaldo in precios.columns
+                else pd.Series(dtype=float))
+    p = precios[principal]
+    if respaldo not in precios.columns or p.dropna().empty:
+        return p.copy()
+    r = precios[respaldo]
+
+    # Ancla: primera fecha en que las DOS series tienen dato. Reescalar el
+    # respaldo por el cociente en esa fecha preserva exactamente sus
+    # rentabilidades y lo hace continuo con la principal en la junta.
+    ambos = p.notna() & r.notna()
+    if not ambos.any():
+        return p.copy()                     # sin solape no hay empalme seguro
+    ancla = p.index[ambos][0]
+
+    try:
+        factor = float(p.loc[ancla]) / float(r.loc[ancla])
+    except ZeroDivisionError:
+        return p.copy()
+    if not np.isfinite(factor) or factor <= 0:
+        return p.copy()
+
+    atras = r.loc[:ancla] * factor          # incluye el ancla, donde coincide
+
+    salida = p.copy()
+    salida = salida.where(salida.notna(), atras.reindex(salida.index))
+    faltan = atras.index.difference(salida.index)
+    if len(faltan):
+        salida = pd.concat([salida, atras.loc[faltan]]).sort_index()
+    return salida.rename(principal)
+
+
 # ---------------------------------------------------------------------------
 # Construcción de componentes
 # ---------------------------------------------------------------------------
@@ -169,12 +222,21 @@ def construir_componentes(precios: pd.DataFrame,
     # Cada pata se estandariza ANTES de restar. Si se restan las variaciones
     # brutas, el Brent (mucho más volátil) domina el componente y el cobre
     # deja de filtrar nada: el peso efectivo no sería el declarado.
-    if hay("brent", "cobre"):
-        z_brent = limpio(transformar(precios["brent"], modo))
+    #
+    # El crudo se toma empalmado (ver empalmar()): Brent donde existe, WTI
+    # reencadenado antes de julio de 2007. Sin el empalme, el componente que
+    # más pesa del índice no podía emitir antes de 2011 por la profundidad de
+    # BZ=F en la fuente, y no por falta de historia del crudo.
+    crudo = empalmar(precios, config.CRUDO_PRINCIPAL, config.CRUDO_RESPALDO)
+    if not crudo.dropna().empty and "cobre" in precios.columns:
+        z_crudo = limpio(transformar(crudo, modo))
         z_cobre = limpio(transformar(precios["cobre"], modo))
-        comp["energia"] = ((z_brent - z_cobre) / np.sqrt(2)).clip(-config.CLIP_Z,
+        comp["energia"] = ((z_crudo - z_cobre) / np.sqrt(2)).clip(-config.CLIP_Z,
                                                                   config.CLIP_Z)
-        detalle["energia"] = ["brent(+)", "cobre(-)"]
+        etiq_crudo = config.CRUDO_PRINCIPAL
+        if config.CRUDO_RESPALDO in precios.columns:
+            etiq_crudo += f"+{config.CRUDO_RESPALDO}"
+        detalle["energia"] = [f"{etiq_crudo}(+)", "cobre(-)"]
 
     # --- 2. Volatilidad energética -----------------------------------------
     # Nivel logarítmico, no variación: la volatilidad implícita es una serie
@@ -192,12 +254,18 @@ def construir_componentes(precios: pd.DataFrame,
         detalle["vol_energia"] = etiq_vol
 
     # --- 3. Refugios --------------------------------------------------------
-    # Signos: oro/ACWI al alza = fricción. EURCHF y EURJPY a la BAJA significan
+    # Signos: oro/bolsa al alza = fricción. EURCHF y EURJPY a la BAJA significan
     # franco y yen fuertes, es decir, fricción: van con signo invertido.
+    #
+    # El denominador es config.DENOMINADOR_BOLSA, la MISMA serie que el factor
+    # de mercado. Hasta la 0.9.0 era ACWI y su fecha de salida a bolsa (2008)
+    # limitaba este componente igual que limitaba la neutralización de beta.
     patas_ref, etiq_ref = [], []
-    if hay("oro", "acwi"):
-        patas_ref.append(limpio(transformar(precios["oro"] / precios["acwi"], modo)))
-        etiq_ref.append("oro/ACWI(+)")
+    den_bolsa = config.DENOMINADOR_BOLSA
+    if hay("oro", den_bolsa):
+        patas_ref.append(limpio(transformar(precios["oro"] / precios[den_bolsa],
+                                            modo)))
+        etiq_ref.append(f"oro/{den_bolsa}(+)")
     if "eurchf" in precios.columns:
         patas_ref.append(-limpio(transformar(precios["eurchf"], modo)))
         etiq_ref.append("CHF(+)")
@@ -475,8 +543,12 @@ def calcular(precios: pd.DataFrame,
         "compuesto": compuesto.round(4),
         "cobertura": cobertura.round(3),
     })
-    tabla["variacion"] = tabla["ifg_suavizado"].diff().round(2)
-    tabla["tramo"] = tabla["ifg_suavizado"].map(tramo)
+    # La variación y el tramo salen del valor CRUDO desde la 0.10.0. El
+    # suavizado se sigue calculando y publicando, pero como línea de
+    # tendencia: no se suaviza una medición y después se llama medición al
+    # suavizado. Ver PROTOCOLO_VALIDACION.md, sección 7.1.
+    tabla["variacion"] = tabla["ifg"].diff().round(2)
+    tabla["tramo"] = tabla["ifg"].map(tramo)
     tabla["parcial"] = tabla["cobertura"] < config.MIN_COBERTURA_PESO
     if coseno is not None:
         tabla["coseno"] = coseno.round(3)
@@ -513,8 +585,14 @@ def descomponer_dia(resultado: dict, fecha=None, n: int = 2) -> dict:
     return {
         "fecha": str(fecha.date()),
         "version": config.VERSION,
-        "valor": None if pd.isna(fila["ifg_suavizado"]) else float(fila["ifg_suavizado"]),
+        # "valor" es el índice oficial y desde la 0.10.0 es el crudo.
+        # "valor_crudo" se mantiene con el mismo contenido para no romper
+        # ningún consumidor que ya lo leyera, y "valor_tendencia" expone el
+        # suavizado, que antes ocupaba "valor". Ninguna clave desaparece.
+        "valor": None if pd.isna(fila["ifg"]) else float(fila["ifg"]),
         "valor_crudo": None if pd.isna(fila["ifg"]) else float(fila["ifg"]),
+        "valor_tendencia": (None if pd.isna(fila["ifg_suavizado"])
+                            else float(fila["ifg_suavizado"])),
         "variacion": None if pd.isna(fila["variacion"]) else float(fila["variacion"]),
         "tramo": fila["tramo"],
         "cobertura": float(fila["cobertura"]),
