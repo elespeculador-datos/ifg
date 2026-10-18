@@ -37,10 +37,37 @@ command -v wkhtmltopdf >/dev/null || { echo "Falta wkhtmltopdf." >&2; exit 1; }
 
 mkdir -p "$(dirname "$SALIDA")"
 
+# EL PDF VERSIONADO ES INMUTABLE, Y AQUÍ SE HACE CUMPLIR.
+#
+# Si ya existe uno para esta versión, no se regenera. El documento con el
+# número de versión en el nombre es el que alguien puede haber citado, y
+# tiene que seguir siendo byte a byte el mismo. El generador incrusta una
+# marca de tiempo de creación, así que regenerarlo produce un archivo
+# distinto aunque el texto sea idéntico: eso basta para romper una suma de
+# comprobación y para que cualquiera que compare dos descargas se pregunte
+# qué ha cambiado.
+#
+# Pasó: una reejecución del script dejó el versionado modificado en el árbol
+# de git, con el mismo texto y otro CreationDate. Lo cazó la comprobación de
+# cambios sin confirmar, no la vista.
+#
+# Para cambiar de verdad el contenido se numera una versión nueva, que es lo
+# que exige el requisito 2. --forzar existe solo para corregir un documento
+# que nunca llegó a publicarse.
+FORZAR="${FORZAR:-0}"
+if [ -f "$SALIDA" ] && [ "$FORZAR" != "1" ]; then
+  echo "Ya existe $SALIDA y es inmutable: no se regenera."
+  echo "Si de verdad hay que rehacerlo, FORZAR=1 $0"
+  echo "Se actualiza solo la copia estable."
+  SOLO_ESTABLE=1
+fi
+
 # El Markdown empieza con su propio H1 y dos líneas de cabecera. En el PDF esa
 # cabecera se sustituye por una portada con formato, así que se recorta de la
 # fuente y se inyecta aparte. Así el .md sigue legible en GitHub por su cuenta
 # y el PDF no repite el título dos veces.
+SOLO_ESTABLE="${SOLO_ESTABLE:-0}"
+
 python3 - "$FUENTE" "$TMP/cuerpo.md" <<'PY'
 import sys
 origen, destino = sys.argv[1], sys.argv[2]
@@ -97,13 +124,18 @@ PY
 # Sin pies de página ni objeto "toc": este wkhtmltopdf viene sin parchear y
 # los ignora. El índice se genera con pandoc dentro del propio HTML, que
 # además es más fiable y se puede dar estilo desde la hoja CSS.
+DESTINO="$SALIDA"
+if [ "$SOLO_ESTABLE" = "1" ]; then
+  DESTINO="$(dirname "$SALIDA")/metodologia.pdf"
+fi
+
 wkhtmltopdf \
   --quiet \
   --enable-local-file-access \
   --page-size A4 \
   --margin-top 20mm --margin-bottom 18mm \
   --margin-left 20mm --margin-right 20mm \
-  "$TMP/cuerpo.html" "$SALIDA"
+  "$TMP/cuerpo.html" "$DESTINO"
 
 # Copia con nombre ESTABLE, además de la versionada.
 #
@@ -114,15 +146,15 @@ wkhtmltopdf \
 # documento viejo. Enlazar la web a la versionada garantiza que algún día se
 # quedará desfasada sin que nadie se dé cuenta.
 ESTABLE="$(dirname "$SALIDA")/metodologia.pdf"
-if [ "$SALIDA" != "$ESTABLE" ]; then
-  cp "$SALIDA" "$ESTABLE"
+if [ "$SOLO_ESTABLE" != "1" ] && [ "$DESTINO" != "$ESTABLE" ]; then
+  cp "$DESTINO" "$ESTABLE"
   echo "Copia estable: $ESTABLE"
 fi
 
-echo "PDF generado: $SALIDA"
+echo "PDF generado: $DESTINO"
 python3 -c "
 from pypdf import PdfReader
-r = PdfReader('$SALIDA')
+r = PdfReader('$DESTINO')
 print(f'  paginas: {len(r.pages)}')
 " 2>/dev/null || true
-ls -la "$SALIDA"
+ls -la "$DESTINO"
