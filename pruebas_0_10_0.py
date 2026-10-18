@@ -80,15 +80,39 @@ ok(abs(d["valor_tendencia"] - float(t.loc[fecha, "ifg_suavizado"])) < 1e-9,
 ok(d["valor"] == d["valor_crudo"], "'valor_crudo' coincide con 'valor'")
 ok(d["version"] == "0.10.0", f"la versión que se publica es {d['version']}")
 
-print("\n== 3. El empalme del crudo ==")
-# Sin respaldo en los datos locales: debe comportarse como antes.
-ok(config.CRUDO_RESPALDO not in p.columns,
-   f"los datos locales no traen '{config.CRUDO_RESPALDO}' (es lo esperado)")
-crudo = indice.empalmar(p, config.CRUDO_PRINCIPAL, config.CRUDO_RESPALDO)
+print("\n== 3. El empalme del crudo, sin respaldo ==")
+#
+# ESTA SECCIÓN ESTUVO MAL ESCRITA Y HAY QUE DEJARLO ANOTADO. Afirmaba que
+# datos/precios.csv NO traía la columna del respaldo, y era cierto hasta que
+# la republicación de la 0.10.0 descargó WTI. Entonces las tres
+# comprobaciones empezaron a fallar sin que el código hubiera cambiado: la
+# prueba dependía de lo que contuviera un fichero de datos mutable, que es
+# justo lo que una prueba no debe hacer.
+#
+# Ahora el caso "sin respaldo" se construye quitando la columna, de modo que
+# el resultado no depende de lo que haya descargado la última ejecución.
+sin_respaldo = p.drop(columns=[config.CRUDO_RESPALDO], errors="ignore")
+ok(config.CRUDO_RESPALDO not in sin_respaldo.columns,
+   "el caso sin respaldo se construye quitando la columna, no confiando en "
+   "que falte")
+crudo = indice.empalmar(sin_respaldo, config.CRUDO_PRINCIPAL,
+                        config.CRUDO_RESPALDO)
 ok(crudo.dropna().index[0] == p["brent"].dropna().index[0],
    "sin respaldo, el crudo arranca donde arranca el Brent")
-ok(res["detalle"]["energia"] == ["brent(+)", "cobre(-)"],
-   f"y el detalle lo refleja: {res['detalle']['energia']}")
+res_sin = indice.calcular(sin_respaldo, gpr=g, prima=pr, gdelt=None)
+ok(res_sin["detalle"]["energia"] == ["brent(+)", "cobre(-)"],
+   f"y el detalle lo refleja: {res_sin['detalle']['energia']}")
+
+# Y si el respaldo SÍ está, como ocurre desde la 0.10.0, debe estar activo.
+if config.CRUDO_RESPALDO in p.columns:
+    crudo_real = indice.empalmar(p, config.CRUDO_PRINCIPAL,
+                                 config.CRUDO_RESPALDO)
+    ok(crudo_real.dropna().index[0] < p["brent"].dropna().index[0],
+       f"con el respaldo real presente, el crudo arranca antes: "
+       f"{crudo_real.dropna().index[0].date()} frente a "
+       f"{p['brent'].dropna().index[0].date()}")
+    ok(res["detalle"]["energia"][0] == "brent+wti(+)",
+       f"y el detalle declara el empalme: {res['detalle']['energia']}")
 
 # Con respaldo sintético que llega más atrás: debe extender el componente.
 print("\n== 4. Con un respaldo sintético que llega más atrás ==")
