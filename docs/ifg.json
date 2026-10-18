@@ -1,22 +1,23 @@
 {
-  "fecha": "2026-10-15",
-  "version": "0.9.0",
-  "valor": 58.26,
-  "valor_crudo": 51.21,
-  "variacion": -7.06,
+  "fecha": "2026-10-16",
+  "version": "0.10.0",
+  "valor": 50.2,
+  "valor_crudo": 50.2,
+  "valor_tendencia": 55.3,
+  "variacion": -4.2,
   "tramo": "Tensión",
   "cobertura": 1.0,
   "parcial": false,
   "motores": [
     {
-      "componente": "fletes",
-      "aporte_cambio": -0.5334,
-      "aporte_nivel": -0.2142
+      "componente": "gas",
+      "aporte_cambio": -0.2032,
+      "aporte_nivel": 0.1712
     },
     {
       "componente": "transporte",
-      "aporte_cambio": -0.0843,
-      "aporte_nivel": -0.0846
+      "aporte_cambio": -0.1291,
+      "aporte_nivel": -0.2798
     }
   ],
   "componentes_activos": [
@@ -32,9 +33,7 @@
     "gdelt",
     "gpr"
   ],
-  "licencia": "CC BY 4.0. Cita: el especulador.com, Índice de Fricción Global, versión 0.9.0.",
-  "aviso": "Contenido informativo y educativo. No constituye asesoramiento financiero ni recomendación de inversión.",
-  "estado": "preliminar: reglas congeladas, índice en validación prospectiva, no publicado como referencia citable",
-  "revisiones": "La serie publicada no se revisa. El recálculo diario solo añade fechas nuevas; la deriva observada se publica en revisiones.csv.",
-  "generado": "2026-10-16T03:43:24+02:00"
+  "estado_dato": "definitivo",
+  "generado": "2026-10-18T21:10:52+02:00",
+  "revisiones": "Serie recalculada al pasar de 0.9.0 a 0.10.0. Ver revision_version.md y docs/historico/."
 }
