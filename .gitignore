@@ -1,0 +1,12 @@
+# Caché de bytecode de Python. Se genera al ejecutar cualquier script y no
+# tiene nada que hacer en el repositorio: está atada a la versión de Python
+# de la máquina que lo generó.
+__pycache__/
+*.py[cod]
+
+# Salidas locales de las pruebas y los gráficos. Lo que se publica va a
+# docs/, que sí está versionado a propósito.
+salidas/
+entrada/
+*.png
+!docs/*.png
