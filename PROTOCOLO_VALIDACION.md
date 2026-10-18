@@ -10,6 +10,38 @@ Fecha de redacción: 18 de octubre de 2026.
 
 ---
 
+> ## RESULTADO DEL SONDEO, 18 de octubre de 2026, 20:12
+> ### La extensión hacia atrás NO funciona. La sección 4 queda sin efecto práctico.
+>
+> El sondeo real de fuentes (`datos/sonda_historia.csv`, ejecutado en Actions)
+> desmiente la expectativa con la que se escribió este protocolo. Cruzado con
+> la estructura de componentes (`viabilidad_extension.py`): **cero hitos
+> mayores** de la muestra 1996–2009 resultan evaluables, ni exigiendo el 50 %
+> de cobertura ni el 70 %. Con cobertura del 50 % la serie no arranca hasta
+> **2009-01-16**, y de los nueve controles solo entra uno.
+>
+> **El cuello de botella no era ACWI.** Son el cobre (`HG=F`, desde
+> 2000-08-30) y el trigo (`ZW=F`, desde 2000-07-17), los cruces del euro
+> (desde 2003-01-23), la prima de riesgo (fuente externa, desde 2004-09-06),
+> Leonardo (2005-07-18) y DHT (2005-10-13). Sumado el calentamiento de la
+> normalización, no hay serie utilizable antes de 2009.
+>
+> **Lo que el arreglo de ACWI sí consigue** es elevar la cobertura del tramo
+> ya publicado: en enero de 2010 pasaría de un 15 % a del orden del 75 %, y
+> la serie sería homogénea desde 2010 en vez de desde 2021. Eso mejora el
+> producto y merece hacerse, con versión nueva y recálculo. Pero **no
+> desbloquea la validación**.
+>
+> **Consecuencia:** no hay atajo. El camino a 1.0.0 es el que ya decía
+> `config.py` antes de todo esto — validación prospectiva, un año de episodios
+> nuevos sin tocar nada. Las secciones 4 y 5 se conservan pre-registradas y
+> sin modificar, por si alguna vez se consigue una fuente con historia
+> suficiente; mientras no la haya, son papel mojado y hay que decirlo.
+>
+> Las secciones 7 (decisiones cerradas), 8 (limitación estructural), 9
+> (reglas de ejecución) y 11 (jerarquía de especificaciones) **siguen
+> vigentes** y se aplican a la validación prospectiva.
+
 ## 1. El problema que este protocolo resuelve
 
 `config.py` ya lo dice, y dice lo correcto:
