@@ -15,17 +15,53 @@ from __future__ import annotations
 # ---------------------------------------------------------------------------
 # Versionado (requisito 2 de la sección 4: reglas congeladas y versionadas)
 # ---------------------------------------------------------------------------
-VERSION = "0.9.0"
-# REGLAS CONGELADAS el 10 de octubre de 2026. Componentes, pesos, agregador,
-# umbrales y hora de corte quedan fijos. Cualquier cambio exige numerar una
-# versión nueva y recalcular la serie entera.
+VERSION = "0.10.0"
+# REGLAS CONGELADAS. Componentes, pesos, agregador, umbrales y hora de corte
+# quedan fijos. Cualquier cambio exige numerar una versión nueva y recalcular
+# la serie entera.
 #
-# 0.9.0 y no 1.0.0 a propósito: el índice NO está publicado como referencia
-# citable. Supera el umbral de falsos positivos (25 % frente al 30 %) pero no
-# el de aciertos (67 % frente al 70 %), y la muestra de validación está
-# agotada tras demasiadas iteraciones. Pasa a 1.0.0 cuando se acumule un año
-# de episodios genuinamente fuera de muestra y los cumpla sin tocar nada.
-FECHA_INICIO_MUESTRA = "2007-01-01"   # 3 años de calentamiento antes de 2010
+# Sigue sin ser 1.0.0, y por el mismo motivo que antes: el índice NO está
+# publicado como referencia citable, y la muestra de validación está agotada
+# tras demasiadas iteraciones. Pasa a 1.0.0 cuando se acumule un año de
+# episodios genuinamente fuera de muestra y los cumpla sin tocar nada. El
+# sondeo de fuentes del 18 de octubre de 2026 descartó el atajo de validar
+# hacia atrás: no hay historia suficiente (ver viabilidad_extension.py).
+#
+# ---------------------------------------------------------------------------
+# CAMBIOS DE 0.9.0 A 0.10.0, con la serie recalculada entera
+# ---------------------------------------------------------------------------
+# Los tres primeros corrigen defectos; el cuarto aplica una decisión de
+# diseño cerrada por argumento a priori en PROTOCOLO_VALIDACION.md, sección 7.
+#
+# 1. FACTOR_MERCADO pasa de "acwi" a "sp500". ACWI es un ETF que cotiza desde
+#    el 28 de marzo de 2008 y se usaba para neutralizar la beta de TODOS los
+#    componentes: su fecha de salida a bolsa se propagaba al inicio de cada
+#    uno. Medido, sustituirlo por una serie 15 meses más antigua adelantaba
+#    los componentes entre 411 y 467 días.
+#
+# 2. FECHA_INICIO_MUESTRA pasa de 2007 a 2000. Estaba recortando series que
+#    tenían más historia: el cobre y el trigo existen desde agosto y julio de
+#    2000, el oro desde agosto de 2000. Se tiraba el calentamiento gratis.
+#
+# 3. El crudo del tramo antiguo pasa a ser WTI empalmado con Brent. BZ=F solo
+#    llega a julio de 2007 y era el cuello de botella del componente de
+#    energía, que pesa 20. DISCONTINUIDAD DECLARADA: antes de 2007-07-30 el
+#    componente usa WTI reencadenado sobre el primer nivel del Brent, de modo
+#    que el empalme no introduce un salto de nivel.
+#
+# 4. El índice oficial y el tramo pasan a calcularse sobre el valor CRUDO. El
+#    suavizado exponencial de 3 días se conserva y se publica como línea de
+#    tendencia. No se suaviza una medición y después se llama medición al
+#    suavizado: el valor del día es el dato y el suavizado es una lectura de
+#    su tendencia. Valdría igual si el suavizado hubiera aprobado la
+#    validación con holgura, que no la aprobaba (64 % frente al 70 % exigido,
+#    mientras el crudo daba 73 %).
+#
+# EFECTO ESPERADO sobre la serie: cobertura de componentes del orden del 75 %
+# en enero de 2010, frente al 15 % de la 0.9.0, y serie homogénea desde 2010
+# en vez de desde junio de 2021. Los valores publicados cambian en toda la
+# serie; la 0.9.0 se conserva archivada en docs/historico/.
+FECHA_INICIO_MUESTRA = "2000-01-01"   # máxima historia disponible en la fuente
 FECHA_INICIO_PUBLICACION = "2010-01-01"
 
 # ---------------------------------------------------------------------------
@@ -52,9 +88,22 @@ MODO_TRANSFORMACION = "mixto"
 # cumplir el criterio de diseño del proyecto hay que retirar explícitamente la
 # parte del componente explicada por el mercado y quedarse con el residuo.
 NEUTRALIZAR_BETA = True
-FACTOR_MERCADO = "acwi"      # serie que representa el riesgo de mercado común
+FACTOR_MERCADO = "sp500"     # serie que representa el riesgo de mercado común
 #
-# DEFECTO CONOCIDO, PENDIENTE DE CORREGIR CON VERSIÓN NUEVA.
+# Denominador del componente de refugios (oro / bolsa). Usa la MISMA serie que
+# el factor de mercado, a propósito: un índice con dos referencias de bolsa
+# distintas según el tramo no es comparable consigo mismo. Hasta la 0.9.0 era
+# ACWI, y su fecha de salida a bolsa limitaba el componente igual que limitaba
+# la neutralización.
+DENOMINADOR_BOLSA = "sp500"
+#
+# Crudo: serie principal y respaldo para el tramo antiguo. El respaldo se
+# reencadena sobre el primer nivel de la principal, así que el empalme no
+# introduce un salto. DISCONTINUIDAD DECLARADA en la metodología.
+CRUDO_PRINCIPAL = "brent"
+CRUDO_RESPALDO = "wti"
+#
+# HISTORIA DEL DEFECTO QUE ESTO CORRIGE (resuelto en 0.10.0).
 # ACWI es un ETF que cotiza desde el 28 de marzo de 2008, y esta serie se usa
 # para neutralizar la beta de TODOS los componentes dentro de limpio(). Su
 # fecha de salida a bolsa se propaga, a través de la neutralización y del
@@ -66,14 +115,14 @@ FACTOR_MERCADO = "acwi"      # serie que representa el riesgo de mercado común
 # de una variable de control mal elegida. Ver validacion_eras.py y la sección
 # 11.1 de PROTOCOLO_VALIDACION.md.
 #
-# EL CAMBIO A "sp500" NO SE HACE AQUÍ SIN MÁS, Y A PROPÓSITO. Cambiar esta
-# constante altera el valor de toda la serie histórica. Si se toca sin más, la
-# ejecución diaria siguiente produce valores distintos para fechas ya
-# publicadas, verificar_estabilidad.py falla —que es lo que tiene que hacer— y
-# la publicación se detiene. La corrección exige, en este orden: numerar
-# versión nueva, descargar el histórico extendido, recalcular la serie
-# completa, republicarla declarando la discontinuidad, y solo entonces
-# cambiar esta línea.
+# POR QUÉ ESTE CAMBIO NO PODÍA HACERSE SOLO AQUÍ. Cambiar esta constante
+# altera el valor de toda la serie histórica. Tocada a secas, la ejecución
+# diaria siguiente produce valores distintos para fechas ya publicadas,
+# verificar_estabilidad.py falla —que es lo que tiene que hacer— y la
+# publicación se detiene. De ahí que la 0.10.0 venga acompañada de
+# republicar_version.py, que archiva la serie anterior, recalcula la completa
+# y la sustituye en un acto deliberado y declarado. El flujo diario no puede
+# hacer esto por accidente.
 VENTANA_BETA = 250           # sesiones para estimar la beta móvil
 MIN_PERIODOS_BETA = 120
 
@@ -134,6 +183,9 @@ OPCIONALES = {"vol_energia_vstoxx", "prima", "gdelt", "gpr"}
 TICKERS = {
     # Energía / materias primas
     "brent":        "BZ=F",
+    # WTI: respaldo del Brent para el tramo anterior a julio de 2007, que es
+    # donde arranca BZ=F en esta fuente. CL=F llega hasta agosto de 2000.
+    "wti":          "CL=F",
     "cobre":        "HG=F",
     # Volatilidad
     "ovx":          "^OVX",

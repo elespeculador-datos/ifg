@@ -165,6 +165,53 @@ def leer_serie_publicada() -> pd.DataFrame | None:
     return previo
 
 
+def comprobar_version() -> bool:
+    """
+    La versión del código tiene que coincidir con la de la serie publicada.
+
+    POR QUÉ ESTA GUARDIA EXISTE. Si se sube VERSION y se cambian reglas sin
+    republicar la serie, el flujo diario NO falla, y eso es lo peligroso:
+    fusionar() conserva intactas las filas ya cerradas y añade la nueva
+    calculada con las reglas nuevas. El resultado es una serie mezclada —el
+    pasado con una fórmula y el presente con otra— publicada en silencio,
+    mientras ifg.json anuncia la versión nueva como si toda la serie fuera de
+    esa versión. Es peor que una caída: una caída se ve.
+
+    verificar_estabilidad.py no lo caza, y es correcto que no lo cace: su
+    trabajo es comprobar que lo publicado no cambia, y aquí no cambia. El que
+    tiene que negarse a publicar es este script.
+
+    La deriva medida sí daría un salto enorme y quedaría en revisiones.csv,
+    pero eso es un rastro para la autopsia, no una barrera.
+
+    Cuando los números no coinciden, la salida NO es saltarse la guardia: es
+    ejecutar el flujo de republicación, que archiva la serie anterior,
+    recalcula la completa y declara la discontinuidad.
+    """
+    ruta = f"{DIR_PUBLICO}/ifg.json"
+    if not os.path.exists(ruta):
+        return True                      # primera publicación: nada que comparar
+    try:
+        with open(ruta, encoding="utf-8") as fh:
+            publicada = str(json.load(fh).get("version", "")).strip()
+    except Exception as e:               # noqa: BLE001
+        log.warning("No se puede leer la versión de %s (%s). Se continúa.",
+                    ruta, e)
+        return True
+    if not publicada or publicada == config.VERSION:
+        return True
+
+    log.error("DESAJUSTE DE VERSIÓN. El código es %s y la serie publicada es "
+              "%s.", config.VERSION, publicada)
+    log.error("No se publica. Publicar ahora dejaría una serie mezclada: el "
+              "pasado con las reglas de %s y las sesiones nuevas con las de "
+              "%s.", publicada, config.VERSION)
+    log.error("Para resolverlo, ejecuta el flujo 'Republicar version' con "
+              "--version-anterior %s. Archivará la serie actual, recalculará "
+              "la completa y declarará la discontinuidad.", publicada)
+    return False
+
+
 def estado_de(cobertura: float, dentro_ventana: bool) -> str:
     """El estado que le toca a una fila según su cobertura y su antigüedad."""
     if cobertura >= 0.9999:
@@ -231,9 +278,11 @@ def fusionar(recalculada: pd.DataFrame,
     # Deriva: solo sobre lo cerrado. Es la cifra que responde a "¿se mueve el
     # pasado?". Incluir los provisionales la ensuciaría con lo que sí tiene
     # permiso para moverse.
+    # Desde la 0.10.0 se mide sobre "ifg", que es el valor oficial. Antes se
+    # medía sobre el suavizado porque el suavizado era el titular.
     comunes = firmes.index.intersection(recalculada.index)
-    deriva = (recalculada.loc[comunes, "ifg_suavizado"]
-              - firmes.loc[comunes, "ifg_suavizado"]).dropna()
+    deriva = (recalculada.loc[comunes, "ifg"]
+              - firmes.loc[comunes, "ifg"]).dropna()
 
     # Correcciones: provisionales que el recálculo mejora.
     correcciones = []
@@ -245,11 +294,11 @@ def fusionar(recalculada: pd.DataFrame,
         fila = ahora.copy()
         fila["estado"] = estado_de(float(ahora["cobertura"]), f in ventana)
         rehechas.append(fila)
-        if abs(float(ahora["ifg_suavizado"]) - float(antes["ifg_suavizado"])) > 0.005:
+        if abs(float(ahora["ifg"]) - float(antes["ifg"])) > 0.005:
             correcciones.append({
                 "fecha": str(f.date()),
-                "valor_anterior": round(float(antes["ifg_suavizado"]), 2),
-                "valor_nuevo": round(float(ahora["ifg_suavizado"]), 2),
+                "valor_anterior": round(float(antes["ifg"]), 2),
+                "valor_nuevo": round(float(ahora["ifg"]), 2),
                 "cobertura_anterior": round(float(antes["cobertura"]), 3),
                 "cobertura_nueva": round(float(ahora["cobertura"]), 3),
                 "estado_nuevo": fila["estado"],
@@ -387,7 +436,14 @@ def escribir_serie_panel(final: pd.DataFrame, res: dict, generado: str,
     NO SE TOCA docs/ifg.json en su forma. Los pipelines de Make ya leen ese
     archivo y cualquier cambio de estructura podría romperlos.
     """
-    serie = final["ifg_suavizado"].dropna().tail(SESIONES_PANEL)
+    # El gráfico pinta el valor OFICIAL desde la 0.10.0, para que su último
+    # punto coincida con el titular. Si pintara el suavizado mientras el
+    # titular es el crudo, el lector vería dos cifras distintas para el mismo
+    # día. La línea de tendencia viaja aparte, en "valores_tendencia", lista
+    # para cuando el plugin la dibuje; añadir una clave no rompe nada, y
+    # quitarla sí.
+    serie = final["ifg"].dropna().tail(SESIONES_PANEL)
+    tendencia = final["ifg_suavizado"].reindex(serie.index)
     tramos = final["tramo"].reindex(serie.index)
 
     # Desglose del último día. Se recalcula; ver el límite conocido anotado
@@ -402,6 +458,8 @@ def escribir_serie_panel(final: pd.DataFrame, res: dict, generado: str,
         "sesiones": int(len(serie)),
         "fechas": [str(f.date()) for f in serie.index],
         "valores": [round(float(v), 2) for v in serie.values],
+        "valores_tendencia": [None if pd.isna(v) else round(float(v), 2)
+                              for v in tendencia.values],
         "maximo": {"fecha": str(serie.idxmax().date()),
                    "valor": round(float(serie.max()), 2)},
         "minimo": {"fecha": str(serie.idxmin().date()),
@@ -426,6 +484,9 @@ def main() -> int:
 
     if not args.ahora and not toca_publicar():
         return 0
+
+    if not comprobar_version():
+        return 1
 
     os.makedirs(DIR_PUBLICO, exist_ok=True)
     generado = datetime.now(ZONA).isoformat(timespec="seconds")
@@ -483,7 +544,11 @@ def main() -> int:
     # Si esta fecha ya estaba publicada, estos tres campos vienen de la
     # publicación original, no del recálculo de hoy. Es justo el punto de
     # toda la regla.
-    ultimo["valor"] = None if pd.isna(fila["ifg_suavizado"]) else float(fila["ifg_suavizado"])
+    # El índice oficial es el crudo desde la 0.10.0; el suavizado viaja como
+    # "valor_tendencia". Ninguna clave desaparece: ver indice.descomponer_dia.
+    ultimo["valor"] = None if pd.isna(fila["ifg"]) else float(fila["ifg"])
+    ultimo["valor_tendencia"] = (None if pd.isna(fila["ifg_suavizado"])
+                                 else float(fila["ifg_suavizado"]))
     ultimo["valor_crudo"] = None if pd.isna(fila["ifg"]) else float(fila["ifg"])
     ultimo["variacion"] = None if pd.isna(fila["variacion"]) else float(fila["variacion"])
     ultimo["tramo"] = fila["tramo"]

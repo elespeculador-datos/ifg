@@ -1,0 +1,99 @@
+name: Republicar version (CAMBIA LA SERIE PUBLICADA)
+
+# ESTE FLUJO SUSTITUYE VALORES YA PUBLICADOS. Es el único autorizado a
+# hacerlo. No tiene schedule y exige teclear la versión anterior a mano como
+# confirmación: no basta con pulsar el botón por error.
+#
+# NO ejecuta verificar_estabilidad.py a propósito. Ese verificador detiene la
+# publicación cuando una fila cerrada cambia de valor, que es exactamente lo
+# que aquí va a pasar y lo que aquí es correcto. Ejecutarlo haría fallar
+# siempre el flujo; saltárselo en el flujo DIARIO sería gravísimo, y por eso
+# son dos flujos distintos y no un parámetro del mismo.
+on:
+  workflow_dispatch:
+    inputs:
+      version_anterior:
+        description: "Versión que se sustituye (debe coincidir con la publicada, p. ej. 0.9.0)"
+        type: string
+        required: true
+      simular:
+        description: "Simular: calcula y mide la discontinuidad, no escribe nada"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: republicar-version
+  cancel-in-progress: false
+
+jobs:
+  republicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Comprobar que la version anterior coincide con la publicada
+        run: |
+          publicada=$(python -c "import json;print(json.load(open('docs/ifg.json'))['version'])")
+          echo "Versión en docs/ifg.json: $publicada"
+          echo "Versión indicada a mano:  ${{ inputs.version_anterior }}"
+          if [ "$publicada" != "${{ inputs.version_anterior }}" ]; then
+            echo "::error::No coinciden. Se aborta para no republicar sobre una version equivocada."
+            exit 1
+          fi
+
+      - name: Actualizar GDELT
+        continue-on-error: true
+        run: python backfill_gdelt.py --cada 7 --incremental
+
+      - name: Simular la republicacion
+        if: inputs.simular
+        run: |
+          python republicar_version.py \
+            --version-anterior "${{ inputs.version_anterior }}" \
+            --simular | tee simulacion.txt
+
+      - name: Publicar la simulacion como artefacto
+        if: inputs.simular
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulacion-republicacion
+          path: simulacion.txt
+          retention-days: 90
+
+      - name: Republicar de verdad
+        if: ${{ !inputs.simular }}
+        run: |
+          python republicar_version.py \
+            --version-anterior "${{ inputs.version_anterior }}" \
+            --confirmar
+
+      - name: Guardar en el repositorio
+        if: ${{ !inputs.simular }}
+        run: |
+          if [ -z "$(git status --porcelain docs datos)" ]; then
+            echo "::error::La republicacion no ha producido cambios. Algo va mal."
+            exit 1
+          fi
+          git config user.name "IFG bot"
+          git config user.email "actions@github.com"
+          git add docs datos
+          git commit -m "Republicacion de la serie: version ${{ inputs.version_anterior }} -> $(python -c 'import config;print(config.VERSION)')"
+          git push
+
+      - name: Recordatorio
+        if: ${{ !inputs.simular && success() }}
+        run: |
+          echo "::notice::Serie republicada. Revisa docs/revision_version.md y la nota de discontinuidad antes de anunciarlo."
