@@ -105,6 +105,20 @@ wkhtmltopdf \
   --margin-left 20mm --margin-right 20mm \
   "$TMP/cuerpo.html" "$SALIDA"
 
+# Copia con nombre ESTABLE, además de la versionada.
+#
+# Por qué las dos. La versionada es inmutable: quien cite la 0.10.0 tiene que
+# seguir encontrando exactamente ese documento dentro de dos años, aunque el
+# índice vaya por la 1.3.0. La estable es a la que enlaza la web, para que el
+# enlace no haya que tocarlo en cada versión y para que nunca apunte a un
+# documento viejo. Enlazar la web a la versionada garantiza que algún día se
+# quedará desfasada sin que nadie se dé cuenta.
+ESTABLE="$(dirname "$SALIDA")/metodologia.pdf"
+if [ "$SALIDA" != "$ESTABLE" ]; then
+  cp "$SALIDA" "$ESTABLE"
+  echo "Copia estable: $ESTABLE"
+fi
+
 echo "PDF generado: $SALIDA"
 python3 -c "
 from pypdf import PdfReader
