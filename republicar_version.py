@@ -111,7 +111,21 @@ def comparar(antigua: pd.DataFrame | None, nueva: pd.DataFrame) -> dict:
         "cobertura_media_despues": round(float(nueva["cobertura"].mean()), 3),
         "primera_sesion_cobertura_plena_antes": _primera_plena(antigua),
         "primera_sesion_cobertura_plena_despues": _primera_plena(nueva),
+        # Año a año: es lo único que responde de verdad a "¿ha servido el
+        # arreglo?". La media de toda la serie puede subir por muchos sitios;
+        # lo que había que corregir era la era degradada del principio.
+        "cobertura_por_ano": _por_ano(antigua, nueva),
     }
+
+
+def _por_ano(antigua: pd.DataFrame, nueva: pd.DataFrame) -> list[tuple]:
+    a = antigua.groupby(antigua.index.year)["cobertura"].mean()
+    n = nueva.groupby(nueva.index.year)["cobertura"].mean()
+    anos = sorted(set(a.index) | set(n.index))
+    return [(int(y),
+             None if y not in a.index else round(float(a[y]), 2),
+             None if y not in n.index else round(float(n[y]), 2))
+            for y in anos]
 
 
 def _primera_plena(s: pd.DataFrame) -> str | None:
@@ -161,6 +175,25 @@ def escribir_nota(cmp_: dict, version_anterior: str, copiados: list[str],
             f"{cmp_['primera_sesion_cobertura_plena_antes']} -> "
             f"**{cmp_['primera_sesion_cobertura_plena_despues']}**",
         ]
+    if cmp_.get("cobertura_por_ano"):
+        L += [
+            "",
+            "### Cobertura de componentes, año a año",
+            "",
+            "Es lo que responde de verdad a si el arreglo ha servido: la media "
+            "de toda la serie puede subir por muchos sitios, pero lo que había "
+            "que corregir era la era degradada del principio.",
+            "",
+            "| Año | Antes | Después |",
+            "|---|---|---|",
+        ]
+        for y, a, n in cmp_["cobertura_por_ano"]:
+            marca = ""
+            if a is not None and n is not None and n - a >= 0.10:
+                marca = " (mejora)"
+            L.append(f"| {y} | {'—' if a is None else f'{a:.2f}'} | "
+                     f"{'—' if n is None else f'{n:.2f}'}{marca} |")
+
     L += [
         "",
         "## Dónde está la serie anterior",
