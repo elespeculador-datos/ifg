@@ -154,11 +154,18 @@ Se usan los de `config.UMBRALES`, tal como están hoy:
 **No se modifica ninguno.** Si el índice no los cumple sobre la muestra
 nueva, el índice no vale y se corrige la fórmula, o se descarta.
 
-## 7. Decisiones que hay que cerrar ANTES de ejecutar
+## 7. Las tres decisiones, cerradas
 
-Están abiertas hoy. Cambiarlas después de ver los resultados de la muestra
-nueva sería quemarla igual que se quemó la anterior. Cada una necesita
-argumento a priori, no empírico.
+**CERRADAS el 18 de octubre de 2026, antes de escribir el código de
+validación y antes de existir un solo dato de la muestra nueva.** El orden de
+los commits de este repositorio es la prueba de que se cerraron antes.
+
+El criterio con el que se han cerrado es uno y solo uno: **¿hay argumento a
+priori, independiente del resultado?** Donde lo hay, se decide. Donde no lo
+hay, no se decide a dedo: se pre-registra la comparación y la arbitra la
+muestra nueva (sección 11). Elegir a dedo una opción que mejora el resultado
+sobre la muestra vieja sería ajuste; elegirla a dedo sin argumento sería
+arbitrariedad. Pre-registrar la comparación no es ninguna de las dos cosas.
 
 ### 7.1 Qué valor es el índice oficial
 
@@ -175,7 +182,22 @@ picos rebajados de sí mismo. Las dos cifras ya se calculan y ya se publican
 sino de etiqueta: cuál de las dos es el índice y cuál es la línea de
 tendencia del gráfico.
 
-**Pendiente de decisión del responsable del índice.**
+**DECISIÓN: el índice oficial y el tramo pasan a calcularse sobre el valor
+crudo. La media exponencial de 3 días se conserva y se publica como línea de
+tendencia del gráfico, rotulada como tal.**
+
+El argumento no es que el crudo apruebe y el suavizado suspenda —eso es el
+resultado, y no puede ser la razón—. El argumento es que **no se suaviza una
+medición y luego se llama medición al suavizado.** El valor del índice es la
+lectura del día; el suavizado es una interpretación de la tendencia de esa
+lectura, y mezclar las dos cosas en una sola cifra confunde el dato con su
+lectura. Esto valdría igual si el suavizado hubiera aprobado con holgura.
+
+La preocupación legítima que motivó el suavizado —un titular que no dé saltos
+diarios— no desaparece, pero se resuelve editorialmente y no estadísticamente:
+se publica el valor con su variación y su línea de tendencia, que es lo que el
+panel ya hace. Un titular estable a costa de no detectar el episodio es un mal
+negocio para un índice de detección.
 
 ### 7.2 La clasificación del Brexit
 
@@ -191,10 +213,21 @@ correctamente y que el hito está mal clasificado — es un episodio
 político-financiero, no un shock de fricción geopolítica con transmisión
 física.
 
-**Pero esta reclasificación solo es legítima si se decide antes de la prueba
-nueva y por el constructo, nunca por el resultado.** Si se decide, el
-resultado antiguo (no detectado, con el Brexit como mayor) se conserva
-publicado en la metodología.
+**DECISIÓN: el Brexit se queda como hito mayor. No se reclasifica.**
+
+Es la decisión conservadora y es la única defendible. Reclasificar un
+episodio después de comprobar que el índice no lo detecta mejora la tasa de
+acierto sin mejorar el índice, y un lector competente lo detectará en cuanto
+compare la lista con la de la versión anterior. El coste de credibilidad de
+quitar un hito que falla es mucho mayor que el coste de suspender en él.
+
+Lo que sí se hace, porque es práctica estándar y es honesto: **publicar la
+tasa de acierto con y sin el Brexit, declarando las dos.** Nunca sustituir
+una por otra. El lector juzga si el episodio pertenece al constructo; el
+índice no se lo esconde.
+
+La misma regla vale hacia adelante: ningún hito de la lista nueva de la
+sección 4 se retira después de ejecutar la validación.
 
 ### 7.3 El peso de GDELT
 
@@ -216,7 +249,19 @@ fricción geopolítica a los mercados. Un ataque con drones a una refinería
 saudí no mueve el volumen mundial de conflicto y sí mueve el crudo. Son dos
 cosas distintas.
 
-**Pendiente de decisión del responsable del índice.**
+**DECISIÓN: no se toca ahora, y no la decide nadie a dedo. Se pre-registra
+como comparación y la arbitra la muestra nueva (sección 11).**
+
+Aquí no tengo argumento a priori lo bastante limpio para resolverlo, y lo
+digo en lugar de disimularlo. Los dos lados tienen defensa razonable: GDELT
+aporta una medida de conflicto independiente de los precios, que es
+justamente lo que evita que el índice sea un derivado del petróleo; y a la
+vez mide un constructo que no es el del índice. Decidirlo mirando Abqaiq
+sería ajuste, y decidirlo sin mirar nada sería capricho.
+
+La salida correcta no es elegir: es **pre-registrar las dos variantes y
+dejar que las separe una muestra que nadie ha mirado**. Eso convierte una
+discusión de despacho en una pregunta empírica contestable.
 
 ## 8. Limitación estructural que no se corrige: se declara
 
@@ -265,6 +310,76 @@ Esto es lo que convierte el protocolo en protocolo:
 | Cumple especificidad, falla sensibilidad | Mide bien, detecta poco | Se publica como indicador de régimen, **no** como detector de eventos, y se dice así |
 | Falla especificidad | Es un indicador de aversión al riesgo con pasos extra | Se descarta la premisa del proyecto |
 | Resultados contradictorios entre eras | La serie no es homogénea | Se publica solo el tramo homogéneo y se declara |
+
+## 11. La jerarquía de especificaciones pre-registrada
+
+Queda una sola cuestión sin resolver por argumento a priori: GDELT. En lugar
+de elegirla a dedo, se pre-registra una comparación cerrada.
+
+### 11.1 Precondición, que no es una opción
+
+Para que la muestra 1996–2009 exista hay que corregir el defecto del factor
+de mercado. **No es una especificación entre varias: es un arreglo.**
+
+`FACTOR_MERCADO` pasa de `acwi` (ETF, cotiza desde 2008-03-28) a `sp500`
+(`^GSPC`, con historia desde 1927). Argumento a priori: la función del factor
+es retirar el riesgo de bolsa común, y para eso el S&P 500 es el mejor
+instrumento medido del factor común de la renta variable mundial, además de
+la serie más larga disponible. Que ACWI represente mejor «bolsa mundial» en
+abstracto no compensa que su fecha de salida a bolsa amputa quince años de
+historia del índice entero.
+
+Se declara como discontinuidad metodológica, y se declara también que el
+denominador del componente de refugios (oro/bolsa) pasa a usar la misma
+serie, por homogeneidad: un índice con dos factores de mercado distintos
+según el tramo no es comparable consigo mismo.
+
+### 11.2 Las dos especificaciones
+
+Sobre esa base, con el titular ya decidido en crudo (7.1), se evalúan
+exactamente **dos** variantes. Dos, no ocho: cada variante añadida multiplica
+la probabilidad de que alguna apruebe por azar.
+
+| Clave | GDELT | Pesos |
+|---|---|---|
+| **E1** | incluido | los de `config.PESOS`, sin cambios |
+| **E2** | excluido | el peso de GDELT se reparte proporcionalmente, como ya hace el pipeline con cualquier componente ausente |
+
+Nada más cambia entre las dos. Mismos umbrales, misma ventana, mismos hitos,
+mismos controles, mismo factor de mercado.
+
+### 11.3 La regla de decisión, fijada antes de ver nada
+
+Se aplica en este orden y se para en el primer punto que resuelva:
+
+1. **Si solo una de las dos cumple los cuatro umbrales**, esa es la
+   especificación del índice. La otra se publica igualmente en el informe.
+2. **Si las dos cumplen**, gana **E1**, la que no cambia nada. Ante empate
+   manda la especificación vigente: no se introduce un cambio que los datos
+   no exigen.
+3. **Si ninguna cumple**, el índice no pasa a 1.0.0. Se aplica la tabla de la
+   sección 10 a **E1**, que es la especificación vigente, y se publica el
+   suspenso de las dos.
+
+La asimetría del punto 2 es deliberada y es lo que impide que esto se
+convierta en una búsqueda: E2 solo entra si E1 falla y ella no. No se puede
+«ganar» quitando GDELT salvo que quitarlo sea lo único que funcione.
+
+### 11.4 Lo que se publica, pase lo que pase
+
+El informe de validación incluye, para **las dos** especificaciones: tasa de
+acierto sobre hitos mayores con y sin el Brexit, tasa de falsos positivos,
+las dos correlaciones de independencia, y el detalle hito por hito con el
+máximo alcanzado. Sin recortes y sin elegir la tabla que favorece.
+
+### 11.5 Lo que queda explícitamente fuera
+
+No se evalúan, ni ahora ni como alternativa de recambio si el resultado no
+gusta: pesos distintos de los congelados, ventanas de normalización
+distintas, niveles de activación distintos, ni la lista de hitos modificada.
+Cualquiera de esas cosas exige un protocolo nuevo, una muestra nueva y una
+versión nueva. Dejarlas escritas aquí como excluidas es parte del
+pre-registro: su ausencia es un compromiso, no un olvido.
 
 ---
 
