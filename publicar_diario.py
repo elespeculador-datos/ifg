@@ -165,6 +165,53 @@ def leer_serie_publicada() -> pd.DataFrame | None:
     return previo
 
 
+def comprobar_version() -> bool:
+    """
+    La versión del código tiene que coincidir con la de la serie publicada.
+
+    POR QUÉ ESTA GUARDIA EXISTE. Si se sube VERSION y se cambian reglas sin
+    republicar la serie, el flujo diario NO falla, y eso es lo peligroso:
+    fusionar() conserva intactas las filas ya cerradas y añade la nueva
+    calculada con las reglas nuevas. El resultado es una serie mezclada —el
+    pasado con una fórmula y el presente con otra— publicada en silencio,
+    mientras ifg.json anuncia la versión nueva como si toda la serie fuera de
+    esa versión. Es peor que una caída: una caída se ve.
+
+    verificar_estabilidad.py no lo caza, y es correcto que no lo cace: su
+    trabajo es comprobar que lo publicado no cambia, y aquí no cambia. El que
+    tiene que negarse a publicar es este script.
+
+    La deriva medida sí daría un salto enorme y quedaría en revisiones.csv,
+    pero eso es un rastro para la autopsia, no una barrera.
+
+    Cuando los números no coinciden, la salida NO es saltarse la guardia: es
+    ejecutar el flujo de republicación, que archiva la serie anterior,
+    recalcula la completa y declara la discontinuidad.
+    """
+    ruta = f"{DIR_PUBLICO}/ifg.json"
+    if not os.path.exists(ruta):
+        return True                      # primera publicación: nada que comparar
+    try:
+        with open(ruta, encoding="utf-8") as fh:
+            publicada = str(json.load(fh).get("version", "")).strip()
+    except Exception as e:               # noqa: BLE001
+        log.warning("No se puede leer la versión de %s (%s). Se continúa.",
+                    ruta, e)
+        return True
+    if not publicada or publicada == config.VERSION:
+        return True
+
+    log.error("DESAJUSTE DE VERSIÓN. El código es %s y la serie publicada es "
+              "%s.", config.VERSION, publicada)
+    log.error("No se publica. Publicar ahora dejaría una serie mezclada: el "
+              "pasado con las reglas de %s y las sesiones nuevas con las de "
+              "%s.", publicada, config.VERSION)
+    log.error("Para resolverlo, ejecuta el flujo 'Republicar version' con "
+              "--version-anterior %s. Archivará la serie actual, recalculará "
+              "la completa y declarará la discontinuidad.", publicada)
+    return False
+
+
 def estado_de(cobertura: float, dentro_ventana: bool) -> str:
     """El estado que le toca a una fila según su cobertura y su antigüedad."""
     if cobertura >= 0.9999:
@@ -437,6 +484,9 @@ def main() -> int:
 
     if not args.ahora and not toca_publicar():
         return 0
+
+    if not comprobar_version():
+        return 1
 
     os.makedirs(DIR_PUBLICO, exist_ok=True)
     generado = datetime.now(ZONA).isoformat(timespec="seconds")
