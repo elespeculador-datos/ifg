@@ -99,6 +99,28 @@ SESIONES_PANEL = 260
 # Columnas de la serie pública, en orden.
 COLUMNAS = ["ifg", "ifg_suavizado", "variacion", "tramo", "cobertura", "parcial"]
 
+RUTA_COMPONENTES = f"{DIR_PUBLICO}/componentes.csv"
+CORRECCIONES = f"{DIR_PUBLICO}/correcciones.csv"
+
+# Sesiones que un valor incompleto sigue abierto a corrección.
+#
+# POR QUÉ CINCO. Cubre los dos plazos reales de las fuentes: una caída de
+# precios se resuelve en uno o dos días hábiles, y GDELT publica su muestra
+# semanal dentro de los siete naturales siguientes. Más ventana no recupera
+# casi nada y retrasa el cierre; menos deja fuera la mitad de los casos.
+VENTANA_PROVISIONAL = 5
+
+# Estados posibles de una fila publicada.
+#   definitivo             cobertura completa; no se vuelve a tocar jamás
+#   provisional            le falta algún componente y aún está dentro de la
+#                          ventana: se recalcula cada madrugada por si la
+#                          fuente vuelve
+#   definitivo_incompleto  salió de la ventana sin completarse. Se cierra con
+#                          la marca puesta: el dato nunca llegó y se dice.
+DEFINITIVO = "definitivo"
+PROVISIONAL = "provisional"
+INCOMPLETO = "definitivo_incompleto"
+
 
 def ya_publicado_hoy() -> bool:
     """¿Hay ya una fila de hoy en el registro de publicaciones?"""
@@ -143,36 +165,188 @@ def leer_serie_publicada() -> pd.DataFrame | None:
     return previo
 
 
-def fusionar(recalculada: pd.DataFrame,
-             publicada: pd.DataFrame | None) -> tuple[pd.DataFrame, pd.Series]:
-    """
-    Serie definitiva = filas ya publicadas INTACTAS + fechas nuevas.
+def estado_de(cobertura: float, dentro_ventana: bool) -> str:
+    """El estado que le toca a una fila según su cobertura y su antigüedad."""
+    if cobertura >= 0.9999:
+        return DEFINITIVO
+    return PROVISIONAL if dentro_ventana else INCOMPLETO
 
-    Devuelve también la deriva: para cada fecha ya publicada, cuánto se
-    separa el valor que saldría hoy del que se publicó en su día. Esa serie
-    no corrige nada; se publica para que la revisión sea auditable.
+
+def fusionar(recalculada: pd.DataFrame,
+             publicada: pd.DataFrame | None) -> tuple[pd.DataFrame, pd.Series, list]:
     """
+    Funde el recálculo con lo ya publicado respetando el estado de cada fila.
+
+    LA REGLA, Y POR QUÉ ES ASÍ. Hasta ahora había una sola norma —lo publicado
+    no se toca— y eso resultó ser demasiado rígido en un caso concreto: los
+    días 9 y 12 de octubre de 2026 una fuente se cayó, el índice se calculó
+    sin un componente y esos dos valores degradados quedaron congelados para
+    siempre. La inmutabilidad protegía un dato que no merecía protección.
+
+    La norma pasa a ser la de las estadísticas oficiales: un dato nace
+    provisional y se vuelve definitivo cuando está completo.
+
+      - Cobertura completa  -> definitivo, intocable para siempre.
+      - Cobertura incompleta y dentro de la ventana -> provisional: se
+        recalcula cada madrugada por si la fuente volvió.
+      - Cobertura incompleta y fuera de la ventana -> se cierra como
+        definitivo incompleto, con la marca puesta.
+
+    Lo que NO cambia es lo esencial: un valor definitivo no se mueve nunca.
+    La inmutabilidad sigue entera donde importa, que es donde el lector cita.
+
+    Devuelve la serie final, la deriva medida SOLO sobre filas definitivas
+    —que es la que de verdad informa de si el pasado se mueve— y la lista de
+    correcciones aplicadas a provisionales.
+    """
+    # Las últimas sesiones del recálculo son la ventana abierta.
+    ventana = set(recalculada.index[-VENTANA_PROVISIONAL:])
+
+    def estados(df: pd.DataFrame) -> pd.Series:
+        return pd.Series(
+            [estado_de(float(c), f in ventana) for f, c in df["cobertura"].items()],
+            index=df.index, name="estado")
+
     if publicada is None:
         log.info("No hay serie previa: se publica el recálculo entero (%d "
                  "sesiones).", len(recalculada))
-        return recalculada, pd.Series(dtype=float)
+        nueva = recalculada.copy()
+        nueva["estado"] = estados(nueva)
+        return nueva, pd.Series(dtype=float), []
 
-    comunes = publicada.index.intersection(recalculada.index)
+    # Compatibilidad con la serie anterior, que no tenía columna de estado:
+    # todo lo que había se considera cerrado, que es como se publicó.
+    if "estado" not in publicada.columns:
+        publicada = publicada.copy()
+        publicada["estado"] = [
+            DEFINITIVO if float(c) >= 0.9999 else INCOMPLETO
+            for c in publicada["cobertura"]]
+        log.info("La serie publicada no traía columna de estado. Se marcan sus "
+                 "%d filas como cerradas, que es como se publicaron.",
+                 len(publicada))
+
+    firmes = publicada[publicada["estado"] != PROVISIONAL]
+    abiertas = publicada.index[publicada["estado"] == PROVISIONAL]
+
+    # Deriva: solo sobre lo cerrado. Es la cifra que responde a "¿se mueve el
+    # pasado?". Incluir los provisionales la ensuciaría con lo que sí tiene
+    # permiso para moverse.
+    comunes = firmes.index.intersection(recalculada.index)
     deriva = (recalculada.loc[comunes, "ifg_suavizado"]
-              - publicada.loc[comunes, "ifg_suavizado"]).dropna()
+              - firmes.loc[comunes, "ifg_suavizado"]).dropna()
 
+    # Correcciones: provisionales que el recálculo mejora.
+    correcciones = []
+    rehechas = []
+    for f in abiertas:
+        if f not in recalculada.index:
+            continue
+        antes, ahora = publicada.loc[f], recalculada.loc[f]
+        fila = ahora.copy()
+        fila["estado"] = estado_de(float(ahora["cobertura"]), f in ventana)
+        rehechas.append(fila)
+        if abs(float(ahora["ifg_suavizado"]) - float(antes["ifg_suavizado"])) > 0.005:
+            correcciones.append({
+                "fecha": str(f.date()),
+                "valor_anterior": round(float(antes["ifg_suavizado"]), 2),
+                "valor_nuevo": round(float(ahora["ifg_suavizado"]), 2),
+                "cobertura_anterior": round(float(antes["cobertura"]), 3),
+                "cobertura_nueva": round(float(ahora["cobertura"]), 3),
+                "estado_nuevo": fila["estado"],
+            })
+
+    partes = [firmes]
+    if rehechas:
+        partes.append(pd.DataFrame(rehechas))
     nuevas = recalculada.index.difference(publicada.index)
-    final = pd.concat([publicada, recalculada.loc[nuevas]]).sort_index()
-    final = final[~final.index.duplicated(keep="first")]
+    if len(nuevas):
+        bloque = recalculada.loc[nuevas].copy()
+        bloque["estado"] = estados(bloque)
+        partes.append(bloque)
 
-    log.info("Fusión: %d sesiones ya publicadas se conservan, %d nuevas se "
-             "añaden.", len(publicada), len(nuevas))
+    final = pd.concat(partes).sort_index()
+    final = final[~final.index.duplicated(keep="last")]
+
+    log.info("Fusión: %d cerradas intactas, %d provisionales revisadas, "
+             "%d nuevas.", len(firmes), len(rehechas), len(nuevas))
+    for c in correcciones:
+        log.warning("CORREGIDO %s: %.2f -> %.2f (cobertura %.3f -> %.3f, ahora %s)",
+                    c["fecha"], c["valor_anterior"], c["valor_nuevo"],
+                    c["cobertura_anterior"], c["cobertura_nueva"], c["estado_nuevo"])
+    abiertas_fin = int((final["estado"] == PROVISIONAL).sum())
+    if abiertas_fin:
+        log.info("Quedan %d sesiones provisionales abiertas a corrección.",
+                 abiertas_fin)
     if len(deriva) and deriva.abs().max() > 0.005:
         peor = deriva.abs().idxmax()
-        log.warning("El recálculo se separa de lo publicado hasta %.3f puntos "
-                    "(%s). NO se corrige: la serie publicada es inmutable.",
+        log.warning("El recálculo se separa de lo CERRADO hasta %.3f puntos "
+                    "(%s). No se corrige: un valor cerrado es inmutable.",
                     deriva.abs().max(), peor.date())
-    return final, deriva
+    return final, deriva, correcciones
+
+
+def anotar_correcciones(correcciones: list, generado: str) -> None:
+    """
+    Registro público de cada corrección aplicada a un provisional.
+
+    Va en archivo propio y no en revisiones.csv porque son dos cosas
+    distintas: revisiones mide cuánto se separaría el recálculo de lo
+    publicado si lo aplicáramos, y esto anota lo que de verdad se cambió.
+    Mezclarlas haría ilegibles las dos.
+    """
+    if not correcciones:
+        return
+    nuevo = not os.path.exists(CORRECCIONES)
+    with open(CORRECCIONES, "a", encoding="utf-8") as fh:
+        if nuevo:
+            fh.write("ejecutado,fecha,valor_anterior,valor_nuevo,"
+                     "cobertura_anterior,cobertura_nueva,estado_nuevo\n")
+        for c in correcciones:
+            fh.write(f"{generado},{c['fecha']},{c['valor_anterior']},"
+                     f"{c['valor_nuevo']},{c['cobertura_anterior']},"
+                     f"{c['cobertura_nueva']},{c['estado_nuevo']}\n")
+
+
+def archivar_componentes(final: pd.DataFrame, res: dict) -> int:
+    """
+    Guarda los z-scores con los que se calculó cada día publicado.
+
+    POR QUÉ HACE FALTA. Hoy nadie puede reproducir la serie partiendo de las
+    fuentes, y no por un fallo: los datos de origen no son inmutables. Yahoo
+    devuelve precios ajustados y reescribe su histórico en cada dividendo, y
+    GDELT rellena huecos hacia atrás. Quien recalcule mañana obtendrá otros
+    números, y sin este archivo no habrá forma de demostrar que los nuestros
+    estaban bien.
+
+    Archivando los componentes, cualquiera coge esta tabla, aplica la fórmula
+    publicada y obtiene exactamente el valor publicado. Eso es lo que separa
+    un índice reproducible de uno que hay que creerse.
+
+    Se escribe con la misma regla que la serie: las filas ya cerradas no se
+    tocan, las provisionales se refrescan y las nuevas se añaden.
+    """
+    comp = res["componentes"]
+    if comp is None or comp.empty:
+        return 0
+
+    cerradas = final.index[final["estado"] != PROVISIONAL]
+    previo = None
+    if os.path.exists(RUTA_COMPONENTES):
+        try:
+            previo = pd.read_csv(RUTA_COMPONENTES, index_col=0, parse_dates=True)
+        except Exception as e:
+            log.warning("No se puede leer %s (%s). Se reescribe.",
+                        RUTA_COMPONENTES, e)
+
+    nuevo = comp.reindex(final.index)
+    if previo is not None and not previo.empty:
+        intocables = previo.index.intersection(cerradas)
+        resto = nuevo.index.difference(intocables)
+        nuevo = pd.concat([previo.loc[intocables], nuevo.loc[resto]]).sort_index()
+        nuevo = nuevo[~nuevo.index.duplicated(keep="first")]
+
+    nuevo.to_csv(RUTA_COMPONENTES, float_format="%.4f")
+    return len(nuevo)
 
 
 def anotar_revision(deriva: pd.Series, generado: str) -> None:
@@ -290,10 +464,14 @@ def main() -> int:
         log.error("No queda ninguna sesión cerrada que publicar.")
         return 1
 
-    # --- Serie definitiva: lo publicado manda -------------------------------
-    final, deriva = fusionar(recalculada, leer_serie_publicada())
+    # --- Serie definitiva: lo cerrado manda ---------------------------------
+    final, deriva, correcciones = fusionar(recalculada, leer_serie_publicada())
     final.to_csv(RUTA_SERIE, float_format="%.2f")
     anotar_revision(deriva, generado)
+    anotar_correcciones(correcciones, generado)
+
+    n_comp = archivar_componentes(final, res)
+    log.info("Componentes archivados: %d sesiones en %s.", n_comp, RUTA_COMPONENTES)
 
     # --- Valor del día, tomado de la serie definitiva ------------------------
     # La fecha la manda la serie definitiva, no el recálculo: si se han
@@ -309,6 +487,7 @@ def main() -> int:
     ultimo["valor_crudo"] = None if pd.isna(fila["ifg"]) else float(fila["ifg"])
     ultimo["variacion"] = None if pd.isna(fila["variacion"]) else float(fila["variacion"])
     ultimo["tramo"] = fila["tramo"]
+    ultimo["estado_dato"] = str(fila["estado"])
 
     ultimo["licencia"] = ("CC BY 4.0. Cita: el especulador.com, Índice de "
                           f"Fricción Global, versión {config.VERSION}.")
@@ -316,9 +495,12 @@ def main() -> int:
                        "asesoramiento financiero ni recomendación de inversión.")
     ultimo["estado"] = ("preliminar: reglas congeladas, índice en validación "
                         "prospectiva, no publicado como referencia citable")
-    ultimo["revisiones"] = ("La serie publicada no se revisa. El recálculo "
-                            "diario solo añade fechas nuevas; la deriva "
-                            "observada se publica en revisiones.csv.")
+    ultimo["revisiones"] = (
+        "Un valor definitivo no se revisa nunca. Un valor provisional —al que "
+        f"le falta algún componente— queda abierto {VENTANA_PROVISIONAL} "
+        "sesiones por si la fuente vuelve, y toda corrección aplicada se "
+        "publica en correcciones.csv. La deriva observada entre el recálculo "
+        "y lo ya cerrado se publica en revisiones.csv.")
     ultimo["generado"] = generado
 
     with open(f"{DIR_PUBLICO}/ifg.json", "w", encoding="utf-8") as fh:
@@ -333,16 +515,17 @@ def main() -> int:
     # el requisito 5 de la sección 4, y la base de la validación prospectiva.
     # También es lo que evita publicar dos veces el mismo día.
     linea = (f"{generado},{ultimo['fecha']},{ultimo['valor']},"
-             f"{ultimo['tramo']},{ultimo['cobertura']}\n")
+             f"{ultimo['tramo']},{ultimo['cobertura']},"
+             f"{ultimo['estado_dato']}\n")
     nuevo = not os.path.exists(REGISTRO)
     with open(REGISTRO, "a", encoding="utf-8") as fh:
         if nuevo:
-            fh.write("ejecutado,fecha_dato,valor,tramo,cobertura\n")
+            fh.write("ejecutado,fecha_dato,valor,tramo,cobertura,estado\n")
         fh.write(linea)
 
-    log.info("Publicado: %s = %.1f (%s), motores %s",
+    log.info("Publicado: %s = %.1f (%s, %s), motores %s",
              ultimo["fecha"], ultimo["valor"], ultimo["tramo"],
-             [m["componente"] for m in ultimo["motores"]])
+             ultimo["estado_dato"], [m["componente"] for m in ultimo["motores"]])
     return 0
 
 

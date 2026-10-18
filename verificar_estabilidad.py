@@ -29,10 +29,18 @@ el recálculo y lo publicado —que sí es un continuo— no se juzga aquí: se
 mide en publicar_diario.py y se publica en docs/revisiones.csv para que
 cualquiera la audite.
 
+QUÉ SE COMPRUEBA EXACTAMENTE, DESDE LA REGLA DE PROVISIONALES. Desde que un
+dato nace provisional y se cierra cuando está completo, "inmutable" ya no
+significa "toda la serie": significa las filas CERRADAS. Las provisionales
+tienen permiso explícito para cambiar durante su ventana, que es justo para
+lo que existen. Comprobarlas aquí haría fallar la publicación cada vez que
+una fuente vuelve, o sea exactamente cuando el sistema está funcionando bien.
+
 CUÁNDO FALLA:
   - una fecha que estaba publicada ha desaparecido de la serie;
-  - una fecha que estaba publicada tiene ahora otro valor, otro tramo u
-    otra variación.
+  - una fecha ya CERRADA tiene ahora otro valor, otro tramo u otra variación;
+  - una fecha que estaba cerrada vuelve a figurar como provisional, que
+    sería reabrir algo que ya se dio por bueno.
 
 Se ejecuta DESPUÉS de publicar_diario.py y ANTES del commit, de modo que si
 la regla se rompe, el flujo falla con ruido y no se guarda nada.
@@ -59,8 +67,10 @@ log = logging.getLogger("estabilidad")
 
 RUTA_SERIE = "docs/ifg_serie.csv"
 
-# Campos que, una vez publicados, no pueden cambiar jamás.
+# Campos que, una vez cerrada la fila, no pueden cambiar jamás.
 CAMPOS_CONGELADOS = ["ifg", "ifg_suavizado", "variacion", "tramo"]
+
+PROVISIONAL = "provisional"
 
 # Cero de verdad. El epsilon es solo por el redondeo a dos decimales del CSV.
 TOLERANCIA = 0.005
@@ -111,8 +121,30 @@ def main() -> int:
                   "citable.")
         return 1
 
-    # --- 2. Ninguna fecha publicada puede cambiar de valor ------------------
+    # --- 2. Ninguna fecha CERRADA puede cambiar de valor --------------------
+    #
+    # Las provisionales se excluyen a propósito: cambian por diseño mientras
+    # dura su ventana. Si la serie anterior no traía columna de estado, se
+    # comprueban todas, que es el comportamiento de antes.
     comunes = antes.index.intersection(ahora.index)
+    if "estado" in antes.columns:
+        abiertas = antes.loc[comunes, "estado"].astype(str) == PROVISIONAL
+        n_abiertas = int(abiertas.sum())
+        comunes = comunes[~abiertas.values]
+        if n_abiertas:
+            log.info("Se excluyen %d sesiones provisionales: cambiar es lo que "
+                     "les toca.", n_abiertas)
+
+    # --- 2 bis. Una fecha cerrada no puede reabrirse ------------------------
+    if "estado" in antes.columns and "estado" in ahora.columns:
+        reabiertas = [f for f in comunes
+                      if str(ahora.loc[f, "estado"]) == PROVISIONAL]
+        if reabiertas:
+            log.error("SE HAN REABIERTO %d sesiones ya cerradas, la primera "
+                      "%s. Un dato cerrado no vuelve a provisional.",
+                      len(reabiertas), reabiertas[0].date())
+            return 1
+
     movidas = []
 
     for campo in CAMPOS_CONGELADOS:
@@ -138,9 +170,13 @@ def main() -> int:
         return 1
 
     nuevas = ahora.index.difference(antes.index)
-    log.info("ESTABLE: %d sesiones publicadas siguen idénticas, %d nuevas se "
-             "añaden%s.", len(comunes), len(nuevas),
-             f" (desde {nuevas[0].date()})" if len(nuevas) else "")
+    abiertas_ahora = (int((ahora["estado"].astype(str) == PROVISIONAL).sum())
+                      if "estado" in ahora.columns else 0)
+    log.info("ESTABLE: %d sesiones cerradas siguen idénticas, %d nuevas se "
+             "añaden%s. Provisionales abiertas: %d.",
+             len(comunes), len(nuevas),
+             f" (desde {nuevas[0].date()})" if len(nuevas) else "",
+             abiertas_ahora)
     return 0
 
 
