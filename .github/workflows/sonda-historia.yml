@@ -1,0 +1,77 @@
+name: Sonda de historia
+
+# Mide cuánta historia da realmente cada fuente, para decidir con hechos hasta
+# dónde puede llegar hacia atrás la serie del índice. Es el paso previo
+# obligatorio del protocolo (PROTOCOLO_VALIDACION.md, sección 3): sin esto, la
+# fecha de inicio de la extensión sería una suposición.
+#
+# NO tiene schedule y NO escribe en el repositorio por defecto: solo se lanza
+# a mano y deja el resultado como artefacto descargable. Una sonda que se
+# ejecuta sola y commitea sin que nadie lo pida es una forma de romper cosas.
+on:
+  workflow_dispatch:
+    inputs:
+      desde:
+        description: "Fecha desde la que sondear (AAAA-MM-DD)"
+        type: string
+        default: "1985-01-01"
+      guardar:
+        description: "Commitear el CSV del resultado en datos/"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sonda-historia
+  cancel-in-progress: false
+
+jobs:
+  sondear:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Sondear la profundidad histórica de cada fuente
+        run: |
+          python sonda_historia.py \
+            --desde "${{ inputs.desde }}" \
+            --salida sonda_historia.csv \
+            | tee sonda_historia.txt
+
+      - name: Publicar el resultado como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonda-historia
+          path: |
+            sonda_historia.csv
+            sonda_historia.txt
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Guardar en el repositorio si se ha pedido
+        if: inputs.guardar
+        run: |
+          mkdir -p datos
+          cp sonda_historia.csv datos/sonda_historia.csv
+          if [ -z "$(git status --porcelain datos/sonda_historia.csv)" ]; then
+            echo "Sin cambios respecto al sondeo anterior."
+            exit 0
+          fi
+          git config user.name "IFG bot"
+          git config user.email "actions@github.com"
+          git add datos/sonda_historia.csv
+          git commit -m "Sonda de historia de las fuentes $(date -u +%Y-%m-%d)"
+          git push
