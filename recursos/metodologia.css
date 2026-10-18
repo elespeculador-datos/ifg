@@ -1,0 +1,190 @@
+/* Hoja de estilo del PDF de metodología del IFG.
+   Pensada para impresión y lectura en pantalla a página completa, no para web. */
+
+/* OJO: aquí NO va un @page { margin }. wkhtmltopdf lo SUMA a los márgenes
+   que recibe por línea de comandos, y el resultado fue un documento cuyo
+   contenido ocupaba el 65 % del ancho de la página con una franja blanca
+   enorme a la derecha. Los márgenes los pone construir_metodologia_pdf.sh. */
+
+html {
+  font-size: 10.5pt;
+}
+
+/* La plantilla standalone de pandoc incrusta su propia hoja con
+   body { max-width: 36em; margin: auto; padding: ... }. Sin anularla, el
+   documento sale con el texto en una columna estrecha y una franja blanca a
+   la derecha. Hay que neutralizarla explícitamente. */
+body {
+  max-width: none !important;
+  padding: 0 !important;
+  font-family: "DejaVu Serif", Georgia, serif;
+  line-height: 1.5;
+  color: #15181c;
+  margin: 0;
+  text-align: left;
+  hyphens: auto;
+}
+
+/* --- Portada ------------------------------------------------------------- */
+.portada {
+  border-bottom: 2.5pt solid #15181c;
+  padding-bottom: 10mm;
+  margin-bottom: 10mm;
+}
+
+.portada .marca {
+  font-family: "DejaVu Sans", Arial, sans-serif;
+  font-size: 8.5pt;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5a6472;
+  margin-bottom: 6mm;
+}
+
+.portada h1 {
+  font-size: 23pt;
+  line-height: 1.15;
+  margin: 0 0 3mm 0;
+  border: none;
+  padding: 0;
+}
+
+.portada .sub {
+  font-family: "DejaVu Sans", Arial, sans-serif;
+  font-size: 11pt;
+  color: #3d4654;
+  margin: 0;
+}
+
+/* --- Jerarquía ----------------------------------------------------------- */
+h1, h2, h3, h4 {
+  font-family: "DejaVu Sans", Arial, sans-serif;
+  color: #15181c;
+  page-break-after: avoid;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 15pt;
+  margin: 11mm 0 4mm 0;
+  padding-bottom: 2mm;
+  border-bottom: 1pt solid #c8ced8;
+}
+
+h2 {
+  font-size: 12pt;
+  margin: 8mm 0 3mm 0;
+}
+
+h3 {
+  font-size: 10.5pt;
+  margin: 6mm 0 2mm 0;
+  color: #3d4654;
+}
+
+p {
+  margin: 0 0 3.2mm 0;
+  orphans: 3;
+  widows: 3;
+}
+
+strong { color: #000; }
+
+/* --- Avisos y notas ------------------------------------------------------ */
+blockquote {
+  margin: 5mm 0;
+  padding: 4mm 5mm;
+  background: #f4f6f9;
+  border-left: 3pt solid #5a6472;
+  font-size: 9.8pt;
+}
+
+blockquote p:last-child { margin-bottom: 0; }
+
+/* --- Tablas -------------------------------------------------------------- */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 4mm 0 5mm 0;
+  font-size: 9.2pt;
+  page-break-inside: avoid;
+}
+
+th {
+  font-family: "DejaVu Sans", Arial, sans-serif;
+  font-size: 8.6pt;
+  text-align: left;
+  border-bottom: 1.2pt solid #15181c;
+  padding: 2mm 2.5mm;
+  vertical-align: bottom;
+}
+
+td {
+  border-bottom: 0.4pt solid #d6dbe3;
+  padding: 1.8mm 2.5mm;
+  vertical-align: top;
+}
+
+tr:last-child td { border-bottom: 1pt solid #15181c; }
+
+/* --- Código y fórmulas --------------------------------------------------- */
+code {
+  font-family: "DejaVu Sans Mono", monospace;
+  font-size: 8.8pt;
+  background: #f1f3f7;
+  padding: 0.3mm 1mm;
+}
+
+pre {
+  background: #f1f3f7;
+  border-left: 2.5pt solid #c8ced8;
+  padding: 3.5mm 4mm;
+  margin: 4mm 0;
+  font-size: 8.8pt;
+  line-height: 1.45;
+  page-break-inside: avoid;
+  white-space: pre-wrap;
+}
+
+pre code { background: none; padding: 0; }
+
+/* --- Listas -------------------------------------------------------------- */
+ul, ol { margin: 0 0 3.5mm 0; padding-left: 6mm; }
+li { margin-bottom: 1.4mm; }
+
+/* --- Separadores --------------------------------------------------------- */
+hr {
+  border: none;
+  border-top: 0.6pt solid #c8ced8;
+  margin: 8mm 0;
+}
+
+a { color: #15181c; text-decoration: none; border-bottom: 0.4pt dotted #8a94a3; }
+
+/* --- Título que emite pandoc: redundante con la portada ------------------ */
+h1.title, header#title-block-header { display: none; }
+
+/* --- Índice -------------------------------------------------------------- */
+#TOC {
+  font-family: "DejaVu Sans", Arial, sans-serif;
+  font-size: 9pt;
+  background: #f4f6f9;
+  padding: 5mm 6mm 5mm 4mm;
+  margin: 0 0 9mm 0;
+  page-break-after: avoid;
+}
+
+#TOC::before {
+  content: "Índice";
+  display: block;
+  font-size: 8.5pt;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #5a6472;
+  margin-bottom: 3mm;
+}
+
+#TOC ul { list-style: none; padding-left: 0; margin: 0; }
+#TOC ul ul { padding-left: 5mm; font-size: 8.6pt; color: #3d4654; }
+#TOC li { margin-bottom: 1mm; }
+#TOC a { border-bottom: none; }
