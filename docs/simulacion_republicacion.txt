@@ -1,0 +1,32 @@
+SIMULACION de republicacion 0.9.0 -> 0.10.0
+Generado 2026-10-18T18:56:08Z. NO se ha republicado nada.
+
+
+# Revisión de versión: 0.9.0 -> 0.10.0
+
+Republicado el 2026-10-18 20:56 CEST.
+
+## Por qué se recalcula la serie entera
+
+Un cambio de reglas obliga a recalcular toda la serie: mantener valores viejos calculados con reglas viejas junto a valores nuevos calculados con reglas nuevas produciría una serie que no es comparable consigo misma. Los cambios de esta versión están detallados en la cabecera de `config.py`.
+
+## Qué cambia, medido
+
+- Sesiones antes: **4293** · después: **4294**
+- Sesiones cuyo valor cambia: **4273** de 4293 comunes
+- Cambio absoluto medio: **2.69** puntos (mediana 1.33)
+- Cambio máximo: **46.97** puntos, el 2011-10-03
+- Sesiones que cambian de tramo: **828**
+- Cobertura media de componentes: 0.838 -> **0.911**
+- Primera sesión con cobertura plena: 2021-06-11 -> **2021-06-11**
+
+## Dónde está la serie anterior
+
+Archivada, no borrada. Quien haya citado un valor de la versión anterior lo sigue encontrando aquí:
+
+- (no había archivos previos)
+
+## Encuadre
+
+Contenido informativo y educativo. No constituye asesoramiento financiero ni recomendación de inversión. El índice es una lectura del estado del mercado, nunca una señal de compra o de venta.
+
