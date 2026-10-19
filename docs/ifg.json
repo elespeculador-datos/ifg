@@ -34,9 +34,9 @@
     "gpr"
   ],
   "estado_dato": "definitivo",
-  "generado": "2026-10-18T21:10:52+02:00",
-  "revisiones": "Serie recalculada al pasar de 0.9.0 a 0.10.0. Ver revision_version.md y docs/historico/.",
   "licencia": "CC BY 4.0. Cita: el especulador.com, Índice de Fricción Global, versión 0.10.0.",
   "aviso": "Contenido informativo y educativo. No constituye asesoramiento financiero ni recomendación de inversión.",
-  "estado": "preliminar: reglas congeladas, índice en validación prospectiva, no publicado como referencia citable"
+  "estado": "preliminar: reglas congeladas, índice en validación prospectiva, no publicado como referencia citable",
+  "revisiones": "Un valor definitivo no se revisa nunca. Un valor provisional —al que le falta algún componente— queda abierto 5 sesiones por si la fuente vuelve, y toda corrección aplicada se publica en correcciones.csv. La deriva observada entre el recálculo y lo ya cerrado se publica en revisiones.csv.",
+  "generado": "2026-10-19T03:45:30+02:00"
 }
