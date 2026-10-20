@@ -375,11 +375,11 @@ def main() -> int:
     serie.to_csv(DATOS / "serie.csv", index=False)
     ant.to_csv(DATOS / "anteriores.csv", index=False)
     cam.to_csv(DATOS / "cambios.csv", index=False)
-    hist = DATOS / "historial_cambios.csv"
+    ruta_cambios = DATOS / "historial_cambios.csv"
     if not cam.empty:
-        cam.to_csv(hist, mode="a", index=False, header=not hist.exists())
-    elif not hist.exists():
-        cam.to_csv(hist, index=False)
+        cam.to_csv(ruta_cambios, mode="a", index=False, header=not ruta_cambios.exists())
+    elif not ruta_cambios.exists():
+        cam.to_csv(ruta_cambios, index=False)
     estado.write_text(json.dumps({
         "fecha_publicacion": fecha,
         "publicacion_anterior": fecha_previa if fecha_previa != fecha else None,
