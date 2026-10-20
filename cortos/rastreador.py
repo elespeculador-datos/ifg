@@ -1,0 +1,279 @@
+"""Rastreador de posiciones cortas de El Especulador.
+
+Descarga cada día el fichero oficial de la CNMV con las posiciones cortas netas
+publicadas sobre acciones españolas (las que alcanzan o superan el 0,5 % del
+capital) y lo convierte en datos abiertos y en una página legible:
+
+  docs/cortos/index.html                 página del rastreador
+  docs/cortos/datos/vigentes.csv         posiciones publicadas hoy
+  docs/cortos/datos/resumen_emisores.csv suma publicada y nº de tenedores por emisor
+  docs/cortos/datos/serie.csv            evolución de las posiciones vigentes
+  docs/cortos/datos/anteriores.csv       posiciones que ya bajaron del 0,5 %
+  docs/cortos/datos/cambios.csv          altas, subidas, bajadas y salidas del día
+  docs/cortos/datos/historial_cambios.csv  todos los cambios detectados, acumulados
+  docs/cortos/datos/ultima.json          resumen para webs y widgets
+
+Fuente: CNMV, «Posiciones cortas netas», fichero NetShortPositions.xls.
+Licencia de los datos derivados: CC BY 4.0, citando a El Especulador y a la CNMV.
+
+Uso:
+  python cortos/rastreador.py                 descarga y publica
+  python cortos/rastreador.py --local F.xls   usa un fichero ya descargado (pruebas)
+"""
+from __future__ import annotations
+
+import argparse
+import html
+import io
+import json
+import sys
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+import pandas as pd
+import requests
+
+URL = "https://www.cnmv.es/DocPortal/Posiciones-Cortas/NetShortPositions.xls"
+FICHA_CNMV = "https://www.cnmv.es/portal/consultas/busqueda.aspx?id=29"
+PILAR = "https://elespeculador.com/posiciones-cortas-bolsa-espanola/"
+RAIZ = Path(__file__).resolve().parent.parent
+SALIDA = RAIZ / "docs" / "cortos"
+DATOS = SALIDA / "datos"
+
+COLUMNAS = ["lei", "isin", "emisor", "tenedor", "fecha_posicion", "posicion_pct"]
+HOJAS = {"fecha": "Fecha", "vigentes": "Última", "serie": "Serie", "anteriores": "Anteriores"}
+
+
+class DatosRaros(Exception):
+    """El fichero no tiene la forma esperada: mejor parar que publicar basura."""
+
+
+# --------------------------------------------------------------------------- descarga
+def descargar() -> bytes:
+    ultimo_error = None
+    for intento in range(4):
+        try:
+            r = requests.get(URL, timeout=90, headers={"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)"})
+            if r.status_code == 200 and r.content[:4] == b"\xd0\xcf\x11\xe0":
+                return r.content
+            ultimo_error = f"HTTP {r.status_code}, {len(r.content)} bytes, cabecera {r.content[:8]!r}"
+        except requests.RequestException as e:
+            ultimo_error = str(e)
+        time.sleep(20 * (intento + 1))
+    raise DatosRaros(f"No se pudo descargar el fichero de la CNMV: {ultimo_error}")
+
+
+# --------------------------------------------------------------------------- lectura
+def _hoja(libro: dict, clave: str) -> pd.DataFrame:
+    nombre = next((n for n in libro if n.startswith(HOJAS[clave])), None)
+    if nombre is None:
+        raise DatosRaros(f"Falta la hoja «{HOJAS[clave]}…»; hojas: {list(libro)}")
+    return libro[nombre]
+
+
+def _tabla(df: pd.DataFrame, nombre: str) -> pd.DataFrame:
+    fila = next((i for i in range(min(15, len(df))) if df.iloc[i].astype(str).str.contains("ISIN").any()), None)
+    if fila is None:
+        raise DatosRaros(f"No encuentro la cabecera en la hoja {nombre}")
+    cab = [str(c) for c in df.iloc[fila].tolist()]
+    if len(cab) < 6 or "LEI" not in cab[0] or "ISIN" not in cab[1] or "%" not in cab[5]:
+        raise DatosRaros(f"Cabecera inesperada en {nombre}: {cab}")
+    t = df.iloc[fila + 1:, :6].dropna(how="all").copy()
+    t.columns = COLUMNAS
+    t = t.dropna(subset=["isin", "tenedor"])
+    for c in ["lei", "isin", "emisor", "tenedor"]:
+        t[c] = t[c].astype(str).str.strip()
+    t["fecha_posicion"] = pd.to_datetime(t["fecha_posicion"], errors="coerce").dt.date
+    t["posicion_pct"] = pd.to_numeric(t["posicion_pct"], errors="coerce")
+    if t["fecha_posicion"].isna().any() or t["posicion_pct"].isna().any():
+        malas = t[t["fecha_posicion"].isna() | t["posicion_pct"].isna()].head(3).to_dict("records")
+        raise DatosRaros(f"Fechas o porcentajes ilegibles en {nombre}: {malas}")
+    return t.reset_index(drop=True)
+
+
+def leer(contenido: bytes) -> tuple[str, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    try:
+        libro = pd.read_excel(io.BytesIO(contenido), sheet_name=None, header=None, engine="xlrd")
+    except Exception:
+        libro = pd.read_excel(io.BytesIO(contenido), sheet_name=None, header=None)
+    fecha_df = _hoja(libro, "fecha")
+    texto = " ".join(str(v) for v in fecha_df.values.ravel() if pd.notna(v))
+    fecha = pd.to_datetime(next((p for p in texto.split() if p[:2] == "20" and len(p) >= 10), ""), errors="coerce")
+    if pd.isna(fecha):
+        raise DatosRaros(f"No leo la fecha de publicación: {texto!r}")
+    vig = _tabla(_hoja(libro, "vigentes"), "Última")
+    serie = _tabla(_hoja(libro, "serie"), "Serie")
+    ant = _tabla(_hoja(libro, "anteriores"), "Anteriores")
+    if len(vig) < 5 or len(serie) < len(vig) or len(ant) < 1000:
+        raise DatosRaros(f"Volumen anómalo: {len(vig)} vigentes, {len(serie)} serie, {len(ant)} anteriores")
+    if (vig["posicion_pct"] < 0).any() or (vig["posicion_pct"] < 0.5 - 1e-9).mean() > 0.3:
+        raise DatosRaros("Demasiadas posiciones vigentes por debajo del 0,5 %: el fichero ha cambiado de criterio")
+    # La hoja «Última» incluye también la comunicación con la que un tenedor
+    # baja del 0,5 %: se publica una vez y deja de mostrarse en la siguiente.
+    vig["estado"] = vig["posicion_pct"].map(lambda x: "igual o superior al 0,5 %" if x >= 0.5 - 1e-9 else "bajó del 0,5 %")
+    return fecha.date().isoformat(), vig, serie, ant
+
+
+# --------------------------------------------------------------------------- cálculos
+def resumen(vig: pd.DataFrame) -> pd.DataFrame:
+    vig = vig[vig["posicion_pct"] >= 0.5 - 1e-9]
+    g = vig.groupby(["isin", "emisor"], as_index=False).agg(
+        tenedores=("tenedor", "nunique"),
+        suma_publicada_pct=("posicion_pct", "sum"),
+        mayor_posicion_pct=("posicion_pct", "max"),
+        ultima_fecha_posicion=("fecha_posicion", "max"),
+    )
+    mayor = vig.sort_values("posicion_pct", ascending=False).drop_duplicates("isin")[["isin", "tenedor"]]
+    g = g.merge(mayor.rename(columns={"tenedor": "mayor_tenedor"}), on="isin")
+    g["suma_publicada_pct"] = g["suma_publicada_pct"].round(2)
+    return g.sort_values(["suma_publicada_pct", "tenedores"], ascending=False).reset_index(drop=True)
+
+
+def cambios(prev: pd.DataFrame | None, vig: pd.DataFrame, fecha: str) -> pd.DataFrame:
+    clave = ["isin", "tenedor"]
+    cols = ["fecha_publicacion", "isin", "emisor", "tenedor", "tipo", "antes_pct", "ahora_pct", "fecha_posicion"]
+    if prev is None or prev.empty:
+        return pd.DataFrame(columns=cols)
+    a = prev.set_index(clave)
+    b = vig.set_index(clave)
+    filas = []
+    for k in b.index.difference(a.index):
+        r = b.loc[k]
+        filas.append([fecha, k[0], r["emisor"], k[1], "nueva", None, r["posicion_pct"], r["fecha_posicion"]])
+    for k in a.index.difference(b.index):
+        r = a.loc[k]
+        filas.append([fecha, k[0], r["emisor"], k[1], "baja del 0,5 %", r["posicion_pct"], None, None])
+    for k in b.index.intersection(a.index):
+        x, y = float(a.loc[k, "posicion_pct"]), float(b.loc[k, "posicion_pct"])
+        if abs(x - y) > 1e-9:
+            filas.append([fecha, k[0], b.loc[k, "emisor"], k[1], "sube" if y > x else "baja", x, y, b.loc[k, "fecha_posicion"]])
+    return pd.DataFrame(filas, columns=cols).sort_values(["emisor", "tenedor"]).reset_index(drop=True)
+
+
+# --------------------------------------------------------------------------- página
+def _pct(x) -> str:
+    return "—" if x is None or pd.isna(x) else f"{x:,.2f} %".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+def _fecha(d) -> str:
+    return "—" if d is None or pd.isna(d) else pd.Timestamp(d).strftime("%d/%m/%Y")
+
+
+def pagina(fecha: str, vig: pd.DataFrame, res: pd.DataFrame, cam: pd.DataFrame) -> str:
+    e = html.escape
+    filas_res = "\n".join(
+        f"<tr><td>{e(r.emisor)}</td><td class='n'>{r.tenedores}</td><td class='n'>{_pct(r.suma_publicada_pct)}</td>"
+        f"<td>{e(r.mayor_tenedor)} ({_pct(r.mayor_posicion_pct)})</td><td>{_fecha(r.ultima_fecha_posicion)}</td></tr>"
+        for r in res.itertuples())
+    filas_vig = "\n".join(
+        f"<tr><td>{e(r.emisor)}</td><td>{e(r.tenedor)}</td><td class='n'>{_pct(r.posicion_pct)}{' · bajó del umbral' if r.posicion_pct < 0.5 - 1e-9 else ''}</td><td>{_fecha(r.fecha_posicion)}</td></tr>"
+        for r in vig.sort_values(["emisor", "posicion_pct"], ascending=[True, False]).itertuples())
+    if cam.empty:
+        bloque_cam = "<p>Sin cambios respecto a la publicación anterior que tenemos registrada.</p>"
+    else:
+        bloque_cam = "<table><thead><tr><th>Emisor</th><th>Tenedor</th><th>Cambio</th><th class='n'>Antes</th><th class='n'>Ahora</th></tr></thead><tbody>" + "\n".join(
+            f"<tr><td>{e(r.emisor)}</td><td>{e(r.tenedor)}</td><td>{e(r.tipo)}</td><td class='n'>{_pct(r.antes_pct)}</td><td class='n'>{_pct(r.ahora_pct)}</td></tr>"
+            for r in cam.itertuples()) + "</tbody></table>"
+    top = res.iloc[0] if len(res) else None
+    n_umbral = int((vig["posicion_pct"] >= 0.5 - 1e-9).sum())
+    frase = (f"A {_fecha(fecha)}, la CNMV publica {n_umbral} posiciones cortas netas iguales o superiores al 0,5 % "
+             f"sobre {res['isin'].nunique()} emisores españoles. La mayor suma publicada es la de {e(top.emisor)}: "
+             f"{_pct(top.suma_publicada_pct)} del capital, repartido entre {top.tenedores} tenedores.") if top is not None else ""
+    ahora = datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M UTC")
+    return f"""<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Posiciones cortas en la bolsa española, día a día | El Especulador</title>
+<meta name="description" content="Rastreador diario de las posiciones cortas netas que publica la CNMV sobre acciones españolas: quién está corto, cuánto y desde cuándo. Datos abiertos.">
+<style>
+:root{{--t:#1d2733;--s:#5b6675;--b:#d7dde5;--a:#1f4e8c;--f:#f6f8fb}}
+body{{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--t);max-width:1000px;margin:0 auto;padding:16px;line-height:1.45}}
+h1{{font-size:1.5rem;margin:.2em 0}} h2{{font-size:1.15rem;margin-top:1.6em}}
+.sub{{color:var(--s)}} table{{width:100%;border-collapse:collapse;font-size:.92rem;margin:.6em 0}}
+th,td{{text-align:left;padding:6px 8px;border-bottom:1px solid var(--b);vertical-align:top}} th{{background:var(--f)}}
+.n{{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}} .caja{{background:var(--f);padding:12px 14px;border-radius:8px}}
+a{{color:var(--a)}} .pie{{color:var(--s);font-size:.85rem;margin-top:2em}}
+@media(max-width:640px){{table{{font-size:.82rem}} th,td{{padding:5px}}}}
+</style>
+<script type="application/ld+json">{json.dumps({
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": "Posiciones cortas netas publicadas en España (rastreador de El Especulador)",
+        "description": "Posiciones cortas netas iguales o superiores al 0,5 % del capital sobre acciones españolas, según la CNMV, actualizadas cada día hábil.",
+        "creator": {"@type": "Organization", "name": "El Especulador", "url": "https://elespeculador.com/"},
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "isBasedOn": URL, "dateModified": fecha,
+        "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"datos/{n}.csv"}
+                         for n in ["vigentes", "resumen_emisores", "serie", "anteriores", "historial_cambios"]],
+    }, ensure_ascii=False)}</script>
+</head><body>
+<h1>Posiciones cortas en la bolsa española</h1>
+<p class="sub">Publicación de la CNMV del {_fecha(fecha)} · actualizado el {ahora} · <a href="https://elespeculador.com/">El Especulador</a></p>
+<div class="caja"><p>{frase}</p>
+<p>Solo se publican las posiciones de cada tenedor que alcanzan el 0,5 % del capital, y una última vez cuando bajan de ese nivel (aparecen marcadas como «bajó del umbral» y no cuentan en la suma); las menores se comunican a la CNMV pero no se hacen públicas. Por eso la suma publicada es un mínimo, no el total de posiciones cortas sobre cada valor. Cómo se leen estos datos: <a href="{PILAR}">guía de posiciones cortas</a>.</p></div>
+<h2>Cambios respecto a la publicación anterior</h2>
+{bloque_cam}
+<h2>Suma publicada por emisor</h2>
+<table><thead><tr><th>Emisor</th><th class="n">Tenedores</th><th class="n">Suma publicada</th><th>Mayor posición</th><th>Última fecha de posición</th></tr></thead><tbody>
+{filas_res}
+</tbody></table>
+<h2>Todas las posiciones publicadas</h2>
+<table><thead><tr><th>Emisor</th><th>Tenedor</th><th class="n">Posición</th><th>Fecha de posición</th></tr></thead><tbody>
+{filas_vig}
+</tbody></table>
+<h2>Datos abiertos</h2>
+<p>Descarga en CSV: <a href="datos/vigentes.csv">posiciones vigentes</a> · <a href="datos/resumen_emisores.csv">resumen por emisor</a> · <a href="datos/serie.csv">evolución de las vigentes</a> · <a href="datos/anteriores.csv">posiciones anteriores desde 2010</a> · <a href="datos/historial_cambios.csv">historial de cambios</a> · <a href="datos/ultima.json">JSON</a>. Licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>: puedes reutilizarlos citando «El Especulador, a partir de datos de la CNMV».</p>
+<p class="pie">Fuente: CNMV, <a href="{FICHA_CNMV}">posiciones cortas netas</a> (fichero <a href="{URL}">NetShortPositions.xls</a>). La fecha de posición es el día en que la posición alcanzó, cambió o bajó del umbral; la CNMV la publica al día hábil siguiente. Contenido informativo; no constituye asesoramiento financiero.</p>
+</body></html>
+"""
+
+
+# --------------------------------------------------------------------------- principal
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--local", help="usar un fichero ya descargado")
+    args = ap.parse_args()
+    contenido = Path(args.local).read_bytes() if args.local else descargar()
+    fecha, vig, serie, ant = leer(contenido)
+    DATOS.mkdir(parents=True, exist_ok=True)
+
+    previo = None
+    estado = DATOS / "ultima.json"
+    if (DATOS / "vigentes.csv").exists():
+        previo = pd.read_csv(DATOS / "vigentes.csv", dtype=str)
+        previo["posicion_pct"] = previo["posicion_pct"].astype(float)
+    fecha_previa = json.loads(estado.read_text(encoding="utf-8")).get("fecha_publicacion") if estado.exists() else None
+    if fecha_previa == fecha and not args.local:
+        print(f"La CNMV no ha publicado nada nuevo desde el {fecha}: no se toca nada.")
+        return 0
+
+    res = resumen(vig)
+    cam = cambios(previo, vig, fecha)
+    vig.to_csv(DATOS / "vigentes.csv", index=False)
+    res.to_csv(DATOS / "resumen_emisores.csv", index=False)
+    serie.to_csv(DATOS / "serie.csv", index=False)
+    ant.to_csv(DATOS / "anteriores.csv", index=False)
+    cam.to_csv(DATOS / "cambios.csv", index=False)
+    hist = DATOS / "historial_cambios.csv"
+    if not cam.empty:
+        cam.to_csv(hist, mode="a", index=False, header=not hist.exists())
+    elif not hist.exists():
+        cam.to_csv(hist, index=False)
+    estado.write_text(json.dumps({
+        "fecha_publicacion": fecha,
+        "generado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "posiciones": int(len(vig)), "emisores": int(res["isin"].nunique()),
+        "cambios": int(len(cam)),
+        "top": res.head(10).assign(ultima_fecha_posicion=res.head(10)["ultima_fecha_posicion"].astype(str)).to_dict("records"),
+        "fuente": URL, "licencia": "CC BY 4.0 · El Especulador a partir de datos de la CNMV",
+    }, ensure_ascii=False, indent=1), encoding="utf-8")
+    (SALIDA / "index.html").write_text(pagina(fecha, vig, res, cam), encoding="utf-8")
+    print(f"Publicación del {fecha}: {len(vig)} posiciones vigentes, {res['isin'].nunique()} emisores, {len(cam)} cambios.")
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except DatosRaros as e:
+        print(f"::error::{e}")
+        sys.exit(1)
