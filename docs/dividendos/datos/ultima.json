@@ -1,6 +1,6 @@
 {
  "fecha": "2026-10-20",
- "generado": "2026-10-20T17:40:33+00:00",
+ "generado": "2026-10-20T20:23:32+00:00",
  "proximos": 6,
  "siguiente": {
   "fecha_ex": "2026-10-29",
@@ -27,5 +27,5 @@
   }
  ],
  "fuente": "BME, operaciones financieras: dividendos; cierres de la ficha de cada valor",
- "licencia": "CC BY 4.0 · El Especulador"
+ "licencia": "Sin licencia abierta: datos de origen de BME, sujetos a sus condiciones. Cita: El Especulador, a partir de datos de BME"
 }
