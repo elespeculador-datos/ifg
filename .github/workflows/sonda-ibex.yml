@@ -1,0 +1,25 @@
+name: Sonda IBEX (temporal)
+on:
+  push:
+    branches: [ibex-sonda]
+    paths: [sonda_ibex/sonda.py, .github/workflows/sonda-ibex.yml]
+permissions:
+  contents: write
+jobs:
+  sonda:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests playwright && python -m playwright install --with-deps chromium
+      - run: python sonda_ibex/sonda.py
+      - name: Guardar resultado en la rama
+        run: |
+          git config user.name "elespeculador-datos-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add sonda_ibex/resultado
+          git commit -m "Sonda IBEX: resultado" || exit 0
+          git push
