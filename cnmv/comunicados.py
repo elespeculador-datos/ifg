@@ -42,7 +42,7 @@ CANALES = {
     "IP": "https://www.cnmv.es/portal/Informacion-Privilegiada/RSS.asmx/GetNoticiasCNMV",
     "OIR": "https://www.cnmv.es/portal/Otra-Informacion-Relevante/RSS.asmx/GetNoticiasCNMV",
 }
-CABECERAS = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Accept": "application/rss+xml, application/xml, text/xml, */*"}
+CABECERAS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36", "Accept": "application/rss+xml, application/xml, text/xml, */*"}
 MADRID = ZoneInfo("Europe/Madrid")
 RAIZ = Path(__file__).resolve().parent.parent
 SALIDA = RAIZ / "docs" / "cnmv"
@@ -108,8 +108,12 @@ def leer_canal(xml: str, canal: str) -> list[dict]:
 def descargar() -> list[dict]:
     filas = []
     for canal, url in CANALES.items():
-        r = requests.get(url, headers=CABECERAS, timeout=60)
-        r.raise_for_status()
+        try:
+            r = requests.get(url, headers=CABECERAS, timeout=60)
+        except requests.RequestException as e:
+            raise DatosRaros(f"La CNMV no responde en el canal {canal}: {type(e).__name__}: {e}") from e
+        if r.status_code != 200:
+            raise DatosRaros(f"La CNMV devuelve HTTP {r.status_code} en el canal {canal}: {r.text[:200]!r}")
         r.encoding = "utf-8"
         filas += leer_canal(r.text, canal)
     return filas
@@ -382,3 +386,6 @@ if __name__ == "__main__":
     except DatosRaros as e:
         print(f"::error::{e}")
         sys.exit(1)
+    except Exception as e:  # que el motivo quede en el resumen de la ejecución
+        print(f"::error::{type(e).__name__}: {e}")
+        raise
