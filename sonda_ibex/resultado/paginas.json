@@ -1,0 +1,2492 @@
+[
+ {
+  "id": 8411,
+  "slug": "vonovia",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/vonovia/",
+  "title": "Vonovia: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:46",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Vonovia (VNA): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/vonovia/"
+ },
+ {
+  "id": 8410,
+  "slug": "siemens",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/siemens/",
+  "title": "Siemens: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:45",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Siemens (SIE): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/siemens/"
+ },
+ {
+  "id": 8409,
+  "slug": "sap",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/sap/",
+  "title": "SAP: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:43",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "SAP: cotización, negocio y claves de la acción - El especulador",
+  "canonical": "https://elespeculador.com/dax40/sap/"
+ },
+ {
+  "id": 8408,
+  "slug": "rwe",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/rwe/",
+  "title": "RWE: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:43",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "RWE: cotización, negocio y claves de la acción - El especulador",
+  "canonical": "https://elespeculador.com/dax40/rwe/"
+ },
+ {
+  "id": 8407,
+  "slug": "rheinmetall",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/rheinmetall/",
+  "title": "Rheinmetall: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:41",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Rheinmetall (RHM): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/rheinmetall/"
+ },
+ {
+  "id": 8406,
+  "slug": "porsche-se",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/porsche-se/",
+  "title": "Porsche SE: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:40",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Porsche SE (PAH3): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/porsche-se/"
+ },
+ {
+  "id": 8404,
+  "slug": "munich-re",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/munich-re/",
+  "title": "Munich Re: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:39",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Munich Re (MUV2): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/munich-re/"
+ },
+ {
+  "id": 8405,
+  "slug": "porsche-ag",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/porsche-ag/",
+  "title": "Porsche AG: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:38",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Porsche AG (P911): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/porsche-ag/"
+ },
+ {
+  "id": 8401,
+  "slug": "infineon",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/infineon/",
+  "title": "Infineon: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:37",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Infineon (IFX): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/infineon/"
+ },
+ {
+  "id": 8403,
+  "slug": "mercedes-benz",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/mercedes-benz/",
+  "title": "Mercedes-Benz: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:36",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Mercedes-Benz (MBG): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/mercedes-benz/"
+ },
+ {
+  "id": 8402,
+  "slug": "linde",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/linde/",
+  "title": "Linde: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:36",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Linde (LIN): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/linde/"
+ },
+ {
+  "id": 8400,
+  "slug": "henkel",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/henkel/",
+  "title": "Henkel: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:34",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Henkel (HEN3): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/henkel/"
+ },
+ {
+  "id": 8399,
+  "slug": "heidelberg-materials",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/heidelberg-materials/",
+  "title": "Heidelberg Materials: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:33",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Heidelberg Materials (HEI): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/heidelberg-materials/"
+ },
+ {
+  "id": 8398,
+  "slug": "fresenius-medical-care",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/fresenius-medical-care/",
+  "title": "Fresenius Medical Care: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:33",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Fresenius Medical Care (FME): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/fresenius-medical-care/"
+ },
+ {
+  "id": 8397,
+  "slug": "eon",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/eon/",
+  "title": "E.ON: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:31",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "E.ON (EOAN): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/eon/"
+ },
+ {
+  "id": 8396,
+  "slug": "deutsche-telekom",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/deutsche-telekom/",
+  "title": "Deutsche Telekom: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:30",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Deutsche Telekom (DTE): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/deutsche-telekom/"
+ },
+ {
+  "id": 8395,
+  "slug": "deutsche-bank",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/deutsche-bank/",
+  "title": "Deutsche Bank: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:30",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Deutsche Bank (DBK): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/deutsche-bank/"
+ },
+ {
+  "id": 8394,
+  "slug": "deutsche-borse",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/deutsche-borse/",
+  "title": "Deutsche Börse: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:27",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Deutsche Börse (DB1): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/deutsche-borse/"
+ },
+ {
+  "id": 8393,
+  "slug": "continental",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/continental/",
+  "title": "Continental: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:27",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Continental (CON): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/continental/"
+ },
+ {
+  "id": 8392,
+  "slug": "bmw",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/bmw/",
+  "title": "BMW: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:27",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "BMW: cotización, negocio y claves de la acción - El especulador",
+  "canonical": "https://elespeculador.com/dax40/bmw/"
+ },
+ {
+  "id": 8391,
+  "slug": "bayer",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/bayer/",
+  "title": "Bayer: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:24",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Bayer (BAYN): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/bayer/"
+ },
+ {
+  "id": 8390,
+  "slug": "basf",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/basf/",
+  "title": "BASF: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:24",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "BASF (BAS): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/basf/"
+ },
+ {
+  "id": 8388,
+  "slug": "airbus",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/airbus/",
+  "title": "Airbus: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:23",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Airbus (AIR): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/airbus/"
+ },
+ {
+  "id": 8389,
+  "slug": "allianz",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/allianz/",
+  "title": "Allianz: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:21",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Allianz (ALV): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/allianz/"
+ },
+ {
+  "id": 8387,
+  "slug": "adidas",
+  "parent": 8378,
+  "link": "https://elespeculador.com/dax40/adidas/",
+  "title": "Adidas: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T16:29:21",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Adidas (ADS): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/adidas/"
+ },
+ {
+  "id": 8386,
+  "slug": "dax-40-otros-sectores",
+  "parent": 0,
+  "link": "https://elespeculador.com/dax-40-otros-sectores/",
+  "title": "DAX 40: Otros sectores",
+  "modified": "2026-10-18T16:29:19",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "DAX 40: Otros sectores, cotizaciones y empresas - El especulador",
+  "canonical": "https://elespeculador.com/dax-40-otros-sectores/"
+ },
+ {
+  "id": 8384,
+  "slug": "dax-40-industria-y-materiales",
+  "parent": 0,
+  "link": "https://elespeculador.com/dax-40-industria-y-materiales/",
+  "title": "DAX 40: Industria y materiales",
+  "modified": "2026-10-18T16:29:19",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "DAX 40: Industria y materiales, cotizaciones y empresas - El especulador",
+  "canonical": "https://elespeculador.com/dax-40-industria-y-materiales/"
+ },
+ {
+  "id": 8385,
+  "slug": "dax-40-inmobiliarias",
+  "parent": 0,
+  "link": "https://elespeculador.com/dax-40-inmobiliarias/",
+  "title": "DAX 40: Inmobiliario",
+  "modified": "2026-10-18T16:29:18",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "DAX 40: Inmobiliario, cotizaciones y empresas - El especulador",
+  "canonical": "https://elespeculador.com/dax-40-inmobiliarias/"
+ },
+ {
+  "id": 8382,
+  "slug": "dax-40-telecom",
+  "parent": 0,
+  "link": "https://elespeculador.com/dax-40-telecom/",
+  "title": "DAX 40: Telecomunicaciones",
+  "modified": "2026-10-18T16:29:16",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "DAX 40: Telecomunicaciones, cotizaciones y empresas - El especulador",
+  "canonical": "https://elespeculador.com/dax-40-telecom/"
+ },
+ {
+  "id": 8383,
+  "slug": "dax-40-salud-biotech",
+  "parent": 0,
+  "link": "https://elespeculador.com/dax-40-salud-biotech/",
+  "title": "DAX 40: Salud y biotecnología",
+  "modified": "2026-10-18T16:29:15",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "DAX 40: Salud y biotecnología, cotizaciones y empresas - El especulador",
+  "canonical": "https://elespeculador.com/dax-40-salud-biotech/"
+ },
+ {
+  "id": 8381,
+  "slug": "dax-40-infraestructuras",
+  "parent": 0,
+  "link": "https://elespeculador.com/dax-40-infraestructuras/",
+  "title": "DAX 40: Infraestructuras e industria pesada",
+  "modified": "2026-10-18T16:29:15",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "DAX 40: Infraestructuras e industria pesada, cotizaciones y empresas - El especulador",
+  "canonical": "https://elespeculador.com/dax-40-infraestructuras/"
+ },
+ {
+  "id": 8380,
+  "slug": "dax-40-energia",
+  "parent": 0,
+  "link": "https://elespeculador.com/dax-40-energia/",
+  "title": "DAX 40: Energía",
+  "modified": "2026-10-18T16:29:12",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "DAX 40: Energía, cotizaciones y empresas - El especulador",
+  "canonical": "https://elespeculador.com/dax-40-energia/"
+ },
+ {
+  "id": 8379,
+  "slug": "dax-40-banca",
+  "parent": 0,
+  "link": "https://elespeculador.com/dax-40-banca/",
+  "title": "DAX 40: Banca y servicios financieros",
+  "modified": "2026-10-18T16:29:12",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "DAX 40: Banca y servicios financieros, cotizaciones y empresas - El especulador",
+  "canonical": "https://elespeculador.com/dax-40-banca/"
+ },
+ {
+  "id": 8378,
+  "slug": "dax40",
+  "parent": 0,
+  "link": "https://elespeculador.com/dax40/",
+  "title": "Empresas del DAX 40",
+  "modified": "2026-10-18T16:29:12",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Empresas del DAX 40: fichas, cotización y claves - El especulador",
+  "canonical": "https://elespeculador.com/dax40/"
+ },
+ {
+  "id": 8304,
+  "slug": "unicaja",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/unicaja/",
+  "title": "Unicaja: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:54",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Unicaja (UNI): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/unicaja/"
+ },
+ {
+  "id": 8303,
+  "slug": "telefonica",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/telefonica/",
+  "title": "Telefónica: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:54",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Telefónica (TEF): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/telefonica/"
+ },
+ {
+  "id": 8302,
+  "slug": "solaria",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/solaria/",
+  "title": "Solaria: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:54",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Solaria (SLR): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/solaria/"
+ },
+ {
+  "id": 8301,
+  "slug": "sacyr",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/sacyr/",
+  "title": "Sacyr: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:54",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Sacyr (SCYR): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/sacyr/"
+ },
+ {
+  "id": 8300,
+  "slug": "rovi",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/rovi/",
+  "title": "Rovi: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:51",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Rovi (ROVI): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/rovi/"
+ },
+ {
+  "id": 8299,
+  "slug": "repsol",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/repsol/",
+  "title": "Repsol: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:51",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Repsol (REP): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/repsol/"
+ },
+ {
+  "id": 8298,
+  "slug": "redeia",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/redeia/",
+  "title": "Redeia: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:51",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Redeia (RED): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/redeia/"
+ },
+ {
+  "id": 8297,
+  "slug": "puig",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/puig/",
+  "title": "Puig: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:51",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Puig (PUIG): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/puig/"
+ },
+ {
+  "id": 8296,
+  "slug": "naturgy",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/naturgy/",
+  "title": "Naturgy: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:48",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Naturgy (NTGY): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/naturgy/"
+ },
+ {
+  "id": 8295,
+  "slug": "merlin-properties",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/merlin-properties/",
+  "title": "Merlin Properties: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:48",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Merlin Properties (MRL): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/merlin-properties/"
+ },
+ {
+  "id": 8294,
+  "slug": "mapfre",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/mapfre/",
+  "title": "Mapfre: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:48",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Mapfre (MAP): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/mapfre/"
+ },
+ {
+  "id": 8293,
+  "slug": "logista",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/logista/",
+  "title": "Logista: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:48",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Logista (LOG): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/logista/"
+ },
+ {
+  "id": 8292,
+  "slug": "inditex",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/inditex/",
+  "title": "Inditex: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:46",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Inditex (ITX): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/inditex/"
+ },
+ {
+  "id": 8291,
+  "slug": "indra",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/indra/",
+  "title": "Indra: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:45",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Indra (IDR): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/indra/"
+ },
+ {
+  "id": 8290,
+  "slug": "iberdrola",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/iberdrola/",
+  "title": "Iberdrola: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:45",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Iberdrola (IBE): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/iberdrola/"
+ },
+ {
+  "id": 8289,
+  "slug": "iag",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/iag/",
+  "title": "IAG: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:45",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "IAG: cotización, negocio y claves de la acción - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/iag/"
+ },
+ {
+  "id": 8288,
+  "slug": "grifols",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/grifols/",
+  "title": "Grifols: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:43",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Grifols (GRF): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/grifols/"
+ },
+ {
+  "id": 8287,
+  "slug": "fluidra",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/fluidra/",
+  "title": "Fluidra: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:43",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Fluidra (FDR): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/fluidra/"
+ },
+ {
+  "id": 8286,
+  "slug": "ferrovial",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/ferrovial/",
+  "title": "Ferrovial: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:43",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Ferrovial (FER): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/ferrovial/"
+ },
+ {
+  "id": 8285,
+  "slug": "endesa",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/endesa/",
+  "title": "Endesa: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:43",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Endesa (ELE): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/endesa/"
+ },
+ {
+  "id": 8284,
+  "slug": "enagas",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/enagas/",
+  "title": "Enagás: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:40",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Enagás (ENG): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/enagas/"
+ },
+ {
+  "id": 8283,
+  "slug": "colonial",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/colonial/",
+  "title": "Colonial: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:40",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Colonial (COL): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/colonial/"
+ },
+ {
+  "id": 8282,
+  "slug": "cie-automotive",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/cie-automotive/",
+  "title": "CIE Automotive: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:40",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "CIE Automotive (CIE): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/cie-automotive/"
+ },
+ {
+  "id": 8281,
+  "slug": "cellnex",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/cellnex/",
+  "title": "Cellnex: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:40",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Cellnex (CLNX): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/cellnex/"
+ },
+ {
+  "id": 8280,
+  "slug": "caixabank",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/caixabank/",
+  "title": "CaixaBank: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:37",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "CaixaBank (CABK): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/caixabank/"
+ },
+ {
+  "id": 8279,
+  "slug": "bbva",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/bbva/",
+  "title": "BBVA: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:37",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "BBVA: cotización, negocio y claves de la acción - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/bbva/"
+ },
+ {
+  "id": 8278,
+  "slug": "bankinter",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/bankinter/",
+  "title": "Bankinter: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:37",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Bankinter (BKT): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/bankinter/"
+ },
+ {
+  "id": 8277,
+  "slug": "banco-sabadell",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/banco-sabadell/",
+  "title": "Banco Sabadell: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:37",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Banco Sabadell (SAB): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/banco-sabadell/"
+ },
+ {
+  "id": 8276,
+  "slug": "arcelormittal",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/arcelormittal/",
+  "title": "ArcelorMittal: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:35",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "ArcelorMittal (MTS): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/arcelormittal/"
+ },
+ {
+  "id": 8275,
+  "slug": "amadeus",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/amadeus/",
+  "title": "Amadeus: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:35",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Amadeus (AMS): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/amadeus/"
+ },
+ {
+  "id": 8273,
+  "slug": "aena",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/aena/",
+  "title": "Aena: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:34",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Aena: cotización, negocio y claves de la acción - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/aena/"
+ },
+ {
+  "id": 8274,
+  "slug": "acs",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/acs/",
+  "title": "ACS: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:33",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "ACS: cotización, negocio y claves de la acción - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/acs/"
+ },
+ {
+  "id": 8259,
+  "slug": "banco-santander",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/banco-santander/",
+  "title": "Banco Santander: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:31",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Banco Santander (SAN): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/banco-santander/"
+ },
+ {
+  "id": 8272,
+  "slug": "acerinox",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/acerinox/",
+  "title": "Acerinox: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:30",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Acerinox (ACX): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/acerinox/"
+ },
+ {
+  "id": 8271,
+  "slug": "acciona-energia",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/acciona-energia/",
+  "title": "Acciona Energía: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:30",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Acciona Energía (ANE): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/acciona-energia/"
+ },
+ {
+  "id": 8270,
+  "slug": "acciona",
+  "parent": 8258,
+  "link": "https://elespeculador.com/ibex35/acciona/",
+  "title": "Acciona: cotización, negocio y claves de la acción",
+  "modified": "2026-10-18T15:15:30",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Acciona (ANA): cotización, negocio y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/acciona/"
+ },
+ {
+  "id": 8258,
+  "slug": "ibex35",
+  "parent": 0,
+  "link": "https://elespeculador.com/ibex35/",
+  "title": "Empresas del IBEX 35",
+  "modified": "2026-10-18T15:15:27",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Empresas del IBEX 35: fichas, cotización y claves - El especulador",
+  "canonical": "https://elespeculador.com/ibex35/"
+ },
+ {
+  "id": 8075,
+  "slug": "indices",
+  "parent": 0,
+  "link": "https://elespeculador.com/indices/",
+  "title": "Índices",
+  "modified": "2026-10-12T22:08:50",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Índices - El especulador",
+  "canonical": "https://elespeculador.com/indices/"
+ },
+ {
+  "id": 7321,
+  "slug": "geopolitica",
+  "parent": 0,
+  "link": "https://elespeculador.com/geopolitica/",
+  "title": "Geopolítica",
+  "modified": "2026-10-14T19:10:30",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Geopolítica y mercados financieros | El Especulador",
+  "canonical": "https://elespeculador.com/geopolitica/"
+ },
+ {
+  "id": 6970,
+  "slug": "planes-premium",
+  "parent": 0,
+  "link": "https://elespeculador.com/planes-premium/",
+  "title": "Planes Premium",
+  "modified": "2026-10-18T19:37:15",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Planes Premium de Trading e Inversión | El Especulador",
+  "canonical": "https://elespeculador.com/planes-premium/"
+ },
+ {
+  "id": 6955,
+  "slug": "macro-premium",
+  "parent": 0,
+  "link": "https://elespeculador.com/macro-premium/",
+  "title": "Macro Premium",
+  "modified": "2026-08-05T03:39:27",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Macro Premium - El especulador",
+  "canonical": "https://elespeculador.com/macro-premium/"
+ },
+ {
+  "id": 6953,
+  "slug": "inversion-premium",
+  "parent": 0,
+  "link": "https://elespeculador.com/inversion-premium/",
+  "title": "Inversión Premium",
+  "modified": "2026-08-05T03:34:51",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Inversión Premium - El especulador",
+  "canonical": "https://elespeculador.com/inversion-premium/"
+ },
+ {
+  "id": 6305,
+  "slug": "politica-editorial",
+  "parent": 0,
+  "link": "https://elespeculador.com/politica-editorial/",
+  "title": "Política editorial de El Especulador",
+  "modified": "2026-08-17T03:37:04",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Política editorial de El Especulador - El especulador",
+  "canonical": "https://elespeculador.com/politica-editorial/"
+ },
+ {
+  "id": 6302,
+  "slug": "posicion-editorial-especulacion",
+  "parent": 0,
+  "link": "https://elespeculador.com/posicion-editorial-especulacion/",
+  "title": "Nuestra posición sobre la especulación en los mercados",
+  "modified": "2026-07-09T00:04:47",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Nuestra posición sobre la especulación en los mercados - El especulador",
+  "canonical": "https://elespeculador.com/posicion-editorial-especulacion/"
+ },
+ {
+  "id": 5704,
+  "slug": "federico-ferreres",
+  "parent": 0,
+  "link": "https://elespeculador.com/federico-ferreres/",
+  "title": "Federico Ferreres",
+  "modified": "2026-04-18T05:00:44",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Federico Ferreres | Perfil profesional",
+  "canonical": "https://elespeculador.com/federico-ferreres/"
+ },
+ {
+  "id": 5702,
+  "slug": "quienes-somos",
+  "parent": 0,
+  "link": "https://elespeculador.com/quienes-somos/",
+  "title": "Quiénes somos",
+  "modified": "2026-07-08T23:41:58",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Quiénes somos - El especulador",
+  "canonical": "https://elespeculador.com/quienes-somos/"
+ },
+ {
+  "id": 5679,
+  "slug": "mercados",
+  "parent": 0,
+  "link": "https://elespeculador.com/mercados/",
+  "title": "Mercados",
+  "modified": "2026-09-21T18:20:29",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Mercados: índices, divisas, criptomonedas y materias primas",
+  "canonical": "https://elespeculador.com/mercados/"
+ },
+ {
+  "id": 4545,
+  "slug": "nasdaq-100",
+  "parent": 0,
+  "link": "https://elespeculador.com/nasdaq-100/",
+  "title": "Nasdaq 100",
+  "modified": "2026-09-21T21:46:52",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Nasdaq 100: análisis macro y escenarios de mercado",
+  "canonical": "https://elespeculador.com/nasdaq-100/"
+ },
+ {
+  "id": 3755,
+  "slug": "china",
+  "parent": 3737,
+  "link": "https://elespeculador.com/bolsa/resto/china/",
+  "title": "China",
+  "modified": "2026-02-28T19:33:32",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "China - El especulador",
+  "canonical": "https://elespeculador.com/bolsa/resto/china/"
+ },
+ {
+  "id": 3753,
+  "slug": "corea",
+  "parent": 3737,
+  "link": "https://elespeculador.com/bolsa/resto/corea/",
+  "title": "Corea",
+  "modified": "2026-02-28T19:32:52",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Corea - El especulador",
+  "canonical": "https://elespeculador.com/bolsa/resto/corea/"
+ },
+ {
+  "id": 3751,
+  "slug": "latinoamerica",
+  "parent": 3737,
+  "link": "https://elespeculador.com/bolsa/resto/latinoamerica/",
+  "title": "Latinoamérica",
+  "modified": "2026-02-28T19:31:19",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Latinoamérica - El especulador",
+  "canonical": "https://elespeculador.com/bolsa/resto/latinoamerica/"
+ },
+ {
+  "id": 3737,
+  "slug": "resto",
+  "parent": 2776,
+  "link": "https://elespeculador.com/bolsa/resto/",
+  "title": "Resto mercados",
+  "modified": "2026-09-21T18:08:35",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Bolsas del mundo: mercados globales e índices | El Especulador",
+  "canonical": "https://elespeculador.com/bolsa/resto/"
+ },
+ {
+  "id": 3734,
+  "slug": "japon",
+  "parent": 2776,
+  "link": "https://elespeculador.com/bolsa/japon/",
+  "title": "Japón",
+  "modified": "2026-09-21T18:01:29",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Bolsa japonesa: mercado, acciones y claves | El Especulador",
+  "canonical": "https://elespeculador.com/bolsa/japon/"
+ },
+ {
+  "id": 3730,
+  "slug": "eeuu",
+  "parent": 2776,
+  "link": "https://elespeculador.com/bolsa/eeuu/",
+  "title": "Estados Unidos",
+  "modified": "2026-09-21T17:57:22",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Bolsa americana: mercado, acciones y claves | El Especulador",
+  "canonical": "https://elespeculador.com/bolsa/eeuu/"
+ },
+ {
+  "id": 3728,
+  "slug": "europa",
+  "parent": 2776,
+  "link": "https://elespeculador.com/bolsa/europa/",
+  "title": "Europa",
+  "modified": "2026-09-21T17:53:23",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Bolsa europea: mercado, acciones y claves | El Especulador",
+  "canonical": "https://elespeculador.com/bolsa/europa/"
+ },
+ {
+  "id": 3726,
+  "slug": "espana",
+  "parent": 2776,
+  "link": "https://elespeculador.com/bolsa/espana/",
+  "title": "España",
+  "modified": "2026-09-21T17:45:48",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Bolsa española: mercado, acciones y claves | El Especulador",
+  "canonical": "https://elespeculador.com/bolsa/espana/"
+ },
+ {
+  "id": 3651,
+  "slug": "ibex-35-infraestructuras",
+  "parent": 0,
+  "link": "https://elespeculador.com/ibex-35-infraestructuras/",
+  "title": "Infraestructuras",
+  "modified": "2026-03-05T23:15:43",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Infraestructuras IBEX 35: constructoras y otras | El Especulador",
+  "canonical": "https://elespeculador.com/ibex-35-infraestructuras/"
+ },
+ {
+  "id": 3575,
+  "slug": "ibex-35-otros-sectores",
+  "parent": 0,
+  "link": "https://elespeculador.com/ibex-35-otros-sectores/",
+  "title": "Otros sectores IBEX 35",
+  "modified": "2026-03-05T23:23:40",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Otros sectores IBEX 35: valores y seguimiento | El Especulador",
+  "canonical": "https://elespeculador.com/ibex-35-otros-sectores/"
+ },
+ {
+  "id": 3579,
+  "slug": "ibex-35-telecom",
+  "parent": 0,
+  "link": "https://elespeculador.com/ibex-35-telecom/",
+  "title": "Telecom IBEX 35",
+  "modified": "2026-03-05T23:20:53",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Telecom IBEX 35: valores clave y contexto | El Especulador",
+  "canonical": "https://elespeculador.com/ibex-35-telecom/"
+ },
+ {
+  "id": 3578,
+  "slug": "ibex-35-salud-biotech",
+  "parent": 0,
+  "link": "https://elespeculador.com/ibex-35-salud-biotech/",
+  "title": "Salud/Biotech IBEX 35",
+  "modified": "2026-03-05T23:19:15",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Salud y Biotech IBEX 35: valores y contexto | El Especulador",
+  "canonical": "https://elespeculador.com/ibex-35-salud-biotech/"
+ },
+ {
+  "id": 3576,
+  "slug": "ibex-35-inmobiliarias",
+  "parent": 0,
+  "link": "https://elespeculador.com/ibex-35-inmobiliarias/",
+  "title": "Inmobiliarias IBEX 35",
+  "modified": "2026-03-05T23:18:09",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Inmobiliarias IBEX 35: SOCIMIs y claves | El Especulador",
+  "canonical": "https://elespeculador.com/ibex-35-inmobiliarias/"
+ },
+ {
+  "id": 3569,
+  "slug": "ibex-35-industria-y-materiales",
+  "parent": 0,
+  "link": "https://elespeculador.com/ibex-35-industria-y-materiales/",
+  "title": "Industria y materiales (IBEX 35)",
+  "modified": "2026-03-05T23:22:38",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Industria y Materiales IBEX 35: valores y claves | El Especulador",
+  "canonical": "https://elespeculador.com/ibex-35-industria-y-materiales/"
+ },
+ {
+  "id": 3568,
+  "slug": "ibex-35-energia",
+  "parent": 0,
+  "link": "https://elespeculador.com/ibex-35-energia/",
+  "title": "Energía IBEX 35",
+  "modified": "2026-03-05T23:14:24",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Energía IBEX 35: eléctricas, oil & gas y claves | El Especulador",
+  "canonical": "https://elespeculador.com/ibex-35-energia/"
+ },
+ {
+  "id": 3567,
+  "slug": "ibex-35-banca",
+  "parent": 0,
+  "link": "https://elespeculador.com/ibex-35-banca/",
+  "title": "Banca IBEX 35",
+  "modified": "2026-03-05T23:11:19",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Banca IBEX 35: bancos y claves del sector | El Especulador",
+  "canonical": "https://elespeculador.com/ibex-35-banca/"
+ },
+ {
+  "id": 2883,
+  "slug": "renta-fija",
+  "parent": 0,
+  "link": "https://elespeculador.com/renta-fija/",
+  "title": "Renta fija",
+  "modified": "2026-10-11T15:34:57",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Renta fija: bonos, tipos y spreads para invertir | El Especulador",
+  "canonical": "https://elespeculador.com/renta-fija/"
+ },
+ {
+  "id": 2877,
+  "slug": "materias-primas",
+  "parent": 0,
+  "link": "https://elespeculador.com/materias-primas/",
+  "title": "Materias primas",
+  "modified": "2026-10-11T13:50:36",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Materias primas: petróleo, oro y claves mercado | El Especulador",
+  "canonical": "https://elespeculador.com/materias-primas/"
+ },
+ {
+  "id": 2776,
+  "slug": "bolsa",
+  "parent": 0,
+  "link": "https://elespeculador.com/bolsa/",
+  "title": "Bolsa",
+  "modified": "2026-10-12T08:19:37",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Acciones y Bolsa: resultados, empresas y movimientos clave",
+  "canonical": "https://elespeculador.com/bolsa/"
+ },
+ {
+  "id": 2367,
+  "slug": "politica-de-cookies-2",
+  "parent": 0,
+  "link": "https://elespeculador.com/politica-de-cookies-2/",
+  "title": "Política de cookies",
+  "modified": "2026-02-01T21:15:36",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Política de cookies - El especulador",
+  "canonical": "https://elespeculador.com/politica-de-cookies-2/"
+ },
+ {
+  "id": 2365,
+  "slug": "politica-de-privacidad-2",
+  "parent": 0,
+  "link": "https://elespeculador.com/politica-de-privacidad-2/",
+  "title": "Política de privacidad",
+  "modified": "2026-02-01T21:14:00",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Política de privacidad - El especulador",
+  "canonical": "https://elespeculador.com/politica-de-privacidad-2/"
+ },
+ {
+  "id": 2362,
+  "slug": "2362-2",
+  "parent": 0,
+  "link": "https://elespeculador.com/2362-2/",
+  "title": "Condiciones de uso",
+  "modified": "2026-02-01T21:53:13",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Condiciones de uso - El especulador",
+  "canonical": "https://elespeculador.com/2362-2/"
+ },
+ {
+  "id": 2360,
+  "slug": "aviso-legal",
+  "parent": 0,
+  "link": "https://elespeculador.com/aviso-legal/",
+  "title": "Aviso legal",
+  "modified": "2026-02-01T21:07:55",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Aviso legal - El especulador",
+  "canonical": "https://elespeculador.com/aviso-legal/"
+ },
+ {
+  "id": 2359,
+  "slug": "politica-de-cookies-ue",
+  "parent": 0,
+  "link": "https://elespeculador.com/politica-de-cookies-ue/",
+  "title": "Política de cookies (UE)",
+  "modified": "2026-02-01T15:22:44",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Política de cookies (UE) - El especulador",
+  "canonical": "https://elespeculador.com/politica-de-cookies-ue/"
+ },
+ {
+  "id": 2143,
+  "slug": "otros-indices",
+  "parent": 0,
+  "link": "https://elespeculador.com/otros-indices/",
+  "title": "Otros índices",
+  "modified": "2026-09-21T21:55:45",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Indices bursátiles: análisis macro y escenarios de mercado",
+  "canonical": "https://elespeculador.com/otros-indices/"
+ },
+ {
+  "id": 2099,
+  "slug": "ibex-35",
+  "parent": 0,
+  "link": "https://elespeculador.com/ibex-35/",
+  "title": "IBEX 35",
+  "modified": "2026-10-19T15:58:06",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "IBEX 35: análisis macro y escenarios de mercado",
+  "canonical": "https://elespeculador.com/ibex-35/"
+ },
+ {
+  "id": 2091,
+  "slug": "latinoamerica",
+  "parent": 0,
+  "link": "https://elespeculador.com/latinoamerica/",
+  "title": "Latinoamérica",
+  "modified": "2026-09-21T21:55:08",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Indices Latinoamérica: análisis macro y escenarios de mercado",
+  "canonical": "https://elespeculador.com/latinoamerica/"
+ },
+ {
+  "id": 2082,
+  "slug": "sp-500",
+  "parent": 0,
+  "link": "https://elespeculador.com/sp-500/",
+  "title": "S&#038;P 500",
+  "modified": "2026-04-13T20:13:13",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "S&P 500: análisis macro y escenarios de mercado",
+  "canonical": "https://elespeculador.com/sp-500/"
+ },
+ {
+  "id": 2077,
+  "slug": "ftse-100-footsie",
+  "parent": 0,
+  "link": "https://elespeculador.com/ftse-100-footsie/",
+  "title": "FTSE 100 (Footsie)",
+  "modified": "2026-09-21T21:49:36",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "FTSE 100: análisis macro y escenarios de mercado",
+  "canonical": "https://elespeculador.com/ftse-100-footsie/"
+ },
+ {
+  "id": 2068,
+  "slug": "dax-40",
+  "parent": 0,
+  "link": "https://elespeculador.com/dax-40/",
+  "title": "DAX 40",
+  "modified": "2026-09-21T21:45:22",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Dax 40: análisis macro y escenarios de mercado",
+  "canonical": "https://elespeculador.com/dax-40/"
+ },
+ {
+  "id": 2062,
+  "slug": "eurostoxx-50",
+  "parent": 0,
+  "link": "https://elespeculador.com/eurostoxx-50/",
+  "title": "EUROSTOXX 50",
+  "modified": "2026-09-21T21:45:50",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Eurostoxx 50: análisis macro y escenarios de mercado",
+  "canonical": "https://elespeculador.com/eurostoxx-50/"
+ },
+ {
+  "id": 1861,
+  "slug": "analisis",
+  "parent": 0,
+  "link": "https://elespeculador.com/analisis/",
+  "title": "Análisis",
+  "modified": "2026-01-24T06:52:00",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Inversión con método | Análisis fundamental y estratégico",
+  "canonical": "https://elespeculador.com/analisis/"
+ },
+ {
+  "id": 1799,
+  "slug": "criptomonedas",
+  "parent": 0,
+  "link": "https://elespeculador.com/criptomonedas/",
+  "title": "Criptomonedas",
+  "modified": "2026-10-11T07:54:03",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Mercado de criptomonedas | Análisis y noticias clave",
+  "canonical": "https://elespeculador.com/criptomonedas/"
+ },
+ {
+  "id": 1797,
+  "slug": "ia",
+  "parent": 0,
+  "link": "https://elespeculador.com/ia/",
+  "title": "IA",
+  "modified": "2026-08-15T21:03:54",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Inteligencia Artificial en trading e inversión | Noticias y análisis",
+  "canonical": "https://elespeculador.com/ia/"
+ },
+ {
+  "id": 1795,
+  "slug": "nikkei-225",
+  "parent": 0,
+  "link": "https://elespeculador.com/nikkei-225/",
+  "title": "NIKKEI 225",
+  "modified": "2026-09-21T21:53:36",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Nikkei 225: análisis macro y escenarios de mercado",
+  "canonical": "https://elespeculador.com/nikkei-225/"
+ },
+ {
+  "id": 1785,
+  "slug": "divisas",
+  "parent": 0,
+  "link": "https://elespeculador.com/divisas/",
+  "title": "Divisas",
+  "modified": "2026-08-27T01:03:58",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Mercado de divisas hoy | Cotización del euro, dólar y más",
+  "canonical": "https://elespeculador.com/divisas/"
+ },
+ {
+  "id": 1719,
+  "slug": "macro",
+  "parent": 0,
+  "link": "https://elespeculador.com/macro/",
+  "title": "Macro",
+  "modified": "2026-10-10T22:14:12",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Macroeconomía: tipos, inflación y ciclo económico | El Especulador",
+  "canonical": "https://elespeculador.com/macro/"
+ },
+ {
+  "id": 1327,
+  "slug": "inversion",
+  "parent": 0,
+  "link": "https://elespeculador.com/inversion/",
+  "title": "Inversión",
+  "modified": "2026-08-16T20:26:30",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Inversión con método | Análisis fundamental y estratégico",
+  "canonical": "https://elespeculador.com/inversion/"
+ },
+ {
+  "id": 1320,
+  "slug": "trading",
+  "parent": 0,
+  "link": "https://elespeculador.com/trading/",
+  "title": "Trading",
+  "modified": "2026-10-19T09:04:51",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Análisis bursátil profesional | Trading con método",
+  "canonical": "https://elespeculador.com/trading/"
+ },
+ {
+  "id": 958,
+  "slug": "home",
+  "parent": 0,
+  "link": "https://elespeculador.com/",
+  "title": "Portada",
+  "modified": "2026-10-14T22:44:51",
+  "template": "template-builder.php",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "El Especulador | Bolsa, Economía y Trading",
+  "canonical": "https://elespeculador.com/"
+ },
+ {
+  "id": 567,
+  "slug": "value-investing",
+  "parent": 0,
+  "link": "https://elespeculador.com/value-investing/",
+  "title": "Value Investing",
+  "modified": "2023-06-12T21:45:42",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Value Investing - El especulador",
+  "canonical": "https://elespeculador.com/value-investing/"
+ },
+ {
+  "id": 442,
+  "slug": "politica-de-privacidad",
+  "parent": 0,
+  "link": "https://elespeculador.com/politica-de-privacidad/",
+  "title": "Política de privacidad",
+  "modified": "2026-01-31T21:00:36",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Política de privacidad - El especulador",
+  "canonical": "https://elespeculador.com/politica-de-privacidad/"
+ },
+ {
+  "id": 441,
+  "slug": "politica-de-cookies",
+  "parent": 0,
+  "link": "https://elespeculador.com/politica-de-cookies/",
+  "title": "Política de cookies",
+  "modified": "2026-01-31T21:00:23",
+  "template": "",
+  "robots": {
+   "index": "noindex",
+   "follow": "follow"
+  },
+  "yoast_title": "Política de cookies - El especulador",
+  "canonical": null
+ },
+ {
+  "id": 416,
+  "slug": "default-redirect-page",
+  "parent": 0,
+  "link": "https://elespeculador.com/default-redirect-page/",
+  "title": "Default Redirect Page",
+  "modified": "2026-01-31T20:49:20",
+  "template": "",
+  "robots": {
+   "index": "noindex",
+   "follow": "nofollow"
+  },
+  "yoast_title": "Default Redirect Page - El especulador",
+  "canonical": null
+ },
+ {
+  "id": 415,
+  "slug": "public-individual-page",
+  "parent": 0,
+  "link": "https://elespeculador.com/public-individual-page/",
+  "title": "Página individual pública",
+  "modified": "2026-08-05T16:18:10",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Página individual pública - El especulador",
+  "canonical": "https://elespeculador.com/public-individual-page/"
+ },
+ {
+  "id": 414,
+  "slug": "member-tos-page",
+  "parent": 0,
+  "link": "https://elespeculador.com/member-tos-page/",
+  "title": "Términos del servicio",
+  "modified": "2026-08-05T16:25:57",
+  "template": "",
+  "robots": {
+   "index": "noindex",
+   "follow": "nofollow"
+  },
+  "yoast_title": "Términos del servicio - El especulador",
+  "canonical": null
+ },
+ {
+  "id": 413,
+  "slug": "thank-you-page",
+  "parent": 0,
+  "link": "https://elespeculador.com/thank-you-page/",
+  "title": "Página de agradecimiento",
+  "modified": "2026-08-05T16:19:53",
+  "template": "",
+  "robots": {
+   "index": "noindex",
+   "follow": "follow"
+  },
+  "yoast_title": "Página de agradecimiento - El especulador",
+  "canonical": null
+ },
+ {
+  "id": 411,
+  "slug": "subscription-plan",
+  "parent": 0,
+  "link": "https://elespeculador.com/subscription-plan/",
+  "title": "Plan de suscripción",
+  "modified": "2026-08-05T16:25:12",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Plan de suscripción - El especulador",
+  "canonical": "https://elespeculador.com/subscription-plan/"
+ },
+ {
+  "id": 410,
+  "slug": "lost-password",
+  "parent": 0,
+  "link": "https://elespeculador.com/lost-password/",
+  "title": "Contraseña perdida",
+  "modified": "2026-08-05T16:02:06",
+  "template": "",
+  "robots": {
+   "index": "noindex",
+   "follow": "follow"
+  },
+  "yoast_title": "Contraseña perdida - El especulador",
+  "canonical": null
+ },
+ {
+  "id": 409,
+  "slug": "register",
+  "parent": 0,
+  "link": "https://elespeculador.com/register/",
+  "title": "Registro",
+  "modified": "2026-08-05T15:59:17",
+  "template": "",
+  "robots": {
+   "index": "noindex",
+   "follow": "follow"
+  },
+  "yoast_title": "Registro - El especulador",
+  "canonical": null
+ },
+ {
+  "id": 407,
+  "slug": "member-login",
+  "parent": 0,
+  "link": "https://elespeculador.com/member-login/",
+  "title": "Inicio de sesión",
+  "modified": "2026-08-05T16:04:28",
+  "template": "",
+  "robots": {
+   "index": "noindex",
+   "follow": "nofollow"
+  },
+  "yoast_title": "Inicio de sesión - El especulador",
+  "canonical": null
+ },
+ {
+  "id": 361,
+  "slug": "iv-reminder-email-cron-job",
+  "parent": 0,
+  "link": "https://elespeculador.com/iv-reminder-email-cron-job/",
+  "title": "Reminder Email Cron Job",
+  "modified": "2026-01-31T21:00:55",
+  "template": "",
+  "robots": {
+   "index": "noindex",
+   "follow": "follow"
+  },
+  "yoast_title": "Reminder Email Cron Job - El especulador",
+  "canonical": null
+ },
+ {
+  "id": 338,
+  "slug": "trading-portfolio",
+  "parent": 0,
+  "link": "https://elespeculador.com/trading-portfolio/",
+  "title": "Portfolio",
+  "modified": "2020-04-10T02:43:56",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Portfolio - El especulador",
+  "canonical": "https://elespeculador.com/trading-portfolio/"
+ },
+ {
+  "id": 212,
+  "slug": "results",
+  "parent": 0,
+  "link": "https://elespeculador.com/results/",
+  "title": "Results",
+  "modified": "2026-08-17T13:01:48",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Results - El especulador",
+  "canonical": "https://elespeculador.com/results/"
+ },
+ {
+  "id": 194,
+  "slug": "privacy-policy",
+  "parent": 0,
+  "link": "https://elespeculador.com/privacy-policy/",
+  "title": "Privacy Policy",
+  "modified": "2020-02-22T20:30:48",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Privacy Policy - El especulador",
+  "canonical": "https://elespeculador.com/privacy-policy/"
+ },
+ {
+  "id": 192,
+  "slug": "cookie-policy",
+  "parent": 0,
+  "link": "https://elespeculador.com/cookie-policy/",
+  "title": "Cookie Policy",
+  "modified": "2026-01-31T21:02:44",
+  "template": "",
+  "robots": {
+   "index": "noindex",
+   "follow": "follow"
+  },
+  "yoast_title": "Cookie Policy - El especulador",
+  "canonical": null
+ },
+ {
+  "id": 138,
+  "slug": "terms-and-conditions",
+  "parent": 0,
+  "link": "https://elespeculador.com/terms-and-conditions/",
+  "title": "Terms and Conditions",
+  "modified": "2026-01-31T21:01:07",
+  "template": "",
+  "robots": {
+   "index": "noindex",
+   "follow": "follow"
+  },
+  "yoast_title": "Terms and Conditions - El especulador",
+  "canonical": null
+ },
+ {
+  "id": 26,
+  "slug": "contacto",
+  "parent": 0,
+  "link": "https://elespeculador.com/contacto/",
+  "title": "Contacto",
+  "modified": "2026-01-22T18:24:57",
+  "template": "",
+  "robots": {
+   "index": "index",
+   "follow": "follow",
+   "max-snippet": "max-snippet:-1",
+   "max-image-preview": "max-image-preview:large",
+   "max-video-preview": "max-video-preview:-1"
+  },
+  "yoast_title": "Contacto - El especulador",
+  "canonical": "https://elespeculador.com/contacto/"
+ }
+]
