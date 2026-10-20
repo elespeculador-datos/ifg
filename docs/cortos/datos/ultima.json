@@ -1,0 +1,101 @@
+{
+ "fecha_publicacion": "2026-10-19",
+ "generado": "2026-10-20T03:36:39+00:00",
+ "posiciones": 64,
+ "emisores": 32,
+ "cambios": 0,
+ "top": [
+  {
+   "isin": "ES0165386014",
+   "emisor": "SOLARIA ENERGIA Y MEDIOAMBIENTE, S.A.",
+   "tenedores": 8,
+   "suma_publicada_pct": 6.5,
+   "mayor_posicion_pct": 1.33,
+   "ultima_fecha_posicion": "2026-10-15",
+   "mayor_tenedor": "JPMorgan Asset Management (UK) Limited"
+  },
+  {
+   "isin": "ES0130960018",
+   "emisor": "ENAGAS, S.A.",
+   "tenedores": 6,
+   "suma_publicada_pct": 5.07,
+   "mayor_posicion_pct": 1.47,
+   "ultima_fecha_posicion": "2026-10-16",
+   "mayor_tenedor": "BlackRock Investment Management (UK) Limited"
+  },
+  {
+   "isin": "ES0178165017",
+   "emisor": "TECNICAS REUNIDAS, S.A.",
+   "tenedores": 4,
+   "suma_publicada_pct": 3.93,
+   "mayor_posicion_pct": 1.3,
+   "ultima_fecha_posicion": "2026-10-14",
+   "mayor_tenedor": "AKO Capital LLP"
+  },
+  {
+   "isin": "LU1048328220",
+   "emisor": "EDREAMS ODIGEO, S.A.",
+   "tenedores": 3,
+   "suma_publicada_pct": 3.12,
+   "mayor_posicion_pct": 1.47,
+   "ultima_fecha_posicion": "2026-10-16",
+   "mayor_tenedor": "Citadel Advisors LLC"
+  },
+  {
+   "isin": "ES0184262212",
+   "emisor": "VISCOFAN, S.A.",
+   "tenedores": 3,
+   "suma_publicada_pct": 2.55,
+   "mayor_posicion_pct": 1.24,
+   "ultima_fecha_posicion": "2026-10-14",
+   "mayor_tenedor": "AKO Capital LLP"
+  },
+  {
+   "isin": "ES0109260531",
+   "emisor": "AMPER, S.A.",
+   "tenedores": 3,
+   "suma_publicada_pct": 2.02,
+   "mayor_posicion_pct": 0.92,
+   "ultima_fecha_posicion": "2026-06-30",
+   "mayor_tenedor": "ActusRayPartners Limited"
+  },
+  {
+   "isin": "ES0171996087",
+   "emisor": "GRIFOLS, S.A.",
+   "tenedores": 1,
+   "suma_publicada_pct": 1.81,
+   "mayor_posicion_pct": 1.81,
+   "ultima_fecha_posicion": "2026-08-21",
+   "mayor_tenedor": "Kintbury Capital LLP"
+  },
+  {
+   "isin": "ES0182870214",
+   "emisor": "SACYR, S.A.",
+   "tenedores": 2,
+   "suma_publicada_pct": 1.79,
+   "mayor_posicion_pct": 1.08,
+   "ultima_fecha_posicion": "2026-10-16",
+   "mayor_tenedor": "Capital Fund Management SA"
+  },
+  {
+   "isin": "ES0157261019",
+   "emisor": "LABORATORIOS FARMACEUTICOS ROVI, S.A.",
+   "tenedores": 1,
+   "suma_publicada_pct": 1.51,
+   "mayor_posicion_pct": 1.51,
+   "ultima_fecha_posicion": "2026-07-24",
+   "mayor_tenedor": "JPMorgan Asset Management (UK) Limited"
+  },
+  {
+   "isin": "ES0132945017",
+   "emisor": "TUBACEX, S.A.",
+   "tenedores": 3,
+   "suma_publicada_pct": 1.5,
+   "mayor_posicion_pct": 0.5,
+   "ultima_fecha_posicion": "2026-10-14",
+   "mayor_tenedor": "WorldQuant, LLC"
+  }
+ ],
+ "fuente": "https://www.cnmv.es/DocPortal/Posiciones-Cortas/NetShortPositions.xls",
+ "licencia": "CC BY 4.0 · El Especulador a partir de datos de la CNMV"
+}
