@@ -3,7 +3,7 @@
 Cada día hábil, a las 17:10 UTC, el flujo `dividendos-diario` descarga de la API pública de BME los dividendos del mercado continuo (la API da el último año y los ya anunciados) y publica en `docs/dividendos/`:
 
 - `index.html`: los próximos dividendos con fecha ex, importe bruto, tipo y fecha de pago, lo repartido por cada empresa en los últimos doce meses y la rentabilidad por dividendo sobre el último cierre (las 15 mayores y las diez mayores del IBEX 35);
-- `datos/*.csv` y `ultima.json`: los mismos datos en abierto, con licencia CC BY 4.0;
+- `datos/*.csv` y `ultima.json`: los mismos datos en abierto, sin licencia abierta: los datos de origen son de BME y se rigen por sus condiciones; si se reutilizan, citar «El Especulador, a partir de datos de BME»;
 - `fragmento-wp.html`: las tablas entre `<!-- dividendos:inicio … -->` y `<!-- dividendos:fin -->`, que un escenario de Make copia en la página «Calendario de dividendos» de elespeculador.com.
 
 Como BME solo guarda un año, el script va acumulando el histórico en `docs/dividendos/datos/dividendos.csv`.
