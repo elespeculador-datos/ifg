@@ -65,6 +65,22 @@ CAJAS = [  # clave (igual que el id del panel en la plantilla de la web), títul
     ("opvs-ampliaciones", "OPVs y ampliaciones", "Ampliaciones de capital, colocaciones y salidas a bolsa."),
 ]
 VENTANA = {"resultados": 30, "dividendos": 10, "recompras": 45, "opvs-ampliaciones": 10}  # días para seguir en la misma operación
+DIAS_LISTADO = 365      # antigüedad máxima de lo que sale en las páginas de cada tipo
+# Páginas de elespeculador.com con el listado completo de cada tipo (shortcode espec_cnmv_listado) y texto del botón
+# que lleva a ellas desde cada recuadro. Con BOTONES = False el botón no se publica (páginas aún en borrador).
+BOTONES = False
+LISTADOS = {
+    "resultados": ("https://elespeculador.com/ibex-35/resultados/", "Ver todos los resultados"),
+    "dividendos": ("https://elespeculador.com/ibex-35/dividendos/", "Ver todos los dividendos"),
+    "recompras": ("https://elespeculador.com/ibex-35/recompras/", "Ver todas las recompras"),
+    "opvs-ampliaciones": ("https://elespeculador.com/ibex-35/ampliaciones-y-opvs/", "Ver todas las ampliaciones y OPVs"),
+}
+INTRO = {
+    "resultados": "Publicaciones de resultados y anuncios de la fecha en que se van a presentar, tal como las comunican a la CNMV las empresas del IBEX 35. Cuando una empresa anuncia la fecha y después publica las cuentas del mismo periodo, sale una sola línea con lo último.",
+    "dividendos": "Anuncios de dividendo comunicados a la CNMV por las empresas del IBEX 35, incluidos los dividendos flexibles (ampliaciones liberadas).",
+    "recompras": "Programas de recompra de acciones de las empresas del IBEX 35. Mientras dura un programa, la empresa informa cada semana de las compras que ha hecho: aquí sale una sola línea por programa, con el último informe y el número de comunicados.",
+    "opvs-ampliaciones": "Ampliaciones de capital, colocaciones de acciones y salidas a bolsa comunicadas a la CNMV por las empresas del IBEX 35.",
+}
 
 
 class DatosRaros(Exception):
@@ -284,8 +300,8 @@ def _corto(t: str, n: int = 190) -> str:
     return t[:n].rsplit(" ", 1)[0].rstrip(",.;:") + "…"
 
 
-def entradas(c: pd.DataFrame, caja: str, hoy: pd.Timestamp) -> list[dict]:
-    x = c[(c["caja"] == caja) & (pd.to_datetime(c["fecha"]) >= hoy - pd.Timedelta(days=DIAS_CAJA))]
+def entradas(c: pd.DataFrame, caja: str, hoy: pd.Timestamp, dias: int = DIAS_CAJA) -> list[dict]:
+    x = c[(c["caja"] == caja) & (pd.to_datetime(c["fecha"]) >= hoy - pd.Timedelta(days=dias))]
     out = []
     for gid, g in x.groupby("grupo", sort=False):
         g = g.sort_values("fecha", ascending=False)
@@ -325,8 +341,34 @@ def cajas_html(c: pd.DataFrame, hoy: pd.Timestamp, sello: str, inicio: pd.Timest
     for clave, titulo, desc in CAJAS:
         es = entradas(c, clave, hoy)[:POR_CAJA]
         cuerpo = "\n".join(articulo(r) for r in es) or f'<p class="efsec-item-excerpt">{_e(vacio(titulo, inicio, hoy))}</p>'
+        if BOTONES:
+            url, texto = LISTADOS[clave]
+            cuerpo += f'\n<p class="espec-ver-todo"><a class="efsec-item-link" href="{url}">{_e(texto)}</a></p>'
         bloques.append(f'<div data-caja="{clave}" data-desc="{_e(desc)}">\n{cuerpo}\n</div>')
     return f"<!-- cnmv:inicio {sello} -->\n" + "\n".join(bloques) + "\n<!-- cnmv:fin -->\n"
+
+
+def listado_html(c: pd.DataFrame, clave: str, titulo: str, hoy: pd.Timestamp, sello: str, inicio: pd.Timestamp) -> str:
+    """Listado completo de un tipo para su página de elespeculador.com: tabla sin imágenes; cada fila lleva la
+    empresa en data-empresa para que la página pueda filtrar por empresa."""
+    es = entradas(c, clave, hoy, DIAS_LISTADO)
+    filas = "\n".join(
+        f'<tr data-empresa="{_e(r["empresa"])}"><td>{_f(r["fecha"])}</td>'
+        f'<td><a href="{FICHAS}{r["ficha"]}/">{_e(r["empresa"])}</a></td><td>{_e(r["etiqueta"])}</td>'
+        f'<td>{_e(_corto(r["texto"], 300))}</td>'
+        f'<td><a href="{_e(r["enlace"])}" target="_blank" rel="noopener nofollow">CNMV</a>'
+        f'{" (" + str(r["n"]) + " comunicados)" if r["n"] > 1 else ""}</td></tr>' for r in es)
+    if not filas:
+        filas = f'<tr><td colspan="5">{_e(vacio(titulo, inicio, hoy))}</td></tr>'
+    desde = max(inicio, hoy - pd.Timedelta(days=DIAS_LISTADO))
+    return (f"<!-- cnmv-listado:inicio {clave} {sello} -->\n"
+            f'<p class="espec-cnmv-intro">{_e(INTRO[clave])}</p>\n'
+            f'<figure class="wp-block-table espec-cnmv-tabla"><table><thead><tr><th>Fecha</th><th>Empresa</th><th>Tipo</th>'
+            f'<th>Comunicado</th><th>Fuente</th></tr></thead><tbody>\n{filas}\n</tbody></table></figure>\n'
+            f'<p class="espec-cnmv-pie">Fuente: CNMV. Comunicados desde el {desde.strftime("%d/%m/%Y")}; se actualiza cada hora '
+            f'en días hábiles (última actualización: {_e(sello[8:10] + "/" + sello[5:7] + "/" + sello[:4] + " a las " + sello[11:])}). '
+            f'La clasificación es automática: el texto oficial de cada comunicado es el que publica la CNMV.</p>\n'
+            f"<!-- cnmv-listado:fin -->\n")
 
 
 def pagina(c: pd.DataFrame, hoy: pd.Timestamp, sello: str) -> str:
@@ -372,6 +414,10 @@ def escribir(h: pd.DataFrame, c: pd.DataFrame, nuevos: int, forzar: bool) -> boo
     c.to_csv(DATOS / "ibex35.csv", index=False)
     inicio = pd.Timestamp(pd.Timestamp(h["fecha"].min()).date())
     cajas = cajas_html(c, hoy, sello, inicio)
+    for clave, titulo, _ in CAJAS:
+        lst = listado_html(c, clave, titulo, hoy, sello, inicio)
+        assert "$" not in lst
+        (SALIDA / f"listado-{clave}.html").write_text(lst, encoding="utf-8")
     assert "$" not in cajas
     (SALIDA / "cajas.html").write_text(cajas, encoding="utf-8")
     (SALIDA / "index.html").write_text(pagina(c, hoy, sello), encoding="utf-8")
