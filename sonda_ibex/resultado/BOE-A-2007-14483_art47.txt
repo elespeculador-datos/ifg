@@ -1,8 +1,0 @@
-200 
- ok 
- Artículo 47. Condiciones para las compraventas forzosas. 
- 1. Quien hubiera formulado una oferta pública dirigida a la totalidad de los valores podrá, una vez liquidada la oferta, exigir a los restantes titulares de acciones u otros valores afectados por la oferta su venta forzosa a un precio equitativo. De igual forma, cualquiera de los titulares podrá exigir del oferente que le compre la totalidad de sus valores a dicho precio. 
- Los derechos citados quedarán condicionados a que en la fecha de liquidación de la oferta, se den las dos circunstancias siguientes: 
- a) Que el oferente sea titular de valores que representen al menos el 90 por 100 del capital con derecho de voto de la sociedad afectada. 
- b) Que la oferta pública previa hubiera sido aceptada por titulares de valores que representen al menos el 90 por 100 de los derechos de voto a los que se hubiera dirigido. 
- 2. Se considerará precio equitativo el correspondiente a la contraprestación de la oferta pública.

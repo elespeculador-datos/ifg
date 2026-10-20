@@ -1,9 +1,0 @@
-200 
- ok 
- Artículo 11. Excepciones a la oferta pública de exclusión. 
- No será precisa una oferta de exclusión en los siguientes supuestos: 
- a) Cuando se den las condiciones previstas en el artículo 47 para el ejercicio de las compraventas forzosas. 
- b) Cuando todos los titulares de los valores afectados acuerden por unanimidad la exclusión de negociación con renuncia a la venta de sus valores en régimen de oferta pública. 
- c) Cuando se produzca la extinción de la sociedad mediante alguna operación societaria en virtud de la cual los accionistas de la sociedad extinguida se conviertan en accionistas de otra sociedad cotizada. 
- d) Cuando se hubiera realizado con anterioridad una oferta pública de adquisición por la totalidad del capital de la sociedad afectada en la que se hubiera manifestado la intención de excluir las acciones de negociación y, además, se justifique el precio, según lo previsto en los apartados 5 y 6 del artículo 10 mediante un informe de valoración, y se facilite la venta de la totalidad de los valores mediante una orden de compra de dichos valores, al mismo precio que el de la oferta previa, durante al menos un mes en el semestre posterior a la finalización de la oferta precedente. 
- e) Cuando la Junta General de Accionistas y, en su caso, la Asamblea General de Obligacionistas, de la sociedad emisora de los valores a excluir, acuerde un procedimiento que a juicio de la Comisión Nacional del Mercado de Valores en virtud de lo establecido en el artículo 34.2 de la Ley 24/1988, de 28 de julio, del Mercado de Valores, sea equivalente a la oferta pública porque asegure la protección de los legítimos intereses de los titulares de valores afectados por la exclusión.

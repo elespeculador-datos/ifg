@@ -1,8 +1,0 @@
-200 
- ok 
- Artículo 110. Precio equitativo. 
- 1. Se entenderá que el precio es equitativo cuando, como mínimo, sea igual al precio más elevado que haya pagado o acordado el obligado a formular la oferta o las personas que actúen en concierto con él por los mismos valores durante un período de tiempo anterior a la oferta determinado reglamentariamente y en los términos que se establezcan. 
- 2. No obstante, la CNMV podrá modificar el precio así calculado en las circunstancias y según los criterios que se establezcan reglamentariamente. 
- Entre las mencionadas circunstancias se podrán incluir, entre otras, las siguientes: que el precio más elevado se haya fijado por acuerdo entre el comprador y el vendedor; que los precios de mercado de los valores en cuestión hayan sido manipulados; que los precios de mercado, en general, o determinados precios, en particular, se hayan visto afectados por acontecimientos excepcionales; que se pretenda favorecer el saneamiento de la sociedad. 
- Entre los referidos criterios podrán incluirse, entre otros, el valor medio del mercado en un determinado periodo; el valor liquidativo de la sociedad u otros criterios de valoración objetivos generalmente utilizados. 
- 3. En el supuesto de modificación del precio a que se refiere el apartado anterior, la CNMV publicará en su página web la decisión de que la oferta se formule a un precio distinto del equitativo. Dicha decisión deberá ser motivada.
