@@ -1,6 +1,6 @@
 <?php
-// Copia del fragmento de Code Snippets «ESPEC: listados completos de comunicados de la CNMV (shortcode espec_cnmv_listado)».
-// La versión que se ejecuta es la de WordPress; esta es solo de referencia. Ámbito: global (shortcode).
+// Copia del fragmento de Code Snippets n.º 42 «ESPEC: listados completos de comunicados de la CNMV (shortcode espec_cnmv_listado)».
+// La versión que se ejecuta es la de WordPress; esta es solo de referencia. Ámbito: front-end.
 /**
  * Shortcode [espec_cnmv_listado tipo="resultados|dividendos|recompras|opvs-ampliaciones"]
  * Listado completo de los comunicados a la CNMV de un tipo (empresas del IBEX 35), sin imágenes y con filtro por empresa.
@@ -38,6 +38,8 @@ add_shortcode('espec_cnmv_listado', function ($atts) {
 	}
 	$permitidas = array(
 		'p'      => array('class' => true),
+		'h2'     => array(),
+		'strong' => array(),
 		'figure' => array('class' => true),
 		'table'  => array(),
 		'thead'  => array(),
@@ -47,9 +49,17 @@ add_shortcode('espec_cnmv_listado', function ($atts) {
 		'td'     => array('colspan' => true),
 		'a'      => array('href' => true, 'target' => true, 'rel' => true),
 	);
+	$extra = '';
+	if ($a['tipo'] === 'dividendos') {
+		$cal = get_page_by_path('calendario-dividendos');
+		if ($cal && $cal->post_status === 'publish') {
+			$extra = '<p class="espec-cnmv-intro" data-calendario><a href="' . esc_url(get_permalink($cal)) . '">Calendario de dividendos de toda la bolsa española</a>: fechas, importes y rentabilidad de todas las cotizadas, no solo del IBEX 35.</p>';
+		}
+	}
 	$id  = 'espec-cnmv-' . $a['tipo'];
 	$out = '<div class="espec-cnmv-listado" id="' . esc_attr($id) . '">'
 		. '<p class="espec-cnmv-filtro"><label>Empresa <select data-filtro><option value="">Todas</option></select></label></p>'
+		. $extra
 		. wp_kses($html, $permitidas)
 		. '</div>';
 	$out .= '<style>
@@ -59,14 +69,22 @@ add_shortcode('espec_cnmv_listado', function ($atts) {
 .espec-cnmv-listado td:first-child{white-space:nowrap}
 .espec-cnmv-filtro select{margin-left:8px;padding:4px 8px;min-width:180px}
 .espec-cnmv-intro,.espec-cnmv-pie{max-width:75ch}
+.espec-cnmv-nav{font-size:14px;margin-bottom:18px}
+.espec-cnmv-listado h2{margin-top:28px}
 .espec-cnmv-pie{font-size:13px;opacity:.75;margin-top:14px}
-@media (max-width:640px){.espec-cnmv-listado th:nth-child(3),.espec-cnmv-listado td:nth-child(3){display:none}}
+@media (max-width:640px){.espec-cnmv-tabla th:nth-child(3),.espec-cnmv-tabla td:nth-child(3){display:none}}
 </style>';
 	$out .= '<script>
 (function () {
 	var caja = document.getElementById(' . wp_json_encode($id) . ');
 	if (!caja) { return; }
 	var sel = caja.querySelector("select[data-filtro]");
+	var nav = caja.querySelector(".espec-cnmv-nav");
+	if (nav) {
+		var cal = caja.querySelector("[data-calendario]");
+		if (cal) { nav.parentNode.insertBefore(cal, nav.nextSibling); }
+		if (sel) { nav.parentNode.insertBefore(sel.parentNode.parentNode, nav.nextSibling); }
+	}
 	var filas = caja.querySelectorAll("tr[data-empresa]");
 	if (!sel || !filas.length) { if (sel) { sel.parentNode.parentNode.style.display = "none"; } return; }
 	var vistos = {}, nombres = [];
