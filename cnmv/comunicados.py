@@ -313,12 +313,17 @@ def articulo(r: dict) -> str:
             f'</article>')
 
 
-def cajas_html(c: pd.DataFrame, hoy: pd.Timestamp, sello: str) -> str:
+def vacio(titulo: str, inicio: pd.Timestamp, hoy: pd.Timestamp) -> str:
+    if hoy - inicio >= pd.Timedelta(days=DIAS_CAJA):
+        return f"Ninguna empresa del IBEX 35 ha comunicado a la CNMV {titulo.lower()} en los últimos {DIAS_CAJA} días."
+    return f"Sin comunicados de {titulo.lower()} de empresas del IBEX 35 desde el {inicio.strftime('%d/%m/%Y')}, cuando empieza este registro."
+
+
+def cajas_html(c: pd.DataFrame, hoy: pd.Timestamp, sello: str, inicio: pd.Timestamp) -> str:
     bloques = []
     for clave, titulo, desc in CAJAS:
         es = entradas(c, clave, hoy)[:POR_CAJA]
-        cuerpo = "\n".join(articulo(r) for r in es) or \
-            f'<p class="efsec-item-excerpt">Ninguna empresa del IBEX 35 ha comunicado a la CNMV {titulo.lower()} en los últimos {DIAS_CAJA} días.</p>'
+        cuerpo = "\n".join(articulo(r) for r in es) or f'<p class="efsec-item-excerpt">{_e(vacio(titulo, inicio, hoy))}</p>'
         bloques.append(f'<div data-caja="{clave}" data-desc="{_e(desc)}">\n{cuerpo}\n</div>')
     return f"<!-- cnmv:inicio {sello} -->\n" + "\n".join(bloques) + "\n<!-- cnmv:fin -->\n"
 
@@ -364,7 +369,8 @@ def escribir(h: pd.DataFrame, c: pd.DataFrame, nuevos: int, forzar: bool) -> boo
     DATOS.mkdir(parents=True, exist_ok=True)
     h.to_csv(HISTORICO, index=False)
     c.to_csv(DATOS / "ibex35.csv", index=False)
-    cajas = cajas_html(c, hoy, sello)
+    inicio = pd.Timestamp(pd.Timestamp(h["fecha"].min()).date())
+    cajas = cajas_html(c, hoy, sello, inicio)
     assert "$" not in cajas
     (SALIDA / "cajas.html").write_text(cajas, encoding="utf-8")
     (SALIDA / "index.html").write_text(pagina(c, hoy, sello), encoding="utf-8")
