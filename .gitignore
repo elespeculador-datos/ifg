@@ -10,3 +10,7 @@ salidas/
 entrada/
 *.png
 !docs/*.png
+
+# Marcador interno que publicar_diario.py deja para el paso del flujo que
+# abre la incidencia por deriva. Es una señal de una ejecución, no un dato.
+aviso_deriva.json

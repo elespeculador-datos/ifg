@@ -70,6 +70,74 @@ jobs:
           git commit -m "IFG $(date -u +%Y-%m-%d)"
           git push
 
+      # LA PUBLICACION PUEDE SALIR BIEN Y AUN ASI HABER PASADO ALGO.
+      # El 20 de octubre de 2026 el recalculo se separo 10,14 puntos del valor
+      # cerrado del dia 14 -la mayor deriva medida- y el flujo no dijo nada,
+      # porque no fallo: publico a su hora un valor correcto. Lo que se movio
+      # fue el pasado. La cifra quedo en revisiones.csv, que nadie abre.
+      #
+      # Este paso NO detiene nada ni corrige nada: una fila cerrada es
+      # inmutable. Solo convierte el marcador que deja publicar_diario.py en
+      # una incidencia, con el mismo patron que el aviso de fallo: una sola
+      # abierta, comentada mientras dure, y cerrada sola cuando se normaliza.
+      #
+      # Si no hay marcador, la ejecucion no llego a medir (por ejemplo, el
+      # segundo cron del dia, que sale antes de calcular). Ausencia de
+      # marcador NO es ausencia de deriva, asi que no se cierra nada.
+      - name: Avisar si la deriva sobre lo ya cerrado merece mirarse
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ ! -f aviso_deriva.json ]; then
+            echo "Sin marcador: esta ejecucion no ha medido deriva."
+            exit 0
+          fi
+
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=deriva-alta" \
+            --jq '.[0].number // empty' 2>/dev/null || true)
+
+          if [ "$(jq -r '.avisar' aviso_deriva.json)" != "true" ]; then
+            if [ -n "$abierta" ]; then
+              gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" \
+                -f body="Deriva normalizada el $(date -u +%Y-%m-%d): $(jq -r '.deriva_maxima' aviso_deriva.json) puntos, sin tramos contradichos. Se cierra." >/dev/null
+              gh api --method PATCH "repos/${{ github.repository }}/issues/$abierta" \
+                -f state=closed >/dev/null
+              echo "Cerrada la incidencia de deriva #$abierta"
+            fi
+            exit 0
+          fi
+
+          cuerpo=$(jq -r '
+            "La ejecucion del \(.generado) mide una deriva de \(.deriva_maxima) puntos sobre filas YA CERRADAS (peor: \(.fecha_peor)), con \(.sesiones_movidas) sesiones movidas. Version \(.version)."
+            + "\n\nLa serie publicada NO se ha tocado: la guardia de estabilidad sigue en verde y un dato cerrado es inmutable. Lo que se avisa es que el recalculo de hoy ya no coincide con lo que se publico."
+            + (if .es_record then "\n\n**Deriva sin precedentes en esta version.** Maximo anterior: \(.record_previo // "ninguno")." else "" end)
+            + (if (.cruces_de_tramo | length) > 0 then
+                 "\n\n**Hay tramos publicados que el recalculo contradice** (esto es lo que importa editorialmente, porque el indice se cita por su tramo):\n\n| Fecha | Publicado | Recalculado |\n|---|---|---|\n"
+                 + ([.cruces_de_tramo[] | "| \(.fecha) | \(.valor_publicado) \(.tramo_publicado) | \(.valor_recalculado) \(.tramo_recalculado) |"] | join("\n"))
+               else "\n\nNingun tramo publicado cambia de etiqueta." end)
+            + "\n\nQue mirar, por orden de probabilidad:\n1. el GPR de la Fed revisa sus ultimos dias en cada entrega de los lunes, y ademas llega con unos seis dias de retraso: compara datos/gpr.csv entre dos ejecuciones;\n2. alinear() arrastra un componente hasta tres sesiones y ese arrastre cuenta como cobertura disponible, asi que la fila cierra como definitiva sobre un dato prestado;\n3. GDELT rellena huecos hacia atras (backfill_gdelt.py).\n\nNO se republica por esto sin decision expresa: republicar sustituye valores ya publicados. Este aviso solo informa."
+            ' aviso_deriva.json)
+          cuerpo="$cuerpo
+
+          Registro: $EJECUCION"
+
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" \
+              -f body="$cuerpo" >/dev/null
+            echo "Comentada la incidencia de deriva abierta #$abierta"
+          else
+            gh api --method POST "repos/${{ github.repository }}/labels" \
+              -f name=deriva-alta -f color=d93f0b \
+              -f description="El recalculo se separa de valores ya cerrados" >/dev/null 2>&1 || true
+            gh api --method POST "repos/${{ github.repository }}/issues" \
+              -f title="Deriva sobre filas cerradas el $(date -u +%Y-%m-%d)" \
+              -f body="$cuerpo" \
+              -f 'labels[]=deriva-alta' >/dev/null
+            echo "Abierta una incidencia de deriva"
+          fi
+
       # UN INDICE DIARIO QUE DEJA DE PUBLICARSE EN SILENCIO ES EL PEOR FALLO
       # QUE PUEDE TENER. El requisito 5 del proyecto es puntualidad, y la
       # puntualidad no se demuestra: se vigila. Un "::error::" en el registro
