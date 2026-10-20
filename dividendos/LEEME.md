@@ -16,5 +16,5 @@ Prueba local: `python dividendos/calendario.py --local respuesta_bme.json`.
 
 - Es lo pagado por acción con fecha ex en los últimos doce meses dividido entre el último cierre de la ficha de BME (`ShareDetailsInfo`). La «ordinaria», que ordena las tablas, no cuenta los dividendos extraordinarios; los flexibles cuentan por el importe para quien elige efectivo.
 - Solo se calcula si el cierre es de los últimos diez días y en la misma moneda que el dividendo (las acciones que pagan en dos monedas se quedan sin dato). Si las fichas de BME no responden, el calendario se publica igual, sin la rentabilidad.
-- La tabla del IBEX 35 usa `dividendos/ibex35.csv`. **Hay que actualizarlo tras cada revisión del Comité Asesor Técnico** y mover la fecha `IBEX35_VALIDA_HASTA` de `calendario.py`; pasada esa fecha, la tabla del IBEX deja de publicarse (nunca sale con una composición vieja).
+- La tabla del IBEX 35 toma la composición de BME (lista de cotizadas del SIBE, campo «indices») si da exactamente 35 valores. Si BME no responde o no cuadra, usa `dividendos/ibex35.csv` mientras no pase `IBEX35_VALIDA_HASTA` de `calendario.py`; pasada esa fecha, la tabla del IBEX deja de publicarse (nunca sale con una composición vieja). Si la de BME y el fichero no coinciden, el registro del flujo lo avisa: conviene actualizar el fichero tras cada revisión del Comité Asesor Técnico.
 
