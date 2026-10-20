@@ -1,198 +1,74 @@
 {
- "clientlib-site.min.ACSHASH617b9eedf49978": {
-  "status": 200,
-  "bytes": 81788,
-  "rutas": [],
-  "contexto": []
+ "LastHist_sin": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/LastHistoricalSharesPrices?tradingSystem=SIBE",
+  "status": 400,
+  "bytes": 242,
+  "muestra": "{\"type\":\"https://tools.ietf.org/html/rfc9110#section-15.5.1\",\"title\":\"One or more validation errors occurred.\",\"status\":400,\"errors\":{\"ISIN\":[\"The ISIN field is required.\"]},\"traceId\":\"00-0672a11c7d0fe675d504669c5f446cdf-7c4d9e0a0286e8e7-00\"}"
  },
- "dynamic/index-ticker": {
+ "LastHist_isin": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/LastHistoricalSharesPrices?ISIN=ES0113900J37",
   "status": 200,
-  "bytes": 70271,
-  "rutas": [
-   "EQ/Prices"
-  ],
-  "contexto": [
-   "=0,e)})}var X=function(e){return e[e.UNDEFINED=0]=`UNDEFINED`,e[e.UP=1]=`UP`,e[e.DOWN=2]=`DOWN`,e[e.EQUAL=3]=`EQUAL`,e}({}),Z={id:`pricesEqHub`,url:`v1/SignalR/EQ/Prices`,invoke:{GetIntradayIndexChartData:async function(e){return await Y(`GetIntradayIndexChartData`,e,Z.id)},GetSessionData:async function(e){return await Y(`GetSessionData`,e,Z.id)},ShareSearch:async function(e){return awa"
-  ]
+  "bytes": 661,
+  "muestra": "{\"details\":{\"name\":\"BANCO SANTANDER\",\"market\":\"02\",\"tradingSystem\":\"SIBE\",\"ticker\":\"SAN\",\"isin\":\"ES0113900J37\"},\"totalResults\":2,\"params\":{\"type\":\"V\",\"isin\":\"ES0113900J37\"},\"hasMoreResults\":false,\"data\":[{\"date\":\"20261020\",\"close\":0.0000,\"reference\":11.7720,\"volume\":9316339,\"turnover\":108671780.29,\"last\":11.6700,\"high\":11.7600,\"low\":11.5800,\"average\":11.6641,\"previous\":11.7720,\"facMult\":0,\"facDivi\":0,\"diff\":0,\"tendency\":3},{\"date\":\"20261019\",\"close\":11.7720,\"reference\":12.0340,\"volume\":20529057,\"turnover\":241944184.48,\"last\":11.7720,\"high\":11.9100,\"low\":11.6960,\"average\":11.7853,\"previous\":12.0340,\"facMult\":0,\"facDivi\":0,\"diff\":-0.021772,\"tendency\":2}]}"
  },
- "dynamic/market-activity": {
-  "status": 200,
-  "bytes": 145444,
-  "rutas": [
-   "EQ/Prices"
-  ],
-  "contexto": [
-   "turn`tendency--green`;case 2:return`tendency--red`;default:return``}return t>0?`tendency--green`:t<0?`tendency--red`:``}var J={id:`pricesEqHub`,url:`v1/SignalR/EQ/Prices`,invoke:{GetIntradayIndexChartData:async function(e){return await Ln(`GetIntradayIndexChartData`,e,J.id)},GetSessionData:async function(e){return await Ln(`GetSessionData`,e,J.id)},ShareSearch:async function(e){return a"
-  ]
+ "BasicData_isin": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/CompanyData/BasicData?isin=ES0113900J37",
+  "status": 400,
+  "bytes": 254,
+  "muestra": "{\"type\":\"https://tools.ietf.org/html/rfc9110#section-15.5.1\",\"title\":\"One or more validation errors occurred.\",\"status\":400,\"errors\":{\"CompanyKey\":[\"The CompanyKey field is required.\"]},\"traceId\":\"00-d17ff98eda1ad748de885426e0166c9d-c6be2069c3dfd300-00\"}"
  },
- "dynamic/share-details": {
+ "BasicData_key": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/CompanyData/BasicData?companyKey=13900",
   "status": 200,
-  "bytes": 472580,
-  "rutas": [
-   "EQ/CompanyData/AllData",
-   "EQ/CompanyData/BasicData",
-   "EQ/CompanyData/Profile",
-   "EQ/CompanySearch",
-   "EQ/CorporateActions",
-   "EQ/CorporateActions/CapitalIncreases",
-   "EQ/CorporateActions/Delistings",
-   "EQ/CorporateActions/Dividends",
-   "EQ/CorporateActions/Mergers",
-   "EQ/CorporateActions/NewListings",
-   "EQ/CorporateActions/OtherPayments",
-   "EQ/CorporateActions/PublicOfferings",
-   "EQ/CorporateActions/Splits",
-   "EQ/CorporateActions/TakeoverBids",
-   "EQ/EQIndexIntraday",
-   "EQ/EQTrades",
-   "EQ/HistoricalIndicesPrices",
-   "EQ/HistoricalSectorsPrices",
-   "EQ/HistoricalSharesPrices",
-   "EQ/IndicesGroup",
-   "EQ/IndicesGroupAllLang",
-   "EQ/LastHistoricalSharesPrices",
-   "EQ/LastPeriods",
-   "EQ/LastRelevantFacts",
-   "EQ/ListedCompanies",
-   "EQ/MtfEquity/Documents",
-   "EQ/MtfEquity/FinancialInformation",
-   "EQ/MtfEquity/HistoricalNetAssetValues",
-   "EQ/MtfEquity/LastPublishedDocumentDate",
-   "EQ/OtherIssuerShares",
-   "EQ/Prices",
-   "EQ/RelevantFacts",
-   "EQ/Sectors",
-   "EQ/SectorsAllLang",
-   "EQ/ShareDetailsInfo",
-   "EQ/Subsectors",
-   "EQ/SubsectorsAll"
-  ],
-  "contexto": [
-   "persisted`,REGISTERED_ADVISORS:`mtfEquityRegisteredAdvisors_persisted`,LIQUIDITY_PROVIDERS:`mtfEquityLiquidityProviderList_persisted`},EQ:{COMPANY_ALL_DATA:`v1/EQ/CompanyData/AllData`,COMPANY_BASIC_DATA:`v1/EQ/CompanyData/BasicData`,COMPANY_PROFILE:`v1/EQ/CompanyData/Profile`,COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ",
-   "eredAdvisors_persisted`,LIQUIDITY_PROVIDERS:`mtfEquityLiquidityProviderList_persisted`},EQ:{COMPANY_ALL_DATA:`v1/EQ/CompanyData/AllData`,COMPANY_BASIC_DATA:`v1/EQ/CompanyData/BasicData`,COMPANY_PROFILE:`v1/EQ/CompanyData/Profile`,COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/Hi",
-   "tfEquityLiquidityProviderList_persisted`},EQ:{COMPANY_ALL_DATA:`v1/EQ/CompanyData/AllData`,COMPANY_BASIC_DATA:`v1/EQ/CompanyData/BasicData`,COMPANY_PROFILE:`v1/EQ/CompanyData/Profile`,COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/",
-   "Q:{COMPANY_ALL_DATA:`v1/EQ/CompanyData/AllData`,COMPANY_BASIC_DATA:`v1/EQ/CompanyData/BasicData`,COMPANY_PROFILE:`v1/EQ/CompanyData/Profile`,COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/",
-   "Data`,COMPANY_BASIC_DATA:`v1/EQ/CompanyData/BasicData`,COMPANY_PROFILE:`v1/EQ/CompanyData/Profile`,COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/",
-   ",COMPANY_PROFILE:`v1/EQ/CompanyData/Profile`,COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`",
-   ",COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/E",
-   "PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompa",
-   "INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/Ot",
-   "ORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LA",
-   "ES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/",
-   "_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v",
-   "ROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`",
-   "g`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subs",
-   "toricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/Subsect",
-   "astPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/Corp",
-   "Q/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL",
-   ":`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalInc",
-   "`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateAction",
-   "FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1",
-   "CTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_ME",
-   "_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateAc",
-   "Q/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTIN",
-   "areDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTH",
-   "TORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PU",
-   "`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOffe",
-   "ASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOfferings`,CA_SPLITS:`v1/EQ/CorporateActions/Split",
-   "_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOfferings`,CA_SPLITS:`v1/EQ/CorporateActions/Splits`,CA_TAKEOVERBIDS:`v1/EQ/CorporateActions/Takeov",
-   "DENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOfferings`,CA_SPLITS:`v1/EQ/CorporateActions/Splits`,CA_TAKEOVERBIDS:`v1/EQ/CorporateActions/TakeoverBids`,MTF_COMPANY_ALL_DATA:`mtfEquityCompanies_persis",
-   "CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOfferings`,CA_SPLITS:`v1/EQ/CorporateActions/Splits`,CA_TAKEOVERBIDS:`v1/EQ/CorporateActions/TakeoverBids`,MTF_COMPANY_ALL_DATA:`mtfEquityCompanies_persisted`,MTF_COMPANY_FILTERED:`mtfEquityCompaniesFilteredByCode",
-   "rporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOfferings`,CA_SPLITS:`v1/EQ/CorporateActions/Splits`,CA_TAKEOVERBIDS:`v1/EQ/CorporateActions/TakeoverBids`,MTF_COMPANY_ALL_DATA:`mtfEquityCompanies_persisted`,MTF_COMPANY_FILTERED:`mtfEquityCompaniesFilteredByCode_persisted`,MTF_DOCUMENTS:`v1/EQ/MtfEquity/Document",
-   "1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOfferings`,CA_SPLITS:`v1/EQ/CorporateActions/Splits`,CA_TAKEOVERBIDS:`v1/EQ/CorporateActions/TakeoverBids`,MTF_COMPANY_ALL_DATA:`mtfEquityCompanies_persisted`,MTF_COMPANY_FILTERED:`mtfEquityCompaniesFilteredByCode_persisted`,MTF_DOCUMENTS:`v1/EQ/MtfEquity/Documents`,MTF_FINANCIAL_INFORMATION:`v1/EQ/MtfEquity/Fi",
-   "teActions/TakeoverBids`,MTF_COMPANY_ALL_DATA:`mtfEquityCompanies_persisted`,MTF_COMPANY_FILTERED:`mtfEquityCompaniesFilteredByCode_persisted`,MTF_DOCUMENTS:`v1/EQ/MtfEquity/Documents`,MTF_FINANCIAL_INFORMATION:`v1/EQ/MtfEquity/FinancialInformation`,MTF_HISTORICAL_NET_ASSET_VALUES:`v1/EQ/MtfEquity/HistoricalNetAssetValues`,MTF_LAST_PUBLISHED_DOCUMENT_DATE:`v1/EQ/MtfEquity/LastPublishedDocum",
-   "yCompanies_persisted`,MTF_COMPANY_FILTERED:`mtfEquityCompaniesFilteredByCode_persisted`,MTF_DOCUMENTS:`v1/EQ/MtfEquity/Documents`,MTF_FINANCIAL_INFORMATION:`v1/EQ/MtfEquity/FinancialInformation`,MTF_HISTORICAL_NET_ASSET_VALUES:`v1/EQ/MtfEquity/HistoricalNetAssetValues`,MTF_LAST_PUBLISHED_DOCUMENT_DATE:`v1/EQ/MtfEquity/LastPublishedDocumentDate`,LATIBEX_SECURITIES:`latibexSecurityList_persi",
-   "yCode_persisted`,MTF_DOCUMENTS:`v1/EQ/MtfEquity/Documents`,MTF_FINANCIAL_INFORMATION:`v1/EQ/MtfEquity/FinancialInformation`,MTF_HISTORICAL_NET_ASSET_VALUES:`v1/EQ/MtfEquity/HistoricalNetAssetValues`,MTF_LAST_PUBLISHED_DOCUMENT_DATE:`v1/EQ/MtfEquity/LastPublishedDocumentDate`,LATIBEX_SECURITIES:`latibexSecurityList_persisted`,LATIBEX_COMPANY_FILTERED:`latibexCompaniesFilteredByCode_persiste",
-   "ORMATION:`v1/EQ/MtfEquity/FinancialInformation`,MTF_HISTORICAL_NET_ASSET_VALUES:`v1/EQ/MtfEquity/HistoricalNetAssetValues`,MTF_LAST_PUBLISHED_DOCUMENT_DATE:`v1/EQ/MtfEquity/LastPublishedDocumentDate`,LATIBEX_SECURITIES:`latibexSecurityList_persisted`,LATIBEX_COMPANY_FILTERED:`latibexCompaniesFilteredByCode_persisted`,LATIBEX_SECURITIES_FILTERED:`latibexSecurityListFilteredByCompanyCode_per",
-   "urn`tendency--green`;case 2:return`tendency--red`;default:return``}return t>0?`tendency--green`:t<0?`tendency--red`:``}var Sa={id:`pricesEqHub`,url:`v1/SignalR/EQ/Prices`,invoke:{GetIntradayIndexChartData:async function(e){return await ha(`GetIntradayIndexChartData`,e,Sa.id)},GetSessionData:async function(e){return await ha(`GetSessionData`,e,Sa.id)},ShareSearch:async function(e){return"
-  ]
+  "bytes": 151,
+  "muestra": "{\"companyKey\":\"13900\",\"mainShareISIN\":\"ES0113900J37\",\"name\":\"BANCO SANTANDER, S.A.\",\"shareName\":\"BANCO SANTANDER\",\"listed\":true,\"tradingSystem\":\"SIBE\"}"
  },
- "dynamic/shares-explorer": {
+ "AllData_key": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/CompanyData/AllData?companyKey=13900",
   "status": 200,
-  "bytes": 144171,
-  "rutas": [
-   "EQ/CompanyData/AllData",
-   "EQ/CompanyData/BasicData",
-   "EQ/CompanyData/Profile",
-   "EQ/CompanySearch",
-   "EQ/CorporateActions",
-   "EQ/CorporateActions/CapitalIncreases",
-   "EQ/CorporateActions/Delistings",
-   "EQ/CorporateActions/Dividends",
-   "EQ/CorporateActions/Mergers",
-   "EQ/CorporateActions/NewListings",
-   "EQ/CorporateActions/OtherPayments",
-   "EQ/CorporateActions/PublicOfferings",
-   "EQ/CorporateActions/Splits",
-   "EQ/CorporateActions/TakeoverBids",
-   "EQ/EQIndexIntraday",
-   "EQ/EQTrades",
-   "EQ/HistoricalIndicesPrices",
-   "EQ/HistoricalSectorsPrices",
-   "EQ/HistoricalSharesPrices",
-   "EQ/IndicesGroup",
-   "EQ/IndicesGroupAllLang",
-   "EQ/LastHistoricalSharesPrices",
-   "EQ/LastPeriods",
-   "EQ/LastRelevantFacts",
-   "EQ/ListedCompanies",
-   "EQ/MtfEquity/Documents",
-   "EQ/MtfEquity/FinancialInformation",
-   "EQ/MtfEquity/HistoricalNetAssetValues",
-   "EQ/MtfEquity/LastPublishedDocumentDate",
-   "EQ/OtherIssuerShares",
-   "EQ/Prices",
-   "EQ/RelevantFacts",
-   "EQ/Sectors",
-   "EQ/SectorsAllLang",
-   "EQ/ShareDetailsInfo",
-   "EQ/Subsectors",
-   "EQ/SubsectorsAll"
-  ],
-  "contexto": [
-   "persisted`,REGISTERED_ADVISORS:`mtfEquityRegisteredAdvisors_persisted`,LIQUIDITY_PROVIDERS:`mtfEquityLiquidityProviderList_persisted`},EQ:{COMPANY_ALL_DATA:`v1/EQ/CompanyData/AllData`,COMPANY_BASIC_DATA:`v1/EQ/CompanyData/BasicData`,COMPANY_PROFILE:`v1/EQ/CompanyData/Profile`,COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ",
-   "eredAdvisors_persisted`,LIQUIDITY_PROVIDERS:`mtfEquityLiquidityProviderList_persisted`},EQ:{COMPANY_ALL_DATA:`v1/EQ/CompanyData/AllData`,COMPANY_BASIC_DATA:`v1/EQ/CompanyData/BasicData`,COMPANY_PROFILE:`v1/EQ/CompanyData/Profile`,COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/Hi",
-   "tfEquityLiquidityProviderList_persisted`},EQ:{COMPANY_ALL_DATA:`v1/EQ/CompanyData/AllData`,COMPANY_BASIC_DATA:`v1/EQ/CompanyData/BasicData`,COMPANY_PROFILE:`v1/EQ/CompanyData/Profile`,COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/",
-   "Q:{COMPANY_ALL_DATA:`v1/EQ/CompanyData/AllData`,COMPANY_BASIC_DATA:`v1/EQ/CompanyData/BasicData`,COMPANY_PROFILE:`v1/EQ/CompanyData/Profile`,COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/",
-   "Data`,COMPANY_BASIC_DATA:`v1/EQ/CompanyData/BasicData`,COMPANY_PROFILE:`v1/EQ/CompanyData/Profile`,COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/",
-   ",COMPANY_PROFILE:`v1/EQ/CompanyData/Profile`,COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`",
-   ",COMPANY_SEARCH:`v1/EQ/CompanySearch`,HIST_INDICES_PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/E",
-   "PRICES:`v1/EQ/HistoricalIndicesPrices`,INDEX_INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompa",
-   "INTRADAY_PRICES:`v1/EQ/EQIndexIntraday`,HIST_SECTORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/Ot",
-   "ORS_PRICES:`v1/EQ/HistoricalSectorsPrices`,HIST_SHARES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LA",
-   "ES_PRICES:`v1/EQ/HistoricalSharesPrices`,INDICES_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/",
-   "_GROUP:`v1/EQ/IndicesGroup`,INDICES_GROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v",
-   "ROUP_ALL_LANGUAGES:`v1/EQ/IndicesGroupAllLang`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`",
-   "g`,LAST_HIST_SHARES_PRICES:`v1/EQ/LastHistoricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subs",
-   "toricalSharesPrices`,LAST_PERIODS:`v1/EQ/LastPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/Subsect",
-   "astPeriods`,LISTED_COMPANIES:`v1/EQ/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/Corp",
-   "Q/ListedCompanies`,OTHER_ISSUER_SHARES:`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL",
-   ":`v1/EQ/OtherIssuerShares`,RELEVANT_FACTS:`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalInc",
-   "`v1/EQ/RelevantFacts`,LAST_RELEVANT_FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateAction",
-   "FACTS:`v1/EQ/LastRelevantFacts`,SECTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1",
-   "CTORS:`v1/EQ/Sectors`,SECTORS_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_ME",
-   "_ALL_LANGUAGES:`v1/EQ/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateAc",
-   "Q/SectorsAllLang`,SHARE_DETAILS_INFO:`v1/EQ/ShareDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTIN",
-   "areDetailsInfo`,SUBSECTORS:`v1/EQ/Subsectors`,ALL_SUBSECTORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTH",
-   "TORS:`v1/EQ/SubsectorsAll`,TRADES:`v1/EQ/EQTrades`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PU",
-   "`,CA:`v1/EQ/CorporateActions`,CA_CAPITAL_INCREASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOffe",
-   "ASES:`v1/EQ/CorporateActions/CapitalIncreases`,CA_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOfferings`,CA_SPLITS:`v1/EQ/CorporateActions/Split",
-   "_DELISTINGS:`v1/EQ/CorporateActions/Delistings`,CA_DIVIDENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOfferings`,CA_SPLITS:`v1/EQ/CorporateActions/Splits`,CA_TAKEOVERBIDS:`v1/EQ/CorporateActions/Takeov",
-   "DENDS:`v1/EQ/CorporateActions/Dividends`,CA_MERGERS:`v1/EQ/CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOfferings`,CA_SPLITS:`v1/EQ/CorporateActions/Splits`,CA_TAKEOVERBIDS:`v1/EQ/CorporateActions/TakeoverBids`,MTF_COMPANY_ALL_DATA:`mtfEquityCompanies_persis",
-   "CorporateActions/Mergers`,CA_NEW_LISTINGS:`v1/EQ/CorporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOfferings`,CA_SPLITS:`v1/EQ/CorporateActions/Splits`,CA_TAKEOVERBIDS:`v1/EQ/CorporateActions/TakeoverBids`,MTF_COMPANY_ALL_DATA:`mtfEquityCompanies_persisted`,MTF_COMPANY_FILTERED:`mtfEquityCompaniesFilteredByCode",
-   "rporateActions/NewListings`,CA_OTHER_PAYMENTS:`v1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOfferings`,CA_SPLITS:`v1/EQ/CorporateActions/Splits`,CA_TAKEOVERBIDS:`v1/EQ/CorporateActions/TakeoverBids`,MTF_COMPANY_ALL_DATA:`mtfEquityCompanies_persisted`,MTF_COMPANY_FILTERED:`mtfEquityCompaniesFilteredByCode_persisted`,MTF_DOCUMENTS:`v1/EQ/MtfEquity/Document",
-   "1/EQ/CorporateActions/OtherPayments`,CA_PUBLIC_OFFERINGS:`v1/EQ/CorporateActions/PublicOfferings`,CA_SPLITS:`v1/EQ/CorporateActions/Splits`,CA_TAKEOVERBIDS:`v1/EQ/CorporateActions/TakeoverBids`,MTF_COMPANY_ALL_DATA:`mtfEquityCompanies_persisted`,MTF_COMPANY_FILTERED:`mtfEquityCompaniesFilteredByCode_persisted`,MTF_DOCUMENTS:`v1/EQ/MtfEquity/Documents`,MTF_FINANCIAL_INFORMATION:`v1/EQ/MtfEquity/Fi",
-   "teActions/TakeoverBids`,MTF_COMPANY_ALL_DATA:`mtfEquityCompanies_persisted`,MTF_COMPANY_FILTERED:`mtfEquityCompaniesFilteredByCode_persisted`,MTF_DOCUMENTS:`v1/EQ/MtfEquity/Documents`,MTF_FINANCIAL_INFORMATION:`v1/EQ/MtfEquity/FinancialInformation`,MTF_HISTORICAL_NET_ASSET_VALUES:`v1/EQ/MtfEquity/HistoricalNetAssetValues`,MTF_LAST_PUBLISHED_DOCUMENT_DATE:`v1/EQ/MtfEquity/LastPublishedDocum",
-   "yCompanies_persisted`,MTF_COMPANY_FILTERED:`mtfEquityCompaniesFilteredByCode_persisted`,MTF_DOCUMENTS:`v1/EQ/MtfEquity/Documents`,MTF_FINANCIAL_INFORMATION:`v1/EQ/MtfEquity/FinancialInformation`,MTF_HISTORICAL_NET_ASSET_VALUES:`v1/EQ/MtfEquity/HistoricalNetAssetValues`,MTF_LAST_PUBLISHED_DOCUMENT_DATE:`v1/EQ/MtfEquity/LastPublishedDocumentDate`,LATIBEX_SECURITIES:`latibexSecurityList_persi",
-   "yCode_persisted`,MTF_DOCUMENTS:`v1/EQ/MtfEquity/Documents`,MTF_FINANCIAL_INFORMATION:`v1/EQ/MtfEquity/FinancialInformation`,MTF_HISTORICAL_NET_ASSET_VALUES:`v1/EQ/MtfEquity/HistoricalNetAssetValues`,MTF_LAST_PUBLISHED_DOCUMENT_DATE:`v1/EQ/MtfEquity/LastPublishedDocumentDate`,LATIBEX_SECURITIES:`latibexSecurityList_persisted`,LATIBEX_COMPANY_FILTERED:`latibexCompaniesFilteredByCode_persiste",
-   "ORMATION:`v1/EQ/MtfEquity/FinancialInformation`,MTF_HISTORICAL_NET_ASSET_VALUES:`v1/EQ/MtfEquity/HistoricalNetAssetValues`,MTF_LAST_PUBLISHED_DOCUMENT_DATE:`v1/EQ/MtfEquity/LastPublishedDocumentDate`,LATIBEX_SECURITIES:`latibexSecurityList_persisted`,LATIBEX_COMPANY_FILTERED:`latibexCompaniesFilteredByCode_persisted`,LATIBEX_SECURITIES_FILTERED:`latibexSecurityListFilteredByCompanyCode_per",
-   "0,e)})}var An=function(e){return e[e.UNDEFINED=0]=`UNDEFINED`,e[e.UP=1]=`UP`,e[e.DOWN=2]=`DOWN`,e[e.EQUAL=3]=`EQUAL`,e}({}),G={id:`pricesEqHub`,url:`v1/SignalR/EQ/Prices`,invoke:{GetIntradayIndexChartData:async function(e){return await Tn(`GetIntradayIndexChartData`,e,G.id)},GetSessionData:async function(e){return await Tn(`GetSessionData`,e,G.id)},ShareSearch:async function(e){return a"
-  ]
+  "bytes": 438,
+  "muestra": "{\"nif\":\"A39000013\",\"address\":\"PO PEREDA 9, 39004 SANTANDER\",\"sector\":\"05\",\"subsector\":\"01\",\"listedCapital\":7278241400.50,\"minimunCapital\":null,\"maximunCapital\":null,\"capitalCurrency\":\"EUR\",\"exclusionDate\":\"\",\"websiteURL\":\"http://www.gruposantander.com\",\"logoURL\":\"/IssuerLogos/13900.gif\",\"companyKey\":\"13900\",\"mainShareISIN\":\"ES0113900J37\",\"name\":\"BANCO SANTANDER, S.A.\",\"shareName\":\"BANCO SANTANDER\",\"listed\":true,\"tradingSystem\":\"SIBE\"}"
  },
- "clientlib-base.min.ACSHASH86b9d387dd6a9a": {
+ "ShareDetailsInfo": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/ShareDetailsInfo?isin=ES0113900J37",
   "status": 200,
-  "bytes": 37359,
-  "rutas": [],
-  "contexto": []
+  "bytes": 4952,
+  "muestra": "{\"name\":\"BANCO SANTANDER\",\"shortName\":\"B.SANTANDER\",\"isin\":\"ES0113900J37\",\"ticker\":\"SAN\",\"issuerCode\":\"13900\",\"nominal\":0.500000,\"market\":\"02\",\"tradingSystem\":\"SIBE\",\"sector\":\"05\",\"subsector\":\"01\",\"admitedCapital\":7278241400.50,\"shares\":14556482801,\"year\":2026,\"capitalisation\":171358915533.37,\"yearTendency\":1,\"yearDiff\":0.1690,\"tradingUnit\":1,\"currency\":\"EUR\",\"active\":\"\",\"lastClosePrice\":11.7720,\"lastClosePriceDate\":\"20261019\",\"otherShares\":[{\"isin\":\"ES0113211835\",\"ticker\":\"BBVA\",\"shortName\":\"BBVA\",\"name\":\"BANCO BILBAO VIZCAYA ARGENTARIA\",\"issuerCode\":\"13211\"},{\"isin\":\"ES0140609019\",\"ticker\":\"CABK\",\"shortName\":\"CAIXABANK\",\"name\":\"CAIXABANK\",\"issuerCode\":\"40609\"},{\"isin\":\"ES0113860A34\",\"ticker\":\"SAB\",\"shortName\":\"BA.SABADELL\",\"name\":\"BANCO DE SABADELL\",\"issuerCode\":\"13860\"}],\"otherSharesFromIssuer\":[{\"isin\":\"ES06139009S5\",\"name\":\"BANCO SANTANDER D2020-NOVIEMBRE\",\"longName\":\"DERECHOS  BANC"
+ },
+ "ListedCompanies": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/ListedCompanies?tradingSystem=SIBE&page=0&pageSize=0",
+  "status": 200,
+  "bytes": 33166,
+  "muestra": "{\"yearOfPriceData\":2026,\"totalResults\":122,\"params\":{\"tradingSystem\":\"SIBE\",\"mtfSegment\":null,\"sectorKey\":null,\"subsectorKey\":null,\"companyKey\":null,\"isin\":null,\"page\":0,\"pageSize\":0},\"hasMoreResults\":false,\"data\":[{\"name\":\"ACCIONA,S.A.\",\"companyKey\":\"25220\",\"isin\":\"ES0125220311\",\"shareName\":\"ACCIONA\",\"sector\":\"02\",\"subsector\":\"03\",\"tradingSystem\":\"SIBE\",\"indices\":\"IBEX 35®, IGBM, IBEX TOP Dividendo®\",\"annualDifference\":0.1135,\"capitalisation\":11519897130.00,\"navCommunicationDay\":\"-\"},{\"name\":\"ACERINOX, S.A.\",\"companyKey\":\"32105\",\"isin\":\"ES0132105018\",\"shareName\":\"ACERINOX\",\"sector\":\"02\",\"subsector\":\"01\",\"tradingSystem\":\"SIBE\",\"indices\":\"IBEX 35®, IGBM, IBEX TOP Dividendo®\",\"annualDifference\":0.3128,\"capitalisation\":4186340879.09,\"navCommunicationDay\":\"-\"},{\"name\":\"ACS,ACTIVIDADES DE CONST.Y SERVICIOS S.A\",\"companyKey\":\"67050\",\"isin\":\"ES0167050915\",\"shareName\":\"ACS ACTIVIDADES CONST.Y SE"
+ },
+ "IndicesGroup": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/IndicesGroup",
+  "status": 400,
+  "bytes": 238,
+  "muestra": "{\"type\":\"https://tools.ietf.org/html/rfc9110#section-15.5.1\",\"title\":\"One or more validation errors occurred.\",\"status\":400,\"errors\":{\"ID\":[\"The ID field is required.\"]},\"traceId\":\"00-bb82f89bef034dd3fc512de46aa0a317-efa19612c56407d0-00\"}"
+ },
+ "Delistings": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/CorporateActions/Delistings?from=20200101&to=20261020&page=0&pageSize=0",
+  "status": 200,
+  "bytes": 7392,
+  "muestra": "{\"totalResults\":29,\"params\":{\"tradingSystem\":null,\"mtfSegment\":null,\"companyKey\":\"\",\"isin\":\"\",\"from\":\"20251020\",\"to\":\"20261020\",\"page\":0,\"pageSize\":0},\"hasMoreResults\":false,\"data\":[{\"admissionDate\":\"20261009\",\"isin\":\"ES0105717005\",\"marketCode\":\"28589\",\"share\":\"REVENGA INGENIEROS\",\"numShares\":11055967,\"nominal\":2874551.420000,\"tradingUnit\":1,\"turnover\":8291975.2500,\"observ\":\"\",\"relevantFactCode\":\"065\",\"numSeq\":\"1\",\"origin\":\"\"},{\"admissionDate\":\"20261008\",\"isin\":\"ES0105265005\",\"marketCode\":\"28937\",\"share\":\"NUMULAE GESTION DE SERVICIOS\",\"numShares\":15018111,\"nominal\":15018111.000000,\"tradingUnit\":1,\"turnover\":35442741.9600,\"observ\":\"\",\"relevantFactCode\":\"065\",\"numSeq\":\"1\",\"origin\":\"\"},{\"admissionDate\":\"20261008\",\"isin\":\"ES0105174009\",\"marketCode\":\"28925\",\"share\":\"OPTIMUM RE SPAIN\",\"numShares\":4971228,\"nominal\":7407129.720000,\"tradingUnit\":1,\"turnover\":64625964.0000,\"observ\":\"\",\"relevantFac"
+ },
+ "NewListings": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/CorporateActions/NewListings?from=20200101&to=20261020&page=0&pageSize=0",
+  "status": 200,
+  "bytes": 71630,
+  "muestra": "{\"totalResults\":249,\"params\":{\"tradingSystem\":null,\"mtfSegment\":null,\"listingType\":null,\"companyKey\":\"\",\"isin\":\"\",\"from\":\"20251020\",\"to\":\"20261020\",\"page\":0,\"pageSize\":0},\"hasMoreResults\":false,\"data\":[{\"admissionDate\":\"20261019\",\"isin\":\"BRBBDCACNPR8\",\"marketCode\":\"29915\",\"share\":\"BANCO BRADESCO PREF.\",\"numShares\":278252057,\"nominal\":0.000000,\"tradingUnit\":1,\"turnover\":973882199.5000,\"admissionType\":\"Integration\",\"observ\":\"BONIFICACIóN EN ACCS.\",\"relevantFactCode\":\"107\",\"numSeq\":\"1\",\"origin\":\"1\"},{\"admissionDate\":\"20261016\",\"isin\":\"DE000FG85MZ4\",\"marketCode\":\"61907\",\"share\":\"SGEGNDX1 31541P1299TUR\",\"numShares\":590000,\"nominal\":5900.000000,\"tradingUnit\":0,\"turnover\":0.0000,\"admissionType\":\"NewSecurity\",\"observ\":\"\",\"relevantFactCode\":\"062\",\"numSeq\":\"1\",\"origin\":\"\"},{\"admissionDate\":\"20261014\",\"isin\":\"DE000FG80PZ8\",\"marketCode\":\"61886\",\"share\":\"SGEGDJIA 49416C1299TUR\",\"numShares\":410000,\"no"
+ },
+ "TakeoverBids": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/CorporateActions/TakeoverBids?from=20200101&to=20261020&page=0&pageSize=0",
+  "status": 200,
+  "bytes": 10071,
+  "muestra": "{\"totalResults\":26,\"params\":{\"companyKey\":\"\",\"from\":\"20200101\",\"to\":\"20261020\",\"page\":0,\"pageSize\":0},\"hasMoreResults\":false,\"data\":[{\"companyName\":\"ERCROS S.A.\",\"companyShortName\":\"ERCROS\",\"companyTradingSystem\":\"02\",\"companyKey\":\"25140\",\"offeringCompanyName\":\"BONDALTI IBERICA, S.L.U.\",\"price\":3.5050,\"startingDate\":\"20260724\",\"finishDate\":\"20260910\",\"shares\":20820562,\"acquiredShares\":7882035,\"cancellationDate\":\"\",\"result\":\"P\",\"acquiredDate\":\"20260917\",\"cancellationText\":\"\",\"priceText\":\"\"},{\"companyName\":\"ERCROS S.A.\",\"companyShortName\":\"ERCROS\",\"companyTradingSystem\":\"02\",\"companyKey\":\"25140\",\"offeringCompanyName\":\"BONDALTI IBERICA, S.L.U.\",\"price\":3.5100,\"startingDate\":\"20260212\",\"finishDate\":\"20260313\",\"shares\":91436199,\"acquiredShares\":70615637,\"cancellationDate\":\"\",\"result\":\"P\",\"acquiredDate\":\"20260320\",\"cancellationText\":\"\",\"priceText\":\"\"},{\"companyName\":\"AEDAS HOMES, S.A.\",\"compan"
+ },
+ "Splits": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/CorporateActions/Splits?from=20200101&to=20261020&page=0&pageSize=0",
+  "status": 200,
+  "bytes": 196,
+  "muestra": "{\"totalResults\":0,\"params\":{\"tradingSystem\":null,\"mtfSegment\":null,\"top1\":false,\"companyKey\":\"\",\"isin\":\"\",\"from\":\"20260920\",\"to\":\"20261020\",\"page\":0,\"pageSize\":0},\"hasMoreResults\":false,\"data\":[]}"
  }
 }
