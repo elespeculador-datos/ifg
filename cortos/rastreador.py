@@ -162,7 +162,7 @@ def _fecha(d) -> str:
     return "—" if d is None or pd.isna(d) else pd.Timestamp(d).strftime("%d/%m/%Y")
 
 
-def pagina(fecha: str, vig: pd.DataFrame, res: pd.DataFrame, cam: pd.DataFrame, primera: bool = False) -> str:
+def pagina(fecha: str, vig: pd.DataFrame, res: pd.DataFrame, cam: pd.DataFrame, primera: bool = False, hist: dict | None = None) -> str:
     e = html.escape
     filas_res = "\n".join(
         f"<tr><td>{e(r.emisor)} <span class='isin'>{e(r.isin)}</span></td><td class='n'>{r.tenedores}</td><td class='n'>{_pct(r.suma_publicada_pct)}</td>"
@@ -223,6 +223,7 @@ a{{color:var(--a)}} .pie{{color:var(--s);font-size:.85rem;margin-top:2em}}
 </tbody></table></div>
 <h2>Quién está corto en más empresas</h2>
 {_tabla_tenedores(vig, e).replace('<figure class="wp-block-table">', '<div class="tabla">').replace('</figure>', '</div>')}
+{_bloque_historico(hist, e)}
 <h2>Todas las posiciones publicadas</h2>
 <div class="tabla"><table><thead><tr><th>Emisor</th><th>Tenedor</th><th class="n">Posición</th><th>Fecha de posición</th></tr></thead><tbody>
 {filas_vig}
@@ -232,6 +233,30 @@ a{{color:var(--a)}} .pie{{color:var(--s);font-size:.85rem;margin-top:2em}}
 <p class="pie">Fuente: CNMV, <a href="{FICHA_CNMV}">posiciones cortas netas</a> (fichero <a href="{URL}">NetShortPositions.xls</a>). La fecha de posición es el día en que la posición alcanzó, cambió o bajó del umbral; la CNMV la publica al día hábil siguiente. Contenido informativo; no constituye asesoramiento financiero.</p>
 </body></html>
 """
+
+
+def historico(serie: pd.DataFrame, ant: pd.DataFrame) -> dict:
+    """Récords del fichero histórico (posiciones vigentes y anteriores desde 2010)."""
+    h = pd.concat([ant, serie], ignore_index=True)
+    h["isin"] = h["isin"].astype(str).str.upper().str.strip()
+    h = h.drop_duplicates(["isin", "tenedor", "fecha_posicion", "posicion_pct"])
+    pub = h[h["posicion_pct"] >= 0.5 - 1e-9].sort_values("fecha_posicion")
+    mx = pub[pub["posicion_pct"] == pub["posicion_pct"].max()].iloc[0]
+    ten = pub.groupby("tenedor")["lei"].nunique().sort_values(ascending=False)
+    return {"desde": str(pd.Timestamp(h["fecha_posicion"].min()).date()),
+            "mayor_posicion": {"tenedor": mx["tenedor"], "emisor": mx["emisor"], "pct": float(mx["posicion_pct"]),
+                               "fecha": str(pd.Timestamp(mx["fecha_posicion"]).date())},
+            "mas_empresas": {"tenedor": ten.index[0], "empresas": int(ten.iloc[0])}}
+
+
+def _bloque_historico(hist: dict | None, e) -> str:
+    if not hist:
+        return ""
+    m, t = hist["mayor_posicion"], hist["mas_empresas"]
+    return (f"<h2>Récords del histórico</h2>\n<p>Desde el {_fecha(hist['desde'])}, primera fecha del fichero histórico de la CNMV, "
+            f"la mayor posición corta individual publicada es la de {e(m['tenedor'])} en {e(m['emisor'])}: un {_pct(m['pct'])} del capital, "
+            f"el {_fecha(m['fecha'])}. La entidad que ha publicado posiciones cortas en más empresas es {e(t['tenedor'])}, en {t['empresas']}. "
+            "El fichero no conserva todas las empresas que han dejado de cotizar, así que estos récords se refieren a las que sí recoge.</p>")
 
 
 def por_tenedor(vig: pd.DataFrame, n: int = 10) -> pd.DataFrame:
@@ -253,7 +278,7 @@ def _tabla_tenedores(vig: pd.DataFrame, e) -> str:
 
 
 # --------------------------------------------------------------------------- fragmento para WordPress
-def fragmento_wp(fecha: str, fecha_previa: str | None, vig: pd.DataFrame, res: pd.DataFrame, cam: pd.DataFrame) -> str:
+def fragmento_wp(fecha: str, fecha_previa: str | None, vig: pd.DataFrame, res: pd.DataFrame, cam: pd.DataFrame, hist: dict | None = None) -> str:
     """HTML estático que Make copia cada día en la página de elespeculador.com.
 
     Va entre dos marcas: Make sustituye solo lo que hay entre ellas y deja intacto
@@ -298,6 +323,7 @@ def fragmento_wp(fecha: str, fecha_previa: str | None, vig: pd.DataFrame, res: p
 </tbody></table></figure>
 <h2>Quién está corto en más empresas</h2>
 {_tabla_tenedores(vig, e)}
+{_bloque_historico(hist, e)}
 <h2>Todas las posiciones publicadas</h2>
 <figure class="wp-block-table"><table><thead><tr><th>Emisor</th><th>Tenedor</th><th>Posición corta neta</th><th>Fecha de la posición</th></tr></thead><tbody>
 {filas_vig}
@@ -311,8 +337,10 @@ def solo_fragmento() -> int:
     vig = pd.read_csv(DATOS / "vigentes.csv", dtype={"lei": str, "isin": str})
     res = pd.read_csv(DATOS / "resumen_emisores.csv", dtype={"isin": str})
     cam = pd.read_csv(DATOS / "cambios.csv", dtype={"isin": str})
+    hist = historico(pd.read_csv(DATOS / "serie.csv", dtype={"lei": str, "isin": str}),
+                     pd.read_csv(DATOS / "anteriores.csv", dtype={"lei": str, "isin": str}))
     (SALIDA / "fragmento-wp.html").write_text(
-        fragmento_wp(estado["fecha_publicacion"], estado.get("publicacion_anterior"), vig, res, cam), encoding="utf-8")
+        fragmento_wp(estado["fecha_publicacion"], estado.get("publicacion_anterior"), vig, res, cam, hist), encoding="utf-8")
     print(f"Fragmento rehecho con la publicación del {estado['fecha_publicacion']}.")
     return 0
 
@@ -341,6 +369,7 @@ def main() -> int:
 
     res = resumen(vig)
     cam = cambios(previo, vig, fecha)
+    hist = historico(serie, ant)
     vig.to_csv(DATOS / "vigentes.csv", index=False)
     res.to_csv(DATOS / "resumen_emisores.csv", index=False)
     serie.to_csv(DATOS / "serie.csv", index=False)
@@ -357,12 +386,13 @@ def main() -> int:
         "generado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "posiciones": int((vig["posicion_pct"] >= 0.5 - 1e-9).sum()), "emisores": int(vig.loc[vig["posicion_pct"] >= 0.5 - 1e-9, "lei"].nunique()),
         "cambios": int(len(cam)),
+        "historico": hist,
         "top": res.head(10).assign(ultima_fecha_posicion=res.head(10)["ultima_fecha_posicion"].astype(str)).to_dict("records"),
         "fuente": URL, "licencia": "CC BY 4.0 · El Especulador a partir de datos de la CNMV",
     }, ensure_ascii=False, indent=1), encoding="utf-8")
-    (SALIDA / "index.html").write_text(pagina(fecha, vig, res, cam, primera=previo is None), encoding="utf-8")
+    (SALIDA / "index.html").write_text(pagina(fecha, vig, res, cam, primera=previo is None, hist=hist), encoding="utf-8")
     (SALIDA / "fragmento-wp.html").write_text(
-        fragmento_wp(fecha, fecha_previa if fecha_previa != fecha else None, vig, res, cam), encoding="utf-8")
+        fragmento_wp(fecha, fecha_previa if fecha_previa != fecha else None, vig, res, cam, hist), encoding="utf-8")
     print(f"Publicación del {fecha}: {len(vig)} filas vigentes, {vig['lei'].nunique()} emisores, {len(cam)} cambios.")
     return 0
 
