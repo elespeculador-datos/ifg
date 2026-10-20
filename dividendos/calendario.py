@@ -315,7 +315,7 @@ def ld_wp(r: dict) -> str:
         "description": "Próximos dividendos del mercado continuo con su fecha ex, importe bruto por acción y fecha de pago, lo repartido por cada empresa en los últimos doce meses y su rentabilidad por dividendo sobre el último cierre, con datos de BME actualizados cada día hábil.",
         "url": PAGINA_WP, "inLanguage": "es", "spatialCoverage": "España",
         "creator": {"@type": "Organization", "name": "El Especulador", "url": "https://elespeculador.com/"},
-        "license": "https://creativecommons.org/licenses/by/4.0/", "isBasedOn": "https://www.bolsasymercados.es/",
+        "creditText": "El Especulador, a partir de datos de BME", "isBasedOn": "https://www.bolsasymercados.es/",
         "dateModified": r["hoy"].date().isoformat(),
         "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"{PAGES}datos/{n}.csv"}
                          for n in ["proximos", "ultimos_12m", "rentabilidad", "dividendos"]],
@@ -354,7 +354,7 @@ def escribir(r: dict) -> None:
         "siguiente": None if prox.empty else {"fecha_ex": prox["fecha_ex"].min().date().isoformat(),
                                               "empresas": sorted(prox.loc[prox["fecha_ex"] == prox["fecha_ex"].min(), "empresa"].unique().tolist())},
         "mayor_rentabilidad": None if rent.empty else rent.head(3)[["empresa", "isin", "rentabilidad_ordinaria_pct"]].to_dict("records"),
-        "fuente": "BME, operaciones financieras: dividendos; cierres de la ficha de cada valor", "licencia": "CC BY 4.0 · El Especulador",
+        "fuente": "BME, operaciones financieras: dividendos; cierres de la ficha de cada valor", "licencia": "Sin licencia abierta: datos de origen de BME, sujetos a sus condiciones. Cita: El Especulador, a partir de datos de BME",
     }, ensure_ascii=False, indent=1), encoding="utf-8")
     frag = fragmento_wp(r)
     (SALIDA / "fragmento-wp.html").write_text(con_ld(frag, ld_wp(r)), encoding="utf-8")
@@ -372,7 +372,7 @@ a{{color:#1f4e8c}} .pie{{color:#5b6675;font-size:.85rem;margin-top:2em}}
 <h1>Calendario de dividendos de la bolsa española</h1>
 {cuerpo}
 <h2>Datos abiertos</h2>
-<p>CSV: <a href="datos/proximos.csv">próximos dividendos</a> · <a href="datos/ultimos_12m.csv">últimos doce meses</a> · <a href="datos/rentabilidad.csv">rentabilidad por dividendo</a> · <a href="datos/dividendos.csv">todos desde hace tres años</a> · <a href="datos/ultima.json">JSON</a>. Licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>, citando «El Especulador, a partir de datos de BME». Cómo funcionan las fechas: <a href="{PILAR}">qué día hay que tener las acciones para cobrar el dividendo</a>.</p>
+<p>CSV: <a href="datos/proximos.csv">próximos dividendos</a> · <a href="datos/ultimos_12m.csv">últimos doce meses</a> · <a href="datos/rentabilidad.csv">rentabilidad por dividendo</a> · <a href="datos/dividendos.csv">todos desde hace tres años</a> · <a href="datos/ultima.json">JSON</a>. Puedes reutilizarlos citando «El Especulador, a partir de datos de BME»; los datos de origen son de BME y se rigen por sus condiciones. Cómo funcionan las fechas: <a href="{PILAR}">qué día hay que tener las acciones para cobrar el dividendo</a>.</p>
 <p class="pie">Fuente: BME, operaciones financieras del mercado continuo. Importes brutos por acción, antes de retenciones. Contenido informativo; no constituye asesoramiento financiero.</p>
 </body></html>
 """, encoding="utf-8")

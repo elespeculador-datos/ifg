@@ -277,7 +277,7 @@ def pagina(r: dict, frag: str) -> str:
         "name": "Estadística del IBEX 35 de El Especulador",
         "description": "Último cierre, rentabilidad del año, máximos históricos y rentabilidad anual y mensual del IBEX 35, actualizados cada día hábil.",
         "creator": {"@type": "Organization", "name": "El Especulador", "url": "https://elespeculador.com/"},
-        "license": "https://creativecommons.org/licenses/by/4.0/", "dateModified": r["fecha"],
+        "creditText": "El Especulador, a partir de datos de BME", "dateModified": r["fecha"],
         "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"datos/{n}.csv"}
                          for n in ["rentabilidad_anual", "rentabilidad_mensual", "maximos"]],
     }, ensure_ascii=False)
@@ -296,7 +296,7 @@ a{{color:#1f4e8c}} .pie{{color:#5b6675;font-size:.85rem;margin-top:2em}}
 <h1>El IBEX 35 en cifras</h1>
 {cuerpo}
 <h2>Datos abiertos</h2>
-<p>CSV: <a href="datos/rentabilidad_anual.csv">rentabilidad anual</a> · <a href="datos/rentabilidad_mensual.csv">rentabilidad mensual</a> · <a href="datos/maximos.csv">máximos históricos</a> · <a href="datos/ultima.json">JSON</a>. Licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>: puedes reutilizarlos citando «El Especulador». Historia y récords explicados: <a href="{PILAR}">histórico del IBEX 35</a>.</p>
+<p>CSV: <a href="datos/rentabilidad_anual.csv">rentabilidad anual</a> · <a href="datos/rentabilidad_mensual.csv">rentabilidad mensual</a> · <a href="datos/maximos.csv">máximos históricos</a> · <a href="datos/ultima.json">JSON</a>. Puedes reutilizar nuestros cálculos citando «El Especulador, a partir de datos de BME»; los cierres de origen son de BME y se rigen por sus condiciones. Historia y récords explicados: <a href="{PILAR}">histórico del IBEX 35</a>.</p>
 <p class="pie">Cálculos de El Especulador con los cierres oficiales del IBEX 35 que publica BME; rentabilidades de años anteriores a 2022, de la serie verificada de El Especulador. Contenido informativo; no constituye asesoramiento financiero.</p>
 </body></html>
 """
@@ -310,7 +310,7 @@ def ld_wp(r: dict) -> str:
         "description": "Último cierre, rentabilidad del año, máximos históricos y rentabilidad anual y mensual del IBEX 35, con los cierres oficiales de BME, actualizados cada día hábil.",
         "url": PAGINA_WP, "inLanguage": "es", "spatialCoverage": "España",
         "creator": {"@type": "Organization", "name": "El Especulador", "url": "https://elespeculador.com/"},
-        "license": "https://creativecommons.org/licenses/by/4.0/", "isBasedOn": "https://www.bolsasymercados.es/",
+        "creditText": "El Especulador, a partir de datos de BME", "isBasedOn": "https://www.bolsasymercados.es/",
         "dateModified": r["fecha"],
         "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"{PAGES}datos/{n}.csv"}
                          for n in ["rentabilidad_anual", "rentabilidad_mensual", "maximos"]],
@@ -332,7 +332,7 @@ def escribir(r: dict) -> None:
     mx.round(2).to_csv(DATOS / "maximos.csv", index=False)
     publico = {k: v for k, v in r.items() if not k.startswith("_")}
     publico["generado"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    publico["licencia"] = "CC BY 4.0 · El Especulador"
+    publico["licencia"] = "Sin licencia abierta: cierres de origen de BME, sujetos a sus condiciones. Cita: El Especulador, a partir de datos de BME"
     (DATOS / "ultima.json").write_text(json.dumps(publico, ensure_ascii=False, indent=1), encoding="utf-8")
     frag = fragmento_wp(r)
     (SALIDA / "fragmento-wp.html").write_text(con_ld(frag, ld_wp(r)), encoding="utf-8")

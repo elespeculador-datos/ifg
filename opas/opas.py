@@ -205,7 +205,7 @@ def ld_wp(d: pd.DataFrame, fecha: str) -> str:
         "url": PAGINA_WP, "inLanguage": "es", "spatialCoverage": "España",
         "temporalCoverage": f"{d['inicio_aceptacion'].min().date().isoformat()}/{fecha}",
         "creator": {"@type": "Organization", "name": "El Especulador", "url": "https://elespeculador.com/"},
-        "license": "https://creativecommons.org/licenses/by/4.0/", "isBasedOn": "https://www.bolsasymercados.es/",
+        "creditText": "El Especulador, a partir de datos de BME", "isBasedOn": "https://www.bolsasymercados.es/",
         "dateModified": fecha,
         "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"{PAGES}datos/{n}.csv"}
                          for n in ["opas", "por_anio"]],
@@ -254,7 +254,7 @@ a{{color:#1f4e8c}} .pie{{color:#5b6675;font-size:.85rem;margin-top:2em}}
 <h1>OPAs en la bolsa española desde 2000</h1>
 {cuerpo}
 <h2>Datos abiertos</h2>
-<p>CSV: <a href="datos/opas.csv">todas las OPAs desde 2000</a> · <a href="datos/por_anio.csv">OPAs por año</a> · <a href="datos/ultima.json">JSON</a>. Licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>, citando «El Especulador, a partir de datos de BME». Qué hacer como accionista: <a href="{PILAR}">qué pasa con mis acciones si hay una OPA</a>.</p>
+<p>CSV: <a href="datos/opas.csv">todas las OPAs desde 2000</a> · <a href="datos/por_anio.csv">OPAs por año</a> · <a href="datos/ultima.json">JSON</a>. Puedes reutilizarlos citando «El Especulador, a partir de datos de BME»; los datos de origen son de BME y se rigen por sus condiciones. Qué hacer como accionista: <a href="{PILAR}">qué pasa con mis acciones si hay una OPA</a>.</p>
 <p class="pie">Fuente: BME, registro de ofertas públicas de adquisición. Las autoriza la CNMV, que es la fuente oficial de cada folleto. Contenido informativo; no constituye asesoramiento financiero.</p>
 </body></html>
 """
@@ -271,11 +271,21 @@ def _csv(d: pd.DataFrame) -> str:
 
 
 def escribir(d: pd.DataFrame, forzar: bool = False) -> bool:
-    """Escribe solo si el registro ha cambiado (o con forzar). Devuelve si ha escrito."""
+    """Escribe solo si el registro ha cambiado, si ha cambiado el texto que se
+    publica (por un cambio en este script) o con forzar. Devuelve si ha escrito."""
     texto = _csv(d)
     previo = DATOS / "opas.csv"
     if previo.exists() and previo.read_text(encoding="utf-8") == texto and not forzar:
-        return False
+        try:
+            f_ant = json.loads((DATOS / "ultima.json").read_text(encoding="utf-8"))["fecha"]
+            frag_ant = (SALIDA / "fragmento-wp.html").read_text(encoding="utf-8")
+            idx_ant = (SALIDA / "index.html").read_text(encoding="utf-8")
+        except (OSError, KeyError, ValueError):
+            return False
+        frag_n = fragmento_wp(d, por_anio(d), f_ant)
+        cuerpo_n = "\n".join(l for l in frag_n.split("\n")[1:-1] if "application/ld+json" not in l)
+        if frag_n == frag_ant and pagina(cuerpo_n, ld_wp(d, f_ant)) == idx_ant:
+            return False
     fecha = hoy_madrid().date().isoformat()
     DATOS.mkdir(parents=True, exist_ok=True)
     previo.write_text(texto, encoding="utf-8")
@@ -287,7 +297,7 @@ def escribir(d: pd.DataFrame, forzar: bool = False) -> bool:
         "opas": int(len(d)), "desde": d["inicio_aceptacion"].min().date().isoformat(),
         "ultima": {"sociedad": ultima.sociedad, "oferente": ultima.oferente,
                    "inicio_aceptacion": _f(ultima.inicio_aceptacion), "resultado": ultima.resultado},
-        "fuente": "BME, registro de OPAs (CorporateActions/TakeoverBids)", "licencia": "CC BY 4.0 · El Especulador",
+        "fuente": "BME, registro de OPAs (CorporateActions/TakeoverBids)", "licencia": "Sin licencia abierta: datos de origen de BME, sujetos a sus condiciones. Cita: El Especulador, a partir de datos de BME",
     }, ensure_ascii=False, indent=1), encoding="utf-8")
     frag = fragmento_wp(d, t, fecha)
     assert "$" not in frag

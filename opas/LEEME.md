@@ -3,7 +3,7 @@
 Cada día hábil, a las 17:25 UTC, el flujo `opas-diario` descarga de la API pública de BME (`CorporateActions/TakeoverBids`) todas las ofertas públicas de adquisición sobre sociedades que cotizan en sus mercados desde 2000 (mercado continuo, corros, BME Growth y Latibex) y, **solo si el registro ha cambiado**, publica en `docs/opas/`:
 
 - `index.html`: OPAs por año y tabla detallada desde 2015 (sociedad, oferente, precio o canje, plazo de aceptación, aceptación y resultado);
-- `datos/opas.csv` (todas desde 2000), `datos/por_anio.csv` y `ultima.json`, con licencia CC BY 4.0;
+- `datos/opas.csv` (todas desde 2000), `datos/por_anio.csv` y `ultima.json`, sin licencia abierta: los datos de origen son de BME y se rigen por sus condiciones; si se reutilizan, citar «El Especulador, a partir de datos de BME»;
 - `fragmento-wp.html`: las tablas entre `<!-- opas:inicio … -->` y `<!-- opas:fin -->`, que un escenario de Make copia en la página «OPAs en la bolsa española» de elespeculador.com.
 
 Notas sobre los datos:
