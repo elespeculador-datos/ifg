@@ -143,7 +143,7 @@ def cambios(prev: pd.DataFrame | None, vig: pd.DataFrame, fecha: str) -> pd.Data
         filas.append([fecha, k[0], r["emisor"], k[1], "nueva", None, r["posicion_pct"], r["fecha_posicion"]])
     for k in a.index.difference(b.index):
         r = a.loc[k]
-        filas.append([fecha, k[0], r["emisor"], k[1], "baja del 0,5 %", r["posicion_pct"], None, None])
+        filas.append([fecha, k[0], r["emisor"], k[1], "deja de publicarse", r["posicion_pct"], None, None])
     for k in b.index.intersection(a.index):
         x, y = float(a.loc[k, "posicion_pct"]), float(b.loc[k, "posicion_pct"])
         if abs(x - y) > 1e-9:
@@ -160,25 +160,27 @@ def _fecha(d) -> str:
     return "—" if d is None or pd.isna(d) else pd.Timestamp(d).strftime("%d/%m/%Y")
 
 
-def pagina(fecha: str, vig: pd.DataFrame, res: pd.DataFrame, cam: pd.DataFrame) -> str:
+def pagina(fecha: str, vig: pd.DataFrame, res: pd.DataFrame, cam: pd.DataFrame, primera: bool = False) -> str:
     e = html.escape
     filas_res = "\n".join(
-        f"<tr><td>{e(r.emisor)}</td><td class='n'>{r.tenedores}</td><td class='n'>{_pct(r.suma_publicada_pct)}</td>"
+        f"<tr><td>{e(r.emisor)} <span class='isin'>{e(r.isin)}</span></td><td class='n'>{r.tenedores}</td><td class='n'>{_pct(r.suma_publicada_pct)}</td>"
         f"<td>{e(r.mayor_tenedor)} ({_pct(r.mayor_posicion_pct)})</td><td>{_fecha(r.ultima_fecha_posicion)}</td></tr>"
         for r in res.itertuples())
     filas_vig = "\n".join(
         f"<tr><td>{e(r.emisor)}</td><td>{e(r.tenedor)}</td><td class='n'>{_pct(r.posicion_pct)}{' · bajó del umbral' if r.posicion_pct < 0.5 - 1e-9 else ''}</td><td>{_fecha(r.fecha_posicion)}</td></tr>"
         for r in vig.sort_values(["emisor", "posicion_pct"], ascending=[True, False]).itertuples())
-    if cam.empty:
-        bloque_cam = "<p>Sin cambios respecto a la publicación anterior que tenemos registrada.</p>"
+    if primera:
+        bloque_cam = "<p>Es la primera publicación registrada por el rastreador: los cambios se mostrarán a partir de la próxima.</p>"
+    elif cam.empty:
+        bloque_cam = "<p>Sin cambios respecto a la publicación anterior.</p>"
     else:
-        bloque_cam = "<table><thead><tr><th>Emisor</th><th>Tenedor</th><th>Cambio</th><th class='n'>Antes</th><th class='n'>Ahora</th></tr></thead><tbody>" + "\n".join(
+        bloque_cam = "<div class='tabla'><table><thead><tr><th>Emisor</th><th>Tenedor</th><th>Cambio</th><th class='n'>Antes</th><th class='n'>Ahora</th></tr></thead><tbody>" + "\n".join(
             f"<tr><td>{e(r.emisor)}</td><td>{e(r.tenedor)}</td><td>{e(r.tipo)}</td><td class='n'>{_pct(r.antes_pct)}</td><td class='n'>{_pct(r.ahora_pct)}</td></tr>"
-            for r in cam.itertuples()) + "</tbody></table>"
+            for r in cam.itertuples()) + "</tbody></table></div>"
     top = res.iloc[0] if len(res) else None
     n_umbral = int((vig["posicion_pct"] >= 0.5 - 1e-9).sum())
     frase = (f"A {_fecha(fecha)}, la CNMV publica {n_umbral} posiciones cortas netas iguales o superiores al 0,5 % "
-             f"sobre {res['isin'].nunique()} emisores españoles. La mayor suma publicada es la de {e(top.emisor)}: "
+             f"sobre {vig.loc[vig['posicion_pct'] >= 0.5 - 1e-9, 'lei'].nunique()} emisores. La mayor suma publicada es la de {e(top.emisor)}: "
              f"{_pct(top.suma_publicada_pct)} del capital, repartido entre {top.tenedores} tenedores.") if top is not None else ""
     ahora = datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M UTC")
     return f"""<!doctype html>
@@ -191,6 +193,7 @@ body{{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--t);
 h1{{font-size:1.5rem;margin:.2em 0}} h2{{font-size:1.15rem;margin-top:1.6em}}
 .sub{{color:var(--s)}} table{{width:100%;border-collapse:collapse;font-size:.92rem;margin:.6em 0}}
 th,td{{text-align:left;padding:6px 8px;border-bottom:1px solid var(--b);vertical-align:top}} th{{background:var(--f)}}
+.tabla{{overflow-x:auto}} .isin{{color:var(--s);font-size:.78rem;white-space:nowrap}}
 .n{{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}} .caja{{background:var(--f);padding:12px 14px;border-radius:8px}}
 a{{color:var(--a)}} .pie{{color:var(--s);font-size:.85rem;margin-top:2em}}
 @media(max-width:640px){{table{{font-size:.82rem}} th,td{{padding:5px}}}}
@@ -213,13 +216,13 @@ a{{color:var(--a)}} .pie{{color:var(--s);font-size:.85rem;margin-top:2em}}
 <h2>Cambios respecto a la publicación anterior</h2>
 {bloque_cam}
 <h2>Suma publicada por emisor</h2>
-<table><thead><tr><th>Emisor</th><th class="n">Tenedores</th><th class="n">Suma publicada</th><th>Mayor posición</th><th>Última fecha de posición</th></tr></thead><tbody>
+<div class="tabla"><table><thead><tr><th>Emisor</th><th class="n">Tenedores</th><th class="n">Suma publicada</th><th>Mayor posición</th><th>Última fecha de posición</th></tr></thead><tbody>
 {filas_res}
-</tbody></table>
+</tbody></table></div>
 <h2>Todas las posiciones publicadas</h2>
-<table><thead><tr><th>Emisor</th><th>Tenedor</th><th class="n">Posición</th><th>Fecha de posición</th></tr></thead><tbody>
+<div class="tabla"><table><thead><tr><th>Emisor</th><th>Tenedor</th><th class="n">Posición</th><th>Fecha de posición</th></tr></thead><tbody>
 {filas_vig}
-</tbody></table>
+</tbody></table></div>
 <h2>Datos abiertos</h2>
 <p>Descarga en CSV: <a href="datos/vigentes.csv">posiciones vigentes</a> · <a href="datos/resumen_emisores.csv">resumen por emisor</a> · <a href="datos/serie.csv">evolución de las vigentes</a> · <a href="datos/anteriores.csv">posiciones anteriores desde 2010</a> · <a href="datos/historial_cambios.csv">historial de cambios</a> · <a href="datos/ultima.json">JSON</a>. Licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>: puedes reutilizarlos citando «El Especulador, a partir de datos de la CNMV».</p>
 <p class="pie">Fuente: CNMV, <a href="{FICHA_CNMV}">posiciones cortas netas</a> (fichero <a href="{URL}">NetShortPositions.xls</a>). La fecha de posición es el día en que la posición alcanzó, cambió o bajó del umbral; la CNMV la publica al día hábil siguiente. Contenido informativo; no constituye asesoramiento financiero.</p>
@@ -261,13 +264,13 @@ def main() -> int:
     estado.write_text(json.dumps({
         "fecha_publicacion": fecha,
         "generado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "posiciones": int(len(vig)), "emisores": int(res["isin"].nunique()),
+        "posiciones": int((vig["posicion_pct"] >= 0.5 - 1e-9).sum()), "emisores": int(vig.loc[vig["posicion_pct"] >= 0.5 - 1e-9, "lei"].nunique()),
         "cambios": int(len(cam)),
         "top": res.head(10).assign(ultima_fecha_posicion=res.head(10)["ultima_fecha_posicion"].astype(str)).to_dict("records"),
         "fuente": URL, "licencia": "CC BY 4.0 · El Especulador a partir de datos de la CNMV",
     }, ensure_ascii=False, indent=1), encoding="utf-8")
-    (SALIDA / "index.html").write_text(pagina(fecha, vig, res, cam), encoding="utf-8")
-    print(f"Publicación del {fecha}: {len(vig)} posiciones vigentes, {res['isin'].nunique()} emisores, {len(cam)} cambios.")
+    (SALIDA / "index.html").write_text(pagina(fecha, vig, res, cam, primera=previo is None), encoding="utf-8")
+    print(f"Publicación del {fecha}: {len(vig)} filas vigentes, {vig['lei'].nunique()} emisores, {len(cam)} cambios.")
     return 0
 
 
