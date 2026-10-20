@@ -1,34 +1,38 @@
 {
- "head tas/NetShortPositions.xls": {
+ "desde1990": {
   "status": 200,
-  "Last-Modified": "Mon, 19 Oct 2026 18:18:31 GMT",
-  "Date": "Tue, 20 Oct 2026 14:42:15 GMT",
-  "ETag": "\"6b5e373ff65fdd1:0\"",
-  "Content-Length": "1708032",
-  "Content-Type": "application/vnd.ms-excel"
+  "bytes": 84226,
+  "total": 220,
+  "params": {
+   "companyKey": "",
+   "from": "19900101",
+   "to": "20261231",
+   "page": 0,
+   "pageSize": 0
+  }
  },
- "get tas/NetShortPositions.xls": {
+ "desde2005": {
   "status": 200,
-  "Last-Modified": "Mon, 19 Oct 2026 18:18:31 GMT",
-  "Date": "Tue, 20 Oct 2026 14:42:15 GMT",
-  "ETag": "\"6b5e373ff65fdd1:0\"",
-  "Content-Length": "1708032",
-  "Content-Type": "application/vnd.ms-excel"
+  "bytes": 55124,
+  "total": 143,
+  "params": {
+   "companyKey": "",
+   "from": "20050101",
+   "to": "20261231",
+   "page": 0,
+   "pageSize": 0
+  }
  },
- "head as/NetShortPositions.xlsx": {
-  "status": 404,
-  "Last-Modified": null,
-  "Date": "Tue, 20 Oct 2026 14:42:16 GMT",
-  "ETag": null,
-  "Content-Length": "103",
-  "Content-Type": "text/html"
- },
- "get as/NetShortPositions.xlsx": {
-  "status": 404,
-  "Last-Modified": null,
-  "Date": "Tue, 20 Oct 2026 14:42:16 GMT",
-  "ETag": null,
-  "Content-Length": "103",
-  "Content-Type": "text/html"
+ "desde2015": {
+  "status": 200,
+  "bytes": 23149,
+  "total": 60,
+  "params": {
+   "companyKey": "",
+   "from": "20150101",
+   "to": "20261231",
+   "page": 0,
+   "pageSize": 0
+  }
  }
 }
