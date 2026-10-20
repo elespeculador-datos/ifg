@@ -221,6 +221,8 @@ a{{color:var(--a)}} .pie{{color:var(--s);font-size:.85rem;margin-top:2em}}
 <div class="tabla"><table><thead><tr><th>Emisor</th><th class="n">Tenedores</th><th class="n">Suma publicada</th><th>Mayor posición</th><th>Última fecha de posición</th></tr></thead><tbody>
 {filas_res}
 </tbody></table></div>
+<h2>Quién está corto en más empresas</h2>
+{_tabla_tenedores(vig, e).replace('<figure class="wp-block-table">', '<div class="tabla">').replace('</figure>', '</div>')}
 <h2>Todas las posiciones publicadas</h2>
 <div class="tabla"><table><thead><tr><th>Emisor</th><th>Tenedor</th><th class="n">Posición</th><th>Fecha de posición</th></tr></thead><tbody>
 {filas_vig}
@@ -230,6 +232,24 @@ a{{color:var(--a)}} .pie{{color:var(--s);font-size:.85rem;margin-top:2em}}
 <p class="pie">Fuente: CNMV, <a href="{FICHA_CNMV}">posiciones cortas netas</a> (fichero <a href="{URL}">NetShortPositions.xls</a>). La fecha de posición es el día en que la posición alcanzó, cambió o bajó del umbral; la CNMV la publica al día hábil siguiente. Contenido informativo; no constituye asesoramiento financiero.</p>
 </body></html>
 """
+
+
+def por_tenedor(vig: pd.DataFrame, n: int = 10) -> pd.DataFrame:
+    """Entidades con más posiciones publicadas (tal como las identifica la CNMV)."""
+    v = vig[vig["posicion_pct"] >= 0.5 - 1e-9]
+    g = v.groupby("tenedor", as_index=False).agg(empresas=("isin", "nunique"))
+    mayor = v.sort_values("posicion_pct", ascending=False).drop_duplicates("tenedor")[["tenedor", "emisor", "posicion_pct"]]
+    g = g.merge(mayor.rename(columns={"emisor": "mayor_emisor", "posicion_pct": "mayor_pct"}), on="tenedor")
+    return g.sort_values(["empresas", "mayor_pct"], ascending=False).head(n).reset_index(drop=True)
+
+
+def _tabla_tenedores(vig: pd.DataFrame, e) -> str:
+    t = por_tenedor(vig)
+    filas = "\n".join(f"<tr><td>{e(r.tenedor)}</td><td>{int(r.empresas)}</td><td>{e(r.mayor_emisor)} ({_pct(r.mayor_pct)})</td></tr>"
+                      for r in t.itertuples())
+    return ("<p>Cada entidad aparece tal como la identifica la CNMV: un mismo grupo puede figurar con varias filiales.</p>\n"
+            "<figure class=\"wp-block-table\"><table><thead><tr><th>Tenedor</th><th>Empresas en las que está corto</th><th>Su mayor posición</th></tr></thead><tbody>\n"
+            + filas + "\n</tbody></table></figure>")
 
 
 # --------------------------------------------------------------------------- fragmento para WordPress
@@ -276,6 +296,8 @@ def fragmento_wp(fecha: str, fecha_previa: str | None, vig: pd.DataFrame, res: p
 <figure class="wp-block-table"><table><thead><tr><th>Emisor</th><th>Tenedores</th><th>Suma publicada</th><th>Mayor posición</th><th>Última fecha de posición</th></tr></thead><tbody>
 {filas_res}
 </tbody></table></figure>
+<h2>Quién está corto en más empresas</h2>
+{_tabla_tenedores(vig, e)}
 <h2>Todas las posiciones publicadas</h2>
 <figure class="wp-block-table"><table><thead><tr><th>Emisor</th><th>Tenedor</th><th>Posición corta neta</th><th>Fecha de la posición</th></tr></thead><tbody>
 {filas_vig}
