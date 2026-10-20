@@ -1,0 +1,47 @@
+{
+ "stooq_ibex": {
+  "url": "https://stooq.com/q/d/l/?s=^ibex&i=d",
+  "status": 200,
+  "tipo": "text/html; charset=utf-8",
+  "bytes": 796
+ },
+ "stooq_ibex_es": {
+  "url": "https://stooq.pl/q/d/l/?s=^ibex&i=d",
+  "status": 200,
+  "tipo": "text/html; charset=utf-8",
+  "bytes": 796
+ },
+ "yahoo_ibex": {
+  "url": "https://query1.finance.yahoo.com/v8/finance/chart/%5EIBEX?period1=0&period2=4102444800&interval=1d",
+  "status": 429,
+  "tipo": "text/html",
+  "bytes": 19
+ },
+ "yahoo_ibex_div": {
+  "url": "https://query1.finance.yahoo.com/v8/finance/chart/%5EIBEXTR?period1=0&period2=4102444800&interval=1d",
+  "status": 429,
+  "tipo": "text/html",
+  "bytes": 19
+ },
+ "bme_ficha": {
+  "url": "https://www.bolsasymercados.es/bme-exchange/es/Indices/Ibex/Ficha/IBEX-35",
+  "status": 200,
+  "tipo": "text/html;charset=utf-8",
+  "bytes": 250572
+ },
+ "bme_factsheet": {
+  "url": "https://www.bolsasymercados.es/dam/descargas/indices/factsheet-ibex-35-es.pdf",
+  "status": 200,
+  "tipo": "application/pdf",
+  "bytes": 505858
+ },
+ "bme_boletin": {
+  "url": "https://www.bolsasymercados.es/dam/descargas/indices/boletin-semanal-indices-ibex-es-en.pdf",
+  "status": 200,
+  "tipo": "application/pdf",
+  "bytes": 290884
+ },
+ "bme_playwright": {
+  "llamadas": 55
+ }
+}
