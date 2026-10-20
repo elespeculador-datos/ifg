@@ -45,6 +45,11 @@ OFERENTES = {
     "FOMENTO DE CONSTRUCCIONES Y CONTRAT": "FOMENTO DE CONSTRUCCIONES Y CONTRATAS, S.A.",
     "PROMOTORA BRAVO DESIGNATED ACTIVIT": "PROMOTORA BRAVO DESIGNATED ACTIVITY COMPANY",
 }
+# Precios que BME redondea a céntimos y que el folleto da con más decimales.
+# Clave: (código de sociedad de BME, inicio de aceptación). Solo con la fuente oficial al lado.
+PRECIOS = {
+    ("25140", "2026-02-12"): 3.505,  # Ercros, OPA voluntaria de Bondalti; CNMV, autorización del 10/02/2026
+}
 COLUMNAS = ["inicio_aceptacion", "fin_aceptacion", "sociedad", "oferente", "precio_eur", "contraprestacion_texto",
             "acciones_a_las_que_se_dirige", "acciones_adquiridas", "aceptacion_pct", "resultado", "fecha_resultado",
             "fecha_retirada", "nota_bme", "codigo_bme"]
@@ -123,6 +128,10 @@ def preparar(filas: list[dict]) -> pd.DataFrame:
             "resultado": resultado, "fecha_resultado": res, "fecha_retirada": retirada,
             "nota_bme": (x.get("cancellationText") or "").strip(), "codigo_bme": (x.get("companyKey") or "").strip(),
         })
+    for o in out:
+        clave = (o["codigo_bme"], o["inicio_aceptacion"].date().isoformat() if o["inicio_aceptacion"] is not None and not pd.isna(o["inicio_aceptacion"]) else "")
+        if clave in PRECIOS:
+            o["precio_eur"] = PRECIOS[clave]
     d = pd.DataFrame(out, columns=COLUMNAS)
     if d["inicio_aceptacion"].isna().mean() > 0.05:
         raise DatosRaros("Demasiadas fechas de inicio ilegibles")
