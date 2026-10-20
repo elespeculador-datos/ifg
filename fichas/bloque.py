@@ -127,14 +127,16 @@ def cargar(datos: Path) -> dict:
     }
 
 
-def puesto(isin: str, cot: dict) -> tuple[int, int]:
-    """Puesto de la empresa por capitalización entre todas las del mercado continuo (SIBE)."""
+def puesto(isin: str, cot: dict) -> tuple[int, int, bool]:
+    """Puesto por capitalización entre las empresas españolas del mercado continuo (ISIN ES), o
+    entre todas si la empresa es extranjera. Devuelve (puesto, total, solo_espanolas)."""
+    espanola = isin.startswith("ES")
     por_empresa: dict[str, float] = {}
     for c in cot.values():
-        if c.get("capitalisation"):
+        if c.get("capitalisation") and (c["isin"].startswith("ES") or not espanola):
             por_empresa[c["companyKey"]] = por_empresa.get(c["companyKey"], 0) + float(c["capitalisation"])
     orden = sorted(por_empresa, key=lambda k: -por_empresa[k])
-    return orden.index(cot[isin]["companyKey"]) + 1, len(orden)
+    return orden.index(cot[isin]["companyKey"]) + 1, len(orden), espanola
 
 
 def rentabilidades(serie: list) -> dict:
@@ -188,9 +190,10 @@ def bloque(slug: str, titulo: str, d: dict, hoy: date) -> str:
 
     # capitalización y puesto
     try:
-        n, total = puesto(isin, d["cot"])
+        n, total, esp = puesto(isin, d["cot"])
         nota = f" ({UNA_CLASE[isin]})" if isin in UNA_CLASE else ""
-        filas.append(("Capitalización", f"{_millones(float(c['capitalisation']))}{nota}: la {n}.ª de las {total} empresas del mercado continuo"))
+        donde = f"la {n}.ª de las {total} empresas españolas del mercado continuo" if esp else f"la {n}.ª de las {total} empresas del mercado continuo, contando las extranjeras"
+        filas.append(("Capitalización", f"{_millones(float(c['capitalisation']))}{nota}: {donde}"))
     except (KeyError, ValueError, TypeError):
         faltan += 1
 
