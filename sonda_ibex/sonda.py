@@ -15,11 +15,11 @@ def prueba(nombre, url, **kw):
     except Exception as e:
         res[nombre] = {"url": url, "error": str(e)}
 
-prueba("stooq_ibex", "https://stooq.com/q/d/l/?s=^ibex&i=d")
-prueba("stooq_ibex_es", "https://stooq.pl/q/d/l/?s=^ibex&i=d")
-prueba("yahoo_ibex", "https://query1.finance.yahoo.com/v8/finance/chart/%5EIBEX?period1=0&period2=4102444800&interval=1d")
-prueba("yahoo_ibex_div", "https://query1.finance.yahoo.com/v8/finance/chart/%5EIBEXTR?period1=0&period2=4102444800&interval=1d")
-prueba("bme_ficha", "https://www.bolsasymercados.es/bme-exchange/es/Indices/Ibex/Ficha/IBEX-35")
+# prueba("stooq_ibex", "https://stooq.com/q/d/l/?s=^ibex&i=d")
+# prueba("stooq_ibex_es", "https://stooq.pl/q/d/l/?s=^ibex&i=d")
+# prueba("yahoo_ibex", "https://query1.finance.yahoo.com/v8/finance/chart/%5EIBEX?period1=0&period2=4102444800&interval=1d")
+# prueba("yahoo_ibex_div", "https://query1.finance.yahoo.com/v8/finance/chart/%5EIBEXTR?period1=0&period2=4102444800&interval=1d")
+# prueba("bme_ficha", "https://www.bolsasymercados.es/bme-exchange/es/Indices/Ibex/Ficha/IBEX-35")
 prueba("bme_factsheet", "https://www.bolsasymercados.es/dam/descargas/indices/factsheet-ibex-35-es.pdf")
 prueba("bme_boletin", "https://www.bolsasymercados.es/dam/descargas/indices/boletin-semanal-indices-ibex-es-en.pdf")
 
@@ -32,19 +32,26 @@ try:
         pg = b.new_page(user_agent=UA["User-Agent"])
         def anota(resp):
             u = resp.url
-            if any(x in u for x in ("api", "json", "Historic", "historic", "Precio", "precio")) and not u.endswith((".js", ".css")):
+            if ("apiweb" in u or "six-group" in u or "fqs" in u or "istoric" in u) and not u.endswith((".js", ".css")):
                 try:
                     cuerpo = resp.text()[:3000]
                 except Exception:
                     cuerpo = ""
                 llamadas.append({"url": u, "status": resp.status, "tipo": resp.headers.get("content-type"), "muestra": cuerpo})
         pg.on("response", anota)
-        for u in ["https://www.bolsasymercados.es/bme-exchange/es/Indices/Ibex/Ficha/IBEX-35",
-                  "https://www.bolsasymercados.es/bme-exchange/es/Indices/Ibex/Precios-Historicos/IBEX-35",
-                  "https://www.bolsasymercados.es/bme-exchange/es/Mercados-y-Cotizaciones/Indices/Ibex"]:
+        for u in ["https://www.bolsasymercados.es/es/bme-exchange/indices/ficha.ibex-35-es0si0000005.html",
+                  "https://www.bolsasymercados.es/es/bme-exchange/indices/ibex/historico.html",
+                  "https://www.bolsasymercados.es/es/bme-exchange/mercados-y-cotizaciones/acciones/ibex-35-es0si0000005.html"]:
             try:
                 pg.goto(u, wait_until="networkidle", timeout=60000); time.sleep(3)
-                (OUT / ("pagina_" + u.rsplit("/", 1)[-1] + ".html")).write_text(pg.content()[:300000], encoding="utf-8")
+                (OUT / ("pagina_" + u.rsplit("/", 1)[-1])).write_text(pg.content()[:600000], encoding="utf-8")
+                for texto in ["Histórico", "Historico", "Descargar", "Exportar", "CSV", "Excel"]:
+                    try:
+                        el = pg.get_by_text(texto, exact=False).first
+                        if el.count():
+                            el.click(timeout=5000); time.sleep(4)
+                    except Exception:
+                        pass
             except Exception as e:
                 llamadas.append({"url": u, "error": str(e)})
         b.close()
