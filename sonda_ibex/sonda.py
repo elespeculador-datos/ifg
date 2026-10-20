@@ -1,4 +1,4 @@
-"""Sonda temporal 20: artículos de normas del BOE (API de legislación consolidada), buscando el bloque por su título."""
+"""Sonda temporal 21 (IRPF): artículos de normas del BOE (API de legislación consolidada), buscando el bloque por su título."""
 import json, re, time
 from pathlib import Path
 import requests
@@ -8,9 +8,8 @@ for f in OUT.glob("*"):
 API = "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/{id}/texto/{q}"
 H = {"Accept": "application/xml", "User-Agent": "Mozilla/5.0 (El Especulador, verificación)"}
 NORMAS = {
-    "BOE-A-2023-7053": [52, 53, 64, 65, 66, 110, 116, 117, 118],   # Ley 6/2023 de los Mercados de Valores
-    "BOE-A-2007-14483": [10, 11, 47, 48],                          # RD 1066/2007 de OPAs
-    "BOE-A-2010-10544": [23, 285, 286, 287, 288, 290, 291],        # Ley de Sociedades de Capital
+    "BOE-A-2006-20764": [25, 33, 37, 46, 49, 101],   # Ley 35/2006 del IRPF
+    "BOE-A-2007-6820": [75, 90, 93],                  # Reglamento del IRPF (RD 439/2007)
 }
 res = {}
 def texto(xml: str) -> str:
