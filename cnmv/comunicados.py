@@ -29,6 +29,7 @@ import html
 import json
 import re
 import sys
+import time
 import unicodedata
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
@@ -105,17 +106,35 @@ def leer_canal(xml: str, canal: str) -> list[dict]:
     return filas
 
 
+def _bajar(canal: str, url: str) -> str:
+    ultimo = ""
+    for intento in range(4):
+        if intento:
+            time.sleep(20 * intento)
+        try:
+            r = requests.get(url, headers=CABECERAS, timeout=(15, 45))
+        except requests.RequestException as e:
+            ultimo = f"{type(e).__name__}: {e}"
+            continue
+        if r.status_code == 200:
+            r.encoding = "utf-8"
+            return r.text
+        ultimo = f"HTTP {r.status_code}: {r.text[:200]!r}"
+    raise DatosRaros(f"La CNMV no responde en el canal {canal} tras 4 intentos ({ultimo})")
+
+
 def descargar() -> list[dict]:
-    filas = []
+    """Cada canal por separado: si uno falla se publica con el otro (la hora siguiente lo recupera, porque el
+    canal guarda todo lo del día). Solo se para si fallan los dos."""
+    filas, fallos = [], []
     for canal, url in CANALES.items():
         try:
-            r = requests.get(url, headers=CABECERAS, timeout=60)
-        except requests.RequestException as e:
-            raise DatosRaros(f"La CNMV no responde en el canal {canal}: {type(e).__name__}: {e}") from e
-        if r.status_code != 200:
-            raise DatosRaros(f"La CNMV devuelve HTTP {r.status_code} en el canal {canal}: {r.text[:200]!r}")
-        r.encoding = "utf-8"
-        filas += leer_canal(r.text, canal)
+            filas += leer_canal(_bajar(canal, url), canal)
+        except DatosRaros as e:
+            print(f"::warning::{e}")
+            fallos.append(canal)
+    if len(fallos) == len(CANALES):
+        raise DatosRaros("No responde ningún canal de la CNMV")
     return filas
 
 
