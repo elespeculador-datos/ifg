@@ -12,6 +12,7 @@ capital) y lo convierte en datos abiertos y en una página legible:
   docs/cortos/datos/cambios.csv          altas, subidas, bajadas y salidas del día
   docs/cortos/datos/historial_cambios.csv  todos los cambios detectados, acumulados
   docs/cortos/datos/ultima.json          resumen para webs y widgets
+  docs/cortos/fragmento-wp.html          tablas en HTML para la página de elespeculador.com
 
 Fuente: CNMV, «Posiciones cortas netas», fichero NetShortPositions.xls.
 Licencia de los datos derivados: CC BY 4.0, citando a El Especulador y a la CNMV.
@@ -19,6 +20,7 @@ Licencia de los datos derivados: CC BY 4.0, citando a El Especulador y a la CNMV
 Uso:
   python cortos/rastreador.py                 descarga y publica
   python cortos/rastreador.py --local F.xls   usa un fichero ya descargado (pruebas)
+  python cortos/rastreador.py --solo-fragmento  rehace el fragmento con los CSV publicados
 """
 from __future__ import annotations
 
@@ -230,11 +232,77 @@ a{{color:var(--a)}} .pie{{color:var(--s);font-size:.85rem;margin-top:2em}}
 """
 
 
+# --------------------------------------------------------------------------- fragmento para WordPress
+def fragmento_wp(fecha: str, fecha_previa: str | None, vig: pd.DataFrame, res: pd.DataFrame, cam: pd.DataFrame) -> str:
+    """HTML estático que Make copia cada día en la página de elespeculador.com.
+
+    Va entre dos marcas: Make sustituye solo lo que hay entre ellas y deja intacto
+    el resto de la página. Sin estilos ni scripts (WordPress los filtraría) y sin
+    el carácter «$», que la sustitución por expresión regular de Make interpretaría.
+    """
+    def e(x) -> str:
+        return html.escape(str(x)).replace("$", "&#36;")
+
+    umbral = vig["posicion_pct"] >= 0.5 - 1e-9
+    top = res.iloc[0] if len(res) else None
+    frase = (f"La CNMV publica {int(umbral.sum())} posiciones cortas netas iguales o superiores al 0,5 % del capital, "
+             f"sobre {vig.loc[umbral, 'lei'].nunique()} emisores.")
+    if top is not None:
+        frase += (f" La mayor suma publicada es la de {e(top.emisor)}: {_pct(top.suma_publicada_pct)} del capital, "
+                  f"entre {int(top.tenedores)} tenedores; el mayor de ellos, {e(top.mayor_tenedor)}, con un {_pct(top.mayor_posicion_pct)}.")
+    if cam.empty:
+        bloque_cam = (f"<p>Sin cambios respecto a la publicación del {_fecha(fecha_previa)}.</p>" if fecha_previa
+                      else "<p>Los cambios diarios se verán aquí a partir de la próxima publicación de la CNMV.</p>")
+    else:
+        bloque_cam = (f"<p>Respecto a la publicación del {_fecha(fecha_previa)}:</p>\n" if fecha_previa else "") + (
+            "<figure class=\"wp-block-table\"><table><thead><tr><th>Emisor</th><th>Tenedor</th><th>Cambio</th><th>Antes</th><th>Ahora</th></tr></thead><tbody>\n"
+            + "\n".join(f"<tr><td>{e(r.emisor)}</td><td>{e(r.tenedor)}</td><td>{e(r.tipo)}</td><td>{_pct(r.antes_pct)}</td><td>{_pct(r.ahora_pct)}</td></tr>"
+                        for r in cam.itertuples())
+            + "\n</tbody></table></figure>")
+    por_nombre = vig.groupby("emisor")["isin"].nunique()
+    repetidos = set(por_nombre[por_nombre > 1].index) | set(res.loc[res["emisor"].duplicated(keep=False), "emisor"])
+    filas_res = "\n".join(
+        f"<tr><td>{e(r.emisor)}{' (ISIN ' + e(r.isin) + ')' if r.emisor in repetidos else ''}</td><td>{int(r.tenedores)}</td><td>{_pct(r.suma_publicada_pct)}</td>"
+        f"<td>{e(r.mayor_tenedor)} ({_pct(r.mayor_posicion_pct)})</td><td>{_fecha(r.ultima_fecha_posicion)}</td></tr>"
+        for r in res.itertuples())
+    filas_vig = "\n".join(
+        f"<tr><td>{e(r.emisor)}{' (ISIN ' + e(r.isin) + ')' if r.emisor in repetidos else ''}</td><td>{e(r.tenedor)}</td><td>{_pct(r.posicion_pct)}{' (bajó del umbral)' if r.posicion_pct < 0.5 - 1e-9 else ''}</td><td>{_fecha(r.fecha_posicion)}</td></tr>"
+        for r in vig.sort_values(["emisor", "posicion_pct"], ascending=[True, False]).itertuples())
+    return f"""<!-- cortos:inicio {fecha} -->
+<p><strong>Datos de la publicación de la CNMV del {_fecha(fecha)}.</strong> {frase}</p>
+<h2>Cambios respecto a la publicación anterior</h2>
+{bloque_cam}
+<h2>Suma publicada por emisor</h2>
+<figure class="wp-block-table"><table><thead><tr><th>Emisor</th><th>Tenedores</th><th>Suma publicada</th><th>Mayor posición</th><th>Última fecha de posición</th></tr></thead><tbody>
+{filas_res}
+</tbody></table></figure>
+<h2>Todas las posiciones publicadas</h2>
+<figure class="wp-block-table"><table><thead><tr><th>Emisor</th><th>Tenedor</th><th>Posición corta neta</th><th>Fecha de la posición</th></tr></thead><tbody>
+{filas_vig}
+</tbody></table></figure>
+<!-- cortos:fin -->"""
+
+
+def solo_fragmento() -> int:
+    """Rehace el fragmento con los CSV ya publicados, sin descargar nada."""
+    estado = json.loads((DATOS / "ultima.json").read_text(encoding="utf-8"))
+    vig = pd.read_csv(DATOS / "vigentes.csv", dtype={"lei": str, "isin": str})
+    res = pd.read_csv(DATOS / "resumen_emisores.csv", dtype={"isin": str})
+    cam = pd.read_csv(DATOS / "cambios.csv", dtype={"isin": str})
+    (SALIDA / "fragmento-wp.html").write_text(
+        fragmento_wp(estado["fecha_publicacion"], estado.get("publicacion_anterior"), vig, res, cam), encoding="utf-8")
+    print(f"Fragmento rehecho con la publicación del {estado['fecha_publicacion']}.")
+    return 0
+
+
 # --------------------------------------------------------------------------- principal
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--local", help="usar un fichero ya descargado")
+    ap.add_argument("--solo-fragmento", action="store_true", help="rehacer solo el fragmento para WordPress")
     args = ap.parse_args()
+    if args.solo_fragmento:
+        return solo_fragmento()
     contenido = Path(args.local).read_bytes() if args.local else descargar()
     fecha, vig, serie, ant = leer(contenido)
     DATOS.mkdir(parents=True, exist_ok=True)
@@ -271,6 +339,8 @@ def main() -> int:
         "fuente": URL, "licencia": "CC BY 4.0 · El Especulador a partir de datos de la CNMV",
     }, ensure_ascii=False, indent=1), encoding="utf-8")
     (SALIDA / "index.html").write_text(pagina(fecha, vig, res, cam, primera=previo is None), encoding="utf-8")
+    (SALIDA / "fragmento-wp.html").write_text(
+        fragmento_wp(fecha, fecha_previa if fecha_previa != fecha else None, vig, res, cam), encoding="utf-8")
     print(f"Publicación del {fecha}: {len(vig)} filas vigentes, {vig['lei'].nunique()} emisores, {len(cam)} cambios.")
     return 0
 
