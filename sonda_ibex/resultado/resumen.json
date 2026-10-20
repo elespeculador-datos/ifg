@@ -1,0 +1,34 @@
+{
+ "head tas/NetShortPositions.xls": {
+  "status": 200,
+  "Last-Modified": "Mon, 19 Oct 2026 18:18:31 GMT",
+  "Date": "Tue, 20 Oct 2026 14:42:15 GMT",
+  "ETag": "\"6b5e373ff65fdd1:0\"",
+  "Content-Length": "1708032",
+  "Content-Type": "application/vnd.ms-excel"
+ },
+ "get tas/NetShortPositions.xls": {
+  "status": 200,
+  "Last-Modified": "Mon, 19 Oct 2026 18:18:31 GMT",
+  "Date": "Tue, 20 Oct 2026 14:42:15 GMT",
+  "ETag": "\"6b5e373ff65fdd1:0\"",
+  "Content-Length": "1708032",
+  "Content-Type": "application/vnd.ms-excel"
+ },
+ "head as/NetShortPositions.xlsx": {
+  "status": 404,
+  "Last-Modified": null,
+  "Date": "Tue, 20 Oct 2026 14:42:16 GMT",
+  "ETag": null,
+  "Content-Length": "103",
+  "Content-Type": "text/html"
+ },
+ "get as/NetShortPositions.xlsx": {
+  "status": 404,
+  "Last-Modified": null,
+  "Date": "Tue, 20 Oct 2026 14:42:16 GMT",
+  "ETag": null,
+  "Content-Length": "103",
+  "Content-Type": "text/html"
+ }
+}
