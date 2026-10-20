@@ -1,38 +1,838 @@
 {
- "desde1990": {
-  "status": 200,
-  "bytes": 84226,
-  "total": 220,
-  "params": {
-   "companyKey": "",
-   "from": "19900101",
-   "to": "20261231",
-   "page": 0,
-   "pageSize": 0
+ "CorporateActions/Dividends": {
+  "2025": {
+   "status": 200,
+   "total": 60,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20251231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": {
+    "exDate": "20251229",
+    "paymentDate": "20251231",
+    "company": "DESA",
+    "share": "DESA",
+    "isin": "ES0126251018",
+    "concept": "A",
+    "conceptText": "A CUENTA",
+    "year": "2025",
+    "type": "O",
+    "typeText": "ORDINARIO",
+    "netAmount": 0.22755148,
+    "grossAmount": 0.28092776,
+    "tradingUnit": 1,
+    "currency": "EUR"
+   }
+  },
+  "2020": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20201231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2015": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20151231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2010": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20101231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2005": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20051231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2000": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20001231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
   }
  },
- "desde2005": {
-  "status": 200,
-  "bytes": 55124,
-  "total": 143,
-  "params": {
-   "companyKey": "",
-   "from": "20050101",
-   "to": "20261231",
-   "page": 0,
-   "pageSize": 0
+ "CorporateActions/Delistings": {
+  "2025": {
+   "status": 200,
+   "total": 4,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20251231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": {
+    "admissionDate": "20251224",
+    "isin": "ES0108015035",
+    "marketCode": "24209",
+    "share": "ALGENID INVERSIONES",
+    "numShares": 4696592,
+    "nominal": 4696592.0,
+    "tradingUnit": 1,
+    "turnover": 6761213.8432,
+    "observ": "",
+    "relevantFactCode": "065",
+    "numSeq": "1",
+    "origin": ""
+   }
+  },
+  "2020": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20201231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2015": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20151231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2010": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20101231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2005": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20051231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2000": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20001231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
   }
  },
- "desde2015": {
-  "status": 200,
-  "bytes": 23149,
-  "total": 60,
-  "params": {
-   "companyKey": "",
-   "from": "20150101",
-   "to": "20261231",
-   "page": 0,
-   "pageSize": 0
+ "CorporateActions/NewListings": {
+  "2025": {
+   "status": 200,
+   "total": 39,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "listingType": null,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20251231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": {
+    "admissionDate": "20251230",
+    "isin": "ES0105716130",
+    "marketCode": "13480",
+    "share": "VANADI COFFEE",
+    "numShares": 17187500,
+    "nominal": 343750.0,
+    "tradingUnit": 1,
+    "turnover": 2750000.0,
+    "admissionType": "Integration",
+    "observ": "AMP. CAP. CONV. OBL. DIC 25 -2",
+    "relevantFactCode": "107",
+    "numSeq": "1",
+    "origin": "1"
+   }
+  },
+  "2020": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "listingType": null,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20201231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2015": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "listingType": null,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20151231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2010": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "listingType": null,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20101231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2005": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "listingType": null,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20051231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2000": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "listingType": null,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20001231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
   }
+ },
+ "CorporateActions/Splits": {
+  "2025": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20260920",
+    "to": "20251231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2020": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20260920",
+    "to": "20201231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2015": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20260920",
+    "to": "20151231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2010": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20260920",
+    "to": "20101231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2005": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20260920",
+    "to": "20051231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2000": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20260920",
+    "to": "20001231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  }
+ },
+ "CorporateActions/CapitalIncreases": {
+  "2025": {
+   "status": 200,
+   "total": 33,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20251231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": {
+    "numSeq": "1",
+    "startingDate": "20251230",
+    "finishDate": "20251230",
+    "isin": "ES0105716130",
+    "issuerName": "VANADI COFFEE S.A.",
+    "shares": 17187500,
+    "naturIndicator": "(*)",
+    "naturDescription": "(*)",
+    "typeIndicator": "3",
+    "typeDescription": "CON PRIMA",
+    "oldShares": null,
+    "newShares": null,
+    "price": null,
+    "disbursement": null,
+    "profitDate": "(*)",
+    "dividendDate": "(*)",
+    "nominalAmount": 343750.0,
+    "rightsIndicator": "N",
+    "rightsPrice": 0.0,
+    "currency": "",
+    "liberatedPercentage": 0.0,
+    "admissionDate": "",
+    "effectiveAmount": 0.0,
+    "subgroupIndicator": "N",
+    "observations": "(*)"
+   }
+  },
+  "2020": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20201231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2015": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20151231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2010": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20101231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2005": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20051231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2000": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20251020",
+    "to": "20001231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  }
+ },
+ "CorporateActions/PublicOfferings": {
+  "2025": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "companyKey": "",
+    "from": "20250101",
+    "to": "20251231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2020": {
+   "status": 200,
+   "total": 1,
+   "params": {
+    "companyKey": "",
+    "from": "20200101",
+    "to": "20201231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": {
+    "companyName": "SOLTEC POWER HOLDINGS, S.A.",
+    "companyShortName": "SOLTEC",
+    "companyTradingSystem": "02",
+    "companyKey": "05513",
+    "offeringCompanyName": "SOLTEC POWER HOLDINGS, S.A.",
+    "price": 4.82,
+    "authorisationDate": "",
+    "startingDate": "20201016",
+    "finishDate": "20201027",
+    "offeredShares": 31146717,
+    "greenShoeIndicator": "S",
+    "greenShoe": 3114671,
+    "maximumDate": "",
+    "definitivedDate": "20201027",
+    "observations1": "",
+    "observations2": "",
+    "observations3": "",
+    "observations4": "",
+    "observations5": ""
+   }
+  },
+  "2015": {
+   "status": 200,
+   "total": 8,
+   "params": {
+    "companyKey": "",
+    "from": "20150101",
+    "to": "20151231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": {
+    "companyName": "THINK SMART, S.A.",
+    "companyShortName": "THINK SMART",
+    "companyTradingSystem": "11",
+    "companyKey": "05097",
+    "offeringCompanyName": "THINK SMART, S.A.",
+    "price": 3.32,
+    "authorisationDate": "",
+    "startingDate": "20151026",
+    "finishDate": "20151029",
+    "offeredShares": 1129518,
+    "greenShoeIndicator": "N",
+    "greenShoe": 0,
+    "maximumDate": "",
+    "definitivedDate": "",
+    "observations1": "",
+    "observations2": "",
+    "observations3": "",
+    "observations4": "",
+    "observations5": ""
+   }
+  },
+  "2010": {
+   "status": 200,
+   "total": 13,
+   "params": {
+    "companyKey": "",
+    "from": "20100101",
+    "to": "20101231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": {
+    "companyName": "COMMCENTER, S.A.",
+    "companyShortName": "COMMCENTER",
+    "companyTradingSystem": "11",
+    "companyKey": "21071",
+    "offeringCompanyName": "COMMCENTER, S.A.",
+    "price": 0.0,
+    "authorisationDate": "",
+    "startingDate": "20101210",
+    "finishDate": "20101222",
+    "offeredShares": 795500,
+    "greenShoeIndicator": "N",
+    "greenShoe": 0,
+    "maximumDate": "",
+    "definitivedDate": "20101222",
+    "observations1": "",
+    "observations2": "",
+    "observations3": "",
+    "observations4": "",
+    "observations5": ""
+   }
+  },
+  "2005": {
+   "status": 200,
+   "total": 1,
+   "params": {
+    "companyKey": "",
+    "from": "20050101",
+    "to": "20051231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": {
+    "companyName": "CORPORACION DERMOESTETICA, S.A.",
+    "companyShortName": "CORP. DERMO.",
+    "companyTradingSystem": "02",
+    "companyKey": "24204",
+    "offeringCompanyName": "CORPORACION DERMOESTETICA",
+    "price": 0.0,
+    "authorisationDate": "20050628",
+    "startingDate": "20050628",
+    "finishDate": "20050711",
+    "offeredShares": 15013906,
+    "greenShoeIndicator": "S",
+    "greenShoe": 2252086,
+    "maximumDate": "20050705",
+    "definitivedDate": "20050711",
+    "observations1": "7,60/9,10 EUROS",
+    "observations2": "",
+    "observations3": "",
+    "observations4": "",
+    "observations5": ""
+   }
+  },
+  "2000": {
+   "status": 200,
+   "total": 15,
+   "params": {
+    "companyKey": "",
+    "from": "20000101",
+    "to": "20001231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": {
+    "companyName": "TELEFONICA MOVILES,S.A.",
+    "companyShortName": "TELF.MOVILES",
+    "companyTradingSystem": "02",
+    "companyKey": "78401",
+    "offeringCompanyName": "TELEFONICA MOVILES",
+    "price": 0.0,
+    "authorisationDate": "20001102",
+    "startingDate": "20001103",
+    "finishDate": "20001117",
+    "offeredShares": 300000000,
+    "greenShoeIndicator": "S",
+    "greenShoe": 45000000,
+    "maximumDate": "20001114",
+    "definitivedDate": "20001120",
+    "observations1": "10,85/13,25",
+    "observations2": "",
+    "observations3": "",
+    "observations4": "",
+    "observations5": ""
+   }
+  }
+ },
+ "CorporateActions/Mergers": {
+  "2025": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20260920",
+    "to": "20251231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2020": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20260920",
+    "to": "20201231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2015": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20260920",
+    "to": "20151231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2010": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20260920",
+    "to": "20101231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2005": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20260920",
+    "to": "20051231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  },
+  "2000": {
+   "status": 200,
+   "total": 0,
+   "params": {
+    "tradingSystem": null,
+    "mtfSegment": null,
+    "top1": false,
+    "companyKey": "",
+    "isin": "",
+    "from": "20260920",
+    "to": "20001231",
+    "page": 0,
+    "pageSize": 0
+   },
+   "muestra": null
+  }
+ },
+ "composicion": {
+  "status": 200,
+  "bytes": 126963,
+  "tipo": "application/pdf",
+  "last_modified": "Mon, 21 Sep 2026 08:42:50 GMT"
+ },
+ "factsheet": {
+  "status": 200,
+  "bytes": 505858,
+  "tipo": "application/pdf",
+  "last_modified": "Mon, 16 Mar 2026 10:34:36 GMT"
  }
 }
