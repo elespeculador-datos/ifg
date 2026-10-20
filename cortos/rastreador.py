@@ -263,6 +263,7 @@ def main() -> int:
         cam.to_csv(hist, index=False)
     estado.write_text(json.dumps({
         "fecha_publicacion": fecha,
+        "publicacion_anterior": fecha_previa if fecha_previa != fecha else None,
         "generado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "posiciones": int((vig["posicion_pct"] >= 0.5 - 1e-9).sum()), "emisores": int(vig.loc[vig["posicion_pct"] >= 0.5 - 1e-9, "lei"].nunique()),
         "cambios": int(len(cam)),
