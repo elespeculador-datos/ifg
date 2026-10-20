@@ -12,6 +12,7 @@ on:
     - cron: "40 16 * * 1-5"
     - cron: "40 17 * * 1-5"
     - cron: "40 18 * * 1-5"
+    - cron: "15 6 * * 2-6"    # por si BME vuelca el cierre de madrugada
   workflow_dispatch:
 
 permissions:

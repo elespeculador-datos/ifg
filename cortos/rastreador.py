@@ -37,7 +37,7 @@ import pandas as pd
 import requests
 
 URL = "https://www.cnmv.es/DocPortal/Posiciones-Cortas/NetShortPositions.xls"
-FICHA_CNMV = "https://www.cnmv.es/portal/consultas/busqueda.aspx?id=29"
+FICHA_CNMV = "https://www.cnmv.es/portal/consultas/busqueda?id=29"
 PILAR = "https://elespeculador.com/posiciones-cortas-bolsa-espanola/"
 RAIZ = Path(__file__).resolve().parent.parent
 SALIDA = RAIZ / "docs" / "cortos"
