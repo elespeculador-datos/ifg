@@ -35,6 +35,8 @@ SALIDA = RAIZ / "docs" / "ibex"
 DATOS = SALIDA / "datos"
 HISTORICO = Path(__file__).resolve().parent / "historico_anual.csv"
 PILAR = "https://elespeculador.com/historico-ibex-35-records/"
+PAGINA_WP = "https://elespeculador.com/ibex-35-en-cifras/"
+PAGES = "https://elespeculador-datos.github.io/ifg/ibex/"
 
 # Récords anteriores a la ventana de la API: 15.945,70 puntos al cierre y
 # 16.040,40 intradía, los dos del 8/11/2007. Ningún cierre ni máximo intradía
@@ -300,6 +302,27 @@ a{{color:#1f4e8c}} .pie{{color:#5b6675;font-size:.85rem;margin-top:2em}}
 """
 
 
+def ld_wp(r: dict) -> str:
+    """Marcado Dataset (schema.org) en una sola línea, para la página de elespeculador.com."""
+    return '<script type="application/ld+json">' + json.dumps({
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": "Estadística del IBEX 35 de El Especulador",
+        "description": "Último cierre, rentabilidad del año, máximos históricos y rentabilidad anual y mensual del IBEX 35, con los cierres oficiales de BME, actualizados cada día hábil.",
+        "url": PAGINA_WP, "inLanguage": "es", "spatialCoverage": "España",
+        "creator": {"@type": "Organization", "name": "El Especulador", "url": "https://elespeculador.com/"},
+        "license": "https://creativecommons.org/licenses/by/4.0/", "isBasedOn": "https://www.bolsasymercados.es/",
+        "dateModified": r["fecha"],
+        "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"{PAGES}datos/{n}.csv"}
+                         for n in ["rentabilidad_anual", "rentabilidad_mensual", "maximos"]],
+    }, ensure_ascii=False) + "</script>"
+
+
+def con_ld(frag: str, ld: str) -> str:
+    marca = "\n<!-- ibex:fin -->"
+    assert frag.count(marca) == 1 and "$" not in ld
+    return frag.replace(marca, "\n" + ld + marca)
+
+
 def escribir(r: dict) -> None:
     DATOS.mkdir(parents=True, exist_ok=True)
     r["_anual"].to_csv(DATOS / "rentabilidad_anual.csv", index=False)
@@ -312,7 +335,7 @@ def escribir(r: dict) -> None:
     publico["licencia"] = "CC BY 4.0 · El Especulador"
     (DATOS / "ultima.json").write_text(json.dumps(publico, ensure_ascii=False, indent=1), encoding="utf-8")
     frag = fragmento_wp(r)
-    (SALIDA / "fragmento-wp.html").write_text(frag, encoding="utf-8")
+    (SALIDA / "fragmento-wp.html").write_text(con_ld(frag, ld_wp(r)), encoding="utf-8")
     (SALIDA / "index.html").write_text(pagina(r, frag), encoding="utf-8")
 
 
