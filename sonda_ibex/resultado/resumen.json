@@ -1,35 +1,133 @@
 {
- "RELACION_SOCIEDADES_EJERCICIO_2026.pdf": {
-  "status": 200,
-  "bytes": 393190,
-  "tipo": "application/pdf"
- },
- "RELACION_SOCIEDADES_EJER_2025.pdf": {
-  "status": 200,
-  "bytes": 384938,
-  "tipo": "application/pdf"
- },
- "RELACION_SOCIEDADES_EJERCICIO_2025.pdf": {
+ "HistoricalSharePrices": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/HistoricalSharePrices?ISIN=ES0113900J37&from=20261001&to=20261020&page=0&pageSize=0&tradingSystem=SIBE",
   "status": 404,
-  "bytes": 4928,
-  "tipo": "text/html"
+  "tipo": null,
+  "muestra": ""
  },
- "RELACION_SOCIEDADES_EJER_2024.pdf": {
+ "HistoricalSharesPrices": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/HistoricalSharesPrices?ISIN=ES0113900J37&from=20261001&to=20261020&page=0&pageSize=0&tradingSystem=SIBE",
   "status": 200,
-  "bytes": 46195,
-  "tipo": "application/pdf"
+  "tipo": "application/json; charset=utf-8",
+  "muestra": "{\"details\":{\"name\":\"BANCO SANTANDER\",\"market\":\"02\",\"tradingSystem\":\"SIBE\",\"ticker\":\"SAN\",\"isin\":\"ES0113900J37\"},\"totalResults\":13,\"params\":{\"type\":\"V\",\"onlyWithTurnover\":null,\"isin\":\"ES0113900J37\",\"from\":\"20261001\",\"to\":\"20261019\",\"page\":0,\"pageSize\":0},\"hasMoreResults\":false,\"data\":[{\"date\":\"20261001\",\"close\":11.8120,\"reference\":12.3280,\"volume\":34170257,\"turnover\":408927896.78,\"last\":11.8120,\"high\":12.2480,\"low\":11.8120,\"average\":11.9659,\"previous\":12.3280,\"facMult\":0,\"facDivi\":0,\"diff\":-0.041856,\"tendency\":2},{\"date\":\"20261002\",\"close\":11.8080,\"reference\":11.8120,\"volume\":25160882,\"turnover\":296263055.74,\"last\":11.8080,\"high\":11.9420,\"low\":11.6160,\"average\":11.7755,\"previous\":11.8120,\"fac"
  },
- "RELACION_SOCIEDADES_EJERCICIO_2024.pdf": {
+ "HistoricalPrices": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/HistoricalPrices?ISIN=ES0113900J37&from=20261001&to=20261020&page=0&pageSize=0&tradingSystem=SIBE",
   "status": 404,
-  "bytes": 4928,
-  "tipo": "text/html"
+  "tipo": null,
+  "muestra": ""
  },
- "RELACION_SOCIEDADES_EJERCICIO_2027.pdf": {
+ "SharesHistoricalPrices": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/SharesHistoricalPrices?ISIN=ES0113900J37&from=20261001&to=20261020&page=0&pageSize=0&tradingSystem=SIBE",
   "status": 404,
-  "bytes": 4928,
-  "tipo": "text/html"
+  "tipo": null,
+  "muestra": ""
  },
- "https://sede.agenciatributaria.gob.es/Sede/impuestos-tasas/impuesto-sobre-transacciones-financieras.html": {
-  "status": 200
- }
+ "SharesPrices": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/SharesPrices?tradingSystem=SIBE&page=0&pageSize=0",
+  "status": 404,
+  "tipo": null,
+  "muestra": ""
+ },
+ "SharePrices": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/SharePrices?tradingSystem=SIBE&page=0&pageSize=0",
+  "status": 404,
+  "tipo": null,
+  "muestra": ""
+ },
+ "Shares": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/Shares?tradingSystem=SIBE&page=0&pageSize=0",
+  "status": 404,
+  "tipo": null,
+  "muestra": ""
+ },
+ "ShareDetails": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/ShareDetails?ISIN=ES0113900J37",
+  "status": 404,
+  "tipo": null,
+  "muestra": ""
+ },
+ "ShareDetail": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/ShareDetail?ISIN=ES0113900J37",
+  "status": 404,
+  "tipo": null,
+  "muestra": ""
+ },
+ "CompanyDetails": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/CompanyDetails?companyKey=13900",
+  "status": 404,
+  "tipo": null,
+  "muestra": ""
+ },
+ "IndexPrices": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/IndexPrices?ISIN=ES0SI0000005",
+  "status": 404,
+  "tipo": null,
+  "muestra": ""
+ },
+ "IndicesPrices": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/IndicesPrices",
+  "status": 404,
+  "tipo": null,
+  "muestra": ""
+ },
+ "IndexConstituents": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/IndexConstituents?ISIN=ES0SI0000005",
+  "status": 404,
+  "tipo": null,
+  "muestra": ""
+ },
+ "IndexShares": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/IndexShares?ISIN=ES0SI0000005",
+  "status": 404,
+  "tipo": null,
+  "muestra": ""
+ },
+ "IndexComposition": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/IndexComposition?ISIN=ES0SI0000005",
+  "status": 404,
+  "tipo": null,
+  "muestra": ""
+ },
+ "IndicesShares": {
+  "url": "https://apiweb.bolsasymercados.es/Market/v1/EQ/IndicesShares?ISIN=ES0SI0000005",
+  "status": 404,
+  "tipo": null,
+  "muestra": ""
+ },
+ "pagina do-Continuo/Precios/ibex-35-ES0SI0000005": {
+  "status": 200,
+  "bytes": 182792
+ },
+ "pagina s-y-Cotizaciones/Indices/Familia/ibex-35": {
+  "status": 200,
+  "bytes": 250553
+ },
+ "pagina tinuo/Ficha/BANCO-SANTANDER-ES0113900J37": {
+  "status": 200,
+  "bytes": 175427
+ },
+ "pagina ercado-Continuo/Precios/mercado-continuo": {
+  "status": 200,
+  "bytes": 187857
+ },
+ "scripts": [
+  "https://cdn.cookielaw.org/scripttemplates/otSDKStub.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/bme/clientlibs/clientlib-base.min.ACSHASH86b9d387dd6a9ac638344b5a4522ed15.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/bme/clientlibs/clientlib-google-gtm.ACSHASH5e4ae57fed51771e48bd142fd48aef87.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/bme/clientlibs/clientlib-i18n.min.ACSHASHe8011fa1ea17504838218b40dea116d3.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/bme/clientlibs/clientlib-site.min.ACSHASH617b9eedf499783f395d1de693753e55.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/bme/components/dynamic/index-ticker/clientlibs.min.ACSHASH2e0cf17fad790c04f6ef7a73d980fda6.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/bme/components/dynamic/market-activity/clientlibs.min.ACSHASHc7f709e6c56ae41a12d18e0af11c41de.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/bme/components/dynamic/market-status-teaser/clientlibs.min.ACSHASHb799a8851e2c51901156de52fa373908.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/bme/components/dynamic/share-details/clientlibs.min.ACSHASH6578360742099df01e9899a2fda039f4.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/bme/components/dynamic/shares-explorer/clientlibs.min.ACSHASHf6e046f0ac5f93cda8327ab06474b2bc.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/bme/components/pagerelatedlist/clientlibs.min.ACSHASH2361187bc27a561531f5a20721f5fd22.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/bme/components/taxonomy/pagetaxonomyfilterlist/clientlibs.min.ACSHASHce80f5c79ab9e8f8b513fc7b496c5368.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/clientlibs/granite/jquery/granite/csrf.min.ACSHASH56934e461ff6c436f962a5990541a527.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/core/wcm/components/commons/site/clientlibs/container.min.ACSHASH0a6aff292f5cc42142779cde92054524.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/saas-aem-module/clientlibs/clientlib-base.min.ACSHASH0c2477f459617676a9c5b0115e5ccff3.js",
+  "https://www.bolsasymercados.es/etc.clientlibs/saas-aem-module/clientlibs/clientlib-dependencies.min.ACSHASHd41d8cd98f00b204e9800998ecf8427e.js"
+ ],
+ "rutas": []
 }
