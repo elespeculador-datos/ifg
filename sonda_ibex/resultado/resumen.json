@@ -1,323 +1,96 @@
 {
- "listed": {
-  "n": 122,
-  "paginas": [
+ "hora_utc": "2026-10-20T20:17:49+00:00",
+ "hist": {
+  "status": 200,
+  "filas": [
    {
-    "page": 0,
-    "n": 122,
-    "total": 122,
-    "mas": false,
-    "eco": {
-     "tradingSystem": "SIBE",
-     "mtfSegment": null,
-     "sectorKey": null,
-     "subsectorKey": null,
-     "companyKey": null,
-     "isin": null,
-     "page": 0,
-     "pageSize": 0
-    }
+    "date": "20261014",
+    "close": 19230.7,
+    "previous": null,
+    "diff": null
    },
    {
-    "page": 0,
-    "n": 122,
-    "total": 122,
-    "mas": false,
-    "eco": {
-     "tradingSystem": "SIBE",
-     "mtfSegment": null,
-     "sectorKey": null,
-     "subsectorKey": null,
-     "companyKey": null,
-     "isin": null,
-     "page": 0,
-     "pageSize": 0
-    }
+    "date": "20261015",
+    "close": 19177.7,
+    "previous": null,
+    "diff": null
+   },
+   {
+    "date": "20261016",
+    "close": 19326.3,
+    "previous": null,
+    "diff": null
+   },
+   {
+    "date": "20261019",
+    "close": 19039.3,
+    "previous": null,
+    "diff": null
    }
   ]
  },
- "historicos": {
-  "ES0125220311": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0132105018": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0167050915": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0105046017": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": [
-    [
-     "20211020",
-     14.4,
-     1,
-     10
-    ],
-    [
-     "20211021",
-     14.1,
-     1,
-     10
-    ],
-    [
-     "20211022",
-     14.195,
-     1,
-     10
-    ],
-    [
-     "20211025",
-     13.96,
-     1,
-     10
-    ],
-    [
-     "20211026",
-     14.2,
-     1,
-     10
-    ],
-    [
-     "20211027",
-     14.175,
-     1,
-     10
-    ]
-   ]
-  },
-  "ES0109067019": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "LU1598757687": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0113211835": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0113860A34": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0113900J37": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0113679I37": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0140609019": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0105066007": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0105027009": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0105563003": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0130960018": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0130670112": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "NL0015001FS8": {
-   "n": 854,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20230616",
-   "con_factor": []
-  },
-  "ES0137650018": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0171996087": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0144580Y14": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0118594417": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0148396007": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0139140174": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0177542018": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0157261019": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0124244E34": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0105025003": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0116870314": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0105777017": {
-   "n": 630,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20240503",
-   "con_factor": []
-  },
-  "ES0173093024": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0173516115": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0182870214": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0165386014": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0178430E18": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
-  },
-  "ES0180907000": {
-   "n": 1278,
-   "paginas": 1,
-   "primera": "20261019",
-   "ultima": "20211020",
-   "con_factor": []
+ "last": {
+  "status": 404,
+  "filas": {
+   "texto": ""
   }
+ },
+ "last_isin": {
+  "status": 404,
+  "filas": {
+   "texto": ""
+  }
+ },
+ "last_tipo": {
+  "status": 404,
+  "filas": {
+   "texto": ""
+  }
+ },
+ "acc_hist": {
+  "status": 200,
+  "filas": [
+   {
+    "date": "20261014",
+    "close": 21.71,
+    "previous": 21.56,
+    "diff": 0.006957
+   },
+   {
+    "date": "20261015",
+    "close": 21.53,
+    "previous": 21.71,
+    "diff": -0.008291
+   },
+   {
+    "date": "20261016",
+    "close": 21.69,
+    "previous": 21.53,
+    "diff": 0.007431
+   },
+   {
+    "date": "20261019",
+    "close": 21.23,
+    "previous": 21.69,
+    "diff": -0.021208
+   }
+  ]
+ },
+ "acc_last": {
+  "status": 200,
+  "filas": [
+   {
+    "date": "20261020",
+    "close": 21.23,
+    "previous": 21.23,
+    "diff": 0
+   },
+   {
+    "date": "20261019",
+    "close": 21.23,
+    "previous": 21.69,
+    "diff": -0.021208
+   }
+  ]
  }
 }
