@@ -1,0 +1,79 @@
+                                           IMPUESTO SOBRE TRANSACCIONES FINANCIERAS
+
+  De acuerdo con lo previsto en la disposición adicional segunda del Real Decreto 366/2021, de 25 de mayo, por el que se desarrolla el procedimiento de presentación e
+ingreso de las autoliquidaciones del Impuesto sobre las Transacciones Financieras y se modifican otras normas tributarias, se procede a publicar la relación de sociedades
+                  españolas cuyas acciones, a fecha 1 de diciembre de 2025 tienen un valor de capitalización bursátil superior a 1.000 millones de euros.
+
+
+                     RELACIÓN DE SOCIEDADES ESPAÑOLAS CUYA CAPITALIZACIÓN BURSATIL SUPERA LOS 1.000 MILLONES DE EUROS (a 1/12/2025)
+
+                                                                                                                VALOR DE CAPITALIZACIÓN           ADMON. COMPETENTE
+EJERCICIO      NIF        DENOMINACIÓN O RAZÓN SOCIAL                                          ISIN
+                                                                                                                  BURSATIL (1/12/2025)             PARA LA EXACCIÓN
+  2026      A15075062    INDUSTRIA DE DISEÑO TEXTIL, S.A. "INDITEX"                    ES0148396007                        153.619.777.080,00              AEAT
+  2026      A39000013    BANCO SANTANDER S.A.                                          ES0113900J37                        138.359.099.332,74              AEAT
+  2026      A48010615    IBERDROLA S.A.                                                ES0144580Y14                        119.894.625.280,27             BIZKAIA
+  2026      A48265169    BANCO BILBAO VIZCAYA ARGENTARIA, S.A.                         ES0113211835                        108.119.235.323,40             BIZKAIA
+  2026      A08663619    CAIXABANK, S.A.                                               ES0140609019                         68.914.209.625,06              AEAT
+  2026      A86212420    AENA, S.M.E., S.A.                                            ES0105046017                         35.175.000.000,00              AEAT
+  2026      A28023430    ENDESA, S.A.                                                  ES0130670112                         32.630.740.245,94              AEAT
+  2026      A84236934    AMADEUS IT GROUP, S.A.                                        ES0109067019                         28.246.300.153,50              AEAT
+  2026      A08015497    NATURGY ENERGY GROUP, S.A.                                    ES0116870314                         25.752.942.554,56              AEAT
+  2026      A85845535   INTERNATIONAL CONSOLIDATED AIRLINES GROUP, S.A.                ES0177542018                         21.182.588.339,71              AEAT
+  2026      A28004885   ACS ACTIVIDADES DE CONSTRUCCION Y SERVICIOS, S.A.              ES0167050915                         21.081.172.494,40              AEAT
+  2026      A28015865    TELEFONICA, S.A.                                              ES0178430E18                         20.798.152.580,07              AEAT
+  2026      A78374725    REPSOL, S.A.                                                  ES0173516115                         18.290.914.302,18              AEAT
+  2026      A64907306    CELLNEX TELECOM, S.A.                                         ES0105066007                         17.476.544.967,31              AEAT
+  2026      A08000143    BANCO DE SABADELL, S.A.                                       ES0113860A34                         15.920.034.732,71              AEAT
+  2026      A08055741    MAPFRE, S.A.                                                  ES0124244E34                         12.404.440.583,64              AEAT
+  2026      A28157360    BANKINTER, S.A.                                               ES0113679I37                         12.287.500.325,18              AEAT
+  2026      A74219304    EDP RENOVAVEIS, S.A.                                          ES0127797019                         12.023.818.847,04              AEAT
+  2026      A08001851    ACCIONA, S.A.                                                 ES0125220311                          9.325.631.010,00              AEAT
+  2026      A78003662    REDEIA CORPORACION, S.A.                                      ES0173093024                          8.267.702.400,00              AEAT
+  2026      A28599033    INDRA SISTEMAS S.A., SERIE A                                  ES0118594417                          7.889.385.593,32              AEAT
+  2026      A86977790    MERLIN PROPERTIES SOCIMI, S.A.                                ES0105025003                          7.159.306.217,30              AEAT
+  2026      A85483311    CORPORACIÓN ACCIONA ENERGÍAS RENOVABLES S.A.                  ES0105563003                          6.709.579.407,80              AEAT
+  2026      A93139053    UNICAJA BANCO, S.A.                                           ES0180907000                          6.536.586.417,66              AEAT
+  2026      A58389123                                                                  ES0171996087
+                        GRIFOLS, S.A.                                                                                         6.463.324.363,99             AEAT
+  2026      A58389123                                                                  ES0171996095
+  2026      A08168064 GRUPO CATALANA OCCIDENTE, S.A.                                   ES0116920333                           5.964.000.000,00             AEAT
+  2026      A28037224 FOMENTO DE CONSTRUCCIONES Y CONTRATAS, S.A.                      ES0122060314                           5.439.431.391,00             AEAT
+  2026      A17728593 FLUIDRA, S.A.                                                    ES0137650018                           4.515.033.145,00             AEAT
+  2026      A87008579 CIA. DE DIST. INTEG. LOGISTA HOLDINGS                            ES0105027009                           3.926.745.000,00             AEAT
+  2026      A28294726 ENAGAS,S.A.                                                      ES0130960018                           3.735.978.455,24             AEAT
+  2026      A20014452 CIE AUTOMOTIVE, S.A.                                             ES0105630315                           3.576.253.397,40            BIZKAIA
+  2026      A28027399 INMOBILIARIA COLONIAL, SOCIMI S.A.                               ES0139140174                           3.306.106.500,49             AEAT
+  2026      A28041283 LABORATORIOS FARMACEUTICOS ROVI S.A.                             ES0157261019                           3.074.145.720,00             AEAT
+  2026      A28013811 SACYR, S.A.                                                      ES0182870214                           3.047.184.219,55             AEAT
+  2026      A28250777 ACERINOX, S.A.                                                   ES0132105018                           3.039.398.172,49             AEAT
+  2026      A01004324 VIDRALA, S.A.                                                    ES0183746314                           2.936.201.917,20         ARABA/ÁLAVA
+  2026      A47412333 EBRO FOODS, S.A.                                                 ES0112501012                           2.781.886.287,36             AEAT
+  2026      A58869389 ALMIRALL S.A.                                                    ES0157097017                           2.723.476.310,64             AEAT
+  2026      A66674904 PUIG BRANDS, S.A. CLASE B                                        ES0105777017                           2.566.352.873,04             AEAT
+  2026      A48027056 ELECNOR S.A.                                                     ES0129743318                           2.536.050.000,00             AEAT
+  2026      A31065501 VISCOFAN, S.A.                                                   ES0184262212                           2.483.100.000,00           NAVARRA
+  2026      A87959649 CIRSA ENTERPRISES, S.A.                                          ES0105884011                           2.385.495.871,40             AEAT
+  2026      A28092583 TECNICAS REUNIDAS, S.A.                                          ES0178165017                           2.288.586.052,50             AEAT
+  2026      A83511501 SOLARIA ENERGIA Y MEDIO AMBIENTE, S.A.                           ES0165386014                           2.041.697.313,84             AEAT
+  2026      A85130821 GRENERGY RENOVABLES, S.A.                                        ES0105079000                           1.943.421.776,00             AEAT
+  2026      A08017535 CEMENTOS MOLINS, S.A.                                            ES0117360117                           1.917.354.430,00             AEAT
+  2026      A20001020 CONSTRUCCIONES Y AUXILIAR DE FERROCARRILES, S.A.                 ES0121975009                           1.844.304.350,00          GUIPUZKOA
+  2026      A95786562 NEINOR HOMES, S.A.                                               ES0105251005                           1.807.209.991,48            BIZKAIA
+  2026      A28164754 DISTRIBUIDORA INTERNACIONAL DE ALIMENTACION, S.A.                ES0126775008                           1.785.311.113,50             AEAT
+  2026      A87471264 METROVACESA, S.A.                                                ES0105122024                           1.729.110.287,40             AEAT
+  2026      A48943864 GESTAMP AUTOMOCION, S.A.                                         ES0105223004                           1.713.881.764,08            BIZKAIA
+  2026      A78304516 MELIA HOTELS INTERNATIONAL, S.A.                                 ES0176252718                           1.619.940.000,00             AEAT
+  2026      A16367328 INMOCEMENTO S.A.                                                 ES0105836003                           1.614.817.368,60             AEAT
+  2026      A28430882 PROSEGUR                                                         ES0175438003                           1.520.624.956,14             AEAT
+  2026      A48004360 FAES FARMA, S.A.                                                 ES0134950F36                           1.502.063.705,50            BIZKAIA
+  2026      A81787889 REALIA BUSINESS, S.A.                                            ES0173908015                           1.497.511.544,99             AEAT
+  2026      A78267176 PHARMA MAR, S.A.                                                 ES0169501022                           1.316.700.000,00             AEAT
+                      LINEA DIRECTA ASEGURADORA, S.A., COMPAÑIA DE SEGUROS
+  2026      A80871031 Y REASEGUROS                                         ES0105546008                                       1.240.795.197,60             AEAT
+                      ATRESMEDIA CORPORACION DE MEDIOS DE COMUNICACION,
+  2026      A78839271 S.A.                                                 ES0109427734                                       1.221.214.448,00             AEAT
+  2026      A87586483 AEDAS HOMES, S.A                                     ES0105287009                                       1.033.505.000,00             AEAT
+
+                                                                                   Página 1
+

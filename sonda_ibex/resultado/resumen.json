@@ -1,0 +1,35 @@
+{
+ "RELACION_SOCIEDADES_EJERCICIO_2026.pdf": {
+  "status": 200,
+  "bytes": 393190,
+  "tipo": "application/pdf"
+ },
+ "RELACION_SOCIEDADES_EJER_2025.pdf": {
+  "status": 200,
+  "bytes": 384938,
+  "tipo": "application/pdf"
+ },
+ "RELACION_SOCIEDADES_EJERCICIO_2025.pdf": {
+  "status": 404,
+  "bytes": 4928,
+  "tipo": "text/html"
+ },
+ "RELACION_SOCIEDADES_EJER_2024.pdf": {
+  "status": 200,
+  "bytes": 46195,
+  "tipo": "application/pdf"
+ },
+ "RELACION_SOCIEDADES_EJERCICIO_2024.pdf": {
+  "status": 404,
+  "bytes": 4928,
+  "tipo": "text/html"
+ },
+ "RELACION_SOCIEDADES_EJERCICIO_2027.pdf": {
+  "status": 404,
+  "bytes": 4928,
+  "tipo": "text/html"
+ },
+ "https://sede.agenciatributaria.gob.es/Sede/impuestos-tasas/impuesto-sobre-transacciones-financieras.html": {
+  "status": 200
+ }
+}
