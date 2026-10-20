@@ -1,0 +1,75 @@
+name: IBEX diario
+
+# Estadística del IBEX 35 de El Especulador: rentabilidad del año y de cada año,
+# máximos históricos y mejores y peores sesiones, a partir de los cierres
+# oficiales que publica BME. Tres horarios (UTC) para cubrir el cambio de hora y
+# el retraso con que BME vuelca el cierre: el script no publica dos veces el
+# mismo cierre, así que solo escribe la primera ejecución que lo encuentra.
+#
+# Es independiente del IFG y del rastreador de cortos: solo lee y escribe ibex/ y docs/ibex/.
+on:
+  schedule:
+    - cron: "40 16 * * 1-5"
+    - cron: "40 17 * * 1-5"
+    - cron: "40 18 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: ibex-diario
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install pandas requests
+      - name: Calcular y publicar
+        run: python ibex/estadistica.py
+      - name: Guardar el resultado en el repositorio
+        run: |
+          if [ -z "$(git status --porcelain docs/ibex)" ]; then
+            echo "Sin cambios."
+            exit 0
+          fi
+          git config user.name "IBEX bot"
+          git config user.email "actions@github.com"
+          git add docs/ibex
+          git commit -m "IBEX $(date -u +%Y-%m-%d)"
+          git pull --rebase --autostash
+          git push
+
+      - name: Abrir incidencia si ha fallado
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=ibex-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          cuerpo="La actualización de la estadística del IBEX 35 del $(date -u +%Y-%m-%d) ha fallado. Registro: $EJECUCION. La página sigue mostrando el último cierre bueno con su fecha. Lo más probable: la API de BME no respondía o ha cambiado de formato."
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="$cuerpo" >/dev/null
+          else
+            gh api --method POST "repos/${{ github.repository }}/labels" -f name=ibex-fallido -f color=b60205 -f description="La estadística del IBEX no se ha actualizado" >/dev/null 2>&1 || true
+            gh api --method POST "repos/${{ github.repository }}/issues" -f title="La estadística del IBEX no se ha actualizado el $(date -u +%Y-%m-%d)" -f body="$cuerpo" -f 'labels[]=ibex-fallido' >/dev/null
+          fi
+      - name: Cerrar la incidencia si ya funciona
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=ibex-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="Actualización correcta el $(date -u +%Y-%m-%d). Se cierra." >/dev/null
+            gh api --method PATCH "repos/${{ github.repository }}/issues/$abierta" -f state=closed >/dev/null
+          fi
