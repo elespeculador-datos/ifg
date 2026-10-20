@@ -1,95 +1,306 @@
 {
- "hora_utc": "2026-10-20T20:17:49+00:00",
- "hist": {
+ "Delistings": {
   "status": 200,
-  "filas": [
+  "n": 2,
+  "params": {
+   "tradingSystem": "SIBE",
+   "mtfSegment": null,
+   "companyKey": "",
+   "isin": "",
+   "from": "20251020",
+   "to": "20261231",
+   "page": 0,
+   "pageSize": 0
+  },
+  "mas": false,
+  "muestra": [
    {
-    "date": "20261014",
-    "close": 19230.7,
-    "previous": null,
-    "diff": null
+    "admissionDate": "20260922",
+    "isin": "ES0125140A14",
+    "marketCode": "11432",
+    "share": "ERCROS",
+    "numShares": 91436199,
+    "nominal": 27430859.7,
+    "tradingUnit": 1,
+    "turnover": 319112334.51,
+    "observ": "",
+    "relevantFactCode": "065",
+    "numSeq": "1",
+    "origin": ""
    },
    {
-    "date": "20261015",
-    "close": 19177.7,
-    "previous": null,
-    "diff": null
-   },
-   {
-    "date": "20261016",
-    "close": 19326.3,
-    "previous": null,
-    "diff": null
-   },
-   {
-    "date": "20261019",
-    "close": 19039.3,
-    "previous": null,
-    "diff": null
+    "admissionDate": "20260105",
+    "isin": "ES0116920333",
+    "marketCode": "11557",
+    "share": "GRUPO CATALANA OCCIDENTE",
+    "numShares": 120000000,
+    "nominal": 36000000.0,
+    "tradingUnit": 1,
+    "turnover": 5400000000.0,
+    "observ": "",
+    "relevantFactCode": "065",
+    "numSeq": "1",
+    "origin": ""
    }
   ]
  },
- "last": {
-  "status": 404,
-  "filas": {
-   "texto": ""
-  }
- },
- "last_isin": {
-  "status": 404,
-  "filas": {
-   "texto": ""
-  }
- },
- "last_tipo": {
-  "status": 404,
-  "filas": {
-   "texto": ""
-  }
- },
- "acc_hist": {
+ "NewListings": {
   "status": 200,
-  "filas": [
+  "n": 56,
+  "params": {
+   "tradingSystem": "SIBE",
+   "mtfSegment": null,
+   "listingType": "All",
+   "companyKey": "",
+   "isin": "",
+   "from": "20251020",
+   "to": "20261231",
+   "page": 0,
+   "pageSize": 0
+  },
+  "mas": false,
+  "muestra": [
    {
-    "date": "20261014",
-    "close": 21.71,
-    "previous": 21.56,
-    "diff": 0.006957
+    "admissionDate": "20261001",
+    "isin": "NL0015001OI1",
+    "marketCode": "10700",
+    "share": "MFE-MEDIAFOREUROPE",
+    "numShares": 1236555,
+    "nominal": 74193.3,
+    "tradingUnit": 1,
+    "turnover": 2819345.4,
+    "admissionType": "Integration",
+    "observ": "AMPL. SEP 26",
+    "relevantFactCode": "107",
+    "numSeq": "1",
+    "origin": "1"
    },
    {
-    "date": "20261015",
-    "close": 21.53,
-    "previous": 21.71,
-    "diff": -0.008291
-   },
-   {
-    "date": "20261016",
-    "close": 21.69,
-    "previous": 21.53,
-    "diff": 0.007431
-   },
-   {
-    "date": "20261019",
-    "close": 21.23,
-    "previous": 21.69,
-    "diff": -0.021208
+    "admissionDate": "20260821",
+    "isin": "ES0113900J37",
+    "marketCode": "10243",
+    "share": "BANCO SANTANDER",
+    "numShares": 329846438,
+    "nominal": 164923219.0,
+    "tradingUnit": 1,
+    "turnover": 4058430573.152,
+    "admissionType": "Integration",
+    "observ": "AMPLIACION AGOSTO 2026",
+    "relevantFactCode": "107",
+    "numSeq": "1",
+    "origin": "1"
    }
   ]
  },
- "acc_last": {
+ "Splits": {
   "status": 200,
-  "filas": [
+  "n": 0,
+  "params": {
+   "tradingSystem": "SIBE",
+   "mtfSegment": null,
+   "top1": false,
+   "companyKey": "",
+   "isin": "",
+   "from": "20260920",
+   "to": "20261231",
+   "page": 0,
+   "pageSize": 0
+  },
+  "mas": false,
+  "muestra": []
+ },
+ "CapitalIncreases": {
+  "status": 200,
+  "n": 61,
+  "params": {
+   "tradingSystem": "SIBE",
+   "mtfSegment": null,
+   "top1": false,
+   "companyKey": "",
+   "isin": "",
+   "from": "20251020",
+   "to": "20261231",
+   "page": 0,
+   "pageSize": 0
+  },
+  "mas": false,
+  "muestra": [
    {
-    "date": "20261020",
-    "close": 21.23,
-    "previous": 21.23,
-    "diff": 0
+    "numSeq": "1",
+    "startingDate": "20261009",
+    "finishDate": "20261022",
+    "isin": "ES0164180061",
+    "issuerName": "MIQUEL Y COSTAS & MIQUEL, S.A.",
+    "shares": 7500000,
+    "naturIndicator": "(*)",
+    "naturDescription": "(*)",
+    "typeIndicator": "2",
+    "typeDescription": "PAR LIBERADA 100%",
+    "oldShares": null,
+    "newShares": null,
+    "price": null,
+    "disbursement": null,
+    "profitDate": "(*)",
+    "dividendDate": "(*)",
+    "nominalAmount": 15000000.0,
+    "rightsIndicator": "S",
+    "rightsPrice": 0.0,
+    "currency": "EUR",
+    "liberatedPercentage": 100.0,
+    "admissionDate": "",
+    "effectiveAmount": 0.0,
+    "subgroupIndicator": "N",
+    "observations": "(*)"
    },
    {
-    "date": "20261019",
-    "close": 21.23,
-    "previous": 21.69,
-    "diff": -0.021208
+    "numSeq": "1",
+    "startingDate": "20261001",
+    "finishDate": "20261001",
+    "isin": "NL0015001OI1",
+    "issuerName": "MFE-MEDIAFOREUROPE N.V.",
+    "shares": 1236555,
+    "naturIndicator": "(*)",
+    "naturDescription": "(*)",
+    "typeIndicator": "0",
+    "typeDescription": "A LA PAR",
+    "oldShares": null,
+    "newShares": null,
+    "price": null,
+    "disbursement": null,
+    "profitDate": "(*)",
+    "dividendDate": "(*)",
+    "nominalAmount": 74193.3,
+    "rightsIndicator": "N",
+    "rightsPrice": 0.0,
+    "currency": "EUR",
+    "liberatedPercentage": 0.0,
+    "admissionDate": "20261001",
+    "effectiveAmount": 0.0,
+    "subgroupIndicator": "N",
+    "observations": "(*)"
+   }
+  ]
+ },
+ "Mergers": {
+  "status": 200,
+  "n": 0,
+  "params": {
+   "tradingSystem": "SIBE",
+   "mtfSegment": null,
+   "top1": false,
+   "companyKey": "",
+   "isin": "",
+   "from": "20260920",
+   "to": "20261231",
+   "page": 0,
+   "pageSize": 0
+  },
+  "mas": false,
+  "muestra": []
+ },
+ "OtherPayments": {
+  "status": 200,
+  "n": 14,
+  "params": {
+   "tradingSystem": "SIBE",
+   "mtfSegment": null,
+   "top1": false,
+   "companyKey": "",
+   "isin": "",
+   "from": "20251020",
+   "to": "20261231",
+   "page": 0,
+   "pageSize": 0
+  },
+  "mas": false,
+  "muestra": [
+   {
+    "exDate": "20260714",
+    "paymentDate": "20260716",
+    "issuerName": "INMOCEMENTO, S.A.",
+    "share": "INMOCEMENTO",
+    "isin": "ES0105836003",
+    "typeIndicator": "3",
+    "typeDescription": "PRIMA DE EMISION",
+    "class": "E",
+    "observations": "PRIMA EMISIóN",
+    "currency": "EUR",
+    "grossAmount": null,
+    "netAmount": null,
+    "effectiveAmount": 68231719.8,
+    "shares": 454878132
+   },
+   {
+    "exDate": "20260714",
+    "paymentDate": "20260716",
+    "issuerName": "FOMENTO DE CONSTR. Y CONTRATAS S.A.",
+    "share": "FOMENTO DE CONSTR. Y CONTRATAS",
+    "isin": "ES0122060314",
+    "typeIndicator": "3",
+    "typeDescription": "PRIMA DE EMISION",
+    "class": "E",
+    "observations": "PRIMA EMISIóN",
+    "currency": "EUR",
+    "grossAmount": null,
+    "netAmount": null,
+    "effectiveAmount": 236497017.0,
+    "shares": 472994034
+   }
+  ]
+ },
+ "PublicOfferings": {
+  "status": 200,
+  "n": 125,
+  "params": {
+   "companyKey": "",
+   "from": "20000101",
+   "to": "20261231",
+   "page": 0,
+   "pageSize": 0
+  },
+  "mas": false,
+  "muestra": [
+   {
+    "companyName": "CORP.  ACCIONA ENERGÍAS RENOVABLES, S.A.",
+    "companyShortName": "ACCIONA ENER",
+    "companyTradingSystem": "02",
+    "companyKey": "05563",
+    "offeringCompanyName": "CORP.  ACCIONA ENERGÍAS RENOVABLES, S.A.",
+    "price": 26.73,
+    "authorisationDate": "",
+    "startingDate": "20210621",
+    "finishDate": "20210629",
+    "offeredShares": 49387588,
+    "greenShoeIndicator": "S",
+    "greenShoe": 7408138,
+    "maximumDate": "",
+    "definitivedDate": "20210629",
+    "observations1": "",
+    "observations2": "",
+    "observations3": "",
+    "observations4": "",
+    "observations5": ""
+   },
+   {
+    "companyName": "ECOENER, S.A.",
+    "companyShortName": "ECOENER",
+    "companyTradingSystem": "02",
+    "companyKey": "05548",
+    "offeringCompanyName": "GRUPO ECOENER, S.A.",
+    "price": 5.9,
+    "authorisationDate": "",
+    "startingDate": "20210415",
+    "finishDate": "20210430",
+    "offeredShares": 16949150,
+    "greenShoeIndicator": "N",
+    "greenShoe": 0,
+    "maximumDate": "",
+    "definitivedDate": "20210430",
+    "observations1": "",
+    "observations2": "",
+    "observations3": "",
+    "observations4": "",
+    "observations5": ""
    }
   ]
  }

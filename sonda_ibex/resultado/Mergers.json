@@ -1,0 +1,16 @@
+{
+ "totalResults": 0,
+ "params": {
+  "tradingSystem": "SIBE",
+  "mtfSegment": null,
+  "top1": false,
+  "companyKey": "",
+  "isin": "",
+  "from": "20260920",
+  "to": "20261231",
+  "page": 0,
+  "pageSize": 0
+ },
+ "hasMoreResults": false,
+ "data": []
+}
