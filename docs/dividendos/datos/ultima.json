@@ -1,6 +1,6 @@
 {
  "fecha": "2026-10-20",
- "generado": "2026-10-20T09:21:31+00:00",
+ "generado": "2026-10-20T14:36:19+00:00",
  "proximos": 6,
  "siguiente": {
   "fecha_ex": "2026-10-29",
@@ -9,6 +9,23 @@
    "IND. DE DISEÑO TEXTIL (INDITEX)"
   ]
  },
- "fuente": "BME, operaciones financieras: dividendos",
+ "mayor_rentabilidad": [
+  {
+   "empresa": "NATURHOUSE HEALTH",
+   "isin": "ES0105043006",
+   "rentabilidad_ordinaria_pct": 13.39
+  },
+  {
+   "empresa": "MFE-MEDIAFOREUROPE",
+   "isin": "NL0015001OI1",
+   "rentabilidad_ordinaria_pct": 10.56
+  },
+  {
+   "empresa": "TELEFONICA",
+   "isin": "ES0178430E18",
+   "rentabilidad_ordinaria_pct": 8.89
+  }
+ ],
+ "fuente": "BME, operaciones financieras: dividendos; cierres de la ficha de cada valor",
  "licencia": "CC BY 4.0 · El Especulador"
 }
