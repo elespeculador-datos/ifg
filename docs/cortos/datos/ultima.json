@@ -1,9 +1,23 @@
 {
- "fecha_publicacion": "2026-10-19",
- "generado": "2026-10-20T03:38:06+00:00",
+ "fecha_publicacion": "2026-10-20",
+ "publicacion_anterior": "2026-10-19",
+ "generado": "2026-10-20T19:16:06+00:00",
  "posiciones": 63,
  "emisores": 31,
- "cambios": 0,
+ "cambios": 3,
+ "historico": {
+  "desde": "2010-06-10",
+  "mayor_posicion": {
+   "tenedor": "BlackRock Investment Management (UK) Limited",
+   "emisor": "SOLARIA ENERGIA Y MEDIOAMBIENTE, S.A.",
+   "pct": 4.49,
+   "fecha": "2025-05-29"
+  },
+  "mas_empresas": {
+   "tenedor": "Marshall Wace LLP",
+   "empresas": 46
+  }
+ },
  "top": [
   {
    "isin": "ES0165386014",
@@ -18,9 +32,9 @@
    "isin": "ES0130960018",
    "emisor": "ENAGAS, S.A.",
    "tenedores": 6,
-   "suma_publicada_pct": 5.07,
-   "mayor_posicion_pct": 1.47,
-   "ultima_fecha_posicion": "2026-10-16",
+   "suma_publicada_pct": 4.85,
+   "mayor_posicion_pct": 1.25,
+   "ultima_fecha_posicion": "2026-10-19",
    "mayor_tenedor": "BlackRock Investment Management (UK) Limited"
   },
   {
@@ -36,9 +50,9 @@
    "isin": "LU1048328220",
    "emisor": "EDREAMS ODIGEO, S.A.",
    "tenedores": 3,
-   "suma_publicada_pct": 3.12,
-   "mayor_posicion_pct": 1.47,
-   "ultima_fecha_posicion": "2026-10-16",
+   "suma_publicada_pct": 3.15,
+   "mayor_posicion_pct": 1.5,
+   "ultima_fecha_posicion": "2026-10-19",
    "mayor_tenedor": "Citadel Advisors LLC"
   },
   {
@@ -78,6 +92,15 @@
    "mayor_tenedor": "Capital Fund Management SA"
   },
   {
+   "isin": "ES0105066007",
+   "emisor": "CELLNEX TELECOM, S.A.",
+   "tenedores": 2,
+   "suma_publicada_pct": 1.6,
+   "mayor_posicion_pct": 1.0,
+   "ultima_fecha_posicion": "2026-10-19",
+   "mayor_tenedor": "D. E. Shaw & Co., L.P."
+  },
+  {
    "isin": "ES0157261019",
    "emisor": "LABORATORIOS FARMACEUTICOS ROVI, S.A.",
    "tenedores": 1,
@@ -85,15 +108,6 @@
    "mayor_posicion_pct": 1.51,
    "ultima_fecha_posicion": "2026-07-24",
    "mayor_tenedor": "JPMorgan Asset Management (UK) Limited"
-  },
-  {
-   "isin": "ES0132945017",
-   "emisor": "TUBACEX, S.A.",
-   "tenedores": 3,
-   "suma_publicada_pct": 1.5,
-   "mayor_posicion_pct": 0.5,
-   "ultima_fecha_posicion": "2026-10-14",
-   "mayor_tenedor": "WorldQuant, LLC"
   }
  ],
  "fuente": "https://www.cnmv.es/DocPortal/Posiciones-Cortas/NetShortPositions.xls",
