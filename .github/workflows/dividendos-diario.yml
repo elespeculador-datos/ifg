@@ -1,0 +1,69 @@
+name: Dividendos diario
+
+# Calendario de dividendos de El Especulador, con los datos de operaciones
+# financieras que publica BME. Una pasada al día, por la tarde (UTC). Solo lee y
+# escribe dividendos/ y docs/dividendos/; no toca el IFG, los cortos ni el IBEX.
+on:
+  schedule:
+    - cron: "10 17 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: dividendos-diario
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install pandas requests
+      - name: Calcular y publicar
+        run: python dividendos/calendario.py
+      - name: Guardar el resultado en el repositorio
+        run: |
+          if [ -z "$(git status --porcelain docs/dividendos)" ]; then
+            echo "Sin cambios."
+            exit 0
+          fi
+          git config user.name "Dividendos bot"
+          git config user.email "actions@github.com"
+          git add docs/dividendos
+          git commit -m "Dividendos $(date -u +%Y-%m-%d)"
+          git pull --rebase --autostash
+          git push
+
+      - name: Abrir incidencia si ha fallado
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=dividendos-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          cuerpo="La actualización del calendario de dividendos del $(date -u +%Y-%m-%d) ha fallado. Registro: $EJECUCION. La página sigue mostrando la última actualización buena con su fecha. Lo más probable: la API de BME no respondía o ha cambiado de formato."
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="$cuerpo" >/dev/null
+          else
+            gh api --method POST "repos/${{ github.repository }}/labels" -f name=dividendos-fallido -f color=b60205 -f description="El calendario de dividendos no se ha actualizado" >/dev/null 2>&1 || true
+            gh api --method POST "repos/${{ github.repository }}/issues" -f title="El calendario de dividendos no se ha actualizado el $(date -u +%Y-%m-%d)" -f body="$cuerpo" -f 'labels[]=dividendos-fallido' >/dev/null
+          fi
+      - name: Cerrar la incidencia si ya funciona
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=dividendos-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="Actualización correcta el $(date -u +%Y-%m-%d). Se cierra." >/dev/null
+            gh api --method PATCH "repos/${{ github.repository }}/issues/$abierta" -f state=closed >/dev/null
+          fi
