@@ -1,25 +1,26 @@
-"""Sonda temporal 5: dividendos de BME en un rango amplio (para probar el calendario)."""
-import json
+"""Sonda temporal 6: listas oficiales del Impuesto sobre Transacciones Financieras (AEAT) en texto."""
+import json, subprocess
 from pathlib import Path
 import requests
 OUT = Path("sonda_ibex/resultado"); OUT.mkdir(parents=True, exist_ok=True)
-API = "https://apiweb.bolsasymercados.es/Market/v1/EQ/CorporateActions/Dividends"
-H = {"User-Agent": "Mozilla/5.0", "Referer": "https://www.bolsasymercados.es/"}
+H = {"User-Agent": "Mozilla/5.0"}
+base = "https://sede.agenciatributaria.gob.es/static_files/Sede/Tema/Declaraciones_informativas/I_Transacciones_Financieras/"
 res = {}
-todo = []
-for desde, hasta in [("20210101", "20231231"), ("20240101", "20251231"), ("20260101", "20271231")]:
-    r = requests.get(API, params={"companyKey": "", "from": desde, "to": hasta, "page": 0, "pageSize": 0, "tradingSystem": "SIBE", "listingType": "All"}, headers=H, timeout=90)
-    j = r.json(); res[desde] = {"status": r.status_code, "total": j.get("totalResults"), "mas": j.get("hasMoreResults"), "n": len(j.get("data", []))}
-    todo += j.get("data", [])
-(OUT / "dividendos.json").write_text(json.dumps(todo, ensure_ascii=False), encoding="utf-8")
-r = requests.get("https://apiweb.bolsasymercados.es/Market/v1/EQ/CompanySearch", params={"search": "", "complete": "false", "tradingSystem": "SIBE", "page": 0, "pageSize": 0, "mtfSegment": ""}, headers=H, timeout=60)
-(OUT / "empresas.json").write_text(r.text, encoding="utf-8")
-# composición del IBEX 35 si existe un endpoint
-for u in ["https://apiweb.bolsasymercados.es/Market/v1/EQ/IndexComponents?ISIN=ES0SI0000005",
-          "https://apiweb.bolsasymercados.es/Market/v1/EQ/IndicesComponents?ISIN=ES0SI0000005",
-          "https://apiweb.bolsasymercados.es/Market/v1/EQ/IndexValues?ISIN=ES0SI0000005"]:
+for nombre in ["RELACION_SOCIEDADES_EJERCICIO_2026.pdf", "RELACION_SOCIEDADES_EJER_2025.pdf", "RELACION_SOCIEDADES_EJERCICIO_2025.pdf",
+               "RELACION_SOCIEDADES_EJER_2024.pdf", "RELACION_SOCIEDADES_EJERCICIO_2024.pdf", "RELACION_SOCIEDADES_EJERCICIO_2027.pdf"]:
     try:
-        rr = requests.get(u, headers=H, timeout=60); res[u] = {"status": rr.status_code, "muestra": rr.text[:400]}
+        r = requests.get(base + nombre, headers=H, timeout=60)
+        res[nombre] = {"status": r.status_code, "bytes": len(r.content), "tipo": r.headers.get("content-type")}
+        if r.status_code == 200 and r.content[:4] == b"%PDF":
+            p = OUT / nombre; p.write_bytes(r.content)
+            subprocess.run(["pdftotext", "-layout", str(p), str(p.with_suffix(".txt"))], check=False)
+    except Exception as e:
+        res[nombre] = {"error": str(e)[:200]}
+# página de la AEAT con el índice de documentos del ITF
+for u in ["https://sede.agenciatributaria.gob.es/Sede/impuestos-tasas/impuesto-sobre-transacciones-financieras.html"]:
+    try:
+        r = requests.get(u, headers=H, timeout=60); res[u] = {"status": r.status_code}
+        (OUT / "itf_indice.html").write_text(r.text, encoding="utf-8")
     except Exception as e:
         res[u] = {"error": str(e)[:200]}
 (OUT / "resumen.json").write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
