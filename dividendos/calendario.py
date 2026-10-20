@@ -30,6 +30,7 @@ import requests
 
 API = "https://apiweb.bolsasymercados.es/Market/v1/EQ/CorporateActions/Dividends"
 FICHA = "https://apiweb.bolsasymercados.es/Market/v1/EQ/ShareDetailsInfo"
+COTIZADAS = "https://apiweb.bolsasymercados.es/Market/v1/EQ/ListedCompanies"
 CABECERAS = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Referer": "https://www.bolsasymercados.es/"}
 RAIZ = Path(__file__).resolve().parent.parent
 SALIDA = RAIZ / "docs" / "dividendos"
@@ -40,7 +41,8 @@ TOP_RENTABILIDAD = 15
 # Nombres cortos de BME que no se entienden fuera de su web
 NOMBRES = {"CASH": "PROSEGUR CASH"}
 # Composición del IBEX 35 (sin cambios desde el 22/07/2024, cuando Puig sustituyó a Meliá). Se revisa cada trimestre:
-# pasada esta fecha, la tabla del IBEX deja de publicarse hasta que se actualicen ibex35.csv y la fecha.
+# La composición se toma de BME (ListedCompanies, campo «indices»); este fichero es la reserva si BME
+# no responde o no da 35 valores. Pasada esta fecha, la reserva deja de valer.
 IBEX35 = Path(__file__).resolve().parent / "ibex35.csv"
 IBEX35_VALIDA_HASTA = "2026-12-20"
 PAGES = "https://elespeculador-datos.github.io/ifg/dividendos/"
@@ -224,8 +226,31 @@ def frase(r: dict) -> str:
     return texto
 
 
-def ibex35(hoy: pd.Timestamp) -> set[str]:
-    """ISIN del IBEX 35 si la composición guardada sigue vigente; si no, vacío (y aviso)."""
+def ibex35_bme() -> set[str]:
+    """ISIN del IBEX 35 según la lista de cotizadas de BME (campo «indices»). Vacío si no cuadra."""
+    try:
+        r = requests.get(COTIZADAS, params={"tradingSystem": "SIBE", "page": 0, "pageSize": 0}, headers=CABECERAS, timeout=60)
+        if r.status_code != 200:
+            return set()
+        j = r.json()
+        if j.get("hasMoreResults"):
+            return set()
+        isins = {f["isin"] for f in j.get("data", []) if "IBEX 35" in (f.get("indices") or "")}
+    except Exception as e:  # noqa: BLE001 - si BME falla, se usa la lista guardada
+        print(f"Sin la lista de cotizadas de BME: {e}")
+        return set()
+    return isins if len(isins) == 35 else set()
+
+
+def ibex35(hoy: pd.Timestamp, red: bool = True) -> set[str]:
+    """ISIN del IBEX 35: los de BME si da exactamente 35; si no, la composición guardada
+    mientras siga vigente; si tampoco, vacío (y aviso)."""
+    if red:
+        desde_bme = ibex35_bme()
+        if desde_bme:
+            if IBEX35.exists() and desde_bme != set(pd.read_csv(IBEX35, dtype=str)["isin"]):
+                print(f"::warning::La composición del IBEX 35 de BME no coincide con {IBEX35.name}: se usa la de BME. Actualiza el fichero.")
+            return desde_bme
     if hoy > pd.Timestamp(IBEX35_VALIDA_HASTA) or not IBEX35.exists():
         print(f"::warning::La composición del IBEX 35 de {IBEX35.name} venció el {IBEX35_VALIDA_HASTA}: no se publica la tabla del IBEX.")
         return set()
@@ -393,7 +418,7 @@ def main() -> int:
     else:
         cot = cotizaciones(isins)
     r["rentabilidad"] = rentabilidad(r, cot)
-    r["ibex"] = ibex35(r["hoy"])
+    r["ibex"] = ibex35(r["hoy"], red=not args.local)
     print(f"Cierres: {len(cot)} de {len(isins)}; rentabilidad calculada para {len(r['rentabilidad'])}.")
     escribir(r)
     print(frase(r), frase_rentabilidad(r["rentabilidad"], r["ibex"]))
