@@ -255,7 +255,7 @@ def _bloque_historico(hist: dict | None, e) -> str:
     m, t = hist["mayor_posicion"], hist["mas_empresas"]
     return (f"<h2>Récords del histórico</h2>\n<p>Desde el {_fecha(hist['desde'])}, primera fecha del fichero histórico de la CNMV, "
             f"la mayor posición corta individual publicada es la de {e(m['tenedor'])} en {e(m['emisor'])}: un {_pct(m['pct'])} del capital, "
-            f"el {_fecha(m['fecha'])}. La entidad que ha publicado posiciones cortas en más empresas es {e(t['tenedor'])}, en {t['empresas']}. "
+            f"el {_fecha(m['fecha'])}. La entidad que ha publicado posiciones cortas en más empresas es {e(t['tenedor'])}, en {t['empresas']} empresas distintas. "
             "El fichero no conserva todas las empresas que han dejado de cotizar, así que estos récords se refieren a las que sí recoge.</p>")
 
 
