@@ -34,6 +34,8 @@ RAIZ = Path(__file__).resolve().parent.parent
 SALIDA = RAIZ / "docs" / "dividendos"
 DATOS = SALIDA / "datos"
 PILAR = "https://elespeculador.com/dividendos-fecha-ex-dividendo/"
+PAGINA_WP = "https://elespeculador.com/calendario-dividendos/"
+PAGES = "https://elespeculador-datos.github.io/ifg/dividendos/"
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
          "septiembre", "octubre", "noviembre", "diciembre"]
 CONCEPTOS = {"A": "a cuenta", "C": "complementario", "E": "especial", "R": "con cargo a reservas", "P": "prima de emisión",
@@ -199,6 +201,27 @@ def fragmento_wp(r: dict) -> str:
 <!-- dividendos:fin -->"""
 
 
+def ld_wp(r: dict) -> str:
+    """Marcado Dataset (schema.org) en una sola línea, para la página de elespeculador.com."""
+    return '<script type="application/ld+json">' + json.dumps({
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": "Calendario de dividendos de la bolsa española (El Especulador)",
+        "description": "Próximos dividendos del mercado continuo con su fecha ex, importe bruto por acción y fecha de pago, y lo repartido por cada empresa en los últimos doce meses, con datos de BME actualizados cada día hábil.",
+        "url": PAGINA_WP, "inLanguage": "es", "spatialCoverage": "España",
+        "creator": {"@type": "Organization", "name": "El Especulador", "url": "https://elespeculador.com/"},
+        "license": "https://creativecommons.org/licenses/by/4.0/", "isBasedOn": "https://www.bolsasymercados.es/",
+        "dateModified": r["hoy"].date().isoformat(),
+        "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"{PAGES}datos/{n}.csv"}
+                         for n in ["proximos", "ultimos_12m", "dividendos"]],
+    }, ensure_ascii=False) + "</script>"
+
+
+def con_ld(frag: str, ld: str) -> str:
+    marca = "\n<!-- dividendos:fin -->"
+    assert frag.count(marca) == 1 and "$" not in ld
+    return frag.replace(marca, "\n" + ld + marca)
+
+
 def escribir(r: dict) -> None:
     DATOS.mkdir(parents=True, exist_ok=True)
     def fechas(df):
@@ -220,7 +243,7 @@ def escribir(r: dict) -> None:
         "fuente": "BME, operaciones financieras: dividendos", "licencia": "CC BY 4.0 · El Especulador",
     }, ensure_ascii=False, indent=1), encoding="utf-8")
     frag = fragmento_wp(r)
-    (SALIDA / "fragmento-wp.html").write_text(frag, encoding="utf-8")
+    (SALIDA / "fragmento-wp.html").write_text(con_ld(frag, ld_wp(r)), encoding="utf-8")
     cuerpo = frag.split("\n", 1)[1].rsplit("\n", 1)[0]
     (SALIDA / "index.html").write_text(f"""<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
