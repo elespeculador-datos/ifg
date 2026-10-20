@@ -1,0 +1,9 @@
+200 
+ ok 
+ Artículo 118. Asesores de voto. 
+ 1. Este Capítulo será de aplicación a los asesores de voto que presten sus servicios en relación con sociedades cotizadas que tengan su domicilio social en un Estado miembro de la Unión Europea y cuyas acciones estén admitidas a negociación en un mercado regulado o en un sistema multilateral de negociación que estén situados u operen en un Estado miembro de la Unión Europea, siempre y cuando el asesor de voto: 
+ a) tenga su domicilio social en España, 
+ b) no tenga su domicilio social en un Estado miembro de la Unión Europea, pero tenga su establecimiento principal en España; o 
+ c) no tenga ni su domicilio social ni su establecimiento principal en un Estado miembro de la Unión Europea, pero tenga un establecimiento en España. 
+ 2. A efectos de lo previsto en este Capítulo, se entenderá por asesor de voto aquella persona jurídica que analiza con carácter profesional y comercial la información que las sociedades cotizadas están legalmente obligadas a publicar y, en su caso, otro tipo de información, para asesorar a los inversores en el ejercicio de sus derechos de voto mediante análisis, asesoramiento o recomendaciones de voto. 
+ 3. Aquellas entidades que cumplan los requisitos establecidos en los dos apartados anteriores deberán comunicarlo a la CNMV.

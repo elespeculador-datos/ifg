@@ -1,0 +1,6 @@
+200 
+ ok 
+ Artículo 52. Suspensión y exclusión de negociación por el organismo rector. 
+ 1. El organismo rector de un centro de negociación podrá suspender o excluir de negociación un instrumento financiero que deje de cumplir las normas de dicho centro. En tal caso, los organismos rectores suspenderán o excluirán también la negociación de los instrumentos derivados vinculados o que hagan referencia al instrumento financiero suspendido o excluido de negociación, cuando esta medida sea necesaria para apoyar los objetivos de la suspensión o exclusión y comunicarán a la CNMV inmediatamente la información sobre a la aplicación de este artículo y seguidamente la harán pública. 
+ 2. Las mismas obligaciones del apartado anterior surgirán para el organismo rector de un centro de negociación cuando el instrumento financiero haya sido excluido de negociación en otro mercado regulado, en las condiciones que se determinen reglamentariamente. 
+ 3. Reglamentariamente se establecerán los casos en los que el organismo rector no podrá suspender o excluir la negociación de un instrumento financiero, así como las clases de instrumentos financieros derivados que quedarán también suspendidos o excluidos.

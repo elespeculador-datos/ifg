@@ -1,0 +1,10 @@
+200 
+ ok 
+ Artículo 116. Compraventas forzosas. 
+ 1. Cuando, a resultas de una oferta pública de adquisición por la totalidad de los valores, en los términos de los artículos 108 a 113 y 117, el oferente posea valores que representen al menos el 90 por ciento del capital que confiere derechos de voto y la oferta haya sido aceptada por titulares de valores que representen al menos el 90 por ciento de los derechos de voto, distintos de los que ya obraran en poder del oferente: 
+ a) El oferente podrá exigir a los restantes titulares de valores que le vendan dichos valores a un precio equitativo. 
+ b) Los titulares de valores de la sociedad afectada podrán exigir del oferente la compra de sus valores a un precio equitativo. 
+ 2. Si, en el supuesto regulado en este artículo, los valores objeto de la compra o venta forzosa, se encontrasen embargados como consecuencia de actos administrativos o de resoluciones judiciales, o existiera sobre ellos algún tipo de carga, incluyendo gravámenes, derechos reales limitados o garantías financieras, los valores se enajenarán libres de dichas cargas, pasando estas a constituirse sobre el precio pagado o los valores entregados por el oferente como pago del precio por la compraventa. 
+ El depositario de los valores estará obligado a mantener en depósito el precio de la venta o, en su caso, los valores entregados, poniendo en conocimiento de la autoridad judicial o administrativa que hubiere ordenado los embargos o del titular de cualesquiera otras cargas la aplicación de este procedimiento. 
+ Si, una vez aplicado lo dispuesto en este apartado, existiera una parte del precio que resultase innecesaria para la satisfacción de las obligaciones garantizadas con el embargo o embargos practicados, o con las cargas existentes sobre los valores, se pondrá inmediatamente a disposición del titular de estos. 
+ 3. Reglamentariamente se establecerá el procedimiento y los requisitos aplicables a la compraventa forzosa a que se refiere este artículo.
