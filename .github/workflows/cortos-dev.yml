@@ -1,0 +1,27 @@
+name: Cortos (desarrollo)
+
+# Flujo de pruebas del rastreador de posiciones cortas. Solo corre al subir
+# cambios a la rama cortos-dev: no toca main, ni docs, ni el IFG.
+on:
+  push:
+    branches: [cortos-dev]
+
+permissions:
+  contents: read
+
+jobs:
+  descubrir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pandas xlrd openpyxl requests lxml
+      - run: python cortos/descubrir.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fichero-cnmv
+          path: cortos/NetShortPositions.xls
+          if-no-files-found: ignore
