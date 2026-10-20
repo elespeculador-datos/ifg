@@ -1,0 +1,17 @@
+{
+ "bme_factsheet": {
+  "url": "https://www.bolsasymercados.es/dam/descargas/indices/factsheet-ibex-35-es.pdf",
+  "status": 200,
+  "tipo": "application/pdf",
+  "bytes": 505858
+ },
+ "bme_boletin": {
+  "url": "https://www.bolsasymercados.es/dam/descargas/indices/boletin-semanal-indices-ibex-es-en.pdf",
+  "status": 200,
+  "tipo": "application/pdf",
+  "bytes": 290884
+ },
+ "bme_playwright": {
+  "llamadas": 19
+ }
+}
