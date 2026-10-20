@@ -15,7 +15,22 @@ from __future__ import annotations
 # ---------------------------------------------------------------------------
 # Versionado (requisito 2 de la sección 4: reglas congeladas y versionadas)
 # ---------------------------------------------------------------------------
-VERSION = "0.10.0"
+VERSION = "0.11.0"
+# 0.11.0 (20 de octubre de 2026): un valor ARRASTRADO deja de contar como
+# cobertura. No cambia ni un peso, ni una ventana, ni un umbral, ni la
+# fórmula: el valor del índice de un día con unas entradas dadas es
+# idéntico al de la 0.10.0. Lo que cambia es la política de revisiones, y
+# por eso lleva versión. Antes, una fila que descansaba en un componente
+# arrastrado nacía con cobertura 1,00, se cerraba como definitiva ese mismo
+# día y el dato real llegaba cuando ya no se podía usar: el 14, 15 y 16 de
+# octubre se publicaron con el GPR del día 13 arrastrado y el recálculo del
+# lunes siguiente se separaba 10,14 puntos de lo publicado. Ahora esas
+# filas nacen provisionales y se corrigen solas dentro de su ventana.
+#
+# CONSECUENCIA PARA LA VALIDACIÓN PROSPECTIVA: el reloj del año de episodios
+# fuera de muestra se reinicia con esta versión, igual que con cualquier
+# otra. Ver PROTOCOLO_VALIDACION.md.
+#
 # REGLAS CONGELADAS. Componentes, pesos, agregador, umbrales y hora de corte
 # quedan fijos. Cualquier cambio exige numerar una versión nueva y recalcular
 # la serie entera.
