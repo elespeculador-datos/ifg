@@ -72,6 +72,11 @@ def _pct(x: float | None, dec: int = 3) -> str:
     return "—" if x is None else _num(x, dec) + " %"
 
 
+def _parte(a: float, total: float) -> str:
+    x = a / total * 100
+    return _num(x, 2 if x < 1 else 1) + " %"
+
+
 def _f(iso: str) -> str:
     return f"{iso[8:10]}/{iso[5:7]}/{iso[:4]}" if iso else ""
 
@@ -317,9 +322,12 @@ def fragmento(datos: dict, fecha: str) -> str:
         frase = (f"<p>En la última subasta de Letras a 12 meses, la del {_flargo(doce['fecha'])}, el tipo de interés medio fue del "
                  f"{_pct(doce['medio'])} y el marginal, el más alto aceptado, del {_pct(doce['marginal'])}.")
         if precio:
-            frase += (f" Al precio medio de esa subasta, que es el que pagan las peticiones no competitivas de los particulares, "
-                      f"una letra de 1.000 euros costó {_num(precio * 10, 2)} euros y se amortiza por 1.000 al vencimiento: la "
-                      f"diferencia es el rendimiento, antes de impuestos.")
+            frase += (f" Al precio medio ponderado redondeado de esa subasta ({_num(precio, 3)} %), el que pagan las peticiones "
+                      f"no competitivas, una letra de 1.000 euros de nominal costó {_num(precio * 10, 2)} euros"
+                      + (f" y se amortiza por 1.000 el {_flargo(doce['vencimiento'])}" if doce.get("vencimiento") else "")
+                      + f". La diferencia, {_num(1000 - precio * 10, 2)} euros, es el rendimiento de quien la mantenga hasta el "
+                      f"vencimiento, antes de impuestos y de las comisiones que cobre la entidad, si las hay. El precio de la próxima "
+                      f"subasta no se sabe hasta que se resuelve.")
         partes.append(frase + "</p>")
     filas = []
     for p in PLAZOS:
@@ -332,8 +340,8 @@ def fragmento(datos: dict, fecha: str) -> str:
                       _num(f["adjudicado"], 0) if f.get("adjudicado") is not None else "—",
                       _f(f.get("vencimiento", ""))])
     partes += ["<h2>La última subasta de cada plazo</h2>",
-               _tabla(["Plazo", "Subasta", "Tipo medio", "Tipo marginal", "Precio medio (% del nominal)",
-                       "Solicitado (mill. €)", "Adjudicado (mill. €)", "Vencimiento"], filas)]
+               _tabla(["Plazo", "Subasta", "Tipo medio", "Tipo marginal", "Precio medio redondeado (% del nominal)",
+                       "Nominal solicitado (mill. €)", "Nominal adjudicado (mill. €)", "Vencimiento"], filas)]
     prox = [c for c in datos["proximas"] if c["subasta"] >= fecha][:6]
     if prox:
         partes += ["<h2>Las próximas subastas</h2>",
@@ -348,7 +356,7 @@ def fragmento(datos: dict, fecha: str) -> str:
     evol = [f for f in sub if f["plazo"] == 12 and f["fecha"] >= desde and f.get("medio") is not None]
     if evol:
         partes += ["<h2>El tipo de las Letras a 12 meses, subasta a subasta</h2>",
-                   _tabla(["Subasta", "Tipo medio", "Tipo marginal", "Adjudicado (mill. €)"],
+                   _tabla(["Subasta", "Tipo medio", "Tipo marginal", "Nominal adjudicado (mill. €)"],
                           [[_f(f["fecha"]), _pct(f["medio"]), _pct(f.get("marginal")),
                             _num(f["adjudicado"], 0) if f.get("adjudicado") is not None else "—"] for f in reversed(evol)])]
     # media anual por plazo
@@ -358,20 +366,23 @@ def fragmento(datos: dict, fecha: str) -> str:
             anual.setdefault(int(f["fecha"][:4]), {}).setdefault(f["plazo"], []).append(f["medio"])
     anios = sorted(anual)[-15:]
     partes += ["<h2>La media de cada año</h2>",
-               "<p>Media simple del tipo medio de todas las subastas de cada año y plazo (el año en curso, hasta la última subasta).</p>",
+               "<p>Cálculo de El Especulador con datos del Tesoro: media simple del tipo medio de todas las subastas de cada año y "
+               "plazo (el año en curso, hasta la última subasta). «—»: ese año no hubo subastas de ese plazo.</p>",
                _tabla(["Año"] + [f"{p} meses" for p in PLAZOS],
                       [[str(a)] + [_pct(sum(anual[a][p]) / len(anual[a][p])) if p in anual[a] else "—" for p in PLAZOS]
                        for a in reversed(anios)])]
     ten = datos["tenedores"]
     u = ten["ultimo"]
     partes += ["<h2>Cuántas Letras tienen los particulares</h2>",
-               f"<p>En {MESES[u['mes'] - 1]} de {u['anio']}, las personas físicas tenían {_num(u['personas_fisicas'], 0)} millones "
-               f"de euros en Letras del Tesoro, el {_num(u['personas_fisicas'] / u['total'] * 100, 1)} % del total en circulación "
-               f"({_num(u['total'], 0)} millones), según el Tesoro con datos del Banco de España.</p>",
+               f"<p>Según la estadística de tenedores del Tesoro Público, en {MESES[u['mes'] - 1]} de {u['anio']} las personas físicas "
+               f"tenían {_num(u['personas_fisicas'], 0)} millones de euros en Letras del Tesoro, el "
+               f"{_parte(u['personas_fisicas'], u['total'])} del total en circulación ({_num(u['total'], 0)} millones).</p>",
                _tabla(["Cierre de", "Personas físicas (mill. €)", "Total en circulación (mill. €)", "Parte de las personas físicas"],
-                      [[str(a), _num(v["personas_fisicas"], 0), _num(v["total"], 0), _num(v["personas_fisicas"] / v["total"] * 100, 1) + " %"]
+                      [[str(a), _num(v["personas_fisicas"], 0), _num(v["total"], 0), _parte(v["personas_fisicas"], v["total"])]
                        for a, v in sorted(ten["anios"].items()) if a >= 2019][::-1]),
-               "<p>Saldos a vencimiento a final de cada año, de la serie de tenedores del Tesoro (fuente: Banco de España).</p>"]
+               "<p>Cartera a vencimiento, saldos nominales a final de cada año. Fuente: Tesoro Público, «Letras del Tesoro: "
+               "distribución por tenedores» (estadísticas mensuales). Según la nota del Tesoro, los datos de 2002 a 2015 son del "
+               "Banco de España (Iberclear) y los de 2016 a 2023, del Banco de España (Securities Holdings Statistics).</p>"]
     partes.append(f'<p class="has-small-font-size">Fuente: D. G. del Tesoro y Política Financiera (resultado de las subastas, '
                   f'estadísticas mensuales, histórico de subastas y calendario de subastas). Tipos en porcentaje anual; importes '
                   f'nominales en millones de euros. <a href="{METODOLOGIA}">Cómo se hace</a>.</p>')
@@ -383,9 +394,10 @@ def ld_wp(fecha: str) -> str:
     return '<script type="application/ld+json">' + json.dumps({
         "@context": "https://schema.org", "@type": "Dataset",
         "name": "Subastas de Letras del Tesoro: tipos de interés, calendario y tenedores (El Especulador)",
-        "description": "Resultados de todas las subastas de Letras del Tesoro desde 2001 (tipo medio y marginal, importes), "
-                       "las próximas subastas con la fecha límite de peticiones de los particulares y las Letras en manos de "
-                       "personas físicas, con datos del Tesoro Público.",
+        "description": "Resultados de todas las subastas de Letras del Tesoro desde 2001 (tipo medio y marginal, importes) y "
+                       "las próximas subastas con la fecha límite de peticiones de los particulares, con datos del Tesoro Público. "
+                       "Incluye además las Letras en manos de personas físicas (estadística de tenedores del Tesoro, con datos del "
+                       "Banco de España hasta 2023).",
         "url": PAGINA_WP, "inLanguage": "es", "spatialCoverage": "España",
         "creator": {"@type": "Organization", "name": "El Especulador", "url": "https://elespeculador.com/"},
         "creditText": "El Especulador, a partir de datos de la D. G. del Tesoro y Política Financiera",
@@ -421,6 +433,8 @@ def escribir(datos: dict, fecha: str, salida: Path) -> bool:
         "fecha": fecha_pub, "comprobado": datetime.now(timezone.utc).isoformat(timespec="seconds"), "huella": nueva,
         "ultimas": {str(k): v for k, v in ultima_por_plazo(datos["subastas"]).items()},
         "proximas": datos["proximas"][:8], "tenedores": datos["tenedores"]["ultimo"],
+        "fuente_tenedores": "Tesoro Público, Letras del Tesoro: distribución por tenedores (estadísticas mensuales); según su nota, "
+                            "2002-2015 Banco de España (Iberclear) y 2016-2023 Banco de España (Securities Holdings Statistics)",
         "fuente": "D. G. del Tesoro y Política Financiera (www.tesoro.es)",
         "condiciones": "Reproducción fiel de la información del Tesoro Público, que la ofrece gratuitamente en www.tesoro.es. "
                        "Cita: El Especulador, a partir de datos de la D. G. del Tesoro y Política Financiera",
