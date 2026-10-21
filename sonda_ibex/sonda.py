@@ -1,4 +1,4 @@
-"""Sonda temporal 26: ranking de capitalización revisado, con datos reales de BME (no publica nada)."""
+"""Sonda temporal 27: ranking de capitalización revisado, con datos reales de BME (no publica nada)."""
 import subprocess, sys
 from pathlib import Path
 OUT = Path("sonda_ibex/resultado")
