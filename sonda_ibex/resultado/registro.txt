@@ -1,0 +1,6 @@
+codigo=0
+--- stdout
+1103 subastas de Letras (2001-01-03 a 2026-10-13). 12 meses: 2026-10-06 2.999 %. Próximas: 26. Datos nuevos.
+
+--- stderr
+
