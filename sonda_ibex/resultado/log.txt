@@ -1,0 +1,5 @@
+122 empresas (113 españolas), datos al 2026-10-20. La mayor: Inditex, 176.278 millones. Marcadas: Digi Spain (en bolsa desde 16/07/2026), TSK (en bolsa desde 13/05/2026), CAM (cuotas participativas) (sin cotizar), Urbas (sin cotizar), Innovative Solutions Ecosystem (sin cotizar), Tubos Reunidos (sin cotizar), Cleop (sin cotizar).
+
+--- stderr ---
+
+exit 0

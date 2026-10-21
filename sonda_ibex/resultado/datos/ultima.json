@@ -1,0 +1,36 @@
+{
+ "fecha": "2026-10-20",
+ "generado": "2026-10-21T03:37:51+00:00",
+ "empresas": 122,
+ "espanolas": 113,
+ "capitalizacion_espanolas": 1154771681146.07,
+ "mayores": [
+  {
+   "nombre": "Inditex",
+   "isin": "ES0148396007",
+   "capitalizacion": 176277837120.0
+  },
+  {
+   "nombre": "Banco Santander",
+   "isin": "ES0113900J37",
+   "capitalizacion": 170718430290.13
+  },
+  {
+   "nombre": "Iberdrola",
+   "isin": "ES0144580Y14",
+   "capitalizacion": 141670794384.68
+  },
+  {
+   "nombre": "BBVA",
+   "isin": "ES0113211835",
+   "capitalizacion": 125041533588.93
+  },
+  {
+   "nombre": "CaixaBank",
+   "isin": "ES0140609019",
+   "capitalizacion": 81060306135.2
+  }
+ ],
+ "fuente": "BME, lista de cotizadas del mercado continuo, ficha e histórico de precios de cada valor",
+ "licencia": "Sin licencia abierta: datos de origen de BME, sujetos a sus condiciones. Cita: El Especulador, a partir de datos de BME"
+}
