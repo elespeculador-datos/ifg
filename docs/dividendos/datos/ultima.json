@@ -1,6 +1,6 @@
 {
- "fecha": "2026-10-20",
- "generado": "2026-10-20T20:23:32+00:00",
+ "fecha": "2026-10-21",
+ "generado": "2026-10-21T17:35:47+00:00",
  "proximos": 6,
  "siguiente": {
   "fecha_ex": "2026-10-29",
@@ -13,17 +13,17 @@
   {
    "empresa": "NATURHOUSE HEALTH",
    "isin": "ES0105043006",
-   "rentabilidad_ordinaria_pct": 13.39
+   "rentabilidad_ordinaria_pct": 13.51
   },
   {
    "empresa": "MFE-MEDIAFOREUROPE",
    "isin": "NL0015001OI1",
-   "rentabilidad_ordinaria_pct": 10.56
+   "rentabilidad_ordinaria_pct": 10.48
   },
   {
    "empresa": "TELEFONICA",
    "isin": "ES0178430E18",
-   "rentabilidad_ordinaria_pct": 8.89
+   "rentabilidad_ordinaria_pct": 8.81
   }
  ],
  "fuente": "BME, operaciones financieras: dividendos; cierres de la ficha de cada valor",
