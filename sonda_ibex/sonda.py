@@ -1,40 +1,10 @@
-"""Sonda temporal 37: RD 1362/2007 (umbrales de participaciones significativas): artículos de normas del BOE (API de legislación consolidada), buscando el bloque por su título."""
-import json, re, time
+"""Sonda temporal 38: prueba real del script de accionistas del IBEX 35 (accionistas/duenos.py)."""
+import subprocess, sys
 from pathlib import Path
-import requests
 OUT = Path("sonda_ibex/resultado"); OUT.mkdir(parents=True, exist_ok=True)
-for f in OUT.glob("*"):
+for f in OUT.rglob("*"):
     if f.is_file():
         f.unlink()
-API = "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/{id}/texto/{q}"
-H = {"Accept": "application/xml", "User-Agent": "Mozilla/5.0 (El Especulador, verificación)"}
-NORMAS = {
-    "BOE-A-2007-18383": [23, 24, 28, 30, 32, 33, 34],   # RD 1362/2007 de transparencia
-}
-res = {}
-def texto(xml: str) -> str:
-    t = re.sub(r"<[^>]+>", " ", xml)
-    t = re.sub(r"[ \t\xa0]+", " ", t)
-    return re.sub(r"\n\s*\n+", "\n", t).strip()
-for norma, arts in NORMAS.items():
-    res[norma] = {}
-    r = requests.get(API.format(id=norma, q="indice"), headers=H, timeout=60)
-    res[norma]["indice"] = r.status_code
-    bloques = re.findall(r"<bloque>(.*?)</bloque>", r.text, re.S)
-    por_num = {}
-    for b in bloques:
-        i = re.search(r"<id>(.*?)</id>", b); t = re.search(r"<titulo>(.*?)</titulo>", b, re.S)
-        if i and t:
-            m = re.match(r"Art[íi]culo\s*(\d+)", t.group(1).replace("\xa0", " ").strip())
-            if m and int(m.group(1)) not in por_num:
-                por_num[int(m.group(1))] = i.group(1)
-    for a in arts:
-        bid = por_num.get(a)
-        if not bid:
-            res[norma][a] = "sin bloque"; continue
-        rr = requests.get(API.format(id=norma, q=f"bloque/{bid}"), headers=H, timeout=60)
-        (OUT / f"{norma}_art{a}.txt").write_text(texto(rr.text), encoding="utf-8")
-        res[norma][a] = [bid, rr.status_code, len(rr.text)]
-        time.sleep(0.4)
-(OUT / "resumen.json").write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
-print("ok")
+r = subprocess.run([sys.executable, "sonda_ibex/duenos.py", "--salida", str(OUT / "accionistas")], capture_output=True, text=True)
+(OUT / "registro.txt").write_text(f"codigo={r.returncode}\n--- stdout\n{r.stdout}\n--- stderr\n{r.stderr[-6000:]}\n", encoding="utf-8")
+print(r.stdout[-3000:])
