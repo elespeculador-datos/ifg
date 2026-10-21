@@ -17,7 +17,7 @@ URLS = ["https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas
         "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/fiscalidad/residentes/impuesto-sobre-la-renta-de-las-personas-fisicas/tributacion-de-los-bonos-y-obligaciones-del-estado"]
 def limpiar(x):
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", x))).strip()
-import ssl, socket, certifi, subprocess, tempfile
+import ssl, socket, certifi, subprocess, tempfile, sys
 def bundle_con_intermedio(host):
     """Descarga el certificado intermedio que anuncia el servidor (AIA) y lo añade al almacén de certifi.
     La verificación TLS sigue activa: solo se completa la cadena que el servidor no envía."""
