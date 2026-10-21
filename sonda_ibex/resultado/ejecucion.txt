@@ -1,0 +1,6 @@
+codigo=0
+--- stdout
+1483 subastas de Bonos y Obligaciones (2001-01-10 a 2026-10-15). 10 años: 2026-10-01 4.176 %. Próximas: 26. Datos nuevos.
+
+--- stderr
+
