@@ -1,84 +1,40 @@
-"""Sonda temporal 36: búsquedas por palabra clave de las que fallaron en la 35."""
-import json, re, html, time
+"""Sonda temporal 37: RD 1362/2007 (umbrales de participaciones significativas): artículos de normas del BOE (API de legislación consolidada), buscando el bloque por su título."""
+import json, re, time
 from pathlib import Path
 import requests
 OUT = Path("sonda_ibex/resultado"); OUT.mkdir(parents=True, exist_ok=True)
 for f in OUT.glob("*"):
     if f.is_file():
         f.unlink()
-H = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36",
-     "Accept-Language": "es-ES,es;q=0.9"}
-BUSQ = "https://www.cnmv.es/portal/Consultas/Busqueda?id=7"
-BASE = "https://www.cnmv.es/portal/consultas/DerechosVoto/"
-API = "https://apiweb.bolsasymercados.es/Market/v1/EQ/"
-CAB = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Referer": "https://www.bolsasymercados.es/", "Origin": "https://www.bolsasymercados.es"}
-
-
-def limpiar(x):
-    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", x))).strip()
-
-
-def pedir(s, metodo, url, **kw):
-    for i in range(3):
-        try:
-            return s.request(metodo, url, timeout=120, **kw)
-        except requests.RequestException:
-            time.sleep(10 * (i + 1))
-    return None
-
-
-def ocultos(t):
-    return {m.group(1): html.unescape(m.group(2)) for m in re.finditer(r'<input type="hidden" name="([^"]+)" id="[^"]*" value="([^"]*)"', t)}
-
-
-def buscar(s, nombre):
-    g = pedir(s, "GET", BUSQ)
-    if g is None:
-        return None, "sin respuesta GET"
-    d = ocultos(g.text)
-    d.update({"ctl00$ContentPrincipal$btnOk": "Buscar", "ctl00$ContentPrincipal$wNombreEntidad$txtDenominacion": nombre})
-    p = pedir(s, "POST", BUSQ, data=d, headers={"Referer": BUSQ})
-    if p is None:
-        return None, "sin respuesta POST"
-    m = re.search(r'Notificaciones-Participaciones\.aspx\?qS=(\{[0-9a-f-]+\})', p.text)
-    if m:
-        return m.group(1), limpiar((re.search(r'id="ctl00_lblSubtitulo">(.*?)<', p.text) or [None, ""])[1])
-    sec = re.search(r'<section id="maincontent".*?</section>', p.text, re.S)
-    sec = sec.group(0) if sec else ""
-    (OUT / ("busq_" + re.sub(r"\W+", "_", nombre)[:30] + ".html")).write_text(sec)
-    cands = [(limpiar(x.group(2)), html.unescape(x.group(1))) for x in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', sec, re.S)]
-    return None, {"final": p.url, "candidatos": cands[:30], "texto": limpiar(sec)[:1500]}
-
-
-def accionistas(s, guid):
-    r = pedir(s, "GET", BASE + "Notificaciones-Participaciones.aspx?qS=" + guid)
-    if r is None:
-        return {"error": "sin respuesta"}
-    t = r.text
-    tot = re.search(r"Número total de derechos de voto.*?([\d]{1,3}(?:\.\d{3})+)", limpiar(t))
-    fmod = re.search(r"Fecha de última modificación del número de derechos de voto:\s*(?:<[^>]+>\s*)*([\d/]+)", t)
-    tab = re.search(r'<table[^>]+id="ctl00_ContentPrincipal_gridAccionistasSignificativos".*?</table>', t, re.S)
-    filas = []
-    if tab:
-        for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", tab.group(0), re.S):
-            celdas = {m.group(1): limpiar(m.group(2)) for m in re.finditer(r'<td[^>]*data-th="([^"]+)"[^>]*>(.*?)</td>', tr, re.S)}
-            if celdas.get("Denominación"):
-                filas.append(celdas)
-    otras = re.search(r'<table[^>]+id="([^"]*Otras[^"]*)"', t, re.I)
-    return {"total_derechos": tot.group(1) if tot else None, "fecha_derechos": fmod.group(1) if fmod else None,
-            "accionistas": filas, "tabla_otras": otras.group(1) if otras else None, "len": len(t)}
-
-
-CLAVES = ["ACCIONA", "ACTIVIDADES DE CONSTRUCCION", "BANKINTER", "LOGISTA", "ACCIONA ENERGIAS", "ENDESA", "FERROVIAL",
-          "INDRA", "TEXTIL", "INTERNATIONAL CONSOLIDATED", "PUIG", "SOLARIA", "IBERDROLA"]
-res = {"empresas": []}
-s = requests.Session(); s.headers.update(H)
-for c in CLAVES:
-    guid, info = buscar(s, c)
-    e = {"clave": c, "guid": guid, "info": info}
-    if guid:
-        e.update(accionistas(s, guid))
-    res["empresas"].append(e)
-    time.sleep(2)
-(OUT / "cnmv_ibex2.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
-print(sum(1 for e in res["empresas"] if e.get("guid")))
+API = "https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/{id}/texto/{q}"
+H = {"Accept": "application/xml", "User-Agent": "Mozilla/5.0 (El Especulador, verificación)"}
+NORMAS = {
+    "BOE-A-2007-18383": [23, 24, 28, 30, 32, 33, 34],   # RD 1362/2007 de transparencia
+}
+res = {}
+def texto(xml: str) -> str:
+    t = re.sub(r"<[^>]+>", " ", xml)
+    t = re.sub(r"[ \t\xa0]+", " ", t)
+    return re.sub(r"\n\s*\n+", "\n", t).strip()
+for norma, arts in NORMAS.items():
+    res[norma] = {}
+    r = requests.get(API.format(id=norma, q="indice"), headers=H, timeout=60)
+    res[norma]["indice"] = r.status_code
+    bloques = re.findall(r"<bloque>(.*?)</bloque>", r.text, re.S)
+    por_num = {}
+    for b in bloques:
+        i = re.search(r"<id>(.*?)</id>", b); t = re.search(r"<titulo>(.*?)</titulo>", b, re.S)
+        if i and t:
+            m = re.match(r"Art[íi]culo\s*(\d+)", t.group(1).replace("\xa0", " ").strip())
+            if m and int(m.group(1)) not in por_num:
+                por_num[int(m.group(1))] = i.group(1)
+    for a in arts:
+        bid = por_num.get(a)
+        if not bid:
+            res[norma][a] = "sin bloque"; continue
+        rr = requests.get(API.format(id=norma, q=f"bloque/{bid}"), headers=H, timeout=60)
+        (OUT / f"{norma}_art{a}.txt").write_text(texto(rr.text), encoding="utf-8")
+        res[norma][a] = [bid, rr.status_code, len(rr.text)]
+        time.sleep(0.4)
+(OUT / "resumen.json").write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
+print("ok")
