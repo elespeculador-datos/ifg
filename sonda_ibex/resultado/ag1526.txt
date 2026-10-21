@@ -1,0 +1,132 @@
+Aviso 15/2026 – Gestor
+del Índice
+Composición de los índices IBEX® a partir del 21 de
+septiembre de 2026
+
+
+
+
+Índices
+
+
+
+
+16 de septiembre 2026
+En consonancia con los Avisos nº 14/2026, 15/2026 y 16/2026 del Comité y los avisos de los
+Comités de Gestión de los índices de las Bolsas, y hechas las modificaciones previstas en
+las Normas de Técnicas para la Composición y Cálculo de los Índices IBEX® y de Estrategia
+sobre Acciones y las Normas de Técnicas para la Composición y Cálculo de los Índices de
+las Bolsas, Sociedad de Bolsas, como Gestor de los índices, comunica que la composición
+de los mismos a partir del 21 de septiembre de 2026 está disponible en SIX Index Data
+Center https://indexdata.six-group.com
+
+
+IBEX 35®
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_I.csv
+
+IBEX 35® BANCOS
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_IB.csv
+
+IBEX 35® ENERGÍA
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_IE.csv
+
+IBEX 35® CONSTRUCCIÓN
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_IC.csv
+
+IBEX MEDIUM CAP®
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_C.csv
+
+IBEX SMALL CAP®
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_S.csv
+
+IBEX® GENDER EQUALITY
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_E.csv
+
+IBEX® ESG
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_A.csv
+
+IBEX® ESG WEIGHTED
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_O.csv
+
+IBEX GROWTH MARKET® ALL SHARE
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_GROAS.csv
+
+IBEX GROWTH MARKET® 15
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_GRO15.csv
+
+IGBM
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_20000.csv
+
+                                                                          SIX Index Support                  SIX Index Business
+Aviso 15/2026 – Gestor del Índice                                         Technical Inquiries                Licensing, Data & Entitlement
+Índices                                                                   8021 Zurich, Switzerland           8021 Zurich, Switzerland
+                                                                          +41 58 399 22 29                   +41 58 399 26 00
+                                                                          indexsupport@six-group.com         indexdata@six-group.com
+
+
+
+Sociedad Bolsas, S.A.U., domicilio social en Madrid, Plaza de la Lealtad 1, C.I.F. A-82695677 e inscrita en el
+Registro Mercantil de Madrid en el tomo 15.611, folio 5, sección 8, hoja núm. M-262818.                                                      2
+IGBV
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_31000.csv
+
+BCN GLOBAL 100
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_40000.csv
+
+BOLSA BILBAO 2000
+https://indexdata.six-group.com/download/bme-reports/composition/forecast/forecast_50000.csv
+
+
+
+
+Estas modificaciones entran en vigor a partir del día 21 de septiembre de 2026. El ajuste
+de los índices se realizará al cierre de la sesión del viernes 18 de septiembre.
+
+Lo que se pone en conocimiento del público en general a los efectos oportunos.
+
+
+
+Madrid, 16 de septiembre de 2026
+
+
+
+
+                                                                          SIX Index Support                  SIX Index Business
+Aviso 15/2026 – Gestor del Índice                                         Technical Inquiries                Licensing, Data & Entitlement
+Índices                                                                   8021 Zurich, Switzerland           8021 Zurich, Switzerland
+                                                                          +41 58 399 22 29                   +41 58 399 26 00
+                                                                          indexsupport@six-group.com         indexdata@six-group.com
+
+
+
+Sociedad Bolsas, S.A.U., domicilio social en Madrid, Plaza de la Lealtad 1, C.I.F. A-82695677 e inscrita en el
+Registro Mercantil de Madrid en el tomo 15.611, folio 5, sección 8, hoja núm. M-262818.                                                      3
+Este material ha sido preparado por Bolsas y Mercados Españoles, Sociedad Holding de Mercados y Sistemas Financieros S. A. (BME) y/o sus filiales (en
+conjunto, "BME") para el uso exclusivo de las personas a las que a las que BME entrega este material. Este material o cualquiera de sus contenidos no debe
+interpretarse como un acuerdo vinculante, una recomendación, un consejo de inversión, solicitud, invitación u oferta de compra o venta de información
+financiera, productos, soluciones o servicios. Dicha información tampoco es un reflejo de posiciones (propias o de terceros) en firme de los intervinientes en el
+Mercado de Valores Español. BME no tiene ninguna obligación de actualizar, revisar o mantener al día el contenido de este material, y estará sujeto a cambios
+sin previo aviso en cualquier momento. Ninguna representación, garantía o compromiso -expreso o implícito- es compromiso -expreso o implícito- es o será
+dado por BME en cuanto a la exactitud, integridad, suficiencia, idoneidad o fiabilidad del contenido de este material.
+
+
+Al reflejar opiniones teóricas, su contenido es meramente informativo y por tanto no debe ser utilizado para valoración de carteras o patrimonios, ni servir de
+base para recomendaciones de inversión. Ni las Entidades contribuidoras, ni Bolsas y Mercados Españoles, Sociedad Holding de Mercados y Sistemas
+Financieros S.A.(BME) ni de ninguna de sus filiales, serán responsables de ninguna pérdida financiera, ni decisión tomada sobre la base de la información
+contenida en este material. En general, Bolsas y Mercados Españoles, Sociedad Holding de Mercados y Sistemas Financieros S. A. (BME) ni ninguna de sus
+filiales, ni las Entidades contribuidoras, sus administradores, representantes, asociados, sociedades controladas, directores, socios, empleados o asesores
+asumen responsabilidad alguna en relación con dicha información, ni de cualquier uso no autorizado del mismo.
+
+
+Este material es propiedad de BME y no puede ser impreso, copiado, reproducido, publicado, transmitido, divulgado o distribuido de ninguna forma sin el
+consentimiento previo por escrito de BME.
+
+
+2026 Bolsas y Mercados Españoles, Sociedad Holding de Mercados y Sistemas Financieros S. A. Todos los derechos reservados.
+
+
+BME                                www.bolsasymercados.es
+Plaza de la Lealtad,1
+Palacio de la Bolsa
+28014 Madrid
+
