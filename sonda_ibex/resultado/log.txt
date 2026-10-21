@@ -1,0 +1,3 @@
+122 empresas (113 españolas). La mayor: Inditex, 176.278 millones.
+
+--- stderr ---
