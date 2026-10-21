@@ -1,0 +1,248 @@
+{
+ "elespeculador.com": {
+  "sitemaps": [
+   "https://elespeculador.com/post-sitemap.xml",
+   "https://elespeculador.com/page-sitemap.xml",
+   "https://elespeculador.com/archive-template-sitemap.xml",
+   "https://elespeculador.com/category-sitemap.xml",
+   "https://elespeculador.com/author-sitemap.xml"
+  ],
+  "robots_txt": "# START YOAST BLOCK\n# ---------------------------\nUser-agent: *\nDisallow:\n\nSitemap: https://elespeculador.com/sitemap_index.xml\n# ---------------------------\n# END YOAST BLOCK",
+  "urls": {
+   "horario-bolsas-hora-espanola": {
+    "en_sitemap": true,
+    "http": 200,
+    "final": "https://elespeculador.com/horario-bolsas-hora-espanola/",
+    "bytes": 280226,
+    "robots": null,
+    "canonical": "https://elespeculador.com/horario-bolsas-hora-espanola/",
+    "title": "¿A qué hora abre Wall Street en España? Horario de bolsas | El Especulador",
+    "ld_types": [
+     "Article",
+     "BreadcrumbList",
+     "EntryPoint",
+     "ImageObject",
+     "ListItem",
+     "NewsArticle",
+     "Organization",
+     "Person",
+     "PropertyValueSpecification",
+     "ReadAction",
+     "SearchAction",
+     "WebPage",
+     "WebSite",
+     "hentry"
+    ],
+    "x_robots": null,
+    "cache": null
+   },
+   "posiciones-cortas-bolsa-espanola": {
+    "en_sitemap": true,
+    "http": 200,
+    "final": "https://elespeculador.com/posiciones-cortas-bolsa-espanola/",
+    "bytes": 252700,
+    "robots": null,
+    "canonical": "https://elespeculador.com/posiciones-cortas-bolsa-espanola/",
+    "title": "Posiciones cortas en España: umbrales y registro de la CNMV | El Especulador",
+    "ld_types": [
+     "Article",
+     "BreadcrumbList",
+     "EntryPoint",
+     "ImageObject",
+     "ListItem",
+     "NewsArticle",
+     "Organization",
+     "Person",
+     "PropertyValueSpecification",
+     "ReadAction",
+     "SearchAction",
+     "WebPage",
+     "WebSite",
+     "hentry"
+    ],
+    "x_robots": null,
+    "cache": null
+   },
+   "historico-ibex-35-records": {
+    "en_sitemap": true,
+    "http": 200,
+    "final": "https://elespeculador.com/historico-ibex-35-records/",
+    "bytes": 282407,
+    "robots": null,
+    "canonical": "https://elespeculador.com/historico-ibex-35-records/",
+    "title": "Máximo histórico del IBEX 35 y rentabilidad anual | El Especulador",
+    "ld_types": [
+     "Article",
+     "BreadcrumbList",
+     "EntryPoint",
+     "ImageObject",
+     "ListItem",
+     "NewsArticle",
+     "Organization",
+     "Person",
+     "PropertyValueSpecification",
+     "ReadAction",
+     "SearchAction",
+     "WebPage",
+     "WebSite",
+     "hentry"
+    ],
+    "x_robots": null,
+    "cache": null
+   },
+   "como-se-elige-el-ibex-35": {
+    "en_sitemap": false,
+    "http": 404,
+    "final": "https://elespeculador.com/como-se-elige-el-ibex-35/",
+    "bytes": 198777,
+    "robots": null,
+    "canonical": null,
+    "title": "Página no encontrada - El especulador",
+    "ld_types": [
+     "BreadcrumbList",
+     "EntryPoint",
+     "ImageObject",
+     "ListItem",
+     "Organization",
+     "PropertyValueSpecification",
+     "SearchAction",
+     "WebSite"
+    ],
+    "x_robots": null,
+    "cache": null
+   },
+   "posiciones-cortas-hoy": {
+    "en_sitemap": true,
+    "http": 200,
+    "final": "https://elespeculador.com/posiciones-cortas-hoy/",
+    "bytes": 181647,
+    "robots": null,
+    "canonical": "https://elespeculador.com/posiciones-cortas-hoy/",
+    "title": "Posiciones cortas en la bolsa española hoy - El especulador",
+    "ld_types": [
+     "BreadcrumbList",
+     "EntryPoint",
+     "ImageObject",
+     "ListItem",
+     "Organization",
+     "PropertyValueSpecification",
+     "ReadAction",
+     "SearchAction",
+     "WebPage",
+     "WebSite",
+     "Webpage"
+    ],
+    "x_robots": null,
+    "cache": null
+   },
+   "ibex-35-en-cifras": {
+    "en_sitemap": true,
+    "http": 200,
+    "final": "https://elespeculador.com/ibex-35-en-cifras/",
+    "bytes": 172917,
+    "robots": null,
+    "canonical": "https://elespeculador.com/ibex-35-en-cifras/",
+    "title": "El IBEX 35 en cifras: máximo histórico y rentabilidad de cada año - El especulador",
+    "ld_types": [
+     "BreadcrumbList",
+     "EntryPoint",
+     "ImageObject",
+     "ListItem",
+     "Organization",
+     "PropertyValueSpecification",
+     "ReadAction",
+     "SearchAction",
+     "WebPage",
+     "WebSite",
+     "Webpage"
+    ],
+    "x_robots": null,
+    "cache": null
+   }
+  }
+ },
+ "tntbolsa.com": {
+  "sitemaps": [
+   "https://tntbolsa.com/post-sitemap.xml",
+   "https://tntbolsa.com/category-sitemap.xml"
+  ],
+  "robots_txt": "User-agent: *\r\nDisallow: /wp-admin/\r\nAllow: /wp-admin/admin-ajax.php\r\n\r\nsitemap: http://tntbolsa.com/sitemap_index.xml",
+  "urls": {
+   "cuanto-arriesgar-por-operacion": {
+    "en_sitemap": true,
+    "http": 200,
+    "final": "https://tntbolsa.com/cuanto-arriesgar-por-operacion/",
+    "bytes": 161920,
+    "robots": null,
+    "canonical": "https://tntbolsa.com/cuanto-arriesgar-por-operacion/",
+    "title": "Cuánto arriesgar por operación: cálculo y rachas - TNT Bolsa",
+    "ld_types": [
+     "Article",
+     "BreadcrumbList",
+     "EntryPoint",
+     "ImageObject",
+     "ListItem",
+     "Organization",
+     "Person",
+     "PropertyValueSpecification",
+     "ReadAction",
+     "SearchAction",
+     "WebPage",
+     "WebSite"
+    ],
+    "x_robots": null,
+    "cache": null
+   },
+   "profit-factor-backtest": {
+    "en_sitemap": true,
+    "http": 200,
+    "final": "https://tntbolsa.com/profit-factor-backtest/",
+    "bytes": 166515,
+    "robots": null,
+    "canonical": "https://tntbolsa.com/profit-factor-backtest/",
+    "title": "Qué es un buen profit factor y cómo leer un backtest - TNT Bolsa",
+    "ld_types": [
+     "Article",
+     "BreadcrumbList",
+     "EntryPoint",
+     "ImageObject",
+     "ListItem",
+     "Organization",
+     "Person",
+     "PropertyValueSpecification",
+     "ReadAction",
+     "SearchAction",
+     "WebPage",
+     "WebSite"
+    ],
+    "x_robots": null,
+    "cache": null
+   },
+   "futuros-ibex-35": {
+    "en_sitemap": true,
+    "http": 200,
+    "final": "https://tntbolsa.com/futuros-ibex-35/",
+    "bytes": 149357,
+    "robots": null,
+    "canonical": "https://tntbolsa.com/futuros-ibex-35/",
+    "title": "Futuros IBEX 35, Mini y Micro: valor del punto (2026) - TNT Bolsa",
+    "ld_types": [
+     "Article",
+     "BreadcrumbList",
+     "EntryPoint",
+     "ImageObject",
+     "ListItem",
+     "Organization",
+     "Person",
+     "PropertyValueSpecification",
+     "ReadAction",
+     "SearchAction",
+     "WebPage",
+     "WebSite"
+    ],
+    "x_robots": null,
+    "cache": null
+   }
+  }
+ }
+}
