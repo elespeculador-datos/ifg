@@ -1,64 +1,49 @@
-"""Sonda temporal 40: aviso legal, históricos y calendario de tesoro.es. (39b (cadena de certificados incompleta en tesoro.es: se completa con el intermedio del AIA): subastas de Letras del Tesoro en tesoro.es (páginas y archivos descargables)."""
-import json, re, html
+"""Sonda temporal 41: estructura de los históricos de subastas del Tesoro (xlsx) y del calendario 2026 (pdf)."""
+import json, re, ssl, socket, subprocess, tempfile, io
 from pathlib import Path
-import requests
+import requests, certifi
+import pandas as pd
 OUT = Path("sonda_ibex/resultado"); OUT.mkdir(parents=True, exist_ok=True)
 for f in OUT.rglob("*"):
     if f.is_file():
         f.unlink()
-H = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36 (El Especulador, datos abiertos)",
-     "Accept-Language": "es-ES,es;q=0.9"}
-URLS = ["https://www.tesoro.es/aviso-legal",
-        "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/subastas",
-        "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/tipos-marginales",
-        "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/tipo-inter%C3%A9s-medio",
-        "https://www.tesoro.es/deuda-publica/subastas/calendario",
-        "https://www.tesoro.es/deuda-publica/subastas/resultados-subastas-anteriores",
-        "https://www.tesoro.es/deuda-publica/estad%C3%ADsticas-mensuales"]
-def limpiar(x):
-    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", x))).strip()
-import ssl, socket, certifi, subprocess, tempfile
-def bundle_con_intermedio(host):
-    """Descarga el certificado intermedio que anuncia el servidor (AIA) y lo añade al almacén de certifi.
-    La verificación TLS sigue activa: solo se completa la cadena que el servidor no envía."""
+H = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36 (El Especulador, datos abiertos)"}
+def bundle(host):
     ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
     with socket.create_connection((host, 443), timeout=30) as sock:
         with ctx.wrap_socket(sock, server_hostname=host) as ss:
             der = ss.getpeercert(binary_form=True)
-    pem_hoja = ssl.DER_cert_to_PEM_cert(der)
-    t = tempfile.NamedTemporaryFile("w", suffix=".pem", delete=False); t.write(pem_hoja); t.close()
+    t = tempfile.NamedTemporaryFile("w", suffix=".pem", delete=False); t.write(ssl.DER_cert_to_PEM_cert(der)); t.close()
     txt = subprocess.run(["openssl", "x509", "-in", t.name, "-noout", "-text"], capture_output=True, text=True).stdout
-    aia = re.findall(r"CA Issuers - URI:(\S+)", txt)
     extra = ""
-    for u in aia:
+    for u in re.findall(r"CA Issuers - URI:(\S+)", txt):
         d = requests.get(u, timeout=30).content
-        if b"BEGIN CERTIFICATE" in d:
-            extra += d.decode()
-        else:
-            extra += ssl.DER_cert_to_PEM_cert(d)
-    b = tempfile.NamedTemporaryFile("w", suffix=".pem", delete=False)
-    b.write(open(certifi.where()).read() + "\n" + extra); b.close()
-    return b.name, aia
+        extra += d.decode() if b"BEGIN CERTIFICATE" in d else ssl.DER_cert_to_PEM_cert(d)
+    b = tempfile.NamedTemporaryFile("w", suffix=".pem", delete=False); b.write(open(certifi.where()).read() + "\n" + extra); b.close()
+    return b.name
+s = requests.Session(); s.headers.update(H); s.verify = bundle("www.tesoro.es")
+BASE = "https://www.tesoro.es/documents/d/tesoro/"
 res = {}
-s = requests.Session(); s.headers.update(H)
-try:
-    s.verify, aia = bundle_con_intermedio("www.tesoro.es")
-    res["_aia"] = aia
-except Exception as e:  # noqa: BLE001
-    res["_aia_error"] = str(e)[:300]
-for u in URLS:
+for nombre in ["historico_subastas-xlsx", "historico_t-marg-xlsx", "historico_t-int-medio-xlsx", "01-xlsx", "02-xlsx", "03-xlsx", "04-xlsx", "05-xlsx", "06-xlsx"]:
     try:
-        r = s.get(u, timeout=60)
-        t = r.text
-        enl = []
-        for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', t, re.S):
-            h = html.unescape(m.group(1)); tx = limpiar(m.group(2))
-            if re.search(r"/documents/|\.(xlsx?|csv|pdf)|reutiliz", h + tx, re.I):
-                enl.append([tx[:80], h[:220]])
-        main = re.search(r"<main.*?</main>", t, re.S)
-        res[u] = {"http": r.status_code, "final": r.url, "len": len(t), "enlaces": enl[:80],
-                  "texto": limpiar(re.sub(r"<script.*?</script>|<style.*?</style>", " ", (main.group(0) if main else t), flags=re.S))[:6000], "tablas": [limpiar(x)[:1500] for x in re.findall(r"<table.*?</table>", t, re.S)[:3]]}
+        r = s.get(BASE + nombre, timeout=90)
+        info = {"http": r.status_code, "tipo": r.headers.get("content-type"), "len": len(r.content)}
+        if r.status_code == 200:
+            (OUT / (nombre + ".xlsx")).write_bytes(r.content)
+            xl = pd.ExcelFile(io.BytesIO(r.content))
+            info["hojas"] = {}
+            for h in xl.sheet_names[:8]:
+                df = xl.parse(h, header=None, nrows=40)
+                info["hojas"][h] = {"forma": list(df.shape), "filas": df.fillna("").astype(str).values.tolist()[:40]}
+        res[nombre] = info
     except Exception as e:  # noqa: BLE001
-        res[u] = {"error": str(e)[:300]}
-(OUT / "tesoro.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
+        res[nombre] = {"error": str(e)[:300]}
+try:
+    r = s.get(BASE + "calendario-tesoro-publico-2026-espanol-12-pdf", timeout=90)
+    p = OUT / "calendario2026.pdf"; p.write_bytes(r.content)
+    txt = subprocess.run(["pdftotext", "-layout", str(p), "-"], capture_output=True, text=True).stdout
+    res["calendario2026"] = {"http": r.status_code, "len": len(r.content), "texto": txt[:8000]}
+except Exception as e:  # noqa: BLE001
+    res["calendario2026"] = {"error": str(e)[:300]}
+(OUT / "tesoro_hist.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
 print("ok")
