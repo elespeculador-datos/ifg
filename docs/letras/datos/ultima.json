@@ -1,6 +1,6 @@
 {
  "fecha": "2026-10-21",
- "comprobado": "2026-10-21T16:18:36+00:00",
+ "comprobado": "2026-10-21T16:28:32+00:00",
  "huella": "30c3f97b81b6",
  "ultimas": {
   "12": {
@@ -156,6 +156,7 @@
   "personas_fisicas": 22080.894224,
   "total": 84940.66
  },
+ "fuente_tenedores": "Tesoro Público, Letras del Tesoro: distribución por tenedores (estadísticas mensuales); según su nota, 2002-2015 Banco de España (Iberclear) y 2016-2023 Banco de España (Securities Holdings Statistics)",
  "fuente": "D. G. del Tesoro y Política Financiera (www.tesoro.es)",
  "condiciones": "Reproducción fiel de la información del Tesoro Público, que la ofrece gratuitamente en www.tesoro.es. Cita: El Especulador, a partir de datos de la D. G. del Tesoro y Política Financiera"
 }
