@@ -29,11 +29,23 @@ import pandas as pd
 import requests
 
 API = "https://apiweb.bolsasymercados.es/Market/v1/EQ/CorporateActions/Dividends"
+FICHA = "https://apiweb.bolsasymercados.es/Market/v1/EQ/ShareDetailsInfo"
+COTIZADAS = "https://apiweb.bolsasymercados.es/Market/v1/EQ/ListedCompanies"
 CABECERAS = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Referer": "https://www.bolsasymercados.es/"}
 RAIZ = Path(__file__).resolve().parent.parent
 SALIDA = RAIZ / "docs" / "dividendos"
 DATOS = SALIDA / "datos"
 PILAR = "https://elespeculador.com/dividendos-fecha-ex-dividendo/"
+PAGINA_WP = "https://elespeculador.com/calendario-dividendos/"
+TOP_RENTABILIDAD = 15
+# Nombres cortos de BME que no se entienden fuera de su web
+NOMBRES = {"CASH": "PROSEGUR CASH"}
+# Composición del IBEX 35 (sin cambios desde el 22/07/2024, cuando Puig sustituyó a Meliá). Se revisa cada trimestre:
+# La composición se toma de BME (ListedCompanies, campo «indices»); este fichero es la reserva si BME
+# no responde o no da 35 valores. Pasada esta fecha, la reserva deja de valer.
+IBEX35 = Path(__file__).resolve().parent / "ibex35.csv"
+IBEX35_VALIDA_HASTA = "2026-12-20"
+PAGES = "https://elespeculador-datos.github.io/ifg/dividendos/"
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
          "septiembre", "octubre", "noviembre", "diciembre"]
 CONCEPTOS = {"A": "a cuenta", "C": "complementario", "E": "especial", "R": "con cargo a reservas", "P": "prima de emisión",
@@ -75,6 +87,21 @@ def descargar() -> list[dict]:
     return filas
 
 
+def cotizaciones(isins: list[str]) -> list[dict]:
+    """Último cierre y capitalización de cada acción (ficha de BME). Nunca hace fallar el calendario."""
+    filas = []
+    for isin in isins:
+        try:
+            r = requests.get(FICHA, params={"isin": isin}, headers=CABECERAS, timeout=30)
+            if r.status_code == 200:
+                j = r.json()
+                filas.append({k: j.get(k) for k in ("isin", "lastClosePrice", "lastClosePriceDate", "capitalisation", "currency")})
+        except Exception as e:  # noqa: BLE001 - una ficha caída no debe parar el resto
+            print(f"Sin ficha de {isin}: {e}")
+        time.sleep(0.2)
+    return filas
+
+
 # --------------------------------------------------------------------------- limpieza
 def preparar(filas: list[dict]) -> pd.DataFrame:
     if not filas:
@@ -91,7 +118,7 @@ def preparar(filas: list[dict]) -> pd.DataFrame:
         raise DatosRaros("Demasiadas fechas o importes ilegibles")
     d = d.dropna(subset=["fecha_ex", "bruto"])
     d = d[d["bruto"] > 0]
-    d["empresa"] = d.get("share", d["company"]).fillna(d["company"]).str.strip()
+    d["empresa"] = d.get("share", d["company"]).fillna(d["company"]).str.strip().replace(NOMBRES)
     d["concepto"] = d.get("concept", pd.Series([""] * len(d))).map(CONCEPTOS).fillna(d.get("conceptText", "").str.lower())
     d["extraordinario"] = d.get("type", pd.Series([""] * len(d))).eq("E")
     d["flexible"] = d.get("type", pd.Series([""] * len(d))).eq("B")
@@ -150,11 +177,39 @@ def calcular(d: pd.DataFrame) -> dict:
     h = hoy_madrid()
     prox = d[d["fecha_ex"] >= h].copy()
     pasados = d[(d["fecha_ex"] > h - pd.DateOffset(years=1)) & (d["fecha_ex"] < h)]
-    ult = (pasados.groupby(["isin", "empresa", "moneda"], as_index=False)
-           .agg(pagos=("bruto", "size"), bruto_total=("bruto", "sum"), ultima_fecha_ex=("fecha_ex", "max"))
-           .sort_values("empresa"))
+    # Una fila por acción y moneda; si BME cambió el nombre (Ferrovial SE / N.V.), se queda el del último pago.
+    pasados = pasados.sort_values("fecha_ex")
+    ult = (pasados.groupby(["isin", "moneda"], as_index=False)
+           .agg(empresa=("empresa", "last"), pagos=("bruto", "size"), bruto_total=("bruto", "sum"), ultima_fecha_ex=("fecha_ex", "max"))
+           .sort_values(["empresa", "moneda"]))[["isin", "empresa", "moneda", "pagos", "bruto_total", "ultima_fecha_ex"]]
     ult["bruto_total"] = ult["bruto_total"].round(6)
+    ordinario = (pasados[~pasados["extraordinario"].astype(bool)].groupby(["isin", "moneda"])["bruto"].sum().round(6)
+                 .rename("bruto_ordinario").reset_index())
+    ult = ult.merge(ordinario, on=["isin", "moneda"], how="left").fillna({"bruto_ordinario": 0.0}).reset_index(drop=True)
     return {"hoy": h, "proximos": prox, "ultimos_12m": ult, "todos": d}
+
+
+def rentabilidad(r: dict, cot: list[dict]) -> pd.DataFrame:
+    """Rentabilidad por dividendo de los últimos doce meses sobre el último cierre.
+
+    Solo se calcula si la ficha de BME tiene un cierre de los últimos diez días, en la
+    misma moneda que el dividendo. La ordinaria excluye los dividendos extraordinarios;
+    los flexibles cuentan por el importe para quien elige efectivo.
+    """
+    columnas = ["isin", "empresa", "moneda", "pagos", "bruto_total", "bruto_ordinario", "cierre", "fecha_cierre",
+                "capitalizacion", "rentabilidad_pct", "rentabilidad_ordinaria_pct"]
+    if not cot:
+        return pd.DataFrame(columns=columnas)
+    c = pd.DataFrame(cot).rename(columns={"lastClosePrice": "cierre", "capitalisation": "capitalizacion", "currency": "moneda_cot"})
+    c["fecha_cierre"] = pd.to_datetime(c["lastClosePriceDate"], format="%Y%m%d", errors="coerce")
+    c["cierre"] = pd.to_numeric(c["cierre"], errors="coerce")
+    u = r["ultimos_12m"].merge(c[["isin", "cierre", "fecha_cierre", "capitalizacion", "moneda_cot"]], on="isin", how="inner")
+    una_moneda = u.groupby("isin")["moneda"].transform("nunique") == 1
+    valida = (u["cierre"] > 0) & una_moneda & (u["moneda"] == u["moneda_cot"].fillna("EUR")) & (u["fecha_cierre"] >= r["hoy"] - pd.Timedelta(days=10))
+    u = u[valida].copy()
+    u["rentabilidad_pct"] = (100 * u["bruto_total"] / u["cierre"]).round(2)
+    u["rentabilidad_ordinaria_pct"] = (100 * u["bruto_ordinario"] / u["cierre"]).round(2)
+    return u.sort_values(["rentabilidad_ordinaria_pct", "empresa"], ascending=[False, True])[columnas].reset_index(drop=True)
 
 
 def frase(r: dict) -> str:
@@ -171,6 +226,53 @@ def frase(r: dict) -> str:
     return texto
 
 
+def ibex35_bme() -> set[str]:
+    """ISIN del IBEX 35 según la lista de cotizadas de BME (campo «indices»). Vacío si no cuadra."""
+    try:
+        r = requests.get(COTIZADAS, params={"tradingSystem": "SIBE", "page": 0, "pageSize": 0}, headers=CABECERAS, timeout=60)
+        if r.status_code != 200:
+            return set()
+        j = r.json()
+        if j.get("hasMoreResults"):
+            return set()
+        isins = {f["isin"] for f in j.get("data", []) if "IBEX 35" in (f.get("indices") or "")}
+    except Exception as e:  # noqa: BLE001 - si BME falla, se usa la lista guardada
+        print(f"Sin la lista de cotizadas de BME: {e}")
+        return set()
+    return isins if len(isins) == 35 else set()
+
+
+def ibex35(hoy: pd.Timestamp, red: bool = True) -> set[str]:
+    """ISIN del IBEX 35: los de BME si da exactamente 35; si no, la composición guardada
+    mientras siga vigente; si tampoco, vacío (y aviso)."""
+    if red:
+        desde_bme = ibex35_bme()
+        if desde_bme:
+            if IBEX35.exists() and desde_bme != set(pd.read_csv(IBEX35, dtype=str)["isin"]):
+                print(f"::warning::La composición del IBEX 35 de BME no coincide con {IBEX35.name}: se usa la de BME. Actualiza el fichero.")
+            return desde_bme
+    if hoy > pd.Timestamp(IBEX35_VALIDA_HASTA) or not IBEX35.exists():
+        print(f"::warning::La composición del IBEX 35 de {IBEX35.name} venció el {IBEX35_VALIDA_HASTA}: no se publica la tabla del IBEX.")
+        return set()
+    return set(pd.read_csv(IBEX35, dtype=str)["isin"])
+
+
+def frase_rentabilidad(rent: pd.DataFrame, ibex: set[str] | None = None) -> str:
+    if rent.empty:
+        return ""
+    t = rent.iloc[0]
+    texto = (f"La mayor rentabilidad por dividendo ordinaria de los últimos doce meses es la de {t.empresa}: "
+             f"{_pct(t.rentabilidad_ordinaria_pct)} sobre su cierre del {_fecha(t.fecha_cierre)}.")
+    i = rent[rent["isin"].isin(ibex or set())]
+    if not i.empty and i.iloc[0]["isin"] != t.isin:
+        texto += f" En el IBEX 35, la de {i.iloc[0]['empresa']}, con un {_pct(i.iloc[0]['rentabilidad_ordinaria_pct'])}."
+    return texto
+
+
+def _pct(x: float) -> str:
+    return f"{x:.2f}".replace(".", ",") + " %"
+
+
 def fragmento_wp(r: dict) -> str:
     def e(x) -> str:
         return html.escape(str(x)).replace("$", "&#36;")
@@ -183,20 +285,72 @@ def fragmento_wp(r: dict) -> str:
             for x in prox.itertuples())
         t_prox = ("<figure class=\"wp-block-table\"><table><thead><tr><th>Fecha ex</th><th>Empresa</th><th>Bruto por acción</th><th>Tipo</th><th>Fecha de pago</th></tr></thead><tbody>\n"
                   + filas + "\n</tbody></table></figure>")
+    rent = r.get("rentabilidad", pd.DataFrame())
+    por_isin = {} if rent.empty else {(q["isin"], q["moneda"]): q for q in rent.to_dict("records")}
+
+    def celda_rent(x) -> str:
+        q = por_isin.get((x.isin, x.moneda))
+        if not q:
+            return "—"
+        nota = " (con extraordinario)" if q["bruto_total"] - q["bruto_ordinario"] > 1e-9 else ""
+        return _pct(q["rentabilidad_pct"]) + nota
+    extra = (lambda x: f"<td>{celda_rent(x)}</td>") if por_isin else (lambda x: "")
     filas_u = "\n".join(
-        f"<tr><td>{e(x.empresa)}</td><td>{int(x.pagos)}</td><td>{_importe(x.bruto_total, x.moneda)}</td><td>{_fecha(x.ultima_fecha_ex)}</td></tr>"
+        f"<tr><td>{e(x.empresa)}</td><td>{int(x.pagos)}</td><td>{_importe(x.bruto_total, x.moneda)}</td><td>{_fecha(x.ultima_fecha_ex)}</td>{extra(x)}</tr>"
         for x in ult.itertuples())
-    t_ult = ("<figure class=\"wp-block-table\"><table><thead><tr><th>Empresa</th><th>Pagos</th><th>Bruto por acción, en total</th><th>Último, con fecha ex</th></tr></thead><tbody>\n"
+    t_ult = ("<figure class=\"wp-block-table\"><table><thead><tr><th>Empresa</th><th>Pagos</th><th>Bruto por acción, en total</th><th>Último, con fecha ex</th>"
+             + ("<th>Rentabilidad sobre el último cierre</th>" if por_isin else "") + "</tr></thead><tbody>\n"
              + filas_u + "\n</tbody></table></figure>")
+    if rent.empty:
+        b_rent = ""
+    else:
+        top = rent[rent["rentabilidad_ordinaria_pct"] > 0].head(TOP_RENTABILIDAD)
+        filas_r = "\n".join(
+            f"<tr><td>{i}</td><td>{e(x.empresa)}</td><td>{_importe(x.bruto_ordinario, x.moneda)}</td><td>{_importe(x.cierre, x.moneda)} ({_fecha(x.fecha_cierre)})</td><td>{_pct(x.rentabilidad_ordinaria_pct)}</td></tr>"
+            for i, x in enumerate(top.itertuples(), 1))
+        ib = rent[rent["isin"].isin(r.get("ibex", set())) & (rent["rentabilidad_ordinaria_pct"] > 0)].head(10)
+        b_ibex = "" if ib.empty else (
+            "<h3>Las diez del IBEX 35 con más rentabilidad por dividendo</h3>\n"
+            "<figure class=\"wp-block-table\"><table><thead><tr><th>Puesto</th><th>Empresa</th><th>Dividendo ordinario, últimos 12 meses</th><th>Último cierre</th><th>Rentabilidad</th></tr></thead><tbody>\n"
+            + "\n".join(f"<tr><td>{i}</td><td>{e(x.empresa)}</td><td>{_importe(x.bruto_ordinario, x.moneda)}</td><td>{_importe(x.cierre, x.moneda)} ({_fecha(x.fecha_cierre)})</td><td>{_pct(x.rentabilidad_ordinaria_pct)}</td></tr>"
+                        for i, x in enumerate(ib.itertuples(), 1))
+            + "\n</tbody></table></figure>\n")
+        b_rent = ("<h2>Rentabilidad por dividendo</h2>\n"
+                  f"<p>Las {len(top)} empresas con mayor rentabilidad por dividendo ordinaria de los últimos doce meses: lo que han pagado por acción con fecha ex en el último año, "
+                  "sin contar los dividendos extraordinarios, dividido entre su último cierre. Los dividendos flexibles cuentan por el importe para quien elige efectivo. "
+                  "Es la rentabilidad del último año, no una previsión.</p>\n"
+                  "<figure class=\"wp-block-table\"><table><thead><tr><th>Puesto</th><th>Empresa</th><th>Dividendo ordinario, últimos 12 meses</th><th>Último cierre</th><th>Rentabilidad</th></tr></thead><tbody>\n"
+                  + filas_r + "\n</tbody></table></figure>\n" + b_ibex)
     return f"""<!-- dividendos:inicio {r['hoy'].date().isoformat()} -->
-<p><strong>Datos a {_fecha(r['hoy'])}.</strong> {e(frase(r))}</p>
+<p><strong>Datos a {_fecha(r['hoy'])}.</strong> {e((frase(r) + " " + frase_rentabilidad(rent, r.get("ibex"))).strip())}</p>
 <h2>Próximos dividendos</h2>
 <p>Para cobrar hay que tener las acciones compradas al cierre de la sesión anterior a la fecha ex.</p>
 {t_prox}
-<h2>Dividendos de los últimos doce meses</h2>
-<p>Lo que ha repartido cada empresa por acción, sumando todos los pagos con fecha ex en el último año.</p>
+{b_rent}<h2>Dividendos de los últimos doce meses</h2>
+<p>Lo que ha repartido cada empresa por acción, sumando todos los pagos con fecha ex en el último año{", y lo que supone sobre su último cierre" if por_isin else ""}.</p>
 {t_ult}
 <!-- dividendos:fin -->"""
+
+
+def ld_wp(r: dict) -> str:
+    """Marcado Dataset (schema.org) en una sola línea, para la página de elespeculador.com."""
+    return '<script type="application/ld+json">' + json.dumps({
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": "Calendario de dividendos de la bolsa española (El Especulador)",
+        "description": "Próximos dividendos del mercado continuo con su fecha ex, importe bruto por acción y fecha de pago, lo repartido por cada empresa en los últimos doce meses y su rentabilidad por dividendo sobre el último cierre, con datos de BME actualizados cada día hábil.",
+        "url": PAGINA_WP, "inLanguage": "es", "spatialCoverage": "España",
+        "creator": {"@type": "Organization", "name": "El Especulador", "url": "https://elespeculador.com/"},
+        "creditText": "El Especulador, a partir de datos de BME", "isBasedOn": "https://www.bolsasymercados.es/",
+        "dateModified": r["hoy"].date().isoformat(),
+        "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"{PAGES}datos/{n}.csv"}
+                         for n in ["proximos", "ultimos_12m", "rentabilidad", "dividendos"]],
+    }, ensure_ascii=False) + "</script>"
+
+
+def con_ld(frag: str, ld: str) -> str:
+    marca = "\n<!-- dividendos:fin -->"
+    assert frag.count(marca) == 1 and "$" not in ld
+    return frag.replace(marca, "\n" + ld + marca)
 
 
 def escribir(r: dict) -> None:
@@ -210,6 +364,13 @@ def escribir(r: dict) -> None:
     fechas(r["todos"]).to_csv(DATOS / "dividendos.csv", index=False)
     fechas(r["proximos"]).to_csv(DATOS / "proximos.csv", index=False)
     fechas(r["ultimos_12m"]).to_csv(DATOS / "ultimos_12m.csv", index=False)
+    rent = r.get("rentabilidad", pd.DataFrame())
+    if not rent.empty:
+        rr = rent.copy()
+        rr["fecha_cierre"] = rr["fecha_cierre"].dt.date
+        if r.get("ibex"):
+            rr["ibex35"] = rr["isin"].isin(r["ibex"])
+        rr.to_csv(DATOS / "rentabilidad.csv", index=False)
     prox = r["proximos"]
     (DATOS / "ultima.json").write_text(json.dumps({
         "fecha": r["hoy"].date().isoformat(),
@@ -217,10 +378,11 @@ def escribir(r: dict) -> None:
         "proximos": int(len(prox)),
         "siguiente": None if prox.empty else {"fecha_ex": prox["fecha_ex"].min().date().isoformat(),
                                               "empresas": sorted(prox.loc[prox["fecha_ex"] == prox["fecha_ex"].min(), "empresa"].unique().tolist())},
-        "fuente": "BME, operaciones financieras: dividendos", "licencia": "CC BY 4.0 · El Especulador",
+        "mayor_rentabilidad": None if rent.empty else rent.head(3)[["empresa", "isin", "rentabilidad_ordinaria_pct"]].to_dict("records"),
+        "fuente": "BME, operaciones financieras: dividendos; cierres de la ficha de cada valor", "licencia": "Sin licencia abierta: datos de origen de BME, sujetos a sus condiciones. Cita: El Especulador, a partir de datos de BME",
     }, ensure_ascii=False, indent=1), encoding="utf-8")
     frag = fragmento_wp(r)
-    (SALIDA / "fragmento-wp.html").write_text(frag, encoding="utf-8")
+    (SALIDA / "fragmento-wp.html").write_text(con_ld(frag, ld_wp(r)), encoding="utf-8")
     cuerpo = frag.split("\n", 1)[1].rsplit("\n", 1)[0]
     (SALIDA / "index.html").write_text(f"""<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -235,7 +397,7 @@ a{{color:#1f4e8c}} .pie{{color:#5b6675;font-size:.85rem;margin-top:2em}}
 <h1>Calendario de dividendos de la bolsa española</h1>
 {cuerpo}
 <h2>Datos abiertos</h2>
-<p>CSV: <a href="datos/proximos.csv">próximos dividendos</a> · <a href="datos/ultimos_12m.csv">últimos doce meses</a> · <a href="datos/dividendos.csv">todos desde hace tres años</a> · <a href="datos/ultima.json">JSON</a>. Licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>, citando «El Especulador, a partir de datos de BME». Cómo funcionan las fechas: <a href="{PILAR}">qué día hay que tener las acciones para cobrar el dividendo</a>.</p>
+<p>CSV: <a href="datos/proximos.csv">próximos dividendos</a> · <a href="datos/ultimos_12m.csv">últimos doce meses</a> · <a href="datos/rentabilidad.csv">rentabilidad por dividendo</a> · <a href="datos/dividendos.csv">todos desde hace tres años</a> · <a href="datos/ultima.json">JSON</a>. Puedes reutilizarlos citando «El Especulador, a partir de datos de BME»; los datos de origen son de BME y se rigen por sus condiciones. Cómo funcionan las fechas: <a href="{PILAR}">qué día hay que tener las acciones para cobrar el dividendo</a>.</p>
 <p class="pie">Fuente: BME, operaciones financieras del mercado continuo. Importes brutos por acción, antes de retenciones. Contenido informativo; no constituye asesoramiento financiero.</p>
 </body></html>
 """, encoding="utf-8")
@@ -244,11 +406,22 @@ a{{color:#1f4e8c}} .pie{{color:#5b6675;font-size:.85rem;margin-top:2em}}
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--local", help="JSON con la lista de dividendos de BME")
+    ap.add_argument("--cotizaciones", help="JSON con las fichas de BME (isin -> ficha), para probar sin red")
     args = ap.parse_args()
     filas = json.loads(Path(args.local).read_text(encoding="utf-8")) if args.local else descargar()
     r = calcular(acumular(preparar(filas)))
+    isins = sorted(r["ultimos_12m"]["isin"].unique())
+    if args.cotizaciones:
+        fichas = json.loads(Path(args.cotizaciones).read_text(encoding="utf-8"))
+        cot = [{k: f.get(k) for k in ("isin", "lastClosePrice", "lastClosePriceDate", "capitalisation", "currency")}
+               for f in fichas.values() if isinstance(f, dict) and f.get("lastClosePrice")]
+    else:
+        cot = cotizaciones(isins)
+    r["rentabilidad"] = rentabilidad(r, cot)
+    r["ibex"] = ibex35(r["hoy"], red=not args.local)
+    print(f"Cierres: {len(cot)} de {len(isins)}; rentabilidad calculada para {len(r['rentabilidad'])}.")
     escribir(r)
-    print(frase(r))
+    print(frase(r), frase_rentabilidad(r["rentabilidad"], r["ibex"]))
     return 0
 
 

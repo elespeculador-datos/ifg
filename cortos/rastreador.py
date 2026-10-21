@@ -39,6 +39,8 @@ import requests
 URL = "https://www.cnmv.es/DocPortal/Posiciones-Cortas/NetShortPositions.xls"
 FICHA_CNMV = "https://www.cnmv.es/portal/consultas/busqueda?id=29"
 PILAR = "https://elespeculador.com/posiciones-cortas-bolsa-espanola/"
+PAGINA_WP = "https://elespeculador.com/posiciones-cortas-hoy/"
+PAGES = "https://elespeculador-datos.github.io/ifg/cortos/"
 RAIZ = Path(__file__).resolve().parent.parent
 SALIDA = RAIZ / "docs" / "cortos"
 DATOS = SALIDA / "datos"
@@ -282,8 +284,9 @@ def fragmento_wp(fecha: str, fecha_previa: str | None, vig: pd.DataFrame, res: p
     """HTML estático que Make copia cada día en la página de elespeculador.com.
 
     Va entre dos marcas: Make sustituye solo lo que hay entre ellas y deja intacto
-    el resto de la página. Sin estilos ni scripts (WordPress los filtraría) y sin
-    el carácter «$», que la sustitución por expresión regular de Make interpretaría.
+    el resto de la página. Sin estilos ni el carácter «$», que la sustitución por
+    expresión regular de Make interpretaría. El único script es el marcado Dataset
+    (JSON-LD, en una línea), que se añade al escribir el fichero con con_ld().
     """
     def e(x) -> str:
         return html.escape(str(x)).replace("$", "&#36;")
@@ -331,6 +334,29 @@ def fragmento_wp(fecha: str, fecha_previa: str | None, vig: pd.DataFrame, res: p
 <!-- cortos:fin -->"""
 
 
+def ld_wp(fecha: str, hist: dict | None) -> str:
+    """Marcado Dataset (schema.org) en una sola línea, para la página de elespeculador.com."""
+    d = {
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": "Posiciones cortas netas publicadas en España (rastreador de El Especulador)",
+        "description": "Posiciones cortas netas iguales o superiores al 0,5 % del capital sobre acciones españolas, según la CNMV, con el resumen por empresa y el historial de cambios, actualizadas cada día hábil.",
+        "url": PAGINA_WP, "inLanguage": "es", "spatialCoverage": "España",
+        "creator": {"@type": "Organization", "name": "El Especulador", "url": "https://elespeculador.com/"},
+        "license": "https://creativecommons.org/licenses/by/4.0/", "isBasedOn": URL, "dateModified": fecha,
+        "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"{PAGES}datos/{n}.csv"}
+                         for n in ["vigentes", "resumen_emisores", "serie", "anteriores", "historial_cambios"]],
+    }
+    if hist:
+        d["temporalCoverage"] = f"{hist['desde']}/{fecha}"
+    return '<script type="application/ld+json">' + json.dumps(d, ensure_ascii=False) + "</script>"
+
+
+def con_ld(frag: str, ld: str) -> str:
+    marca = "\n<!-- cortos:fin -->"
+    assert frag.count(marca) == 1 and "$" not in ld
+    return frag.replace(marca, "\n" + ld + marca)
+
+
 def solo_fragmento() -> int:
     """Rehace el fragmento con los CSV ya publicados, sin descargar nada."""
     estado = json.loads((DATOS / "ultima.json").read_text(encoding="utf-8"))
@@ -339,8 +365,9 @@ def solo_fragmento() -> int:
     cam = pd.read_csv(DATOS / "cambios.csv", dtype={"isin": str})
     hist = historico(pd.read_csv(DATOS / "serie.csv", dtype={"lei": str, "isin": str}),
                      pd.read_csv(DATOS / "anteriores.csv", dtype={"lei": str, "isin": str}))
-    (SALIDA / "fragmento-wp.html").write_text(
-        fragmento_wp(estado["fecha_publicacion"], estado.get("publicacion_anterior"), vig, res, cam, hist), encoding="utf-8")
+    (SALIDA / "fragmento-wp.html").write_text(con_ld(
+        fragmento_wp(estado["fecha_publicacion"], estado.get("publicacion_anterior"), vig, res, cam, hist),
+        ld_wp(estado["fecha_publicacion"], hist)), encoding="utf-8")
     print(f"Fragmento rehecho con la publicación del {estado['fecha_publicacion']}.")
     return 0
 
@@ -375,11 +402,11 @@ def main() -> int:
     serie.to_csv(DATOS / "serie.csv", index=False)
     ant.to_csv(DATOS / "anteriores.csv", index=False)
     cam.to_csv(DATOS / "cambios.csv", index=False)
-    hist = DATOS / "historial_cambios.csv"
+    ruta_cambios = DATOS / "historial_cambios.csv"
     if not cam.empty:
-        cam.to_csv(hist, mode="a", index=False, header=not hist.exists())
-    elif not hist.exists():
-        cam.to_csv(hist, index=False)
+        cam.to_csv(ruta_cambios, mode="a", index=False, header=not ruta_cambios.exists())
+    elif not ruta_cambios.exists():
+        cam.to_csv(ruta_cambios, index=False)
     estado.write_text(json.dumps({
         "fecha_publicacion": fecha,
         "publicacion_anterior": fecha_previa if fecha_previa != fecha else None,
@@ -391,8 +418,9 @@ def main() -> int:
         "fuente": URL, "licencia": "CC BY 4.0 · El Especulador a partir de datos de la CNMV",
     }, ensure_ascii=False, indent=1), encoding="utf-8")
     (SALIDA / "index.html").write_text(pagina(fecha, vig, res, cam, primera=previo is None, hist=hist), encoding="utf-8")
-    (SALIDA / "fragmento-wp.html").write_text(
-        fragmento_wp(fecha, fecha_previa if fecha_previa != fecha else None, vig, res, cam, hist), encoding="utf-8")
+    (SALIDA / "fragmento-wp.html").write_text(con_ld(
+        fragmento_wp(fecha, fecha_previa if fecha_previa != fecha else None, vig, res, cam, hist),
+        ld_wp(fecha, hist)), encoding="utf-8")
     print(f"Publicación del {fecha}: {len(vig)} filas vigentes, {vig['lei'].nunique()} emisores, {len(cam)} cambios.")
     return 0
 

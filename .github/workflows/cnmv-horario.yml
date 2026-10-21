@@ -1,0 +1,70 @@
+name: CNMV horario
+
+# Comunicados a la CNMV de las empresas del IBEX 35 para los recuadros de la página del IBEX 35 de
+# El Especulador. Los canales RSS de la CNMV solo muestran lo comunicado desde el cierre anterior, así que
+# se leen cada hora de los días hábiles y se acumulan. Solo lee y escribe cnmv/ y docs/cnmv/ (y lee la
+# composición del IBEX de dividendos/ibex35.csv); no toca el IFG, los cortos, el IBEX, los dividendos ni las OPAs.
+on:
+  schedule:
+    - cron: "7 5-21 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: cnmv-horario
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install pandas requests
+      - name: Leer la CNMV y publicar
+        run: python cnmv/comunicados.py
+      - name: Guardar el resultado en el repositorio
+        run: |
+          if [ -z "$(git status --porcelain docs/cnmv)" ]; then
+            echo "Sin cambios."
+            exit 0
+          fi
+          git config user.name "CNMV bot"
+          git config user.email "actions@github.com"
+          git add docs/cnmv
+          git commit -m "CNMV $(TZ=Europe/Madrid date +%Y-%m-%d\ %H:%M)"
+          git pull --rebase --autostash
+          git push
+
+      - name: Abrir incidencia si ha fallado
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=cnmv-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          cuerpo="La lectura de los comunicados de la CNMV del $(date -u +%Y-%m-%d) ha fallado. Registro: $EJECUCION. Los recuadros de la página del IBEX 35 siguen mostrando la última versión buena. Lo más probable: la CNMV no respondía o ha cambiado el formato del RSS."
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="$cuerpo" >/dev/null
+          else
+            gh api --method POST "repos/${{ github.repository }}/labels" -f name=cnmv-fallido -f color=b60205 -f description="Los comunicados de la CNMV no se han actualizado" >/dev/null 2>&1 || true
+            gh api --method POST "repos/${{ github.repository }}/issues" -f title="Los comunicados de la CNMV no se han actualizado el $(date -u +%Y-%m-%d)" -f body="$cuerpo" -f 'labels[]=cnmv-fallido' >/dev/null
+          fi
+      - name: Cerrar la incidencia si ya funciona
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=cnmv-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="Lectura correcta el $(date -u +%Y-%m-%d). Se cierra." >/dev/null
+            gh api --method PATCH "repos/${{ github.repository }}/issues/$abierta" -f state=closed >/dev/null
+          fi
