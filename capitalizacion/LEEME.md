@@ -18,4 +18,5 @@ empresas de más de 100 millones. Si una cotizada nueva no está en `nombres.py`
 avisa y usa el nombre de BME.
 
 Estado (21/10/2026): preparado y probado con datos reales en la rama `capitalizacion-borrador`,
-sin publicar, a la espera de que BME aclare su licencia de datos.
+sin publicar, a la espera de que BME aclare su licencia de datos. Página en borrador: 8615. Escenario de Make que la
+actualiza: 10013817 (inactivo). Puesta en marcha: fusionar esta rama, lanzar el flujo, activar 10013817 y publicar 8615.
