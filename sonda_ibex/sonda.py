@@ -1,4 +1,4 @@
-"""Sonda temporal 32: enlaces de la ficha de entidad de la CNMV (Iberdrola) y página de participaciones significativas."""
+"""Sonda temporal 33: participaciones significativas de Iberdrola en la CNMV (variantes de URL sin .aspx)."""
 import json, re, html
 from pathlib import Path
 import requests
@@ -9,22 +9,27 @@ for f in OUT.glob("*"):
 H = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36",
      "Accept-Language": "es-ES,es;q=0.9"}
 s = requests.Session(); s.headers.update(H)
-r = s.get("https://www.cnmv.es/portal/Consultas/DatosEntidad?nif=A48010615", timeout=60)
-t = r.text
-links = []
-for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', t, re.S):
-    txt = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(2))).strip()
-    href = html.unescape(m.group(1))
-    if "onsultas" in href or "articipac" in txt.lower() or "voto" in txt.lower():
-        links.append([txt[:80], href[:200]])
-res = {"links": links[:80]}
-ps = [h for tx, h in links if "articipac" in tx.lower() or "articipac" in h.lower()]
-if ps:
-    u = ps[0] if ps[0].startswith("http") else "https://www.cnmv.es" + (ps[0] if ps[0].startswith("/") else "/portal/" + ps[0])
-    p = s.get(u, timeout=60)
-    tablas = re.findall(r"<table.*?</table>", p.text, re.S)
-    res["ps_url"] = u; res["ps_http"] = p.status_code; res["ps_final"] = p.url
-    res["ps_tablas"] = [re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " | ", x))[:2500] for x in tablas[:3]]
-    (OUT / "ps.html").write_text(p.text[:400000])
-(OUT / "cnmv_entidad.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
-print(json.dumps(res, ensure_ascii=False)[:3000])
+URLS = ["https://www.cnmv.es/portal/Consultas/Busqueda?id=7&nif=A48010615",
+        "https://www.cnmv.es/portal/Consultas/EE/ParticipacionesSignificativas?nif=A48010615",
+        "https://www.cnmv.es/portal/consultas/participacionessignificativas?nif=A48010615",
+        "https://www.cnmv.es/portal/Consultas/EE/ParticipacionesSignificativasAutocartera?nif=A48010615"]
+res = {}
+for u in URLS:
+    try:
+        p = s.get(u, timeout=60)
+        t = p.text
+        tablas = re.findall(r"<table.*?</table>", t, re.S)
+        enl = []
+        for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', t, re.S):
+            tx = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(2))).strip()
+            h = html.unescape(m.group(1))
+            if any(k in (tx + h).lower() for k in ("particip", "voto", "nif=", "autocart")):
+                enl.append([tx[:70], h[:180]])
+        res[u] = {"http": p.status_code, "final": p.url, "len": len(t), "title": (re.search(r"<title>(.*?)</title>", t, re.S) or [None, ""])[1].strip()[:120],
+                  "tablas": [re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " | ", x))[:1800] for x in tablas[:2]], "enlaces": enl[:40]}
+        if tablas:
+            (OUT / ("p%d.html" % URLS.index(u))).write_text(t[:300000])
+    except Exception as e:  # noqa: BLE001
+        res[u] = {"error": str(e)}
+(OUT / "cnmv_ps2.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
+print(json.dumps(res, ensure_ascii=False)[:2000])
