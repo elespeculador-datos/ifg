@@ -64,6 +64,7 @@ MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto
          "diciembre"]
 # Plazos de referencia para la media anual (clase, años)
 REFERENCIAS = (("B", 3), ("B", 5), ("O", 10), ("O", 30))
+TEXTOS = "2"  # súbelo al cambiar los textos fijos del fragmento, para que el escenario de Make los copie
 ACTIVO = re.compile(r"^\s*(B|O)\s*(€i|\(BV\)|\(v\))?\s*-\s*(>)?\s*(\d+)\s*(a|y)\b\s*(\(s\))?\s*$", re.I)
 
 
@@ -397,6 +398,7 @@ def huella(datos: dict) -> str:
     base.append([[c["subasta"], c["peticiones"]] for c in datos["proximas"][:4]])
     base.append([[v["valor"], v["cupon"], v["vencimiento"]] for v in datos["en_emision"]])
     base.append(datos["tenedores"]["ultimo"])
+    base.append(TEXTOS)
     return hashlib.sha256(json.dumps(base, sort_keys=True).encode()).hexdigest()[:12]
 
 
@@ -449,9 +451,11 @@ def fragmento(datos: dict, fecha: str) -> str:
         partes += ["<h2>Las próximas subastas</h2>",
                    "<p>Jueves de subasta de Bonos y Obligaciones del calendario del Tesoro. Según el Tesoro, los valores que "
                    "salen en cada una se anuncian generalmente el viernes anterior. La columna de peticiones es "
-                   "el plazo para los particulares con Cuenta Directa en el Banco de España; quien compre a través de un "
-                   "banco o un bróker tiene el plazo que fije su entidad.</p>",
-                   _tabla(["Subasta", "Peticiones con Cuenta Directa, hasta el", "Emisión", "Puede incluir indexados"],
+                   "el plazo para los particulares que piden en persona en el Banco de España, con Cuenta Directa: antes de "
+                   "las 14:00 (hora peninsular) de ese día. Por internet, en la web del Tesoro, el mismo calendario pide "
+                   "presentar la petición como mínimo dos días antes de la subasta. Quien compre a través de un banco o un "
+                   "bróker tiene el plazo que fije su entidad.</p>",
+                   _tabla(["Subasta", "Peticiones en el Banco de España, hasta el", "Emisión", "Puede incluir indexados"],
                           [[_f(c["subasta"]), _f(c["peticiones"]), _f(c["emision"]), "Sí" if c["indexados"] else "No"]
                            for c in prox])]
     emi = datos["en_emision"]
