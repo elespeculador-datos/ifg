@@ -1,62 +1,57 @@
-"""Sonda temporal 44 (textos de procedimiento y fiscalidad de las Letras). 40: aviso legal, históricos y calendario de tesoro.es. (39b (cadena de certificados incompleta en tesoro.es: se completa con el intermedio del AIA): subastas de Letras del Tesoro en tesoro.es (páginas y archivos descargables)."""
-import json, re, html
+"""Sonda temporal 45: de dónde sale la composición del IBEX 35 en la web de BME (peticiones a su API al cargar las páginas del índice)."""
+import json, re, subprocess, sys
 from pathlib import Path
-import requests
 OUT = Path("sonda_ibex/resultado"); OUT.mkdir(parents=True, exist_ok=True)
 for f in OUT.rglob("*"):
     if f.is_file():
         f.unlink()
-H = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36 (El Especulador, datos abiertos)",
-     "Accept-Language": "es-ES,es;q=0.9"}
-URLS = ["https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/la-subasta",
-        "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/presentacion-de-peticiones",
-        "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/publicacion-de-resultados-de-la-subasta",
-        "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/instrumentos/letras-del-tesoro",
-        "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/fiscalidad/residentes/impuesto-sobre-la-renta-de-las-personas-fisicas/tributacion-de-las-letras-del-tesoro"]
-def limpiar(x):
-    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", x))).strip()
-import ssl, socket, certifi, subprocess, tempfile
-def bundle_con_intermedio(host):
-    """Descarga el certificado intermedio que anuncia el servidor (AIA) y lo añade al almacén de certifi.
-    La verificación TLS sigue activa: solo se completa la cadena que el servidor no envía."""
-    ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
-    with socket.create_connection((host, 443), timeout=30) as sock:
-        with ctx.wrap_socket(sock, server_hostname=host) as ss:
-            der = ss.getpeercert(binary_form=True)
-    pem_hoja = ssl.DER_cert_to_PEM_cert(der)
-    t = tempfile.NamedTemporaryFile("w", suffix=".pem", delete=False); t.write(pem_hoja); t.close()
-    txt = subprocess.run(["openssl", "x509", "-in", t.name, "-noout", "-text"], capture_output=True, text=True).stdout
-    aia = re.findall(r"CA Issuers - URI:(\S+)", txt)
-    extra = ""
-    for u in aia:
-        d = requests.get(u, timeout=30).content
-        if b"BEGIN CERTIFICATE" in d:
-            extra += d.decode()
-        else:
-            extra += ssl.DER_cert_to_PEM_cert(d)
-    b = tempfile.NamedTemporaryFile("w", suffix=".pem", delete=False)
-    b.write(open(certifi.where()).read() + "\n" + extra); b.close()
-    return b.name, aia
-res = {}
-s = requests.Session(); s.headers.update(H)
-try:
-    s.verify, aia = bundle_con_intermedio("www.tesoro.es")
-    res["_aia"] = aia
-except Exception as e:  # noqa: BLE001
-    res["_aia_error"] = str(e)[:300]
-for u in URLS:
-    try:
-        r = s.get(u, timeout=60)
-        t = r.text
-        enl = []
-        for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', t, re.S):
-            h = html.unescape(m.group(1)); tx = limpiar(m.group(2))
-            if re.search(r"/documents/|\.(xlsx?|csv|pdf)|reutiliz", h + tx, re.I):
-                enl.append([tx[:80], h[:220]])
-        main = re.search(r"<main.*?</main>", t, re.S)
-        res[u] = {"http": r.status_code, "final": r.url, "len": len(t), "enlaces": enl[:80],
-                  "texto": limpiar(re.sub(r"<script.*?</script>|<style.*?</style>", " ", (main.group(0) if main else t), flags=re.S))[:20000], "tablas": [limpiar(x)[:1500] for x in re.findall(r"<table.*?</table>", t, re.S)[:3]]}
-    except Exception as e:  # noqa: BLE001
-        res[u] = {"error": str(e)[:300]}
-(OUT / "tesoro.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
-print("ok")
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", "playwright"], check=True)
+subprocess.run([sys.executable, "-m", "playwright", "install", "--with-deps", "chromium"], check=True,
+               stdout=subprocess.DEVNULL)
+from playwright.sync_api import sync_playwright
+capt, paginas = [], {}
+def respuesta(r):
+    u = r.url
+    if "apiweb" in u or "/api/" in u.lower() or "json" in (r.headers.get("content-type") or ""):
+        try:
+            cuerpo = r.text()
+        except Exception as e:
+            cuerpo = f"ERR {e}"
+        capt.append({"pagina": actual[0], "url": u, "status": r.status, "metodo": r.request.method,
+                     "ct": r.headers.get("content-type"), "cuerpo": cuerpo[:30000]})
+actual = [""]
+INICIO = ["https://www.bolsasymercados.es/bme-exchange/es/Indices",
+          "https://www.bolsasymercados.es/bme-exchange/es/Indices/Ibex"]
+with sync_playwright() as p:
+    b = p.chromium.launch()
+    pg = b.new_page(locale="es-ES", user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36")
+    pg.on("response", respuesta)
+    def visitar(url):
+        actual[0] = url
+        try:
+            pg.goto(url, wait_until="networkidle", timeout=90000)
+        except Exception as e:
+            paginas[url] = {"error": str(e)[:300]}
+            return []
+        pg.wait_for_timeout(4000)
+        enlaces = pg.eval_on_selector_all("a[href]", "els => els.map(e => [e.getAttribute('href'), (e.innerText||'').trim().slice(0,80)])")
+        paginas[url] = {"final": pg.url, "titulo": pg.title(), "texto": pg.inner_text("body")[:6000],
+                        "enlaces": [e for e in enlaces if e[0] and re.search(r"ndice|ibex|ponder|compos", e[0] + e[1], re.I)][:150]}
+        return [e[0] for e in enlaces if e[0]]
+    vistos = set()
+    cola = list(INICIO)
+    while cola and len(vistos) < 14:
+        u = cola.pop(0)
+        if u in vistos:
+            continue
+        vistos.add(u)
+        hrefs = visitar(u)
+        for h in hrefs:
+            if h.startswith("/"):
+                h = "https://www.bolsasymercados.es" + h
+            if re.search(r"bolsasymercados\.es/bme-exchange/es/Indices/Ibex", h, re.I) and re.search(r"ibex-?35|compos|ponder", h, re.I) and h not in vistos:
+                cola.append(h)
+    b.close()
+(OUT / "paginas.json").write_text(json.dumps(paginas, ensure_ascii=False, indent=1))
+(OUT / "peticiones.json").write_text(json.dumps(capt, ensure_ascii=False, indent=1))
+print(len(paginas), "páginas,", len(capt), "peticiones")
