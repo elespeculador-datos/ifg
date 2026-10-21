@@ -53,6 +53,7 @@ PAGES = "https://elespeculador-datos.github.io/ifg/accionistas/"
 MAX_FALLOS = 5
 PAUSA = 2.0  # segundos entre consultas a la CNMV
 DIAS_RECIENTES = 30  # ventana de la tabla de notificaciones recientes
+MOSTRAR_RECIENTES = False  # tabla de notificaciones recientes: apagada hasta que se decida si se publica
 
 # ISIN -> (nombre corto, texto que se busca en la CNMV, comienzo del nombre en la CNMV)
 EMPRESAS = {
@@ -306,15 +307,14 @@ def frase_empresa(e: dict) -> str:
         return (f"<p>La CNMV recoge {n} {'participación' if n == 1 else 'participaciones'}, solo a través de instrumentos "
                 f"financieros.</p>")
     nom = lambda f: html.escape(f["accionista"])  # noqa: E731
-    if len(p) == 2 and {bool(p[0]["directo"]), bool(p[1]["directo"])} == {True, False}:
-        d, i = (p[0], p[1]) if p[0]["directo"] else (p[1], p[0])
-        t = (f"La mayor participación por acciones, del {_pct(p[0]['acciones'])} de los derechos de voto, figura dos veces: "
-             f"de forma directa a nombre de {nom(d)} y de forma indirecta a nombre de {nom(i)}.")
-    elif len(p) == 1:
+    # Sin deducir relaciones de control: dos filas con el mismo porcentaje pueden ser dos accionistas distintos
+    # (SEPI y Amancio Ortega en Enagás) o la misma participación, directa e indirecta (Criteria y la Fundación).
+    if len(p) == 1:
         t = f"La mayor participación por acciones es la de {nom(p[0])}, con el {_pct(p[0]['acciones'])} de los derechos de voto."
     else:
-        t = (f"La mayor participación por acciones, del {_pct(p[0]['acciones'])}, figura a nombre de "
-             + ", ".join(nom(f) for f in p[:-1]) + f" y {nom(p[-1])}.")
+        cuantas = {2: "dos", 3: "tres", 4: "cuatro"}.get(len(p), str(len(p)))
+        t = (f"El porcentaje más alto por acciones, el {_pct(p[0]['acciones'])} de los derechos de voto, figura en {cuantas} filas, "
+             "a nombre de " + ", ".join(nom(f) for f in p[:-1]) + f" y de {nom(p[-1])}.")
     resto = n - len(p)
     if resto:
         t += f" En total, la CNMV recoge {n} participaciones significativas."
@@ -386,7 +386,8 @@ def huella(datos: dict, hoy: str) -> str:
     la tabla de las notificaciones recientes, que cambia aunque no lleguen datos nuevos."""
     base = [[e["isin"], e.get("fuera"), [[f["accionista"], f["acciones"], f["instrumentos"], f["total"], f["fecha"]]
                                          for f in e.get("accionistas", [])]] for e in datos["empresas"]]
-    base.append([[e["isin"], f["accionista"], f["fecha"]] for e, f in recientes(datos, hoy)])
+    if MOSTRAR_RECIENTES:
+        base.append([[e["isin"], f["accionista"], f["fecha"]] for e, f in recientes(datos, hoy)])
     return hashlib.sha256(json.dumps(base, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:12]
 
 
@@ -414,12 +415,13 @@ def fragmento(datos: dict, fecha: str, hoy: str) -> str:
               "<p>Accionistas con participación significativa en tres empresas o más del índice. Entre paréntesis, el total de "
               "derechos de voto que declaran en cada una, por acciones y por instrumentos financieros.</p>",
               tabla_presencia(datos),
-              f"<h2>Las notificaciones de los últimos {DIAS_RECIENTES} días</h2>",
-              f"<p>Las participaciones cuya última notificación registró la CNMV en los {DIAS_RECIENTES} días anteriores a esta "
-              "actualización: la forma más rápida de ver quién ha comunicado un cambio hace poco. Quien deja de ser accionista "
-              "significativo sale de la ficha de la empresa, así que esas salidas no aparecen aquí.</p>",
-              tabla_recientes(datos, hoy),
               "<h2>Empresa por empresa</h2>"]
+    if MOSTRAR_RECIENTES:
+        partes[-1:-1] = [f"<h2>Las notificaciones de los últimos {DIAS_RECIENTES} días</h2>",
+                         f"<p>Las participaciones cuya última notificación registró la CNMV en los {DIAS_RECIENTES} días anteriores "
+                         "a esta actualización. Quien deja de ser accionista significativo sale de la ficha de la empresa, así que "
+                         "esas salidas no aparecen aquí.</p>",
+                         tabla_recientes(datos, hoy)]
     for e in con:
         aviso = (f' <small>(la CNMV no respondió en la última consulta: datos del {_f(e.get("consulta", ""))})</small>'
                  if e.get("de_consulta_anterior") else "")
@@ -431,8 +433,9 @@ def fragmento(datos: dict, fecha: str, hoy: str) -> str:
             f"significativos lo comunican a {html.escape(e['supervisor'])}, no a la CNMV." for e in fuera) +
             " Por eso no aparecen en las tablas.</p>")
     partes.append(f'<p class="has-small-font-size">Fuente: CNMV, registro de participaciones significativas de cada emisor, '
-                  f'tal y como lo publica (última notificación de cada accionista). Los nombres de los accionistas se reproducen '
-                  f'como figuran en la CNMV. <a href="{METODOLOGIA}">Cómo se hace y cómo leer las tablas</a>.</p>')
+                  f'tal y como lo publica. Cada porcentaje es el de la última notificación del accionista y puede no coincidir con su '
+                  f'participación de hoy. Los nombres se reproducen como figuran en la CNMV. '
+                  f'<a href="{METODOLOGIA}">Cómo se hace y cómo leer las tablas</a>.</p>')
     partes.append("<!-- accionistas:fin -->")
     return "\n".join(partes)
 
@@ -494,7 +497,7 @@ a{{color:#1f4e8c}} .pie{{color:#5b6675;font-size:.85rem;margin-top:2em}}
 <h1>Los accionistas del IBEX 35</h1>
 {cuerpo}
 <h2>Datos abiertos</h2>
-<p>CSV: <a href="datos/accionistas.csv">todas las participaciones</a> · <a href="datos/ultima.json">JSON</a>. Reproducen la información que publica gratuitamente la CNMV en su web. Cita: «El Especulador, a partir de datos de la CNMV». Explicación completa: <a href="{PAGINA_WP}">la página de elespeculador.com</a>.</p>
+<p>CSV: <a href="datos/accionistas.csv">todas las participaciones</a> · <a href="datos/ultima.json">JSON</a>. Reproducen la información que la CNMV publica gratuitamente en su web. Si los reutilizas, cumple las condiciones de la <a href="https://www.cnmv.es/portal/Utilidades/NotaLegal.aspx" target="_blank" rel="noopener">nota legal de la CNMV</a> (reproducción fiel y, si los incluyes en algo de pago, aviso de que son gratuitos en cnmv.es). Cita: «El Especulador, a partir de datos de la CNMV». Explicación completa: <a href="{PAGINA_WP}">la página de elespeculador.com</a>.</p>
 <p class="pie">Comprobado el {_f(datetime.now(timezone.utc).date().isoformat())}. Contenido informativo; no constituye asesoramiento financiero.</p>
 </body></html>
 """, encoding="utf-8")
