@@ -14,7 +14,7 @@ NOMBRES = {
     "ES0125220311": "Acciona", "ES0118594417": "Indra", "ES0180907000": "Unicaja",
     "ES0173093024": "Redeia", "ES0105025003": "Merlin Properties", "ES0105563003": "Acciona Energía",
     "ES0105027009": "Logista", "ES0122060314": "FCC", "ES0130960018": "Enagás",
-    "ES0171996087": "Grifols", "ES0132105018": "Acerinox", "ES0137650018": "Fluidra",
+    "ES0171996087": "Grifols", "ES0171996095": "Grifols", "ES0132105018": "Acerinox", "ES0137650018": "Fluidra",
     "ES0105777017": "Puig", "ES0182870214": "Sacyr", "ES0183746314": "Vidrala",
     "ES0105630315": "CIE Automotive", "ES0139140174": "Colonial", "ES0157261019": "Rovi",
     "LU0569974404": "Aperam", "ES0105884011": "Cirsa", "ES0112501012": "Ebro Foods",
