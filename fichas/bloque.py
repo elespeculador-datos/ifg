@@ -124,6 +124,9 @@ def cargar(datos: Path) -> dict:
         "rent": {r["isin"]: r for r in leer(DOCS / "dividendos" / "datos" / "rentabilidad.csv")},
         "prox": leer(DOCS / "dividendos" / "datos" / "proximos.csv"),
         "opas": leer(DOCS / "opas" / "datos" / "opas.csv"),
+        # La clasificación de «las empresas más grandes de la bolsa» (capitalizacion/ranking.py), si ya se publica:
+        # suma las clases de una misma empresa (Grifols A y B) y así la ficha y la página dicen lo mismo.
+        "capit": {r["isin"]: r for r in leer(DOCS / "capitalizacion" / "datos" / "empresas.csv")},
     }
 
 
@@ -190,10 +193,19 @@ def bloque(slug: str, titulo: str, d: dict, hoy: date) -> str:
 
     # capitalización y puesto
     try:
-        n, total, esp = puesto(isin, d["cot"])
-        nota = f" ({UNA_CLASE[isin]})" if isin in UNA_CLASE else ""
+        r = d.get("capit", {}).get(isin)
+        if r and r.get("capitalizacion"):
+            esp = r["espanola"] == "True"
+            n = int(r["puesto_espanolas"] if esp else r["puesto"])
+            total = sum(1 for x in d["capit"].values() if x["espanola"] == "True") if esp else len(d["capit"])
+            cap = float(r["capitalizacion"])
+            nota = " (clases A y B)" if len(r.get("clases", "").split()) > 1 else (f" ({UNA_CLASE[isin]})" if isin in UNA_CLASE and isin != "ES0171996087" else "")
+        else:
+            n, total, esp = puesto(isin, d["cot"])
+            cap = float(c["capitalisation"])
+            nota = f" ({UNA_CLASE[isin]})" if isin in UNA_CLASE else ""
         donde = f"la {n}.ª de las {total} empresas españolas del mercado continuo" if esp else f"la {n}.ª de las {total} empresas del mercado continuo, contando las extranjeras"
-        filas.append(("Capitalización", f"{_millones(float(c['capitalisation']))}{nota}: {donde}"))
+        filas.append(("Capitalización", f"{_millones(cap)}{nota}: {donde}"))
     except (KeyError, ValueError, TypeError):
         faltan += 1
 
