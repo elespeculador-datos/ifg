@@ -1,10 +1,10 @@
 {
- "fecha_publicacion": "2026-10-20",
- "publicacion_anterior": "2026-10-19",
- "generado": "2026-10-20T19:16:06+00:00",
+ "fecha_publicacion": "2026-10-21",
+ "publicacion_anterior": "2026-10-20",
+ "generado": "2026-10-21T19:17:03+00:00",
  "posiciones": 63,
  "emisores": 31,
- "cambios": 3,
+ "cambios": 7,
  "historico": {
   "desde": "2010-06-10",
   "mayor_posicion": {
@@ -23,18 +23,18 @@
    "isin": "ES0165386014",
    "emisor": "SOLARIA ENERGIA Y MEDIOAMBIENTE, S.A.",
    "tenedores": 8,
-   "suma_publicada_pct": 6.5,
+   "suma_publicada_pct": 6.6,
    "mayor_posicion_pct": 1.33,
-   "ultima_fecha_posicion": "2026-10-15",
+   "ultima_fecha_posicion": "2026-10-20",
    "mayor_tenedor": "JPMorgan Asset Management (UK) Limited"
   },
   {
    "isin": "ES0130960018",
    "emisor": "ENAGAS, S.A.",
    "tenedores": 6,
-   "suma_publicada_pct": 4.85,
+   "suma_publicada_pct": 4.82,
    "mayor_posicion_pct": 1.25,
-   "ultima_fecha_posicion": "2026-10-19",
+   "ultima_fecha_posicion": "2026-10-20",
    "mayor_tenedor": "BlackRock Investment Management (UK) Limited"
   },
   {
