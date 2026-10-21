@@ -65,7 +65,7 @@ AVISOS: list[str] = []
 
 
 def _num(x: float, dec: int = 0) -> str:
-    return f"{x:,.{dec}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"{x:,.{dec}f}".replace(",", "X").replace(".", ",").replace("X", ".").replace("-", "−")
 
 
 def _pct(x: float | None, dec: int = 3) -> str:
