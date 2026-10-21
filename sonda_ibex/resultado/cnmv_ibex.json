@@ -1,0 +1,1578 @@
+{
+ "n_ibex": 35,
+ "empresas": [
+  {
+   "nombre_bme": "ACCIONA,S.A.",
+   "isin": "ES0125220311",
+   "guid": null,
+   "info": {
+    "final": "https://www.cnmv.es/portal/Consultas/Busqueda?id=7",
+    "candidatos": [],
+    "len": 214972
+   }
+  },
+  {
+   "nombre_bme": "ACERINOX, S.A.",
+   "isin": "ES0132105018",
+   "guid": "{a9b732dc-114a-4cc4-ad4d-40f1385abf83}",
+   "info": "ACERINOX, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "07/08/2023",
+   "accionistas": [
+    {
+     "Denominación": "CORPORACION FINANCIERA ALBA, S.A.",
+     "% Total (A)": "18,958",
+     "% Directo": "18,958",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "18,958",
+     "F.Registro Entrada CNMV": "07/03/2017",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FERGUSON , SCOTT DAVID",
+     "% Total (A)": "0,000",
+     "% Directo": "0,000",
+     "% Indirecto": "0,000",
+     "%  (B)": "3,084",
+     "(A+B)": "3,084",
+     "F.Registro Entrada CNMV": "17/06/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FUNDACIO PRIVADA DANIEL BRAVO ANDREU",
+     "% Total (A)": "5,705",
+     "% Directo": "0,000",
+     "% Indirecto": "5,705",
+     "%  (B)": "0,000",
+     "(A+B)": "5,705",
+     "F.Registro Entrada CNMV": "07/01/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "INDUSTRIAL DEVELOPMENT CORPORATION (I.D.C.)",
+     "% Total (A)": "3,041",
+     "% Directo": "3,041",
+     "% Indirecto": "0,000",
+     "%  (B)": "",
+     "(A+B)": "3,041",
+     "F.Registro Entrada CNMV": "22/06/2009",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "THE GOLDMAN SACHS GROUP, INC.",
+     "% Total (A)": "2,552",
+     "% Directo": "0,000",
+     "% Indirecto": "2,552",
+     "%  (B)": "2,211",
+     "(A+B)": "4,763",
+     "F.Registro Entrada CNMV": "19/10/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 230929
+  },
+  {
+   "nombre_bme": "ACS,ACTIVIDADES DE CONST.Y SERVICIOS S.A",
+   "isin": "ES0167050915",
+   "guid": null,
+   "info": {
+    "final": "https://www.cnmv.es/portal/Consultas/Busqueda?id=7",
+    "candidatos": [],
+    "len": 215036
+   }
+  },
+  {
+   "nombre_bme": "AENA, S.M.E., S.A.",
+   "isin": "ES0105046017",
+   "guid": "{f926a04a-21b9-4dcc-9b3f-34281c79543e}",
+   "info": "AENA, S.M.E., S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "12/06/2025",
+   "accionistas": [
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "5,038",
+     "% Directo": "0,000",
+     "% Indirecto": "5,038",
+     "%  (B)": "0,095",
+     "(A+B)": "5,133",
+     "F.Registro Entrada CNMV": "02/06/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "ENAIRE",
+     "% Total (A)": "51,000",
+     "% Directo": "51,000",
+     "% Indirecto": "0,000",
+     "%  (B)": "",
+     "(A+B)": "51,000",
+     "F.Registro Entrada CNMV": "17/02/2015",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FIDELITY INTERNATIONAL LIMITED",
+     "% Total (A)": "1,010",
+     "% Directo": "0,000",
+     "% Indirecto": "1,010",
+     "%  (B)": "0,000",
+     "(A+B)": "1,010",
+     "F.Registro Entrada CNMV": "19/05/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "HOHN , CHRISTOPHER ANTHONY",
+     "% Total (A)": "2,841",
+     "% Directo": "0,000",
+     "% Indirecto": "2,841",
+     "%  (B)": "3,416",
+     "(A+B)": "6,257",
+     "F.Registro Entrada CNMV": "01/12/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "THE CHILDREN'S INVESTMENT MASTER FUND",
+     "% Total (A)": "0,000",
+     "% Directo": "0,000",
+     "% Indirecto": "0,000",
+     "%  (B)": "3,416",
+     "(A+B)": "3,416",
+     "F.Registro Entrada CNMV": "01/12/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 232245
+  },
+  {
+   "nombre_bme": "AMADEUS IT GROUP, S.A.",
+   "isin": "ES0109067019",
+   "guid": "{3ef49631-6207-4546-bbe0-e789bb22f2b2}",
+   "info": "AMADEUS IT GROUP, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "30/06/2026",
+   "accionistas": [
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "5,481",
+     "% Directo": "0,000",
+     "% Indirecto": "5,481",
+     "%  (B)": "0,017",
+     "(A+B)": "5,498",
+     "F.Registro Entrada CNMV": "04/07/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "CAPITAL RESEARCH AND MANAGEMENT COMPANY",
+     "% Total (A)": "5,032",
+     "% Directo": "0,000",
+     "% Indirecto": "5,032",
+     "%  (B)": "0,000",
+     "(A+B)": "5,032",
+     "F.Registro Entrada CNMV": "05/12/2022",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FIDELITY INTERNATIONAL LIMITED",
+     "% Total (A)": "3,764",
+     "% Directo": "0,000",
+     "% Indirecto": "3,764",
+     "%  (B)": "0,234",
+     "(A+B)": "3,998",
+     "F.Registro Entrada CNMV": "29/09/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FUNDSMITH LLP",
+     "% Total (A)": "3,020",
+     "% Directo": "0,000",
+     "% Indirecto": "3,020",
+     "%  (B)": "0,000",
+     "(A+B)": "3,020",
+     "F.Registro Entrada CNMV": "29/11/2019",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "MASSACHUSETTS FINANCIAL SERVICES COMPANY",
+     "% Total (A)": "5,090",
+     "% Directo": "0,000",
+     "% Indirecto": "5,090",
+     "%  (B)": "0,000",
+     "(A+B)": "5,090",
+     "F.Registro Entrada CNMV": "01/06/2022",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 233179
+  },
+  {
+   "nombre_bme": "ARCELORMITTAL, S.A.",
+   "isin": "LU1598757687",
+   "guid": "{118b5646-e908-476a-8e75-90b9bbef1b2e}",
+   "info": "ARCELORMITTAL, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "20/11/2025",
+   "accionistas": [
+    {
+     "Denominación": "ESTADO DE LUXEMBURGO",
+     "% Total (A)": "5,622",
+     "% Directo": "5,622",
+     "% Indirecto": "0,000",
+     "%  (B)": "",
+     "(A+B)": "5,622",
+     "F.Registro Entrada CNMV": "31/03/2005",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 220988
+  },
+  {
+   "nombre_bme": "BANCO BILBAO VIZCAYA ARGENTARIA, S.A.",
+   "isin": "ES0113211835",
+   "guid": "{79ab2be1-8ea5-4918-a3db-2e2def0620ab}",
+   "info": "BANCO BILBAO VIZCAYA ARGENTARIA, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "24/09/2026",
+   "accionistas": [
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "7,076",
+     "% Directo": "0,000",
+     "% Indirecto": "7,076",
+     "%  (B)": "0,082",
+     "(A+B)": "7,158",
+     "F.Registro Entrada CNMV": "04/07/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 222066
+  },
+  {
+   "nombre_bme": "BANCO DE SABADELL, S.A.",
+   "isin": "ES0113860A34",
+   "guid": "{c6c3bfab-89cf-4f55-b766-c4ab9067a7e2}",
+   "info": "BANCO DE SABADELL, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "31/07/2026",
+   "accionistas": [
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "8,367",
+     "% Directo": "0,000",
+     "% Indirecto": "8,367",
+     "%  (B)": "0,076",
+     "(A+B)": "8,443",
+     "F.Registro Entrada CNMV": "18/06/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "BPCE, S.A.",
+     "% Total (A)": "7,000",
+     "% Directo": "7,000",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "7,000",
+     "F.Registro Entrada CNMV": "15/10/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "ZURICH INSURANCE GROUP LTD",
+     "% Total (A)": "4,947",
+     "% Directo": "0,000",
+     "% Indirecto": "4,947",
+     "%  (B)": "0,000",
+     "(A+B)": "4,947",
+     "F.Registro Entrada CNMV": "24/09/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 227028
+  },
+  {
+   "nombre_bme": "BANCO SANTANDER, S.A.",
+   "isin": "ES0113900J37",
+   "guid": "{d07a7519-1fb0-4473-b720-653729e4c654}",
+   "info": "BANCO SANTANDER, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "09/09/2026",
+   "accionistas": [
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "6,851",
+     "% Directo": "0,000",
+     "% Indirecto": "6,851",
+     "%  (B)": "0,010",
+     "(A+B)": "6,861",
+     "F.Registro Entrada CNMV": "04/07/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 221502
+  },
+  {
+   "nombre_bme": "BANKINTER,S.A.",
+   "isin": "ES0113679I37",
+   "guid": null,
+   "info": {
+    "final": "https://www.cnmv.es/portal/Consultas/Busqueda?id=7",
+    "candidatos": [],
+    "len": 214974
+   }
+  },
+  {
+   "nombre_bme": "CAIXABANK, S.A.",
+   "isin": "ES0140609019",
+   "guid": "{d48009b2-73ab-4f8c-ad61-0a0bb475bb29}",
+   "info": "CAIXABANK, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "20/05/2026",
+   "accionistas": [
+    {
+     "Denominación": "BFA TENEDORA DE ACCIONES, S.A.",
+     "% Total (A)": "16,117",
+     "% Directo": "16,117",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "16,117",
+     "F.Registro Entrada CNMV": "30/03/2021",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "4,620",
+     "% Directo": "0,000",
+     "% Indirecto": "4,620",
+     "%  (B)": "0,060",
+     "(A+B)": "4,680",
+     "F.Registro Entrada CNMV": "04/07/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "CRITERIA CAIXA, S.A.U.",
+     "% Total (A)": "30,012",
+     "% Directo": "30,012",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "30,012",
+     "F.Registro Entrada CNMV": "29/03/2021",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FROB",
+     "% Total (A)": "16,117",
+     "% Directo": "0,000",
+     "% Indirecto": "16,117",
+     "%  (B)": "0,000",
+     "(A+B)": "16,117",
+     "F.Registro Entrada CNMV": "30/03/2021",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FUNDACION BANCARIA CAIXA D ESTALVIS I PENSIONS DE BARCELONA",
+     "% Total (A)": "30,012",
+     "% Directo": "0,000",
+     "% Indirecto": "30,012",
+     "%  (B)": "0,000",
+     "(A+B)": "30,012",
+     "F.Registro Entrada CNMV": "29/03/2021",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 231282
+  },
+  {
+   "nombre_bme": "CELLNEX TELECOM, S.A.",
+   "isin": "ES0105066007",
+   "guid": "{e8e9cdc0-a34c-4782-b11a-f45a7502c152}",
+   "info": "CELLNEX TELECOM, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "23/08/2026",
+   "accionistas": [
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "5,185",
+     "% Directo": "0,000",
+     "% Indirecto": "5,185",
+     "%  (B)": "1,032",
+     "(A+B)": "6,217",
+     "F.Registro Entrada CNMV": "29/09/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "CANADA PENSION PLAN INVESTMENT BOARD",
+     "% Total (A)": "4,662",
+     "% Directo": "4,662",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "4,662",
+     "F.Registro Entrada CNMV": "12/11/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "DODGE & COX",
+     "% Total (A)": "3,277",
+     "% Directo": "0,000",
+     "% Indirecto": "3,277",
+     "%  (B)": "0,000",
+     "(A+B)": "3,277",
+     "F.Registro Entrada CNMV": "21/10/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "EDIZIONE S.R.L.",
+     "% Total (A)": "10,252",
+     "% Directo": "0,000",
+     "% Indirecto": "10,252",
+     "%  (B)": "0,000",
+     "(A+B)": "10,252",
+     "F.Registro Entrada CNMV": "24/11/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "GIC (VENTURES) PRIVATE LIMITED",
+     "% Total (A)": "6,730",
+     "% Directo": "0,000",
+     "% Indirecto": "6,730",
+     "%  (B)": "0,000",
+     "(A+B)": "6,730",
+     "F.Registro Entrada CNMV": "23/03/2023",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "GIC PRIVATE LIMITED",
+     "% Total (A)": "6,989",
+     "% Directo": "0,259",
+     "% Indirecto": "6,730",
+     "%  (B)": "0,042",
+     "(A+B)": "7,031",
+     "F.Registro Entrada CNMV": "23/03/2023",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "HOHN , CHRISTOPHER ANTHONY",
+     "% Total (A)": "10,145",
+     "% Directo": "0,000",
+     "% Indirecto": "10,145",
+     "%  (B)": "0,000",
+     "(A+B)": "10,145",
+     "F.Registro Entrada CNMV": "25/11/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "LAZARD ASSET MANAGEMENT",
+     "% Total (A)": "3,021",
+     "% Directo": "0,000",
+     "% Indirecto": "3,021",
+     "%  (B)": "0,000",
+     "(A+B)": "3,021",
+     "F.Registro Entrada CNMV": "20/05/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "TCI LUXEMBOURG, S.A.R.L.",
+     "% Total (A)": "8,338",
+     "% Directo": "8,338",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "8,338",
+     "F.Registro Entrada CNMV": "25/11/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 243262
+  },
+  {
+   "nombre_bme": "CIA. DE DIST. INTEG. LOGISTA HOLDINGS",
+   "isin": "ES0105027009",
+   "guid": null,
+   "info": {
+    "final": "https://www.cnmv.es/portal/Consultas/Busqueda?id=7",
+    "candidatos": [],
+    "len": 215029
+   }
+  },
+  {
+   "nombre_bme": "COLONIAL SFL, SOCIMI, S.A.",
+   "isin": "ES0139140174",
+   "guid": "{4dff2428-ebd9-462c-bed4-e9502ee1d08a}",
+   "info": "COLONIAL SFL, SOCIMI, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "23/06/2026",
+   "accionistas": [
+    {
+     "Denominación": "ALBA EUROPE, SARL",
+     "% Total (A)": "5,006",
+     "% Directo": "5,006",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "5,006",
+     "F.Registro Entrada CNMV": "28/02/2024",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "1,521",
+     "% Directo": "0,000",
+     "% Indirecto": "1,521",
+     "%  (B)": "1,481",
+     "(A+B)": "3,002",
+     "F.Registro Entrada CNMV": "05/02/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "CORPORACION FINANCIERA ALBA, S.A.",
+     "% Total (A)": "5,006",
+     "% Directo": "0,000",
+     "% Indirecto": "5,006",
+     "%  (B)": "0,000",
+     "(A+B)": "5,006",
+     "F.Registro Entrada CNMV": "29/02/2024",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "CREDIT AGRICOLE, S.A.",
+     "% Total (A)": "4,239",
+     "% Directo": "0,000",
+     "% Indirecto": "4,239",
+     "%  (B)": "0,000",
+     "(A+B)": "4,239",
+     "F.Registro Entrada CNMV": "11/08/2021",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "CRITERIA CAIXA, S.A.U.",
+     "% Total (A)": "17,321",
+     "% Directo": "17,321",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "17,321",
+     "F.Registro Entrada CNMV": "08/07/2024",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "DIC HOLDING LLC",
+     "% Total (A)": "4,287",
+     "% Directo": "4,287",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "4,287",
+     "F.Registro Entrada CNMV": "20/11/2018",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FERNANDEZ GONZALEZ, CARLOS",
+     "% Total (A)": "12,760",
+     "% Directo": "0,000",
+     "% Indirecto": "12,760",
+     "%  (B)": "0,000",
+     "(A+B)": "12,760",
+     "F.Registro Entrada CNMV": "26/02/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FUNDACION BANCARIA CAIXA D ESTALVIS I PENSIONS DE BARCELONA",
+     "% Total (A)": "17,321",
+     "% Directo": "0,000",
+     "% Indirecto": "17,321",
+     "%  (B)": "0,000",
+     "(A+B)": "17,321",
+     "F.Registro Entrada CNMV": "08/07/2024",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "QATAR INVESTMENT AUTHORITY",
+     "% Total (A)": "16,367",
+     "% Directo": "0,000",
+     "% Indirecto": "16,367",
+     "%  (B)": "0,000",
+     "(A+B)": "16,367",
+     "F.Registro Entrada CNMV": "22/09/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "QUAESTOR HOLDINGS, S.A.",
+     "% Total (A)": "8,067",
+     "% Directo": "0,000",
+     "% Indirecto": "8,067",
+     "%  (B)": "0,000",
+     "(A+B)": "8,067",
+     "F.Registro Entrada CNMV": "10/10/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 247466
+  },
+  {
+   "nombre_bme": "CORP.  ACCIONA ENERGÍAS RENOVABLES, S.A.",
+   "isin": "ES0105563003",
+   "guid": null,
+   "info": {
+    "final": "https://www.cnmv.es/portal/Consultas/Busqueda?id=7",
+    "candidatos": [],
+    "len": 215036
+   }
+  },
+  {
+   "nombre_bme": "ENAGAS, S.A.",
+   "isin": "ES0130960018",
+   "guid": "{314b7234-dbe9-4738-a608-94bbacace8c9}",
+   "info": "ENAGAS, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "20/12/2019",
+   "accionistas": [
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "4,628",
+     "% Directo": "0,000",
+     "% Indirecto": "4,628",
+     "%  (B)": "3,000",
+     "(A+B)": "7,628",
+     "F.Registro Entrada CNMV": "07/10/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "ORTEGA GAONA, AMANCIO",
+     "% Total (A)": "5,000",
+     "% Directo": "0,000",
+     "% Indirecto": "5,000",
+     "%  (B)": "0,000",
+     "(A+B)": "5,000",
+     "F.Registro Entrada CNMV": "07/07/2020",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "SOCIEDAD ESTATAL DE PARTICIPACIONES INDUSTRIALES",
+     "% Total (A)": "5,000",
+     "% Directo": "5,000",
+     "% Indirecto": "0,000",
+     "%  (B)": "",
+     "(A+B)": "5,000",
+     "F.Registro Entrada CNMV": "27/11/2007",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 226653
+  },
+  {
+   "nombre_bme": "ENDESA, SOCIEDAD ANONIMA",
+   "isin": "ES0130670112",
+   "guid": null,
+   "info": {
+    "final": "https://www.cnmv.es/portal/Consultas/Busqueda?id=7",
+    "candidatos": [],
+    "len": 215000
+   }
+  },
+  {
+   "nombre_bme": "FERROVIAL N.V.",
+   "isin": "NL0015001FS8",
+   "guid": null,
+   "info": {
+    "final": "https://www.cnmv.es/portal/Consultas/Busqueda?id=7",
+    "candidatos": [],
+    "len": 214974
+   }
+  },
+  {
+   "nombre_bme": "FLUIDRA, S.A.",
+   "isin": "ES0137650018",
+   "guid": "{548d403f-b58e-4049-a85c-0eabd4f3d749}",
+   "info": "FLUIDRA, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "10/01/2022",
+   "accionistas": [
+    {
+     "Denominación": "ADBE PARTNERS, S.L.",
+     "% Total (A)": "28,298",
+     "% Directo": "20,000",
+     "% Indirecto": "8,298",
+     "%  (B)": "0,000",
+     "(A+B)": "28,298",
+     "F.Registro Entrada CNMV": "04/12/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "BEUZELIN , HUGUES",
+     "% Total (A)": "3,124",
+     "% Directo": "0,000",
+     "% Indirecto": "3,124",
+     "%  (B)": "0,000",
+     "(A+B)": "3,124",
+     "F.Registro Entrada CNMV": "13/05/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "G3T, S.L.",
+     "% Total (A)": "5,002",
+     "% Directo": "5,002",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "5,002",
+     "F.Registro Entrada CNMV": "23/03/2021",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "PISCINE LUXEMBOURG HOLDINGS 1, S.A R.L.",
+     "% Total (A)": "11,465",
+     "% Directo": "11,465",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "11,465",
+     "F.Registro Entrada CNMV": "20/09/2021",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "PUIG ROCHA, MANUEL",
+     "% Total (A)": "7,000",
+     "% Directo": "0,000",
+     "% Indirecto": "7,000",
+     "%  (B)": "0,000",
+     "(A+B)": "7,000",
+     "F.Registro Entrada CNMV": "12/05/2023",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "RHÔNE CAPITAL L.L.C.",
+     "% Total (A)": "11,465",
+     "% Directo": "0,000",
+     "% Indirecto": "11,465",
+     "%  (B)": "0,000",
+     "(A+B)": "11,465",
+     "F.Registro Entrada CNMV": "20/09/2021",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 235075
+  },
+  {
+   "nombre_bme": "GRIFOLS, S.A.",
+   "isin": "ES0171996087",
+   "guid": "{2ead15d0-ae0b-4c59-8bd9-ac751740b459}",
+   "info": "GRIFOLS, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "04/01/2016",
+   "accionistas": [
+    {
+     "Denominación": "ANDERSEN , MARC P.",
+     "% Total (A)": "5,391",
+     "% Directo": "0,000",
+     "% Indirecto": "5,391",
+     "%  (B)": "0,000",
+     "(A+B)": "5,391",
+     "F.Registro Entrada CNMV": "14/05/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "ARMISTICE CAPITAL MASTER FUND LTD",
+     "% Total (A)": "1,064",
+     "% Directo": "1,064",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "1,064",
+     "F.Registro Entrada CNMV": "28/01/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "0,721",
+     "% Directo": "0,000",
+     "% Indirecto": "0,721",
+     "%  (B)": "2,298",
+     "(A+B)": "3,019",
+     "F.Registro Entrada CNMV": "05/06/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "DERIA, S.L.",
+     "% Total (A)": "15,204",
+     "% Directo": "15,204",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "15,204",
+     "F.Registro Entrada CNMV": "07/10/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "EMPLOYEES PROVIDENT FUND BOARD (EPF)",
+     "% Total (A)": "3,034",
+     "% Directo": "3,034",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "3,034",
+     "F.Registro Entrada CNMV": "24/07/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FLAT FOOTED LLC.",
+     "% Total (A)": "5,391",
+     "% Directo": "0,000",
+     "% Indirecto": "5,391",
+     "%  (B)": "0,000",
+     "(A+B)": "5,391",
+     "F.Registro Entrada CNMV": "14/05/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "GRIFOLS COMA-CROS, ALBERT",
+     "% Total (A)": "7,105",
+     "% Directo": "0,015",
+     "% Indirecto": "7,089",
+     "%  (B)": "0,000",
+     "(A+B)": "7,105",
+     "F.Registro Entrada CNMV": "17/12/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "GRIFOLS ROURA, ENRIQUE Y NURIA",
+     "% Total (A)": "15,308",
+     "% Directo": "0,104",
+     "% Indirecto": "15,204",
+     "%  (B)": "0,000",
+     "(A+B)": "15,308",
+     "F.Registro Entrada CNMV": "08/10/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "MASON CAPITAL MANAGEMENT LLC",
+     "% Total (A)": "3,174",
+     "% Directo": "0,000",
+     "% Indirecto": "3,174",
+     "%  (B)": "0,000",
+     "(A+B)": "3,174",
+     "F.Registro Entrada CNMV": "13/02/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "MASON CAPITAL MASTER FUND L.P.",
+     "% Total (A)": "3,174",
+     "% Directo": "0,000",
+     "% Indirecto": "3,174",
+     "%  (B)": "0,000",
+     "(A+B)": "3,174",
+     "F.Registro Entrada CNMV": "13/02/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "MORGAN STANLEY",
+     "% Total (A)": "0,100",
+     "% Directo": "0,000",
+     "% Indirecto": "0,100",
+     "%  (B)": "4,246",
+     "(A+B)": "4,346",
+     "F.Registro Entrada CNMV": "12/10/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "PONDER TRADE, S.L.",
+     "% Total (A)": "7,089",
+     "% Directo": "7,089",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "7,089",
+     "F.Registro Entrada CNMV": "28/02/2022",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "SCRANTON ENTERPRISES, B.V.",
+     "% Total (A)": "8,672",
+     "% Directo": "8,672",
+     "% Indirecto": "0,000",
+     "%  (B)": "",
+     "(A+B)": "8,672",
+     "F.Registro Entrada CNMV": "05/02/2016",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "THE GOLDMAN SACHS GROUP, INC.",
+     "% Total (A)": "0,021",
+     "% Directo": "0,000",
+     "% Indirecto": "0,021",
+     "%  (B)": "3,512",
+     "(A+B)": "3,533",
+     "F.Registro Entrada CNMV": "15/10/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 254164
+  },
+  {
+   "nombre_bme": "IBERDROLA, S.A.",
+   "isin": "ES0144580Y14",
+   "guid": "{a202763c-df5b-4816-9891-828e701df324}",
+   "info": "IBERDROLA, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "29/07/2026",
+   "accionistas": [
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "6,230",
+     "% Directo": "0,000",
+     "% Indirecto": "6,230",
+     "%  (B)": "0,024",
+     "(A+B)": "6,254",
+     "F.Registro Entrada CNMV": "04/07/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "QATAR INVESTMENT AUTHORITY",
+     "% Total (A)": "8,694",
+     "% Directo": "0,000",
+     "% Indirecto": "8,694",
+     "%  (B)": "0,000",
+     "(A+B)": "8,694",
+     "F.Registro Entrada CNMV": "07/01/2020",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 224296
+  },
+  {
+   "nombre_bme": "INDRA SISTEMAS, S.A., SERIE A",
+   "isin": "ES0118594417",
+   "guid": null,
+   "info": {
+    "final": "https://www.cnmv.es/portal/Consultas/Busqueda?id=7",
+    "candidatos": [],
+    "len": 215009
+   }
+  },
+  {
+   "nombre_bme": "INDUSTRIA DE DISEÑO TEXTIL, SA \"INDITEX\"",
+   "isin": "ES0148396007",
+   "guid": null,
+   "info": {
+    "final": "https://www.cnmv.es/portal/Consultas/Busqueda?id=7",
+    "candidatos": [],
+    "len": 214870
+   }
+  },
+  {
+   "nombre_bme": "INTERNATIONAL CONSOLIDAT. AIRLINES GROUP",
+   "isin": "ES0177542018",
+   "guid": null,
+   "info": {
+    "final": "https://www.cnmv.es/portal/Consultas/Busqueda?id=7",
+    "candidatos": [],
+    "len": 215036
+   }
+  },
+  {
+   "nombre_bme": "LABORATORIOS FARMACEUTICOS ROVI, S.A.",
+   "isin": "ES0157261019",
+   "guid": "{99bbbd97-e726-4ea1-af51-87f4c8391137}",
+   "info": "LABORATORIOS FARMACEUTICOS ROVI, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "10/09/2024",
+   "accionistas": [
+    {
+     "Denominación": "INDUMENTA PUERI, S.L.",
+     "% Total (A)": "10,005",
+     "% Directo": "0,000",
+     "% Indirecto": "10,005",
+     "%  (B)": "3,434",
+     "(A+B)": "13,439",
+     "F.Registro Entrada CNMV": "09/06/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "NORBEL INVERSIONES, S.L.",
+     "% Total (A)": "58,186",
+     "% Directo": "58,186",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "58,186",
+     "F.Registro Entrada CNMV": "20/09/2024",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 224506
+  },
+  {
+   "nombre_bme": "MAPFRE, S.A.",
+   "isin": "ES0124244E34",
+   "guid": "{8829841f-9029-4c41-9157-7439acb0c1bb}",
+   "info": "MAPFRE, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "01/07/2011",
+   "accionistas": [
+    {
+     "Denominación": "FUNDACION MAPFRE",
+     "% Total (A)": "67,723",
+     "% Directo": "0,000",
+     "% Indirecto": "67,723",
+     "%  (B)": "",
+     "(A+B)": "67,723",
+     "F.Registro Entrada CNMV": "03/10/2013",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 220926
+  },
+  {
+   "nombre_bme": "MERLIN PROPERTIES, SOCIMI, S.A.",
+   "isin": "ES0105025003",
+   "guid": "{faa13dd7-2822-4f18-b11b-abb6cc00b767}",
+   "info": "MERLIN PROPERTIES, SOCIMI, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "26/03/2026",
+   "accionistas": [
+    {
+     "Denominación": "BANCO SANTANDER, S.A.",
+     "% Total (A)": "22,268",
+     "% Directo": "16,697",
+     "% Indirecto": "5,571",
+     "%  (B)": "0,000",
+     "(A+B)": "22,268",
+     "F.Registro Entrada CNMV": "02/11/2016",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "4,460",
+     "% Directo": "0,000",
+     "% Indirecto": "4,460",
+     "%  (B)": "0,172",
+     "(A+B)": "4,632",
+     "F.Registro Entrada CNMV": "04/07/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "LAO HERNANDEZ, MANUEL",
+     "% Total (A)": "6,271",
+     "% Directo": "0,000",
+     "% Indirecto": "6,271",
+     "%  (B)": "0,000",
+     "(A+B)": "6,271",
+     "F.Registro Entrada CNMV": "31/03/2020",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 226333
+  },
+  {
+   "nombre_bme": "NATURGY ENERGY GROUP, S.A.",
+   "isin": "ES0116870314",
+   "guid": "{21484418-2d5f-41fb-b19a-65784e821fa5}",
+   "info": "NATURGY ENERGY GROUP, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "10/08/2020",
+   "accionistas": [
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "3,712",
+     "% Directo": "0,000",
+     "% Indirecto": "3,712",
+     "%  (B)": "0,547",
+     "(A+B)": "4,259",
+     "F.Registro Entrada CNMV": "02/06/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "CORPORACION FINANCIERA ALBA, S.A.",
+     "% Total (A)": "5,008",
+     "% Directo": "0,000",
+     "% Indirecto": "5,008",
+     "%  (B)": "0,000",
+     "(A+B)": "5,008",
+     "F.Registro Entrada CNMV": "04/06/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "CRITERIA CAIXA, S.A.U.",
+     "% Total (A)": "25,986",
+     "% Directo": "25,986",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "25,986",
+     "F.Registro Entrada CNMV": "17/12/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FUNDACION BANCARIA CAIXA D ESTALVIS I PENSIONS DE BARCELONA",
+     "% Total (A)": "25,986",
+     "% Directo": "0,000",
+     "% Indirecto": "25,986",
+     "%  (B)": "0,000",
+     "(A+B)": "25,986",
+     "F.Registro Entrada CNMV": "17/12/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "IFM GLOBAL INFRASTRUCTURE FUND",
+     "% Total (A)": "15,169",
+     "% Directo": "0,000",
+     "% Indirecto": "15,169",
+     "%  (B)": "0,000",
+     "(A+B)": "15,169",
+     "F.Registro Entrada CNMV": "26/06/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "INDUSTRY SUPER HOLDINGS PTY LTD.",
+     "% Total (A)": "15,169",
+     "% Directo": "0,000",
+     "% Indirecto": "15,169",
+     "%  (B)": "0,000",
+     "(A+B)": "15,169",
+     "F.Registro Entrada CNMV": "26/06/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "SONATRACH",
+     "% Total (A)": "3,850",
+     "% Directo": "3,850",
+     "% Indirecto": "0,000",
+     "%  (B)": "",
+     "(A+B)": "3,850",
+     "F.Registro Entrada CNMV": "15/11/2011",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 238704
+  },
+  {
+   "nombre_bme": "PUIG BRANDS, S.A. CLASE B",
+   "isin": "ES0105777017",
+   "guid": null,
+   "info": {
+    "final": "https://www.cnmv.es/portal/Consultas/Busqueda?id=7",
+    "candidatos": [],
+    "len": 215001
+   }
+  },
+  {
+   "nombre_bme": "REDEIA CORPORACION, S.A.",
+   "isin": "ES0173093024",
+   "guid": "{a375a7a9-156a-4b6d-8f98-e866e3630b75}",
+   "info": "REDEIA CORPORACION, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "27/05/2016",
+   "accionistas": [
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "4,667",
+     "% Directo": "0,000",
+     "% Indirecto": "4,667",
+     "%  (B)": "0,558",
+     "(A+B)": "5,225",
+     "F.Registro Entrada CNMV": "04/07/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "ORTEGA GAONA, AMANCIO",
+     "% Total (A)": "5,000",
+     "% Directo": "0,000",
+     "% Indirecto": "5,000",
+     "%  (B)": "0,000",
+     "(A+B)": "5,000",
+     "F.Registro Entrada CNMV": "29/07/2021",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "SOCIEDAD ESTATAL DE PARTICIPACIONES INDUSTRIALES",
+     "% Total (A)": "20,000",
+     "% Directo": "20,000",
+     "% Indirecto": "0,000",
+     "%  (B)": "",
+     "(A+B)": "20,000",
+     "F.Registro Entrada CNMV": "30/09/2005",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 225924
+  },
+  {
+   "nombre_bme": "REPSOL, S.A.",
+   "isin": "ES0173516115",
+   "guid": "{b19bd910-cdd8-4e32-bf27-4edc2f0c0145}",
+   "info": "REPSOL, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "03/08/2026",
+   "accionistas": [
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "6,664",
+     "% Directo": "0,000",
+     "% Indirecto": "6,664",
+     "%  (B)": "0,512",
+     "(A+B)": "7,176",
+     "F.Registro Entrada CNMV": "04/07/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 221439
+  },
+  {
+   "nombre_bme": "SACYR, S.A.",
+   "isin": "ES0182870214",
+   "guid": "{a7a0e7e5-019d-4ced-b1f9-930d9706fcf1}",
+   "info": "SACYR, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "03/02/2026",
+   "accionistas": [
+    {
+     "Denominación": "DISA CORPORACION PETROLIFERA, S.A.",
+     "% Total (A)": "14,598",
+     "% Directo": "1,845",
+     "% Indirecto": "12,753",
+     "%  (B)": "0,000",
+     "(A+B)": "14,598",
+     "F.Registro Entrada CNMV": "01/07/2021",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "GRUPO CORPORATIVO FUERTES, S.L.",
+     "% Total (A)": "6,322",
+     "% Directo": "6,322",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "6,322",
+     "F.Registro Entrada CNMV": "14/02/2020",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "GRUPO EMPRESARIAL FUERTES, S.L.",
+     "% Total (A)": "5,930",
+     "% Directo": "0,000",
+     "% Indirecto": "5,930",
+     "%  (B)": "0,000",
+     "(A+B)": "5,930",
+     "F.Registro Entrada CNMV": "05/02/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "LOUREDA MANTIÑAN, JOSE MANUEL",
+     "% Total (A)": "6,746",
+     "% Directo": "0,000",
+     "% Indirecto": "6,746",
+     "%  (B)": "0,000",
+     "(A+B)": "6,746",
+     "F.Registro Entrada CNMV": "01/10/2024",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "POINT72 LONDON INVESTMENTS LTD",
+     "% Total (A)": "0,000",
+     "% Directo": "0,000",
+     "% Indirecto": "0,000",
+     "%  (B)": "1,574",
+     "(A+B)": "1,574",
+     "F.Registro Entrada CNMV": "23/09/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "PRILOU, S.L.",
+     "% Total (A)": "6,746",
+     "% Directo": "6,746",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "6,746",
+     "F.Registro Entrada CNMV": "01/10/2024",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "RUBRIC CAPITAL MANAGEMENT",
+     "% Total (A)": "0,000",
+     "% Directo": "0,000",
+     "% Indirecto": "0,000",
+     "%  (B)": "4,432",
+     "(A+B)": "4,432",
+     "F.Registro Entrada CNMV": "17/01/2023",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "THE GOLDMAN SACHS GROUP, INC.",
+     "% Total (A)": "2,727",
+     "% Directo": "0,000",
+     "% Indirecto": "2,727",
+     "%  (B)": "2,442",
+     "(A+B)": "5,169",
+     "F.Registro Entrada CNMV": "21/10/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 241485
+  },
+  {
+   "nombre_bme": "SOLARIA ENERGIA Y MEDIO AMBIENTE, S.A.",
+   "isin": "ES0165386014",
+   "guid": null,
+   "info": {
+    "final": "https://www.cnmv.es/portal/Consultas/Busqueda?id=7",
+    "candidatos": [],
+    "len": 215030
+   }
+  },
+  {
+   "nombre_bme": "TELEFONICA, S.A.",
+   "isin": "ES0178430E18",
+   "guid": "{c014e5ce-80ec-48b2-becc-1d8fc6f0a63e}",
+   "info": "TELEFONICA, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "13/05/2024",
+   "accionistas": [
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "5,033",
+     "% Directo": "0,000",
+     "% Indirecto": "5,033",
+     "%  (B)": "1,208",
+     "(A+B)": "6,241",
+     "F.Registro Entrada CNMV": "23/06/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "CRITERIA CAIXA, S.A.U.",
+     "% Total (A)": "5,007",
+     "% Directo": "5,007",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "5,007",
+     "F.Registro Entrada CNMV": "08/04/2024",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FUNDACION BANCARIA CAIXA D ESTALVIS I PENSIONS DE BARCELONA",
+     "% Total (A)": "5,007",
+     "% Directo": "0,000",
+     "% Indirecto": "5,007",
+     "%  (B)": "0,000",
+     "(A+B)": "5,007",
+     "F.Registro Entrada CNMV": "08/04/2024",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "MORGAN STANLEY",
+     "% Total (A)": "0,101",
+     "% Directo": "0,000",
+     "% Indirecto": "0,101",
+     "%  (B)": "8,297",
+     "(A+B)": "8,398",
+     "F.Registro Entrada CNMV": "10/09/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "PUBLIC INVESTMENT FUND",
+     "% Total (A)": "9,969",
+     "% Directo": "0,000",
+     "% Indirecto": "9,969",
+     "%  (B)": "0,000",
+     "(A+B)": "9,969",
+     "F.Registro Entrada CNMV": "06/02/2025",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "SOCIEDAD ESTATAL DE PARTICIPACIONES INDUSTRIALES",
+     "% Total (A)": "10,000",
+     "% Directo": "10,000",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "10,000",
+     "F.Registro Entrada CNMV": "20/05/2024",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 235955
+  },
+  {
+   "nombre_bme": "UNICAJA BANCO, S.A.",
+   "isin": "ES0180907000",
+   "guid": "{6570a10a-3ec2-437b-9c57-14c98545724a}",
+   "info": "UNICAJA BANCO, S.A.",
+   "total_derechos": null,
+   "fecha_derechos": "11/10/2024",
+   "accionistas": [
+    {
+     "Denominación": "BLACKROCK INC.",
+     "% Total (A)": "2,101",
+     "% Directo": "0,000",
+     "% Indirecto": "2,101",
+     "%  (B)": "0,901",
+     "(A+B)": "3,002",
+     "F.Registro Entrada CNMV": "10/07/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FUNDACION BANCARIA CAJA DE AHORROS DE ASTURIAS",
+     "% Total (A)": "6,560",
+     "% Directo": "6,560",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "6,560",
+     "F.Registro Entrada CNMV": "06/08/2021",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "FUNDACION BANCARIA UNICAJA",
+     "% Total (A)": "30,236",
+     "% Directo": "30,236",
+     "% Indirecto": "0,000",
+     "%  (B)": "0,000",
+     "(A+B)": "30,236",
+     "F.Registro Entrada CNMV": "03/08/2021",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "INDUMENTA PUERI, S.L.",
+     "% Total (A)": "5,000",
+     "% Directo": "0,000",
+     "% Indirecto": "5,000",
+     "%  (B)": "0,000",
+     "(A+B)": "5,000",
+     "F.Registro Entrada CNMV": "05/10/2018",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "OLIVO LOPEZ, TOMAS",
+     "% Total (A)": "5,178",
+     "% Directo": "0,139",
+     "% Indirecto": "5,039",
+     "%  (B)": "0,000",
+     "(A+B)": "5,178",
+     "F.Registro Entrada CNMV": "10/03/2022",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    },
+    {
+     "Denominación": "SANTA LUCIA S.A CIA DE SEGUROS",
+     "% Total (A)": "10,000",
+     "% Directo": "9,948",
+     "% Indirecto": "0,052",
+     "%  (B)": "0,000",
+     "(A+B)": "10,000",
+     "F.Registro Entrada CNMV": "11/05/2026",
+     "Información adicional": "",
+     "Detalle/anulaciones": ""
+    }
+   ],
+   "tabla_otras": null,
+   "len": 234117
+  }
+ ]
+}
