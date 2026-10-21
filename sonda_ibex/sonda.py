@@ -1,5 +1,5 @@
-"""Sonda temporal 31: cómo publica la CNMV las participaciones significativas de un emisor (Iberdrola)."""
-import json, re
+"""Sonda temporal 32: enlaces de la ficha de entidad de la CNMV (Iberdrola) y página de participaciones significativas."""
+import json, re, html
 from pathlib import Path
 import requests
 OUT = Path("sonda_ibex/resultado"); OUT.mkdir(parents=True, exist_ok=True)
@@ -8,23 +8,23 @@ for f in OUT.glob("*"):
         f.unlink()
 H = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36",
      "Accept-Language": "es-ES,es;q=0.9"}
-URLS = [
-    "https://www.cnmv.es/Portal/Consultas/EE/ParticipacionesSignificativas.aspx?nif=A48010615",
-    "https://www.cnmv.es/portal/Consultas/EE/ParticipacionesSignificativas.aspx?nif=A48010615&lang=es",
-    "https://www.cnmv.es/Portal/Consultas/DatosEntidad.aspx?nif=A48010615",
-    "https://www.cnmv.es/portal/Consultas/Busqueda.aspx?id=29&nif=A48010615",
-    "https://www.cnmv.es/Portal/Consultas/EE/DerechosVoto.aspx?nif=A48010615",
-]
-res = {}
-for u in URLS:
-    try:
-        r = requests.get(u, headers=H, timeout=60)
-        t = r.text
-        tablas = re.findall(r"<table.*?</table>", t, re.S)
-        res[u] = {"http": r.status_code, "final": r.url, "len": len(t), "title": (re.search(r"<title>(.*?)</title>", t, re.S) or [None, ""])[1].strip()[:150],
-                  "n_tablas": len(tablas), "tabla0": re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " | ", tablas[0]))[:1500] if tablas else None,
-                  "enlaces": sorted(set(re.findall(r'href="([^"]*(?:Participac|DerechosVoto|nif=)[^"]*)"', t)))[:30]}
-    except Exception as e:  # noqa: BLE001
-        res[u] = {"error": str(e)}
-(OUT / "cnmv_ps.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
-print(json.dumps(res, ensure_ascii=False)[:2500])
+s = requests.Session(); s.headers.update(H)
+r = s.get("https://www.cnmv.es/portal/Consultas/DatosEntidad?nif=A48010615", timeout=60)
+t = r.text
+links = []
+for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', t, re.S):
+    txt = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(2))).strip()
+    href = html.unescape(m.group(1))
+    if "onsultas" in href or "articipac" in txt.lower() or "voto" in txt.lower():
+        links.append([txt[:80], href[:200]])
+res = {"links": links[:80]}
+ps = [h for tx, h in links if "articipac" in tx.lower() or "articipac" in h.lower()]
+if ps:
+    u = ps[0] if ps[0].startswith("http") else "https://www.cnmv.es" + (ps[0] if ps[0].startswith("/") else "/portal/" + ps[0])
+    p = s.get(u, timeout=60)
+    tablas = re.findall(r"<table.*?</table>", p.text, re.S)
+    res["ps_url"] = u; res["ps_http"] = p.status_code; res["ps_final"] = p.url
+    res["ps_tablas"] = [re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " | ", x))[:2500] for x in tablas[:3]]
+    (OUT / "ps.html").write_text(p.text[:400000])
+(OUT / "cnmv_entidad.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
+print(json.dumps(res, ensure_ascii=False)[:3000])
