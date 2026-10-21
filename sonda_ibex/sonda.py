@@ -1,4 +1,4 @@
-"""Sonda temporal 39: subastas de Letras del Tesoro en tesoro.es (páginas y archivos descargables)."""
+"""Sonda temporal 39b (cadena de certificados incompleta en tesoro.es: se completa con el intermedio del AIA): subastas de Letras del Tesoro en tesoro.es (páginas y archivos descargables)."""
 import json, re, html
 from pathlib import Path
 import requests
@@ -16,8 +16,35 @@ URLS = ["https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas
         "https://www.tesoro.es/"]
 def limpiar(x):
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", x))).strip()
+import ssl, socket, certifi, subprocess, tempfile
+def bundle_con_intermedio(host):
+    """Descarga el certificado intermedio que anuncia el servidor (AIA) y lo añade al almacén de certifi.
+    La verificación TLS sigue activa: solo se completa la cadena que el servidor no envía."""
+    ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
+    with socket.create_connection((host, 443), timeout=30) as sock:
+        with ctx.wrap_socket(sock, server_hostname=host) as ss:
+            der = ss.getpeercert(binary_form=True)
+    pem_hoja = ssl.DER_cert_to_PEM_cert(der)
+    t = tempfile.NamedTemporaryFile("w", suffix=".pem", delete=False); t.write(pem_hoja); t.close()
+    txt = subprocess.run(["openssl", "x509", "-in", t.name, "-noout", "-text"], capture_output=True, text=True).stdout
+    aia = re.findall(r"CA Issuers - URI:(\S+)", txt)
+    extra = ""
+    for u in aia:
+        d = requests.get(u, timeout=30).content
+        if b"BEGIN CERTIFICATE" in d:
+            extra += d.decode()
+        else:
+            extra += ssl.DER_cert_to_PEM_cert(d)
+    b = tempfile.NamedTemporaryFile("w", suffix=".pem", delete=False)
+    b.write(open(certifi.where()).read() + "\n" + extra); b.close()
+    return b.name, aia
 res = {}
 s = requests.Session(); s.headers.update(H)
+try:
+    s.verify, aia = bundle_con_intermedio("www.tesoro.es")
+    res["_aia"] = aia
+except Exception as e:  # noqa: BLE001
+    res["_aia_error"] = str(e)[:300]
 for u in URLS:
     try:
         r = s.get(u, timeout=60)
