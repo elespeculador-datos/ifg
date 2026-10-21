@@ -1,0 +1,56 @@
+<!-- /wp:html -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading" id="calculadora">Calculadora: cuánto se paga por una letra y cuánto se cobra</h2>
+<!-- /wp:heading -->
+
+<!-- wp:html -->
+<div id="ee-calc-letras" style="border:1px solid #d7dde5;border-radius:6px;padding:14px 16px;margin:0 0 1em;max-width:640px">
+<p style="margin:0 0 10px">Escribe el tipo de interés (por ejemplo, el tipo medio de la última subasta de la tabla de arriba), los días que faltan hasta el vencimiento y el número de letras de 1.000 euros. O escribe el precio y la calculadora da el tipo.</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px 18px">
+<label style="display:flex;flex-direction:column;font-size:.9em">Tipo de interés (%)<input id="eecl-tipo" type="text" inputmode="decimal" value="3,000" style="width:9em;padding:4px"></label>
+<label style="display:flex;flex-direction:column;font-size:.9em">Precio (% del nominal)<input id="eecl-precio" type="text" inputmode="decimal" value="" placeholder="opcional" style="width:9em;padding:4px"></label>
+<label style="display:flex;flex-direction:column;font-size:.9em">Días hasta el vencimiento<input id="eecl-dias" type="number" min="1" max="366" step="1" value="364" style="width:7em;padding:4px"></label>
+<label style="display:flex;flex-direction:column;font-size:.9em">Letras de 1.000 €<input id="eecl-num" type="number" min="1" step="1" value="1" style="width:7em;padding:4px"></label>
+</div>
+<p id="eecl-res" aria-live="polite" style="margin:12px 0 4px;font-weight:600"></p>
+<p id="eecl-nota" style="margin:0;font-size:.85em;color:#5b6675">Fórmula del Tesoro para las Letras de hasta un año, con la convención ACTUAL/360: precio = 100 / (1 + tipo × días / 360), redondeado por exceso a tres decimales. Antes de impuestos y de las comisiones de la entidad, si las hay. Es un cálculo orientativo: el precio de cada subasta lo fija el Tesoro.</p>
+</div>
+<script>
+(function () {
+  var q = function (id) { return document.getElementById(id); };
+  var num = function (s) { s = String(s || '').trim().replace(/\./g, '').replace(',', '.'); return s === '' ? NaN : Number(s); };
+  var entre = function (x, a, b) { return isFinite(x) ? Math.min(Math.max(x, a), b) === x : false; };
+  var fmt = function (x, d) { var s = x.toFixed(d).split('.'); s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.'); return s.join(','); };
+  var desdePrecio = false;
+  function calcula() {
+    var dias = Math.round(num(q('eecl-dias').value)), n = Math.round(num(q('eecl-num').value));
+    var tipo = num(q('eecl-tipo').value), precio = num(q('eecl-precio').value), res = q('eecl-res');
+    if (!entre(dias, 1, 366)) { res.textContent = 'Revisa los días: de 1 a 366.'; return; }
+    if (!entre(n, 1, 1000000)) { res.textContent = 'Revisa el número de letras.'; return; }
+    if (desdePrecio) {
+      if (!entre(precio, 0.001, 99.999)) { res.textContent = 'Escribe un precio válido, en porcentaje del nominal.'; return; }
+      tipo = (100 / precio - 1) * 360 / dias * 100;
+      q('eecl-tipo').value = fmt(tipo, 3);
+    } else {
+      if (!entre(tipo, -0.999, 19.999)) { res.textContent = 'Escribe un tipo de interés válido.'; return; }
+      precio = Math.ceil(100 / (1 + tipo / 100 * dias / 360) * 1000 - 1e-9) / 1000;
+      q('eecl-precio').value = '';
+      q('eecl-precio').placeholder = fmt(precio, 3);
+    }
+    var paga = precio * 10 * n, cobra = 1000 * n;
+    res.textContent = 'Pagas ' + fmt(paga, 2) + ' € y al vencimiento cobras ' + fmt(cobra, 2) + ' €: ' + fmt(cobra - paga, 2) +
+      ' € de diferencia (precio ' + fmt(precio, 3) + ' %, tipo ' + fmt(tipo, 3) + ' %).';
+  }
+  q('eecl-tipo').addEventListener('input', function () { desdePrecio = false; calcula(); });
+  q('eecl-precio').addEventListener('input', function () { desdePrecio = entre(num(this.value), 0.001, 99.999); calcula(); });
+  q('eecl-dias').addEventListener('input', calcula);
+  q('eecl-num').addEventListener('input', calcula);
+  calcula();
+})();
+</script>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>Los días se cuentan desde la fecha de emisión de la subasta hasta el vencimiento: 364 en las últimas Letras a 12 meses, 182 a 6 meses, 266 a 9 meses y 91 a 3 meses. Con el tipo medio de la última subasta de cada uno de esos cuatro plazos, la fórmula da exactamente el precio medio que publicó el Tesoro.</p>
+<!-- /wp:paragraph -->
