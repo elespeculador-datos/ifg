@@ -1,0 +1,131 @@
+{
+ "denominacion": {
+  "http": 200,
+  "final": "https://www.cnmv.es/portal/consultas/DerechosVoto/PS_AC_INI?qS=%7Be948ea44-4373-4385-ad4e-60eb254c50dc%7D",
+  "len": 213977,
+  "ocultos": [
+   "__EVENTARGUMENT",
+   "__EVENTTARGET",
+   "__EVENTVALIDATION",
+   "__VIEWSTATE",
+   "__VIEWSTATEGENERATOR",
+   "ctl00$ContentPrincipal$btnOk",
+   "ctl00$ContentPrincipal$wNombreEntidad$txtDenominacion"
+  ],
+  "tablas": [],
+  "enlaces": [
+   [
+    "Código de conducta",
+    "/DocPortal/quees/Conducta.pdf"
+   ],
+   [
+    "CNMV 2030",
+    "/DocPortal/OtrosDocumentos/CNMV2030.pdf"
+   ],
+   [
+    "Política de comunicación pública",
+    "/DocPortal/AlDia/PoliticaComunicacionCNMV.pdf"
+   ],
+   [
+    "Plan de sostenibilidad ambiental",
+    "/DocPortal/OtrosDocumentos/Plan-Sostenibilidad-CNMV.pdf"
+   ],
+   [
+    "Política de comunicación pública",
+    "/DocPortal/AlDia/PoliticaComunicacionCNMV.pdf"
+   ],
+   [
+    "Participaciones significativas y autocartera",
+    "../busqueda.aspx?id=7"
+   ],
+   [
+    "Servicios de financiación participativa",
+    "../Servicios-Financiacion-Participativa/Indice.aspx"
+   ],
+   [
+    "Plataformas de financiación participativa no armonizadas",
+    "../Servicios-Financiacion-Participativa/Listado-PFP-No-Armonizadas.aspx"
+   ],
+   [
+    "Proveedores de servicios de financiación participativa",
+    "../Servicios-Financiacion-Participativa/Listado-Proveedores.aspx"
+   ],
+   [
+    "Proveedores de servicios de financiación participativa europeos que prestan servicios en E",
+    "../Servicios-Financiacion-Participativa/Listado-Proveedores-Europeos.aspx"
+   ],
+   [
+    "Documentos a consulta",
+    "../../Publicaciones/DocumentosConsulta.aspx"
+   ],
+   [
+    "De la Comisión Nacional del Mercado de Valores",
+    "../../publicaciones/documentos-fase-consulta.aspx?tDoc=1"
+   ],
+   [
+    "De la Comisión Europea",
+    "../../publicaciones/listadodocumentos.aspx?tDoc=4"
+   ],
+   [
+    "De IOSCO",
+    "../../publicaciones/listadodocumentos.aspx?tDoc=2"
+   ],
+   [
+    "De ESMA",
+    "../../publicaciones/listadodocumentos.aspx?tDoc=3"
+   ],
+   [
+    "De otros organismos",
+    "../../publicaciones/listadodocumentos.aspx?tDoc=54"
+   ],
+   [
+    "Listado individualizado de artículos publicados en el Boletín de la CNMV",
+    "/DocPortal/Publicaciones/Boletin/Listado_ArticulosBoletin.pdf"
+   ],
+   [
+    "Ciberseguridad en las infraestructuras de los mercados",
+    "/DocPortal/Publicaciones/Ciberseguridad/Ciberseguridad_Infraestructuras_Mercados.pdf"
+   ],
+   [
+    "Otros documentos - Emisores y Cotizadas",
+    "../../Menu/Otros-Documentos-Emisores.aspx"
+   ],
+   [
+    "Otros documentos - IIC",
+    "../../Menu/Otros-Documentos-IIC.aspx"
+   ],
+   [
+    "Otros documentos - Capital Riesgo",
+    "../../Menu/Otros-Documentos-Capital-Riesgo.aspx"
+   ],
+   [
+    "Otros documentos - ESI",
+    "../../Menu/Otros-Documentos-ESI.aspx"
+   ],
+   [
+    "Publicaciones y estadísticas - Infraestructuras de mercados",
+    "../../Menu/Publicaciones-Documentos-Infraestructuras-Mercados.aspx"
+   ],
+   [
+    "Otros documentos - Infraestructuras de mercados",
+    "../../Menu/Otros-Documentos-Infraestructuras.aspx"
+   ],
+   [
+    "Participaciones Significativas y Autocartera",
+    "/Portal/Consultas/Busqueda.aspx?id=7"
+   ],
+   [
+    "Notificaciones de derechos de voto e instrumentos financieros",
+    "Notificaciones-Participaciones.aspx?qS={7cbbf626-468e-47c4-90ad-9ce2929172f8}"
+   ],
+   [
+    "Sociedades cotizadas donde participa",
+    "SociedadesParticipa.aspx?qS={7cbbf626-468e-47c4-90ad-9ce2929172f8}"
+   ]
+  ],
+  "texto": "Cookies técnicas Cookies técnicas Se utilizan para el correcto funcionamiento del sitio. Cookies de personalización Cookies de personalización Permiten recordar información para que el usuario acceda al servicio con determinadas características que pueden diferenciar su experiencia de la de otros usuarios. Por ejemplo, el idioma elegido u otras opciones que permiten una mejora en la accesibilidad a la web."
+ },
+ "ultdias": {
+  "error": "_timeout(err=e, url=url, timeout_value=read_timeout)\n  File \"/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/urllib3/connectionpool.py\", line 373, in _raise_timeout\n    raise ReadTimeoutError(\nurllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='www.cnmv.es', port=443): Read timed out. (read timeout=60)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/runner/work/ifg/ifg/sonda_ibex/sonda.py\", line 27, in <module>\n    g = s.get(URL, timeout=60)\n        ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/requests/sessions.py\", line 671, in get\n    return self.request(\"GET\", url, params=params, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/requests/sessions.py\", line 651, in request\n    resp = self.send(prep, **send_kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/requests/sessions.py\", line 784, in send\n    r = adapter.send(request, **kwargs)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/requests/adapters.py\", line 742, in send\n    raise ReadTimeout(e, request=request)\nrequests.exceptions.ReadTimeout: HTTPSConnectionPool(host='www.cnmv.es', port=443): Read timed out. (read timeout=60)\n"
+ }
+}
