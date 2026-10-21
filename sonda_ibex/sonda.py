@@ -1,4 +1,4 @@
-"""Sonda temporal 28: auditoría de indexación de las piezas y páginas nuevas (sitemaps, estado HTTP, robots, canonical, JSON-LD)."""
+"""Sonda temporal 29: ¿están indexables las páginas comerciales de tntbolsa.com? (robots, canonical, estado HTTP, sitemap)."""
 import json, re
 from pathlib import Path
 import requests
@@ -6,39 +6,32 @@ OUT = Path("sonda_ibex/resultado"); OUT.mkdir(parents=True, exist_ok=True)
 for f in OUT.glob("*"):
     if f.is_file():
         f.unlink()
-H = {"User-Agent": "Mozilla/5.0 (compatible; El Especulador auditoria SEO)"}
-SITES = {
-    "elespeculador.com": ["horario-bolsas-hora-espanola", "posiciones-cortas-bolsa-espanola", "historico-ibex-35-records",
-                          "como-se-elige-el-ibex-35", "posiciones-cortas-hoy", "ibex-35-en-cifras"],
-    "tntbolsa.com": ["cuanto-arriesgar-por-operacion", "profit-factor-backtest", "futuros-ibex-35"],
-}
-res = {}
-for site, slugs in SITES.items():
-    r = requests.get(f"https://{site}/sitemap_index.xml", headers=H, timeout=60)
-    maps = re.findall(r"<loc>(.*?)</loc>", r.text)
-    texto = ""
-    for m in maps:
-        if "post-sitemap" in m or "page-sitemap" in m:
-            try:
-                texto += requests.get(m, headers=H, timeout=60).text
-            except Exception as e:  # noqa: BLE001
-                texto += f"ERROR {m} {e}"
-    rob = requests.get(f"https://{site}/robots.txt", headers=H, timeout=30).text
-    res[site] = {"sitemaps": maps, "robots_txt": rob[:1500], "urls": {}}
-    for s in slugs:
-        url = f"https://{site}/{s}/"
-        d = {"en_sitemap": f"/{s}/" in texto}
-        try:
-            p = requests.get(url, headers=H, timeout=60)
-            h = p.text
-            d.update(http=p.status_code, final=p.url, bytes=len(h),
-                     robots=(re.search(r'<meta name="robots" content="([^"]*)"', h) or [None, None])[1],
-                     canonical=(re.search(r'<link rel="canonical" href="([^"]*)"', h) or [None, None])[1],
-                     title=(re.search(r"<title>(.*?)</title>", h, re.S) or [None, None])[1],
-                     ld_types=sorted(set(re.findall(r'"@type":"([A-Za-z]+)"', h))),
-                     x_robots=p.headers.get("X-Robots-Tag"), cache=p.headers.get("cf-cache-status") or p.headers.get("x-cache"))
-        except Exception as e:  # noqa: BLE001
-            d["error"] = str(e)
-        res[site]["urls"][s] = d
-(OUT / "auditoria.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
+H = {"User-Agent": "Mozilla/5.0 (compatible; auditoria SEO TNT)"}
+PAGS = ["", "cursos-bolsa", "curso-bolsa", "cursos-de-bolsa-online", "trading-mentor-coach", "webinars-trading", "federico-ferreres",
+        "tnt-bolsa", "contacto", "planes-suscripcion", "kit-plan-diario-trading", "plan-trading"]
+res = {"sitemap_index": requests.get("https://tntbolsa.com/sitemap_index.xml", headers=H, timeout=60).text[:2000]}
+try:
+    ps = requests.get("https://tntbolsa.com/page-sitemap.xml", headers=H, timeout=60)
+    res["page_sitemap"] = {"http": ps.status_code, "inicio": ps.text[:500]}
+except Exception as e:  # noqa: BLE001
+    res["page_sitemap"] = str(e)
+for s in PAGS:
+    url = f"https://tntbolsa.com/{s}/" if s else "https://tntbolsa.com/"
+    try:
+        p = requests.get(url, headers=H, timeout=60, allow_redirects=True)
+        h = p.text
+        rob = re.search(r"<meta name=[\"']robots[\"'] content=[\"']([^\"']*)", h)
+        can = re.search(r"<link rel=[\"']canonical[\"'] href=[\"']([^\"']*)", h)
+        tit = re.search(r"<title>(.*?)</title>", h, re.S)
+        res[s or "/"] = {"http": p.status_code, "final": p.url, "robots": rob and rob.group(1), "canonical": can and can.group(1),
+                         "title": tit and tit.group(1).strip()[:120], "x_robots": p.headers.get("X-Robots-Tag")}
+    except Exception as e:  # noqa: BLE001
+        res[s or "/"] = {"error": str(e)}
+for s in ["", "ibex-35", "historico-ibex-35-records", "ibex-35-en-cifras"]:
+    url = f"https://elespeculador.com/{s}/" if s else "https://elespeculador.com/"
+    p = requests.get(url, headers=H, timeout=60)
+    rob = re.search(r"<meta name=[\"']robots[\"'] content=[\"']([^\"']*)", p.text)
+    ld = re.findall(r'"@type":\s*"([A-Za-z]+)"', p.text)
+    res["ee:" + (s or "/")] = {"http": p.status_code, "robots": rob and rob.group(1), "dataset": "Dataset" in ld}
+(OUT / "tnt.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
 print(json.dumps(res, ensure_ascii=False)[:3000])
