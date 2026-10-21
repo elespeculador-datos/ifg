@@ -1,5 +1,6 @@
 """Sonda temporal 41: estructura de los históricos de subastas del Tesoro (xlsx) y del calendario 2026 (pdf)."""
-import json, re, ssl, socket, subprocess, tempfile, io
+import json, re, ssl, socket, subprocess, tempfile, io, sys
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", "openpyxl"], check=False)
 from pathlib import Path
 import requests, certifi
 import pandas as pd
@@ -42,7 +43,7 @@ try:
     r = s.get(BASE + "calendario-tesoro-publico-2026-espanol-12-pdf", timeout=90)
     p = OUT / "calendario2026.pdf"; p.write_bytes(r.content)
     txt = subprocess.run(["pdftotext", "-layout", str(p), "-"], capture_output=True, text=True).stdout
-    res["calendario2026"] = {"http": r.status_code, "len": len(r.content), "texto": txt[:8000]}
+    res["calendario2026"] = {"http": r.status_code, "len": len(r.content), "texto": txt[:60000]}
 except Exception as e:  # noqa: BLE001
     res["calendario2026"] = {"error": str(e)[:300]}
 (OUT / "tesoro_hist.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
