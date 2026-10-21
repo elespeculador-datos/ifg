@@ -35,7 +35,7 @@ import re
 import sys
 import time
 import unicodedata
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -52,6 +52,7 @@ METODOLOGIA = PAGINA_WP + "#como-se-hace"
 PAGES = "https://elespeculador-datos.github.io/ifg/accionistas/"
 MAX_FALLOS = 5
 PAUSA = 2.0  # segundos entre consultas a la CNMV
+DIAS_RECIENTES = 30  # ventana de la tabla de notificaciones recientes
 
 # ISIN -> (nombre corto, texto que se busca en la CNMV, comienzo del nombre en la CNMV)
 EMPRESAS = {
@@ -373,18 +374,39 @@ def tabla_presencia(datos: dict) -> str:
             f"<tbody>\n{cuerpo}\n</tbody></table></figure>")
 
 
-def huella(datos: dict) -> str:
-    """Resumen de los datos (sin fechas de consulta), para saber si algo ha cambiado."""
+def recientes(datos: dict, hoy: str) -> list[tuple[dict, dict]]:
+    """Participaciones cuya última notificación se registró en los DIAS_RECIENTES días anteriores a hoy."""
+    desde = (date.fromisoformat(hoy) - timedelta(days=DIAS_RECIENTES)).isoformat()
+    filas = [(e, f) for e in datos["empresas"] if not e.get("fuera") for f in e["accionistas"] if f["fecha"] and f["fecha"] > desde]
+    return sorted(filas, key=lambda x: (x[1]["fecha"], _sin_tildes(x[0]["empresa"]), x[1]["accionista"]), reverse=True)
+
+
+def huella(datos: dict, hoy: str) -> str:
+    """Resumen de los datos (sin fechas de consulta), para saber si algo ha cambiado. Incluye qué filas entran en
+    la tabla de las notificaciones recientes, que cambia aunque no lleguen datos nuevos."""
     base = [[e["isin"], e.get("fuera"), [[f["accionista"], f["acciones"], f["instrumentos"], f["total"], f["fecha"]]
                                          for f in e.get("accionistas", [])]] for e in datos["empresas"]]
+    base.append([[e["isin"], f["accionista"], f["fecha"]] for e, f in recientes(datos, hoy)])
     return hashlib.sha256(json.dumps(base, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:12]
 
 
-def fragmento(datos: dict, fecha: str) -> str:
+def tabla_recientes(datos: dict, hoy: str) -> str:
+    filas = recientes(datos, hoy)
+    if not filas:
+        return f"<p>Ninguna en los últimos {DIAS_RECIENTES} días.</p>"
+    cuerpo = "\n".join(
+        f"<tr><td>{_f(f['fecha'])}</td><td>{html.escape(e['empresa'])}</td><td>{html.escape(f['accionista'])}</td>"
+        f"<td>{_pct(f['acciones'])}</td><td>{_pct(f['instrumentos'])}</td><td>{_pct(f['total'])}</td></tr>" for e, f in filas)
+    return ('<figure class="wp-block-table"><table><thead><tr><th>Registrada en la CNMV</th><th>Empresa</th><th>Accionista</th>'
+            '<th>Por acciones</th><th>Por instrumentos financieros</th><th>Total</th></tr></thead>'
+            f"<tbody>\n{cuerpo}\n</tbody></table></figure>")
+
+
+def fragmento(datos: dict, fecha: str, hoy: str) -> str:
     con = [e for e in datos["empresas"] if not e.get("fuera")]
     fuera = [e for e in datos["empresas"] if e.get("fuera")]
     ultima = max((f["fecha"] for e in con for f in e["accionistas"] if f["fecha"]), default="")
-    partes = [f"<!-- accionistas:inicio {huella(datos)} -->",
+    partes = [f"<!-- accionistas:inicio {huella(datos, hoy)} -->",
               f'<p class="has-small-font-size">Actualizado el {_f(fecha)} con el registro de participaciones significativas '
               f"de la CNMV. La notificación más reciente es del {_f(ultima)}.</p>",
               resumen(datos),
@@ -392,6 +414,11 @@ def fragmento(datos: dict, fecha: str) -> str:
               "<p>Accionistas con participación significativa en tres empresas o más del índice. Entre paréntesis, el total de "
               "derechos de voto que declaran en cada una, por acciones y por instrumentos financieros.</p>",
               tabla_presencia(datos),
+              f"<h2>Las notificaciones de los últimos {DIAS_RECIENTES} días</h2>",
+              f"<p>Las participaciones cuya última notificación registró la CNMV en los {DIAS_RECIENTES} días anteriores a esta "
+              "actualización: la forma más rápida de ver quién ha comunicado un cambio hace poco. Quien deja de ser accionista "
+              "significativo sale de la ficha de la empresa, así que esas salidas no aparecen aquí.</p>",
+              tabla_recientes(datos, hoy),
               "<h2>Empresa por empresa</h2>"]
     for e in con:
         aviso = (f' <small>(la CNMV no respondió en la última consulta: datos del {_f(e.get("consulta", ""))})</small>'
@@ -431,7 +458,7 @@ def escribir(datos: dict, fecha: str, salida: Path) -> bool:
     dd.mkdir(parents=True, exist_ok=True)
     previo = dd / "ultima.json"
     antes = json.loads(previo.read_text(encoding="utf-8")) if previo.exists() else {}
-    nueva = huella(datos)
+    nueva = huella(datos, fecha)
     cambia = antes.get("huella") != nueva
     fecha_pub = fecha if cambia else antes.get("fecha", fecha)
     campos = ["empresa", "isin", "accionista", "acciones", "directo", "indirecto", "instrumentos", "total", "fecha", "info",
@@ -448,7 +475,7 @@ def escribir(datos: dict, fecha: str, salida: Path) -> bool:
         "condiciones": "Reproducción fiel de la información publicada por la CNMV, que la ofrece gratuitamente en www.cnmv.es. "
                        "Cita: El Especulador, a partir de datos de la CNMV",
         **datos}, ensure_ascii=False, indent=1), encoding="utf-8")
-    frag = fragmento(datos, fecha_pub)
+    frag = fragmento(datos, fecha_pub, fecha)
     marca = "\n<!-- accionistas:fin -->"
     ld = ld_wp(fecha_pub)
     assert "$" not in frag and "$" not in ld and frag.count(marca) == 1
