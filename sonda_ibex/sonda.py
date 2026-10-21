@@ -1,4 +1,4 @@
-"""Sonda temporal 33: participaciones significativas de Iberdrola en la CNMV (variantes de URL sin .aspx)."""
+"""Sonda temporal 34: búsqueda de participaciones significativas en la CNMV (postback ASP.NET)."""
 import json, re, html
 from pathlib import Path
 import requests
@@ -8,28 +8,37 @@ for f in OUT.glob("*"):
         f.unlink()
 H = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36",
      "Accept-Language": "es-ES,es;q=0.9"}
-s = requests.Session(); s.headers.update(H)
-URLS = ["https://www.cnmv.es/portal/Consultas/Busqueda?id=7&nif=A48010615",
-        "https://www.cnmv.es/portal/Consultas/EE/ParticipacionesSignificativas?nif=A48010615",
-        "https://www.cnmv.es/portal/consultas/participacionessignificativas?nif=A48010615",
-        "https://www.cnmv.es/portal/Consultas/EE/ParticipacionesSignificativasAutocartera?nif=A48010615"]
+URL = "https://www.cnmv.es/portal/Consultas/Busqueda?id=7"
+
+
+def ocultos(t):
+    return {m.group(1): html.unescape(m.group(2)) for m in re.finditer(r'<input type="hidden" name="([^"]+)" id="[^"]*" value="([^"]*)"', t)}
+
+
+def limpiar(x):
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", x))).strip()
+
+
 res = {}
-for u in URLS:
-    try:
-        p = s.get(u, timeout=60)
-        t = p.text
-        tablas = re.findall(r"<table.*?</table>", t, re.S)
-        enl = []
-        for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', t, re.S):
-            tx = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(2))).strip()
-            h = html.unescape(m.group(1))
-            if any(k in (tx + h).lower() for k in ("particip", "voto", "nif=", "autocart")):
-                enl.append([tx[:70], h[:180]])
-        res[u] = {"http": p.status_code, "final": p.url, "len": len(t), "title": (re.search(r"<title>(.*?)</title>", t, re.S) or [None, ""])[1].strip()[:120],
-                  "tablas": [re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " | ", x))[:1800] for x in tablas[:2]], "enlaces": enl[:40]}
-        if tablas:
-            (OUT / ("p%d.html" % URLS.index(u))).write_text(t[:300000])
-    except Exception as e:  # noqa: BLE001
-        res[u] = {"error": str(e)}
-(OUT / "cnmv_ps2.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
-print(json.dumps(res, ensure_ascii=False)[:2000])
+for nombre, extra in [("denominacion", {"ctl00$ContentPrincipal$wNombreEntidad$txtDenominacion": "IBERDROLA"}),
+                      ("ultdias", {"ctl00$ContentPrincipal$wFechas$ult_dias": "3"})]:
+    s = requests.Session(); s.headers.update(H)
+    g = s.get(URL, timeout=60)
+    datos = ocultos(g.text)
+    datos.update({"ctl00$ContentPrincipal$btnOk": "Buscar"})
+    datos.update(extra)
+    p = s.post(URL, data=datos, headers={"Referer": URL}, timeout=90)
+    t = p.text
+    (OUT / f"{nombre}.html").write_text(t[:600000])
+    tablas = re.findall(r"<table.*?</table>", t, re.S)
+    enl = []
+    for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', t, re.S):
+        h = html.unescape(m.group(1)); tx = limpiar(m.group(2))
+        if re.search(r"nif=|NIF=|ndoc|verDoc|Documento|\.pdf|id=7|Particip", h, re.I) and "lang=" not in h:
+            enl.append([tx[:90], h[:220]])
+    sec = re.search(r'<section.*?</section>', t, re.S)
+    res[nombre] = {"http": p.status_code, "final": p.url, "len": len(t), "ocultos": sorted(datos)[:12],
+                   "tablas": [limpiar(x)[:2500] for x in tablas[:3]], "enlaces": enl[:60],
+                   "texto": limpiar(sec.group(0))[:3000] if sec else ""}
+(OUT / "cnmv_ps3.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
+print(json.dumps(res, ensure_ascii=False)[:1500])
