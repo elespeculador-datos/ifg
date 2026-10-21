@@ -1,0 +1,1916 @@
+{
+ "fecha": "2026-10-21",
+ "comprobado": "2026-10-21T15:02:30+00:00",
+ "huella": "5f0a727e1c1d",
+ "fuente": "CNMV, registro de participaciones significativas (Real Decreto 1362/2007)",
+ "condiciones": "Reproducción fiel de la información publicada por la CNMV, que la ofrece gratuitamente en www.cnmv.es. Cita: El Especulador, a partir de datos de la CNMV",
+ "empresas": [
+  {
+   "isin": "ES0125220311",
+   "empresa": "Acciona",
+   "nombre_cnmv": "ACCIONA, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 3.152,
+     "directo": 0.0,
+     "indirecto": 3.152,
+     "instrumentos": 0.707,
+     "total": 3.859,
+     "fecha": "2026-08-07",
+     "info": ""
+    },
+    {
+     "accionista": "TUSSEN DE GRACHTEN BV",
+     "acciones": 29.021,
+     "directo": 29.021,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 29.021,
+     "fecha": "2019-04-10",
+     "info": ""
+    },
+    {
+     "accionista": "WIT EUROPESE INVESTERING, BV",
+     "acciones": 26.101,
+     "directo": 26.101,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 26.101,
+     "fecha": "2019-04-10",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 54856653,
+   "fecha_derechos_voto": "2019-04-05"
+  },
+  {
+   "isin": "ES0105563003",
+   "empresa": "Acciona Energía",
+   "nombre_cnmv": "CORPORACION ACCIONA ENERGIAS RENOVABLES, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "ACCIONA, S.A.",
+     "acciones": 91.108,
+     "directo": 91.108,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 91.108,
+     "fecha": "2025-11-06",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 324761830,
+   "fecha_derechos_voto": "2024-06-27"
+  },
+  {
+   "isin": "ES0132105018",
+   "empresa": "Acerinox",
+   "nombre_cnmv": "ACERINOX, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "CORPORACION FINANCIERA ALBA, S.A.",
+     "acciones": 18.958,
+     "directo": 18.958,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 18.958,
+     "fecha": "2017-03-07",
+     "info": ""
+    },
+    {
+     "accionista": "FERGUSON , SCOTT DAVID",
+     "acciones": 0.0,
+     "directo": 0.0,
+     "indirecto": 0.0,
+     "instrumentos": 3.084,
+     "total": 3.084,
+     "fecha": "2026-06-17",
+     "info": ""
+    },
+    {
+     "accionista": "FUNDACIO PRIVADA DANIEL BRAVO ANDREU",
+     "acciones": 5.705,
+     "directo": 0.0,
+     "indirecto": 5.705,
+     "instrumentos": 0.0,
+     "total": 5.705,
+     "fecha": "2025-01-07",
+     "info": ""
+    },
+    {
+     "accionista": "INDUSTRIAL DEVELOPMENT CORPORATION (I.D.C.)",
+     "acciones": 3.041,
+     "directo": 3.041,
+     "indirecto": 0.0,
+     "instrumentos": null,
+     "total": 3.041,
+     "fecha": "2009-06-22",
+     "info": ""
+    },
+    {
+     "accionista": "THE GOLDMAN SACHS GROUP, INC.",
+     "acciones": 2.552,
+     "directo": 0.0,
+     "indirecto": 2.552,
+     "instrumentos": 2.211,
+     "total": 4.763,
+     "fecha": "2026-10-19",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 249335371,
+   "fecha_derechos_voto": "2023-08-07"
+  },
+  {
+   "isin": "ES0167050915",
+   "empresa": "ACS",
+   "nombre_cnmv": "ACS, ACTIVIDADES DE CONSTRUCCION Y SERVICIOS, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "ACCION CONCERTADA",
+     "acciones": 4.774,
+     "directo": 2.54,
+     "indirecto": 2.234,
+     "instrumentos": 0.0,
+     "total": 4.774,
+     "fecha": "2026-05-21",
+     "info": ""
+    },
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 4.641,
+     "directo": 0.0,
+     "indirecto": 4.641,
+     "instrumentos": 0.416,
+     "total": 5.057,
+     "fecha": "2025-07-04",
+     "info": ""
+    },
+    {
+     "accionista": "CRITERIA CAIXA, S.A.U.",
+     "acciones": 10.648,
+     "directo": 10.648,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 10.648,
+     "fecha": "2026-05-21",
+     "info": ""
+    },
+    {
+     "accionista": "FUNDACION BANCARIA CAIXA D ESTALVIS I PENSIONS DE BARCELONA",
+     "acciones": 10.648,
+     "directo": 0.0,
+     "indirecto": 10.648,
+     "instrumentos": 0.0,
+     "total": 10.648,
+     "fecha": "2026-05-21",
+     "info": ""
+    },
+    {
+     "accionista": "PEREZ RODRIGUEZ, FLORENTINO",
+     "acciones": 15.015,
+     "directo": 0.0,
+     "indirecto": 15.015,
+     "instrumentos": 0.0,
+     "total": 15.015,
+     "fecha": "2026-08-10",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 277097885,
+   "fecha_derechos_voto": "2026-07-16"
+  },
+  {
+   "isin": "ES0105046017",
+   "empresa": "Aena",
+   "nombre_cnmv": "AENA, S.M.E., S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 5.038,
+     "directo": 0.0,
+     "indirecto": 5.038,
+     "instrumentos": 0.095,
+     "total": 5.133,
+     "fecha": "2026-06-02",
+     "info": ""
+    },
+    {
+     "accionista": "ENAIRE",
+     "acciones": 51.0,
+     "directo": 51.0,
+     "indirecto": 0.0,
+     "instrumentos": null,
+     "total": 51.0,
+     "fecha": "2015-02-17",
+     "info": ""
+    },
+    {
+     "accionista": "FIDELITY INTERNATIONAL LIMITED",
+     "acciones": 1.01,
+     "directo": 0.0,
+     "indirecto": 1.01,
+     "instrumentos": 0.0,
+     "total": 1.01,
+     "fecha": "2026-05-19",
+     "info": ""
+    },
+    {
+     "accionista": "HOHN , CHRISTOPHER ANTHONY",
+     "acciones": 2.841,
+     "directo": 0.0,
+     "indirecto": 2.841,
+     "instrumentos": 3.416,
+     "total": 6.257,
+     "fecha": "2025-12-01",
+     "info": ""
+    },
+    {
+     "accionista": "THE CHILDREN'S INVESTMENT MASTER FUND",
+     "acciones": 0.0,
+     "directo": 0.0,
+     "indirecto": 0.0,
+     "instrumentos": 3.416,
+     "total": 3.416,
+     "fecha": "2025-12-01",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 1500000000,
+   "fecha_derechos_voto": "2025-06-12"
+  },
+  {
+   "isin": "ES0109067019",
+   "empresa": "Amadeus",
+   "nombre_cnmv": "AMADEUS IT GROUP, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 5.481,
+     "directo": 0.0,
+     "indirecto": 5.481,
+     "instrumentos": 0.017,
+     "total": 5.498,
+     "fecha": "2025-07-04",
+     "info": ""
+    },
+    {
+     "accionista": "CAPITAL RESEARCH AND MANAGEMENT COMPANY",
+     "acciones": 5.032,
+     "directo": 0.0,
+     "indirecto": 5.032,
+     "instrumentos": 0.0,
+     "total": 5.032,
+     "fecha": "2022-12-05",
+     "info": ""
+    },
+    {
+     "accionista": "FIDELITY INTERNATIONAL LIMITED",
+     "acciones": 3.764,
+     "directo": 0.0,
+     "indirecto": 3.764,
+     "instrumentos": 0.234,
+     "total": 3.998,
+     "fecha": "2026-09-29",
+     "info": ""
+    },
+    {
+     "accionista": "FUNDSMITH LLP",
+     "acciones": 3.02,
+     "directo": 0.0,
+     "indirecto": 3.02,
+     "instrumentos": 0.0,
+     "total": 3.02,
+     "fecha": "2019-11-29",
+     "info": ""
+    },
+    {
+     "accionista": "MASSACHUSETTS FINANCIAL SERVICES COMPANY",
+     "acciones": 5.09,
+     "directo": 0.0,
+     "indirecto": 5.09,
+     "instrumentos": 0.0,
+     "total": 5.09,
+     "fecha": "2022-06-01",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 431571296,
+   "fecha_derechos_voto": "2026-06-30"
+  },
+  {
+   "isin": "LU1598757687",
+   "empresa": "ArcelorMittal",
+   "fuera": true,
+   "pais": "Luxemburgo",
+   "supervisor": "la CSSF, el supervisor luxemburgués"
+  },
+  {
+   "isin": "ES0113860A34",
+   "empresa": "Banco Sabadell",
+   "nombre_cnmv": "BANCO DE SABADELL, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 8.367,
+     "directo": 0.0,
+     "indirecto": 8.367,
+     "instrumentos": 0.076,
+     "total": 8.443,
+     "fecha": "2026-06-18",
+     "info": ""
+    },
+    {
+     "accionista": "BPCE, S.A.",
+     "acciones": 7.0,
+     "directo": 7.0,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 7.0,
+     "fecha": "2026-10-15",
+     "info": ""
+    },
+    {
+     "accionista": "ZURICH INSURANCE GROUP LTD",
+     "acciones": 4.947,
+     "directo": 0.0,
+     "indirecto": 4.947,
+     "instrumentos": 0.0,
+     "total": 4.947,
+     "fecha": "2025-09-24",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 4768462,
+   "fecha_derechos_voto": "2026-07-31"
+  },
+  {
+   "isin": "ES0113900J37",
+   "empresa": "Banco Santander",
+   "nombre_cnmv": "BANCO SANTANDER, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 6.851,
+     "directo": 0.0,
+     "indirecto": 6.851,
+     "instrumentos": 0.01,
+     "total": 6.861,
+     "fecha": "2025-07-04",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 14556482801,
+   "fecha_derechos_voto": "2026-09-09"
+  },
+  {
+   "isin": "ES0113679I37",
+   "empresa": "Bankinter",
+   "nombre_cnmv": "BANKINTER, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BANK OF AMERICA CORPORATION",
+     "acciones": 0.351,
+     "directo": 0.0,
+     "indirecto": 0.351,
+     "instrumentos": 2.744,
+     "total": 3.095,
+     "fecha": "2026-10-14",
+     "info": ""
+    },
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 5.031,
+     "directo": 0.0,
+     "indirecto": 5.031,
+     "instrumentos": 0.879,
+     "total": 5.91,
+     "fecha": "2025-07-21",
+     "info": ""
+    },
+    {
+     "accionista": "CARTIVAL, S.A.",
+     "acciones": 23.186,
+     "directo": 23.186,
+     "indirecto": 0.0,
+     "instrumentos": 0.005,
+     "total": 23.191,
+     "fecha": "2020-12-22",
+     "info": ""
+    },
+    {
+     "accionista": "FMR LLC",
+     "acciones": 3.278,
+     "directo": 0.0,
+     "indirecto": 3.278,
+     "instrumentos": 0.501,
+     "total": 3.779,
+     "fecha": "2025-07-09",
+     "info": ""
+    },
+    {
+     "accionista": "LAZARD ASSET MANAGEMENT",
+     "acciones": 3.032,
+     "directo": 0.0,
+     "indirecto": 3.032,
+     "instrumentos": 0.0,
+     "total": 3.032,
+     "fecha": "2020-12-09",
+     "info": ""
+    },
+    {
+     "accionista": "MASAVEU HERRERO, FERNANDO",
+     "acciones": 5.311,
+     "directo": 0.087,
+     "indirecto": 5.225,
+     "instrumentos": 0.0,
+     "total": 5.311,
+     "fecha": "2015-02-23",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 898866154,
+   "fecha_derechos_voto": "2014-05-30"
+  },
+  {
+   "isin": "ES0113211835",
+   "empresa": "BBVA",
+   "nombre_cnmv": "BANCO BILBAO VIZCAYA ARGENTARIA, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 7.076,
+     "directo": 0.0,
+     "indirecto": 7.076,
+     "instrumentos": 0.082,
+     "total": 7.158,
+     "fecha": "2025-07-04",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 5510865297,
+   "fecha_derechos_voto": "2026-09-24"
+  },
+  {
+   "isin": "ES0140609019",
+   "empresa": "CaixaBank",
+   "nombre_cnmv": "CAIXABANK, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BFA TENEDORA DE ACCIONES, S.A.",
+     "acciones": 16.117,
+     "directo": 16.117,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 16.117,
+     "fecha": "2021-03-30",
+     "info": ""
+    },
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 4.62,
+     "directo": 0.0,
+     "indirecto": 4.62,
+     "instrumentos": 0.06,
+     "total": 4.68,
+     "fecha": "2025-07-04",
+     "info": ""
+    },
+    {
+     "accionista": "CRITERIA CAIXA, S.A.U.",
+     "acciones": 30.012,
+     "directo": 30.012,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 30.012,
+     "fecha": "2021-03-29",
+     "info": ""
+    },
+    {
+     "accionista": "FROB",
+     "acciones": 16.117,
+     "directo": 0.0,
+     "indirecto": 16.117,
+     "instrumentos": 0.0,
+     "total": 16.117,
+     "fecha": "2021-03-30",
+     "info": ""
+    },
+    {
+     "accionista": "FUNDACION BANCARIA CAIXA D ESTALVIS I PENSIONS DE BARCELONA",
+     "acciones": 30.012,
+     "directo": 0.0,
+     "indirecto": 30.012,
+     "instrumentos": 0.0,
+     "total": 30.012,
+     "fecha": "2021-03-29",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 6975929960,
+   "fecha_derechos_voto": "2026-05-20"
+  },
+  {
+   "isin": "ES0105066007",
+   "empresa": "Cellnex",
+   "nombre_cnmv": "CELLNEX TELECOM, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 5.185,
+     "directo": 0.0,
+     "indirecto": 5.185,
+     "instrumentos": 1.032,
+     "total": 6.217,
+     "fecha": "2026-09-29",
+     "info": ""
+    },
+    {
+     "accionista": "CANADA PENSION PLAN INVESTMENT BOARD",
+     "acciones": 4.662,
+     "directo": 4.662,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 4.662,
+     "fecha": "2025-11-12",
+     "info": ""
+    },
+    {
+     "accionista": "DODGE & COX",
+     "acciones": 3.277,
+     "directo": 0.0,
+     "indirecto": 3.277,
+     "instrumentos": 0.0,
+     "total": 3.277,
+     "fecha": "2025-10-21",
+     "info": ""
+    },
+    {
+     "accionista": "EDIZIONE S.R.L.",
+     "acciones": 10.252,
+     "directo": 0.0,
+     "indirecto": 10.252,
+     "instrumentos": 0.0,
+     "total": 10.252,
+     "fecha": "2025-11-24",
+     "info": ""
+    },
+    {
+     "accionista": "GIC (VENTURES) PRIVATE LIMITED",
+     "acciones": 6.73,
+     "directo": 0.0,
+     "indirecto": 6.73,
+     "instrumentos": 0.0,
+     "total": 6.73,
+     "fecha": "2023-03-23",
+     "info": ""
+    },
+    {
+     "accionista": "GIC PRIVATE LIMITED",
+     "acciones": 6.989,
+     "directo": 0.259,
+     "indirecto": 6.73,
+     "instrumentos": 0.042,
+     "total": 7.031,
+     "fecha": "2023-03-23",
+     "info": ""
+    },
+    {
+     "accionista": "HOHN , CHRISTOPHER ANTHONY",
+     "acciones": 10.145,
+     "directo": 0.0,
+     "indirecto": 10.145,
+     "instrumentos": 0.0,
+     "total": 10.145,
+     "fecha": "2025-11-25",
+     "info": ""
+    },
+    {
+     "accionista": "LAZARD ASSET MANAGEMENT",
+     "acciones": 3.021,
+     "directo": 0.0,
+     "indirecto": 3.021,
+     "instrumentos": 0.0,
+     "total": 3.021,
+     "fecha": "2026-05-20",
+     "info": ""
+    },
+    {
+     "accionista": "TCI LUXEMBOURG, S.A.R.L.",
+     "acciones": 8.338,
+     "directo": 8.338,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 8.338,
+     "fecha": "2025-11-25",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 664106024,
+   "fecha_derechos_voto": "2026-08-23"
+  },
+  {
+   "isin": "ES0139140174",
+   "empresa": "Colonial",
+   "nombre_cnmv": "COLONIAL SFL, SOCIMI, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "ALBA EUROPE, SARL",
+     "acciones": 5.006,
+     "directo": 5.006,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 5.006,
+     "fecha": "2024-02-28",
+     "info": ""
+    },
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 1.521,
+     "directo": 0.0,
+     "indirecto": 1.521,
+     "instrumentos": 1.481,
+     "total": 3.002,
+     "fecha": "2026-02-05",
+     "info": ""
+    },
+    {
+     "accionista": "CORPORACION FINANCIERA ALBA, S.A.",
+     "acciones": 5.006,
+     "directo": 0.0,
+     "indirecto": 5.006,
+     "instrumentos": 0.0,
+     "total": 5.006,
+     "fecha": "2024-02-29",
+     "info": ""
+    },
+    {
+     "accionista": "CREDIT AGRICOLE, S.A.",
+     "acciones": 4.239,
+     "directo": 0.0,
+     "indirecto": 4.239,
+     "instrumentos": 0.0,
+     "total": 4.239,
+     "fecha": "2021-08-11",
+     "info": ""
+    },
+    {
+     "accionista": "CRITERIA CAIXA, S.A.U.",
+     "acciones": 17.321,
+     "directo": 17.321,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 17.321,
+     "fecha": "2024-07-08",
+     "info": ""
+    },
+    {
+     "accionista": "DIC HOLDING LLC",
+     "acciones": 4.287,
+     "directo": 4.287,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 4.287,
+     "fecha": "2018-11-20",
+     "info": ""
+    },
+    {
+     "accionista": "FERNANDEZ GONZALEZ, CARLOS",
+     "acciones": 12.76,
+     "directo": 0.0,
+     "indirecto": 12.76,
+     "instrumentos": 0.0,
+     "total": 12.76,
+     "fecha": "2026-02-26",
+     "info": ""
+    },
+    {
+     "accionista": "FUNDACION BANCARIA CAIXA D ESTALVIS I PENSIONS DE BARCELONA",
+     "acciones": 17.321,
+     "directo": 0.0,
+     "indirecto": 17.321,
+     "instrumentos": 0.0,
+     "total": 17.321,
+     "fecha": "2024-07-08",
+     "info": ""
+    },
+    {
+     "accionista": "QATAR INVESTMENT AUTHORITY",
+     "acciones": 16.367,
+     "directo": 0.0,
+     "indirecto": 16.367,
+     "instrumentos": 0.0,
+     "total": 16.367,
+     "fecha": "2025-09-22",
+     "info": ""
+    },
+    {
+     "accionista": "QUAESTOR HOLDINGS, S.A.",
+     "acciones": 8.067,
+     "directo": 0.0,
+     "indirecto": 8.067,
+     "instrumentos": 0.0,
+     "total": 8.067,
+     "fecha": "2025-10-10",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 612844687,
+   "fecha_derechos_voto": "2026-06-23"
+  },
+  {
+   "isin": "ES0130960018",
+   "empresa": "Enagás",
+   "nombre_cnmv": "ENAGAS, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 4.628,
+     "directo": 0.0,
+     "indirecto": 4.628,
+     "instrumentos": 3.0,
+     "total": 7.628,
+     "fecha": "2026-10-07",
+     "info": ""
+    },
+    {
+     "accionista": "ORTEGA GAONA, AMANCIO",
+     "acciones": 5.0,
+     "directo": 0.0,
+     "indirecto": 5.0,
+     "instrumentos": 0.0,
+     "total": 5.0,
+     "fecha": "2020-07-07",
+     "info": ""
+    },
+    {
+     "accionista": "SOCIEDAD ESTATAL DE PARTICIPACIONES INDUSTRIALES",
+     "acciones": 5.0,
+     "directo": 5.0,
+     "indirecto": 0.0,
+     "instrumentos": null,
+     "total": 5.0,
+     "fecha": "2007-11-27",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 261990074,
+   "fecha_derechos_voto": "2019-12-20"
+  },
+  {
+   "isin": "ES0130670112",
+   "empresa": "Endesa",
+   "nombre_cnmv": "ENDESA, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "ENEL S.P.A.",
+     "acciones": 70.101,
+     "directo": 0.0,
+     "indirecto": 70.101,
+     "instrumentos": null,
+     "total": 70.101,
+     "fecha": "2016-02-22",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 1041744551,
+   "fecha_derechos_voto": "2026-03-28"
+  },
+  {
+   "isin": "NL0015001FS8",
+   "empresa": "Ferrovial",
+   "fuera": true,
+   "pais": "Países Bajos",
+   "supervisor": "la AFM, el supervisor neerlandés"
+  },
+  {
+   "isin": "ES0137650018",
+   "empresa": "Fluidra",
+   "nombre_cnmv": "FLUIDRA, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "ADBE PARTNERS, S.L.",
+     "acciones": 28.298,
+     "directo": 20.0,
+     "indirecto": 8.298,
+     "instrumentos": 0.0,
+     "total": 28.298,
+     "fecha": "2025-12-04",
+     "info": ""
+    },
+    {
+     "accionista": "BEUZELIN , HUGUES",
+     "acciones": 3.124,
+     "directo": 0.0,
+     "indirecto": 3.124,
+     "instrumentos": 0.0,
+     "total": 3.124,
+     "fecha": "2026-05-13",
+     "info": ""
+    },
+    {
+     "accionista": "G3T, S.L.",
+     "acciones": 5.002,
+     "directo": 5.002,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 5.002,
+     "fecha": "2021-03-23",
+     "info": ""
+    },
+    {
+     "accionista": "PISCINE LUXEMBOURG HOLDINGS 1, S.A R.L.",
+     "acciones": 11.465,
+     "directo": 11.465,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 11.465,
+     "fecha": "2021-09-20",
+     "info": ""
+    },
+    {
+     "accionista": "PUIG ROCHA, MANUEL",
+     "acciones": 7.0,
+     "directo": 0.0,
+     "indirecto": 7.0,
+     "instrumentos": 0.0,
+     "total": 7.0,
+     "fecha": "2023-05-12",
+     "info": ""
+    },
+    {
+     "accionista": "RHÔNE CAPITAL L.L.C.",
+     "acciones": 11.465,
+     "directo": 0.0,
+     "indirecto": 11.465,
+     "instrumentos": 0.0,
+     "total": 11.465,
+     "fecha": "2021-09-20",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 192129070,
+   "fecha_derechos_voto": "2022-01-10"
+  },
+  {
+   "isin": "ES0171996087",
+   "empresa": "Grifols",
+   "nombre_cnmv": "GRIFOLS, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "ANDERSEN , MARC P.",
+     "acciones": 5.391,
+     "directo": 0.0,
+     "indirecto": 5.391,
+     "instrumentos": 0.0,
+     "total": 5.391,
+     "fecha": "2026-05-14",
+     "info": ""
+    },
+    {
+     "accionista": "ARMISTICE CAPITAL MASTER FUND LTD",
+     "acciones": 1.064,
+     "directo": 1.064,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 1.064,
+     "fecha": "2025-01-28",
+     "info": ""
+    },
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 0.721,
+     "directo": 0.0,
+     "indirecto": 0.721,
+     "instrumentos": 2.298,
+     "total": 3.019,
+     "fecha": "2026-06-05",
+     "info": ""
+    },
+    {
+     "accionista": "DERIA, S.L.",
+     "acciones": 15.204,
+     "directo": 15.204,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 15.204,
+     "fecha": "2025-10-07",
+     "info": ""
+    },
+    {
+     "accionista": "EMPLOYEES PROVIDENT FUND BOARD (EPF)",
+     "acciones": 3.034,
+     "directo": 3.034,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 3.034,
+     "fecha": "2026-07-24",
+     "info": ""
+    },
+    {
+     "accionista": "FLAT FOOTED LLC.",
+     "acciones": 5.391,
+     "directo": 0.0,
+     "indirecto": 5.391,
+     "instrumentos": 0.0,
+     "total": 5.391,
+     "fecha": "2026-05-14",
+     "info": ""
+    },
+    {
+     "accionista": "GRIFOLS COMA-CROS, ALBERT",
+     "acciones": 7.105,
+     "directo": 0.015,
+     "indirecto": 7.089,
+     "instrumentos": 0.0,
+     "total": 7.105,
+     "fecha": "2025-12-17",
+     "info": ""
+    },
+    {
+     "accionista": "GRIFOLS ROURA, ENRIQUE Y NURIA",
+     "acciones": 15.308,
+     "directo": 0.104,
+     "indirecto": 15.204,
+     "instrumentos": 0.0,
+     "total": 15.308,
+     "fecha": "2025-10-08",
+     "info": ""
+    },
+    {
+     "accionista": "MASON CAPITAL MANAGEMENT LLC",
+     "acciones": 3.174,
+     "directo": 0.0,
+     "indirecto": 3.174,
+     "instrumentos": 0.0,
+     "total": 3.174,
+     "fecha": "2025-02-13",
+     "info": ""
+    },
+    {
+     "accionista": "MASON CAPITAL MASTER FUND L.P.",
+     "acciones": 3.174,
+     "directo": 0.0,
+     "indirecto": 3.174,
+     "instrumentos": 0.0,
+     "total": 3.174,
+     "fecha": "2025-02-13",
+     "info": ""
+    },
+    {
+     "accionista": "MORGAN STANLEY",
+     "acciones": 0.1,
+     "directo": 0.0,
+     "indirecto": 0.1,
+     "instrumentos": 4.246,
+     "total": 4.346,
+     "fecha": "2026-10-12",
+     "info": ""
+    },
+    {
+     "accionista": "PONDER TRADE, S.L.",
+     "acciones": 7.089,
+     "directo": 7.089,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 7.089,
+     "fecha": "2022-02-28",
+     "info": ""
+    },
+    {
+     "accionista": "SCRANTON ENTERPRISES, B.V.",
+     "acciones": 8.672,
+     "directo": 8.672,
+     "indirecto": 0.0,
+     "instrumentos": null,
+     "total": 8.672,
+     "fecha": "2016-02-05",
+     "info": ""
+    },
+    {
+     "accionista": "THE GOLDMAN SACHS GROUP, INC.",
+     "acciones": 0.021,
+     "directo": 0.0,
+     "indirecto": 0.021,
+     "instrumentos": 3.512,
+     "total": 3.533,
+     "fecha": "2026-10-15",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 426129798,
+   "fecha_derechos_voto": "2016-01-04"
+  },
+  {
+   "isin": "ES0177542018",
+   "empresa": "IAG",
+   "nombre_cnmv": "INTERNATIONAL CONSOLIDATED AIRLINES GROUP, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 3.208,
+     "directo": 0.0,
+     "indirecto": 3.208,
+     "instrumentos": 0.347,
+     "total": 3.555,
+     "fecha": "2026-05-25",
+     "info": ""
+    },
+    {
+     "accionista": "CAPITAL RESEARCH AND MANAGEMENT COMPANY",
+     "acciones": 5.041,
+     "directo": 0.0,
+     "indirecto": 5.041,
+     "instrumentos": 0.0,
+     "total": 5.041,
+     "fecha": "2026-02-11",
+     "info": ""
+    },
+    {
+     "accionista": "EUROPACIFIC GROWTH FUND",
+     "acciones": 3.036,
+     "directo": 3.036,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 3.036,
+     "fecha": "2025-02-14",
+     "info": ""
+    },
+    {
+     "accionista": "QATAR AIRWAYS GROUP (Q.C.S.C.)",
+     "acciones": 24.995,
+     "directo": 24.995,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 24.995,
+     "fecha": "2024-12-12",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 4611669527,
+   "fecha_derechos_voto": "2026-04-22"
+  },
+  {
+   "isin": "ES0144580Y14",
+   "empresa": "Iberdrola",
+   "nombre_cnmv": "IBERDROLA, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 6.23,
+     "directo": 0.0,
+     "indirecto": 6.23,
+     "instrumentos": 0.024,
+     "total": 6.254,
+     "fecha": "2025-07-04",
+     "info": ""
+    },
+    {
+     "accionista": "QATAR INVESTMENT AUTHORITY",
+     "acciones": 8.694,
+     "directo": 0.0,
+     "indirecto": 8.694,
+     "instrumentos": 0.0,
+     "total": 8.694,
+     "fecha": "2020-01-07",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 6673141516,
+   "fecha_derechos_voto": "2026-07-29"
+  },
+  {
+   "isin": "ES0148396007",
+   "empresa": "Inditex",
+   "nombre_cnmv": "INDUSTRIA DE DISEÑO TEXTIL, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "ORTEGA GAONA, AMANCIO",
+     "acciones": 59.294,
+     "directo": 0.0,
+     "indirecto": 59.294,
+     "instrumentos": 0.0,
+     "total": 59.294,
+     "fecha": "2020-07-07",
+     "info": ""
+    },
+    {
+     "accionista": "ORTEGA MERA, SANDRA",
+     "acciones": 5.053,
+     "directo": 0.0,
+     "indirecto": 5.053,
+     "instrumentos": null,
+     "total": 5.053,
+     "fecha": "2014-11-03",
+     "info": ""
+    },
+    {
+     "accionista": "PONTEGADEA INVERSIONES, S.L.",
+     "acciones": 50.01,
+     "directo": 50.01,
+     "indirecto": 0.0,
+     "instrumentos": null,
+     "total": 50.01,
+     "fecha": "2015-12-21",
+     "info": ""
+    },
+    {
+     "accionista": "ROSP CORUNNA PARTICIPACIONES EMPRESARIALES, S.L.",
+     "acciones": 6.993,
+     "directo": 6.993,
+     "indirecto": 0.0,
+     "instrumentos": null,
+     "total": 6.993,
+     "fecha": "2002-01-10",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 3116652000,
+   "fecha_derechos_voto": "2014-07-18"
+  },
+  {
+   "isin": "ES0118594417",
+   "empresa": "Indra",
+   "nombre_cnmv": "INDRA SISTEMAS, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "AMBER CAPITAL INVESTMENT MANAGEMENT ICAV - AMBER GLOBAL OPPORTUNITIES FUND",
+     "acciones": 3.398,
+     "directo": 3.398,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 3.398,
+     "fecha": "2026-10-16",
+     "info": ""
+    },
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 3.107,
+     "directo": 0.0,
+     "indirecto": 3.107,
+     "instrumentos": 0.431,
+     "total": 3.538,
+     "fecha": "2026-09-02",
+     "info": ""
+    },
+    {
+     "accionista": "ING GROEP N.V.",
+     "acciones": 0.415,
+     "directo": 0.415,
+     "indirecto": 0.0,
+     "instrumentos": 5.166,
+     "total": 5.581,
+     "fecha": "2026-05-18",
+     "info": ""
+    },
+    {
+     "accionista": "OUGHOURLIAN , JOSEPH",
+     "acciones": 3.749,
+     "directo": 0.0,
+     "indirecto": 3.749,
+     "instrumentos": 0.0,
+     "total": 3.749,
+     "fecha": "2026-10-16",
+     "info": ""
+    },
+    {
+     "accionista": "SAPA PLACENCIA S.L.",
+     "acciones": 7.944,
+     "directo": 0.0,
+     "indirecto": 7.944,
+     "instrumentos": 0.0,
+     "total": 7.944,
+     "fecha": "2024-01-19",
+     "info": ""
+    },
+    {
+     "accionista": "SOCIEDAD ESTATAL DE PARTICIPACIONES INDUSTRIALES",
+     "acciones": 25.159,
+     "directo": 25.159,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 25.159,
+     "fecha": "2022-06-09",
+     "info": ""
+    },
+    {
+     "accionista": "T. ROWE PRICE ASSOCIATES, INC",
+     "acciones": 4.38,
+     "directo": 0.0,
+     "indirecto": 4.38,
+     "instrumentos": 0.613,
+     "total": 4.993,
+     "fecha": "2026-08-10",
+     "info": ""
+    },
+    {
+     "accionista": "THE GOLDMAN SACHS GROUP, INC.",
+     "acciones": 0.156,
+     "directo": 0.0,
+     "indirecto": 0.156,
+     "instrumentos": 7.471,
+     "total": 7.627,
+     "fecha": "2026-06-19",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 176654402,
+   "fecha_derechos_voto": "2017-05-23"
+  },
+  {
+   "isin": "ES0105027009",
+   "empresa": "Logista",
+   "nombre_cnmv": "LOGISTA INTEGRAL, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "FMR LLC",
+     "acciones": 4.586,
+     "directo": 0.0,
+     "indirecto": 4.586,
+     "instrumentos": 0.0,
+     "total": 4.586,
+     "fecha": "2025-01-20",
+     "info": ""
+    },
+    {
+     "accionista": "IMPERIAL BRANDS PLC",
+     "acciones": 50.008,
+     "directo": 0.0,
+     "indirecto": 50.008,
+     "instrumentos": 0.0,
+     "total": 50.008,
+     "fecha": "2021-07-20",
+     "info": ""
+    },
+    {
+     "accionista": "MASAVEU HERRERO, FERNANDO",
+     "acciones": 5.201,
+     "directo": 0.015,
+     "indirecto": 5.186,
+     "instrumentos": 0.0,
+     "total": 5.201,
+     "fecha": "2022-12-19",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 132750000,
+   "fecha_derechos_voto": "2014-06-10"
+  },
+  {
+   "isin": "ES0124244E34",
+   "empresa": "Mapfre",
+   "nombre_cnmv": "MAPFRE, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "FUNDACION MAPFRE",
+     "acciones": 67.723,
+     "directo": 0.0,
+     "indirecto": 67.723,
+     "instrumentos": null,
+     "total": 67.723,
+     "fecha": "2013-10-03",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 3079553273,
+   "fecha_derechos_voto": "2011-07-01"
+  },
+  {
+   "isin": "ES0105025003",
+   "empresa": "Merlin Properties",
+   "nombre_cnmv": "MERLIN PROPERTIES, SOCIMI, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BANCO SANTANDER, S.A.",
+     "acciones": 22.268,
+     "directo": 16.697,
+     "indirecto": 5.571,
+     "instrumentos": 0.0,
+     "total": 22.268,
+     "fecha": "2016-11-02",
+     "info": ""
+    },
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 4.46,
+     "directo": 0.0,
+     "indirecto": 4.46,
+     "instrumentos": 0.172,
+     "total": 4.632,
+     "fecha": "2025-07-04",
+     "info": ""
+    },
+    {
+     "accionista": "LAO HERNANDEZ, MANUEL",
+     "acciones": 6.271,
+     "directo": 0.0,
+     "indirecto": 6.271,
+     "instrumentos": 0.0,
+     "total": 6.271,
+     "fecha": "2020-03-31",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 620000000,
+   "fecha_derechos_voto": "2026-03-26"
+  },
+  {
+   "isin": "ES0116870314",
+   "empresa": "Naturgy",
+   "nombre_cnmv": "NATURGY ENERGY GROUP, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 3.712,
+     "directo": 0.0,
+     "indirecto": 3.712,
+     "instrumentos": 0.547,
+     "total": 4.259,
+     "fecha": "2026-06-02",
+     "info": ""
+    },
+    {
+     "accionista": "CORPORACION FINANCIERA ALBA, S.A.",
+     "acciones": 5.008,
+     "directo": 0.0,
+     "indirecto": 5.008,
+     "instrumentos": 0.0,
+     "total": 5.008,
+     "fecha": "2026-06-04",
+     "info": ""
+    },
+    {
+     "accionista": "CRITERIA CAIXA, S.A.U.",
+     "acciones": 25.986,
+     "directo": 25.986,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 25.986,
+     "fecha": "2025-12-17",
+     "info": ""
+    },
+    {
+     "accionista": "FUNDACION BANCARIA CAIXA D ESTALVIS I PENSIONS DE BARCELONA",
+     "acciones": 25.986,
+     "directo": 0.0,
+     "indirecto": 25.986,
+     "instrumentos": 0.0,
+     "total": 25.986,
+     "fecha": "2025-12-17",
+     "info": ""
+    },
+    {
+     "accionista": "IFM GLOBAL INFRASTRUCTURE FUND",
+     "acciones": 15.169,
+     "directo": 0.0,
+     "indirecto": 15.169,
+     "instrumentos": 0.0,
+     "total": 15.169,
+     "fecha": "2025-06-26",
+     "info": ""
+    },
+    {
+     "accionista": "INDUSTRY SUPER HOLDINGS PTY LTD.",
+     "acciones": 15.169,
+     "directo": 0.0,
+     "indirecto": 15.169,
+     "instrumentos": 0.0,
+     "total": 15.169,
+     "fecha": "2025-06-26",
+     "info": ""
+    },
+    {
+     "accionista": "SONATRACH",
+     "acciones": 3.85,
+     "directo": 3.85,
+     "indirecto": 0.0,
+     "instrumentos": null,
+     "total": 3.85,
+     "fecha": "2011-11-15",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 969613801,
+   "fecha_derechos_voto": "2020-08-10"
+  },
+  {
+   "isin": "ES0105777017",
+   "empresa": "Puig",
+   "nombre_cnmv": "PUIG BRANDS, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "EXEA QUORUM, S.L.",
+     "acciones": 93.209,
+     "directo": 0.0,
+     "indirecto": 93.209,
+     "instrumentos": 0.0,
+     "total": 93.209,
+     "fecha": "2026-09-04",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 2141656418,
+   "fecha_derechos_voto": "2024-05-07"
+  },
+  {
+   "isin": "ES0173093024",
+   "empresa": "Redeia",
+   "nombre_cnmv": "REDEIA CORPORACION, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 4.667,
+     "directo": 0.0,
+     "indirecto": 4.667,
+     "instrumentos": 0.558,
+     "total": 5.225,
+     "fecha": "2025-07-04",
+     "info": ""
+    },
+    {
+     "accionista": "ORTEGA GAONA, AMANCIO",
+     "acciones": 5.0,
+     "directo": 0.0,
+     "indirecto": 5.0,
+     "instrumentos": 0.0,
+     "total": 5.0,
+     "fecha": "2021-07-29",
+     "info": ""
+    },
+    {
+     "accionista": "SOCIEDAD ESTATAL DE PARTICIPACIONES INDUSTRIALES",
+     "acciones": 20.0,
+     "directo": 20.0,
+     "indirecto": 0.0,
+     "instrumentos": null,
+     "total": 20.0,
+     "fecha": "2005-09-30",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 541080000,
+   "fecha_derechos_voto": "2016-05-27"
+  },
+  {
+   "isin": "ES0173516115",
+   "empresa": "Repsol",
+   "nombre_cnmv": "REPSOL, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 6.664,
+     "directo": 0.0,
+     "indirecto": 6.664,
+     "instrumentos": 0.512,
+     "total": 7.176,
+     "fecha": "2025-07-04",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 1089606334,
+   "fecha_derechos_voto": "2026-08-03"
+  },
+  {
+   "isin": "ES0157261019",
+   "empresa": "Rovi",
+   "nombre_cnmv": "LABORATORIOS FARMACEUTICOS ROVI, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "INDUMENTA PUERI, S.L.",
+     "acciones": 10.005,
+     "directo": 0.0,
+     "indirecto": 10.005,
+     "instrumentos": 3.434,
+     "total": 13.439,
+     "fecha": "2026-06-09",
+     "info": ""
+    },
+    {
+     "accionista": "NORBEL INVERSIONES, S.L.",
+     "acciones": 58.186,
+     "directo": 58.186,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 58.186,
+     "fecha": "2024-09-20",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 51235762,
+   "fecha_derechos_voto": "2024-09-10"
+  },
+  {
+   "isin": "ES0182870214",
+   "empresa": "Sacyr",
+   "nombre_cnmv": "SACYR, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "DISA CORPORACION PETROLIFERA, S.A.",
+     "acciones": 14.598,
+     "directo": 1.845,
+     "indirecto": 12.753,
+     "instrumentos": 0.0,
+     "total": 14.598,
+     "fecha": "2021-07-01",
+     "info": ""
+    },
+    {
+     "accionista": "GRUPO CORPORATIVO FUERTES, S.L.",
+     "acciones": 6.322,
+     "directo": 6.322,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 6.322,
+     "fecha": "2020-02-14",
+     "info": ""
+    },
+    {
+     "accionista": "GRUPO EMPRESARIAL FUERTES, S.L.",
+     "acciones": 5.93,
+     "directo": 0.0,
+     "indirecto": 5.93,
+     "instrumentos": 0.0,
+     "total": 5.93,
+     "fecha": "2026-02-05",
+     "info": ""
+    },
+    {
+     "accionista": "LOUREDA MANTIÑAN, JOSE MANUEL",
+     "acciones": 6.746,
+     "directo": 0.0,
+     "indirecto": 6.746,
+     "instrumentos": 0.0,
+     "total": 6.746,
+     "fecha": "2024-10-01",
+     "info": ""
+    },
+    {
+     "accionista": "POINT72 LONDON INVESTMENTS LTD",
+     "acciones": 0.0,
+     "directo": 0.0,
+     "indirecto": 0.0,
+     "instrumentos": 1.574,
+     "total": 1.574,
+     "fecha": "2026-09-23",
+     "info": ""
+    },
+    {
+     "accionista": "PRILOU, S.L.",
+     "acciones": 6.746,
+     "directo": 6.746,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 6.746,
+     "fecha": "2024-10-01",
+     "info": ""
+    },
+    {
+     "accionista": "RUBRIC CAPITAL MANAGEMENT",
+     "acciones": 0.0,
+     "directo": 0.0,
+     "indirecto": 0.0,
+     "instrumentos": 4.432,
+     "total": 4.432,
+     "fecha": "2023-01-17",
+     "info": ""
+    },
+    {
+     "accionista": "THE GOLDMAN SACHS GROUP, INC.",
+     "acciones": 2.727,
+     "directo": 0.0,
+     "indirecto": 2.727,
+     "instrumentos": 2.442,
+     "total": 5.169,
+     "fecha": "2026-10-21",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 805780142,
+   "fecha_derechos_voto": "2026-02-03"
+  },
+  {
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "nombre_cnmv": "SOLARIA ENERGIA Y MEDIOAMBIENTE, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 3.089,
+     "directo": 0.0,
+     "indirecto": 3.089,
+     "instrumentos": 0.802,
+     "total": 3.891,
+     "fecha": "2026-06-10",
+     "info": ""
+    },
+    {
+     "accionista": "DIAZ-TEJEIRO GUTIERREZ, ENRIQUE",
+     "acciones": 13.498,
+     "directo": 0.637,
+     "indirecto": 12.861,
+     "instrumentos": 0.0,
+     "total": 13.498,
+     "fecha": "2025-06-06",
+     "info": ""
+    },
+    {
+     "accionista": "DIAZ-TEJEIRO LARRAÑAGA, ARTURO",
+     "acciones": 8.803,
+     "directo": 1.235,
+     "indirecto": 7.568,
+     "instrumentos": 0.0,
+     "total": 8.803,
+     "fecha": "2025-06-06",
+     "info": ""
+    },
+    {
+     "accionista": "DIAZ-TEJEIRO LARRAÑAGA, ENRIQUE",
+     "acciones": 6.39,
+     "directo": 0.057,
+     "indirecto": 6.333,
+     "instrumentos": 0.0,
+     "total": 6.39,
+     "fecha": "2025-06-06",
+     "info": ""
+    },
+    {
+     "accionista": "DIAZ-TEJEIRO LARRAÑAGA, MIGUEL",
+     "acciones": 7.731,
+     "directo": 1.206,
+     "indirecto": 6.526,
+     "instrumentos": 0.0,
+     "total": 7.731,
+     "fecha": "2025-06-06",
+     "info": ""
+    },
+    {
+     "accionista": "INVESCO LTD.",
+     "acciones": 1.886,
+     "directo": 0.0,
+     "indirecto": 1.886,
+     "instrumentos": 0.075,
+     "total": 1.961,
+     "fecha": "2026-08-04",
+     "info": ""
+    },
+    {
+     "accionista": "MILLENNIUM GROUP MANAGEMENT LLC",
+     "acciones": 0.0,
+     "directo": 0.0,
+     "indirecto": 0.0,
+     "instrumentos": 1.878,
+     "total": 1.878,
+     "fecha": "2026-10-16",
+     "info": ""
+    },
+    {
+     "accionista": "MORGAN STANLEY",
+     "acciones": 0.0,
+     "directo": 0.0,
+     "indirecto": 0.0,
+     "instrumentos": 7.646,
+     "total": 7.646,
+     "fecha": "2026-03-05",
+     "info": ""
+    },
+    {
+     "accionista": "POINT72 ASSOCIATES, LLC",
+     "acciones": 0.0,
+     "directo": 0.0,
+     "indirecto": 0.0,
+     "instrumentos": 1.985,
+     "total": 1.985,
+     "fecha": "2026-09-29",
+     "info": ""
+    },
+    {
+     "accionista": "POINT72 LONDON INVESTMENTS LTD",
+     "acciones": 0.0,
+     "directo": 0.0,
+     "indirecto": 0.0,
+     "instrumentos": 1.288,
+     "total": 1.288,
+     "fecha": "2026-10-19",
+     "info": ""
+    },
+    {
+     "accionista": "STONESHIELD HOLDING S.A.R.L.",
+     "acciones": 7.108,
+     "directo": 0.0,
+     "indirecto": 7.108,
+     "instrumentos": 2.437,
+     "total": 9.545,
+     "fecha": "2026-05-21",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 132638164,
+   "fecha_derechos_voto": "2026-04-30"
+  },
+  {
+   "isin": "ES0178430E18",
+   "empresa": "Telefónica",
+   "nombre_cnmv": "TELEFONICA, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 5.033,
+     "directo": 0.0,
+     "indirecto": 5.033,
+     "instrumentos": 1.208,
+     "total": 6.241,
+     "fecha": "2026-06-23",
+     "info": ""
+    },
+    {
+     "accionista": "CRITERIA CAIXA, S.A.U.",
+     "acciones": 5.007,
+     "directo": 5.007,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 5.007,
+     "fecha": "2024-04-08",
+     "info": ""
+    },
+    {
+     "accionista": "FUNDACION BANCARIA CAIXA D ESTALVIS I PENSIONS DE BARCELONA",
+     "acciones": 5.007,
+     "directo": 0.0,
+     "indirecto": 5.007,
+     "instrumentos": 0.0,
+     "total": 5.007,
+     "fecha": "2024-04-08",
+     "info": ""
+    },
+    {
+     "accionista": "MORGAN STANLEY",
+     "acciones": 0.101,
+     "directo": 0.0,
+     "indirecto": 0.101,
+     "instrumentos": 8.297,
+     "total": 8.398,
+     "fecha": "2026-09-10",
+     "info": ""
+    },
+    {
+     "accionista": "PUBLIC INVESTMENT FUND",
+     "acciones": 9.969,
+     "directo": 0.0,
+     "indirecto": 9.969,
+     "instrumentos": 0.0,
+     "total": 9.969,
+     "fecha": "2025-02-06",
+     "info": ""
+    },
+    {
+     "accionista": "SOCIEDAD ESTATAL DE PARTICIPACIONES INDUSTRIALES",
+     "acciones": 10.0,
+     "directo": 10.0,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 10.0,
+     "fecha": "2024-05-20",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 5670161554,
+   "fecha_derechos_voto": "2024-05-13"
+  },
+  {
+   "isin": "ES0180907000",
+   "empresa": "Unicaja",
+   "nombre_cnmv": "UNICAJA BANCO, S.A.",
+   "fuera": false,
+   "consulta": "2026-10-21",
+   "accionistas": [
+    {
+     "accionista": "BLACKROCK INC.",
+     "acciones": 2.101,
+     "directo": 0.0,
+     "indirecto": 2.101,
+     "instrumentos": 0.901,
+     "total": 3.002,
+     "fecha": "2026-07-10",
+     "info": ""
+    },
+    {
+     "accionista": "FUNDACION BANCARIA CAJA DE AHORROS DE ASTURIAS",
+     "acciones": 6.56,
+     "directo": 6.56,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 6.56,
+     "fecha": "2021-08-06",
+     "info": ""
+    },
+    {
+     "accionista": "FUNDACION BANCARIA UNICAJA",
+     "acciones": 30.236,
+     "directo": 30.236,
+     "indirecto": 0.0,
+     "instrumentos": 0.0,
+     "total": 30.236,
+     "fecha": "2021-08-03",
+     "info": ""
+    },
+    {
+     "accionista": "INDUMENTA PUERI, S.L.",
+     "acciones": 5.0,
+     "directo": 0.0,
+     "indirecto": 5.0,
+     "instrumentos": 0.0,
+     "total": 5.0,
+     "fecha": "2018-10-05",
+     "info": ""
+    },
+    {
+     "accionista": "OLIVO LOPEZ, TOMAS",
+     "acciones": 5.178,
+     "directo": 0.139,
+     "indirecto": 5.039,
+     "instrumentos": 0.0,
+     "total": 5.178,
+     "fecha": "2022-03-10",
+     "info": ""
+    },
+    {
+     "accionista": "SANTA LUCIA S.A CIA DE SEGUROS",
+     "acciones": 10.0,
+     "directo": 9.948,
+     "indirecto": 0.052,
+     "instrumentos": 0.0,
+     "total": 10.0,
+     "fecha": "2026-05-11",
+     "info": ""
+    }
+   ],
+   "derechos_voto": 2571434468,
+   "fecha_derechos_voto": "2024-10-11"
+  }
+ ]
+}

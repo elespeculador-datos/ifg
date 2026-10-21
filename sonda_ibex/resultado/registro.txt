@@ -1,0 +1,6 @@
+codigo=0
+--- stdout
+33 empresas con datos de la CNMV, 153 participaciones. Datos nuevos.
+
+--- stderr
+
