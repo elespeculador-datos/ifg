@@ -1,4 +1,4 @@
-"""Sonda temporal 35: accionistas significativos de las 35 del IBEX en la CNMV."""
+"""Sonda temporal 36: búsquedas por palabra clave de las que fallaron en la 35."""
 import json, re, html, time
 from pathlib import Path
 import requests
@@ -43,8 +43,11 @@ def buscar(s, nombre):
     m = re.search(r'Notificaciones-Participaciones\.aspx\?qS=(\{[0-9a-f-]+\})', p.text)
     if m:
         return m.group(1), limpiar((re.search(r'id="ctl00_lblSubtitulo">(.*?)<', p.text) or [None, ""])[1])
-    cands = [(limpiar(x.group(2)), html.unescape(x.group(1))) for x in re.finditer(r'<a[^>]+href="([^"]*PS_AC_INI[^"]*)"[^>]*>(.*?)</a>', p.text, re.S)]
-    return None, {"final": p.url, "candidatos": cands[:15], "len": len(p.text)}
+    sec = re.search(r'<section id="maincontent".*?</section>', p.text, re.S)
+    sec = sec.group(0) if sec else ""
+    (OUT / ("busq_" + re.sub(r"\W+", "_", nombre)[:30] + ".html")).write_text(sec)
+    cands = [(limpiar(x.group(2)), html.unescape(x.group(1))) for x in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', sec, re.S)]
+    return None, {"final": p.url, "candidatos": cands[:30], "texto": limpiar(sec)[:1500]}
 
 
 def accionistas(s, guid):
@@ -52,7 +55,7 @@ def accionistas(s, guid):
     if r is None:
         return {"error": "sin respuesta"}
     t = r.text
-    tot = re.search(r"Número total de derechos de voto[^:]*:\s*(?:<[^>]+>\s*)*([\d.]+)", t)
+    tot = re.search(r"Número total de derechos de voto.*?([\d]{1,3}(?:\.\d{3})+)", limpiar(t))
     fmod = re.search(r"Fecha de última modificación del número de derechos de voto:\s*(?:<[^>]+>\s*)*([\d/]+)", t)
     tab = re.search(r'<table[^>]+id="ctl00_ContentPrincipal_gridAccionistasSignificativos".*?</table>', t, re.S)
     filas = []
@@ -66,16 +69,16 @@ def accionistas(s, guid):
             "accionistas": filas, "tabla_otras": otras.group(1) if otras else None, "len": len(t)}
 
 
-j = requests.get(API + "ListedCompanies", params={"tradingSystem": "SIBE", "page": 0, "pageSize": 0}, headers=CAB, timeout=60).json()
-ibex = [c for c in j["data"] if "IBEX 35" in (c.get("indices") or "")]
-res = {"n_ibex": len(ibex), "empresas": []}
+CLAVES = ["ACCIONA", "ACTIVIDADES DE CONSTRUCCION", "BANKINTER", "LOGISTA", "ACCIONA ENERGIAS", "ENDESA", "FERROVIAL",
+          "INDRA", "TEXTIL", "INTERNATIONAL CONSOLIDATED", "PUIG", "SOLARIA", "IBERDROLA"]
+res = {"empresas": []}
 s = requests.Session(); s.headers.update(H)
-for c in ibex:
-    guid, info = buscar(s, c["name"])
-    e = {"nombre_bme": c["name"], "isin": c["isin"], "guid": guid, "info": info}
+for c in CLAVES:
+    guid, info = buscar(s, c)
+    e = {"clave": c, "guid": guid, "info": info}
     if guid:
         e.update(accionistas(s, guid))
     res["empresas"].append(e)
     time.sleep(2)
-(OUT / "cnmv_ibex.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
-print(res["n_ibex"], sum(1 for e in res["empresas"] if e.get("guid")))
+(OUT / "cnmv_ibex2.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
+print(sum(1 for e in res["empresas"] if e.get("guid")))
