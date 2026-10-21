@@ -1,20 +1,911 @@
 {
+ "_aia": [
+  "http://www.cert.fnmt.es/certs/ACCOMP.crt"
+ ],
  "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/letras-del-tesoro": {
-  "error": "HTTPSConnectionPool(host='www.tesoro.es', port=443): Max retries exceeded with url: /deuda-publica/subastas/resultado-ultimas-subastas/letras-del-tesoro (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate"
+  "http": 200,
+  "final": "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/letras-del-tesoro",
+  "len": 303699,
+  "enlaces": [
+   [
+    "Subastas",
+    "https://www.tesoro.es/deuda-publica/subastas"
+   ],
+   [
+    "Resultado últimas subastas",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas"
+   ],
+   [
+    "Subastas",
+    "https://www.tesoro.es/deuda-publica/subastas"
+   ],
+   [
+    "Calendario",
+    "https://www.tesoro.es/deuda-publica/subastas/calendario"
+   ],
+   [
+    "Resultado últimas subastas",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas"
+   ],
+   [
+    "Letras del Tesoro",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/letras-del-tesoro"
+   ],
+   [
+    "Bonos del Estado",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/bonos-del-estado"
+   ],
+   [
+    "Obligaciones del Estado",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/obligaciones-del-estado"
+   ],
+   [
+    "Bonos y Obligaciones indexados",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/bonos-y-obligaciones-indexados"
+   ],
+   [
+    "Resultados subastas anteriores",
+    "https://www.tesoro.es/deuda-publica/subastas/resultados-subastas-anteriores"
+   ],
+   [
+    "Letras del Tesoro",
+    "https://www.tesoro.es/letras-del-tesoro2"
+   ],
+   [
+    "Bonos y Obligaciones del Estado",
+    "https://www.tesoro.es/bonos-y-obligaciones-del-estado1"
+   ],
+   [
+    "Procedimiento de Emisión y Subasta de los Valores del Tesoro",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro"
+   ],
+   [
+    "Calendario",
+    "/web/tesoro/deuda-publica/subastas/calendario"
+   ],
+   [
+    "La subasta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/la-subasta"
+   ],
+   [
+    "Convocatoria de la subasta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/convocatoria-de-la-subasta"
+   ],
+   [
+    "Presentación de peticiones",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/presentacion"
+   ],
+   [
+    "Publicación de los resultados de la subasta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/publicacion-de-resultados-de-la-subasta"
+   ],
+   [
+    "Segunda vuelta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/segunda-vuelta"
+   ],
+   [
+    "Pago del nominal adjudicado en la subasta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/pago-del-nominal-adjudicado-en-la-subasta"
+   ],
+   [
+    "Puesta en circulación de los Valores del Tesoro suscritos y abono en cuenta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/puesta-en-circulacion-de-los-valores-del-tesoro-suscritos-y-abono-en-las-cuentas-en-la-central-de-"
+   ],
+   [
+    "Canjes de Deuda de Estado",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/canjes-de-deuda-de-estado"
+   ],
+   [
+    "Letras del Tesoro",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/letras-del-tesoro"
+   ],
+   [
+    "Bonos y Obligaciones del Estado",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/bonos-y-obligaciones-del-estado"
+   ],
+   [
+    "Tributación de las Letras del Tesoro",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/fiscalidad/residentes/impuesto-sobre-la-renta-de-las-personas-fisicas/tributacion-de-las-letras-del-tesoro"
+   ],
+   [
+    "Tributación de los Bonos y Obligaciones del Estado",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/fiscalidad/residentes/impuesto-sobre-la-renta-de-las-personas-fisicas/tributacion-de-los-bonos-y-obligaciones-del-estado"
+   ],
+   [
+    "Tributación de los Bonos y Obligaciones del Estado Segregables",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/fiscalidad/residentes/impuesto-sobre-la-renta-de-las-personas-fisicas/tributacion-de-los-bonos-y-obligaciones-del-estado-segregables"
+   ],
+   [
+    "Creadores de Mercado de Letras del Tesoro",
+    "https://www.tesoro.es/creadores-de-mercado-de-letras-del-tesoro"
+   ],
+   [
+    "Requisitos para poder acceder a la condición de Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/requisitos-para-poder-acceder-a-la-condicion-de-creador-de-mercado-de-letras"
+   ],
+   [
+    "Procedimiento para el acceso a la condición de Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/procedimiento-para-el-acceso-a-la-condicion-de-creador-de-mercado-de-letras"
+   ],
+   [
+    "Derechos del Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/derechos-del-creador-de-mercado-de-letras"
+   ],
+   [
+    "Obligaciones del Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/obligaciones-del-creador-de-mercado-de-letras"
+   ],
+   [
+    "Criterios para evaluar la actividad del Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/criterios-para-evaluar-la-actividad-del-creador-de-mercado-de-letras"
+   ],
+   [
+    "Pérdida de la condición de Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/perdida-de-la-condicion-de-creador-de-mercado-de-letras"
+   ],
+   [
+    "Lista de Creadores de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/lista-de-creadores-de-mercado-de-letras"
+   ],
+   [
+    "Creadores de Mercado de Bonos y Obligaciones del Estado",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado"
+   ],
+   [
+    "Requisitos para poder acceder a la condición de Creador de Mercado de Bonos y Ob",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/requisitos-para-poder-acceder-a-la-condicion-de-creador-de-mercado-de-bonos-y-obligac"
+   ],
+   [
+    "Procedimiento para el acceso a la condición de Creador de Mercado de Bonos y Obl",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/procedimiento-para-el-acceso-a-la-condicion-de-creador-de-mercado-de-bonos-y-obligaci"
+   ],
+   [
+    "Derechos del Creador de Mercado de Bonos y Obligaciones",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/derechos-del-creador-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Obligaciones del Creador de Mercado de Bonos y Obligaciones",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/obligaciones-del-creador-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Criterios para evaluar la actividad del Creador de Mercado de Bonos y Obligacion",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/criterios-para-evaluar-la-actividad-del-creador-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Pérdida de la condición de Creador de Mercado de Bonos y Obligaciones",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/perdida-de-la-condicion-de-creador-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Lista de Creadores de Mercado de Bonos y Obligaciones",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/lista-de-creadores-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Creadores de Mercado más activos",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos"
+   ],
+   [
+    "2024",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2024"
+   ],
+   [
+    "2023",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2023"
+   ],
+   [
+    "2022",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2022"
+   ],
+   [
+    "2021",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2021"
+   ],
+   [
+    "2020",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2020"
+   ],
+   [
+    "2019",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2019"
+   ],
+   [
+    "2018",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2018"
+   ],
+   [
+    "2017",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2017"
+   ],
+   [
+    "2016",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2016"
+   ],
+   [
+    "2015",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2015"
+   ],
+   [
+    "Estadísticas",
+    "https://www.tesoro.es/deuda-publica/estadisticas"
+   ],
+   [
+    "Estadísticas Mensuales",
+    "https://www.tesoro.es/deuda-publica/estad%C3%ADsticas-mensuales"
+   ],
+   [
+    "Histórico de Estadísticas",
+    "https://www.tesoro.es/hist%C3%B3rico-de-estad%C3%ADsticas"
+   ],
+   [
+    "Subastas",
+    "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/subastas"
+   ],
+   [
+    "Tipos marginales",
+    "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/tipos-marginales"
+   ],
+   [
+    "Tipo interés medio",
+    "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/tipo-inter%C3%A9s-medio"
+   ],
+   [
+    "Tipos efectivos nuevas emisiones",
+    "https://www.tesoro.es/deuda-publica/hist%C3%B3rico-de-estadisticas/tipos-efectivos-nuevas-emisiones"
+   ],
+   [
+    "Distribución por tenedores",
+    "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/distribuci%C3%B3n-por-tenedores-2002-2017"
+   ],
+   [
+    "Letras del Tesoro",
+    "/deuda-publica/subastas/resultado-ultimas-subastas/letras-del-tesoros"
+   ],
+   [
+    "Bonos del Estado",
+    "/deuda-publica/subastas/resultado-ultimas-subastas/bonos-del-estado"
+   ],
+   [
+    "Obligaciones del Estado",
+    "/deuda-publica/subastas/resultado-ultimas-subastas/obligaciones-del-estado"
+   ],
+   [
+    "Bonos y Obligaciones indexados",
+    "/deuda-publica/subastas/resultado-ultimas-subastas/bonos-y-obligaciones-indexados"
+   ],
+   [
+    "Aviso legal",
+    "https://www.tesoro.es/aviso-legal"
+   ],
+   [
+    "Calendario de días hábiles",
+    "https://www.tesoro.es/deuda-publica/subastas/calendario"
+   ]
+  ],
+  "texto": "Letras del Tesoro - Tesoro - Elijo Tesoro {\"imports\":{\"react-dom\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom.js\",\"@clayui/breadcrumb\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$breadcrumb.js\",\"@clayui/charts\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$charts.js\",\"@clayui/empty-state\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$empty-state.js\",\"react\":\"/o/frontend-js-react-web/__liferay__/exports/react.js\",\"react-dom-16\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom-16.js\",\"@clayui/navigation-bar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$navigation-bar.js\",\"@clayui/icon\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$icon.js\",\"@clayui/table\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$table.js\",\"@clayui/slider\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$slider.js\",\"@clayui/multi-select\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$multi-select.js\",\"@clayui/nav\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$nav.js\",\"@clayui/provider\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$provider.js\",\"@clayui/panel\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$panel.js\",\"@clayui/list\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$list.js\",\"@liferay/dynamic-data-mapping-form-field-type\":\"/o/dynamic-data-mapping-form-field-type/__liferay__/index.js\",\"@clayui/date-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$date-picker.js\",\"@clayui/label\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$label.js\",\"@liferay/frontend-js-api/data-set\":\"/o/frontend-js-dependencies-web/__liferay__/exports/@liferay$js-api$data-set.js\",\"@clayui/core\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$core.js\",\"@clayui/pagination-bar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$pagination-bar.js\",\"@clayui/layout\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$layout.js\",\"@clayui/multi-step-nav\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$multi-step-nav.js\",\"@liferay/frontend-js-api\":\"/o/frontend-js-dependencies-web/__liferay__/exports/@liferay$js-api.js\",\"@clayui/toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$toolbar.js\",\"@clayui/badge\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$badge.js\",\"react-dom-18\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom-18.js\",\"@clayui/link\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$link.js\",\"@clayui/card\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$card.js\",\"@clayui/tooltip\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$tooltip.js\",\"@clayui/button\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$button.js\",\"@clayui/tabs\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$tabs.js\",\"@clayui/sticker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$sticker.js\",\"@clayui/form\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$form.js\",\"@clayui/popover\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$popover.js\",\"@clayui/shared\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$shared.js\",\"@clayui/localized-input\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$localized-input.js\",\"@clayui/modal\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$modal.js\",\"@clayui/color-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$color-picker.js\",\"@clayui/pagination\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$pagination.js\",\"@clayui/autocomplete\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$autocomplete.js\",\"@clayui/management-toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$management-toolbar.js\",\"@clayui/time-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$time-picker.js\",\"@clayui/upper-toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$upper-toolbar.js\",\"@clayui/loading-indicator\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$loading-indicator.js\",\"@clayui/drop-down\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayu",
+  "tablas": [
+   "Plazo 3 MESES 6 MESES 9 MESES 12 MESES Fecha subasta 13/10/2026 06/10/2026 13/10/2026 06/10/2026 Fecha vencimiento 15/01/2027 09/04/2027 09/07/2027 08/10/2027 Fecha de liquidación 16/10/2026 09/10/2026 16/10/2026 09/10/2026 Nominal solicitado 1.886,84 3.323,05 2.842,34 5.693,91 Nominal adjudicado 751,69 2.297,11 1.382,22 4.173,52 Nominal adjudicado (2ª vuelta) 0,00 0,00 82,31 0,00 Precio mínimo aceptado 99,336 98,606 97,854 97,032 Tipo de interés marginal 2,645 2,798 2,968 3,026 Precio medio 99,339 98,620 97,860 97,057 Tipo de interés medio 2,635 2,769 2,960 2,999 Adjudicado al marginal 250,00 50,00 150,00 175,00 1er precio no admitido 99,336 98,605 97,854 97,030 Volumen peticiones a ese precio 20,00 50,00 100,00 25,00 Peticiones no competitivas 136,37 988,39 211,12 1.195,20 Efectivo solicitado 1.874,21 3.276,73 2.781,12 5.524,82 Efectivo adjudicado 746,70 2.265,28 1.352,61 4.050,16 Efectivo adjudicado (2ª vuelta) 0,00 0,00 80,55 0,00 Ratio de cobertura 2,51 1,45 2,06 1,36 Anterior tipo marginal 2,464 2,641 2,783 2,846"
+  ]
  },
  "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas": {
-  "error": "HTTPSConnectionPool(host='www.tesoro.es', port=443): Max retries exceeded with url: /deuda-publica/subastas/resultado-ultimas-subastas (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1010)')))"
+  "http": 200,
+  "final": "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/letras-del-tesoro",
+  "len": 302219,
+  "enlaces": [
+   [
+    "Subastas",
+    "https://www.tesoro.es/deuda-publica/subastas"
+   ],
+   [
+    "Resultado últimas subastas",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas"
+   ],
+   [
+    "Subastas",
+    "https://www.tesoro.es/deuda-publica/subastas"
+   ],
+   [
+    "Calendario",
+    "https://www.tesoro.es/deuda-publica/subastas/calendario"
+   ],
+   [
+    "Resultado últimas subastas",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas"
+   ],
+   [
+    "Letras del Tesoro",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/letras-del-tesoro"
+   ],
+   [
+    "Bonos del Estado",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/bonos-del-estado"
+   ],
+   [
+    "Obligaciones del Estado",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/obligaciones-del-estado"
+   ],
+   [
+    "Bonos y Obligaciones indexados",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/bonos-y-obligaciones-indexados"
+   ],
+   [
+    "Resultados subastas anteriores",
+    "https://www.tesoro.es/deuda-publica/subastas/resultados-subastas-anteriores"
+   ],
+   [
+    "Letras del Tesoro",
+    "https://www.tesoro.es/letras-del-tesoro2"
+   ],
+   [
+    "Bonos y Obligaciones del Estado",
+    "https://www.tesoro.es/bonos-y-obligaciones-del-estado1"
+   ],
+   [
+    "Procedimiento de Emisión y Subasta de los Valores del Tesoro",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro"
+   ],
+   [
+    "Calendario",
+    "/web/tesoro/deuda-publica/subastas/calendario"
+   ],
+   [
+    "La subasta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/la-subasta"
+   ],
+   [
+    "Convocatoria de la subasta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/convocatoria-de-la-subasta"
+   ],
+   [
+    "Presentación de peticiones",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/presentacion"
+   ],
+   [
+    "Publicación de los resultados de la subasta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/publicacion-de-resultados-de-la-subasta"
+   ],
+   [
+    "Segunda vuelta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/segunda-vuelta"
+   ],
+   [
+    "Pago del nominal adjudicado en la subasta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/pago-del-nominal-adjudicado-en-la-subasta"
+   ],
+   [
+    "Puesta en circulación de los Valores del Tesoro suscritos y abono en cuenta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/puesta-en-circulacion-de-los-valores-del-tesoro-suscritos-y-abono-en-las-cuentas-en-la-central-de-"
+   ],
+   [
+    "Canjes de Deuda de Estado",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/canjes-de-deuda-de-estado"
+   ],
+   [
+    "Letras del Tesoro",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/letras-del-tesoro"
+   ],
+   [
+    "Bonos y Obligaciones del Estado",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/bonos-y-obligaciones-del-estado"
+   ],
+   [
+    "Tributación de las Letras del Tesoro",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/fiscalidad/residentes/impuesto-sobre-la-renta-de-las-personas-fisicas/tributacion-de-las-letras-del-tesoro"
+   ],
+   [
+    "Tributación de los Bonos y Obligaciones del Estado",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/fiscalidad/residentes/impuesto-sobre-la-renta-de-las-personas-fisicas/tributacion-de-los-bonos-y-obligaciones-del-estado"
+   ],
+   [
+    "Tributación de los Bonos y Obligaciones del Estado Segregables",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/fiscalidad/residentes/impuesto-sobre-la-renta-de-las-personas-fisicas/tributacion-de-los-bonos-y-obligaciones-del-estado-segregables"
+   ],
+   [
+    "Creadores de Mercado de Letras del Tesoro",
+    "https://www.tesoro.es/creadores-de-mercado-de-letras-del-tesoro"
+   ],
+   [
+    "Requisitos para poder acceder a la condición de Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/requisitos-para-poder-acceder-a-la-condicion-de-creador-de-mercado-de-letras"
+   ],
+   [
+    "Procedimiento para el acceso a la condición de Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/procedimiento-para-el-acceso-a-la-condicion-de-creador-de-mercado-de-letras"
+   ],
+   [
+    "Derechos del Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/derechos-del-creador-de-mercado-de-letras"
+   ],
+   [
+    "Obligaciones del Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/obligaciones-del-creador-de-mercado-de-letras"
+   ],
+   [
+    "Criterios para evaluar la actividad del Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/criterios-para-evaluar-la-actividad-del-creador-de-mercado-de-letras"
+   ],
+   [
+    "Pérdida de la condición de Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/perdida-de-la-condicion-de-creador-de-mercado-de-letras"
+   ],
+   [
+    "Lista de Creadores de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/lista-de-creadores-de-mercado-de-letras"
+   ],
+   [
+    "Creadores de Mercado de Bonos y Obligaciones del Estado",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado"
+   ],
+   [
+    "Requisitos para poder acceder a la condición de Creador de Mercado de Bonos y Ob",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/requisitos-para-poder-acceder-a-la-condicion-de-creador-de-mercado-de-bonos-y-obligac"
+   ],
+   [
+    "Procedimiento para el acceso a la condición de Creador de Mercado de Bonos y Obl",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/procedimiento-para-el-acceso-a-la-condicion-de-creador-de-mercado-de-bonos-y-obligaci"
+   ],
+   [
+    "Derechos del Creador de Mercado de Bonos y Obligaciones",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/derechos-del-creador-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Obligaciones del Creador de Mercado de Bonos y Obligaciones",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/obligaciones-del-creador-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Criterios para evaluar la actividad del Creador de Mercado de Bonos y Obligacion",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/criterios-para-evaluar-la-actividad-del-creador-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Pérdida de la condición de Creador de Mercado de Bonos y Obligaciones",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/perdida-de-la-condicion-de-creador-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Lista de Creadores de Mercado de Bonos y Obligaciones",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/lista-de-creadores-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Creadores de Mercado más activos",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos"
+   ],
+   [
+    "2024",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2024"
+   ],
+   [
+    "2023",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2023"
+   ],
+   [
+    "2022",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2022"
+   ],
+   [
+    "2021",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2021"
+   ],
+   [
+    "2020",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2020"
+   ],
+   [
+    "2019",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2019"
+   ],
+   [
+    "2018",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2018"
+   ],
+   [
+    "2017",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2017"
+   ],
+   [
+    "2016",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2016"
+   ],
+   [
+    "2015",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2015"
+   ],
+   [
+    "Estadísticas",
+    "https://www.tesoro.es/deuda-publica/estadisticas"
+   ],
+   [
+    "Estadísticas Mensuales",
+    "https://www.tesoro.es/deuda-publica/estad%C3%ADsticas-mensuales"
+   ],
+   [
+    "Histórico de Estadísticas",
+    "https://www.tesoro.es/hist%C3%B3rico-de-estad%C3%ADsticas"
+   ],
+   [
+    "Subastas",
+    "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/subastas"
+   ],
+   [
+    "Tipos marginales",
+    "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/tipos-marginales"
+   ],
+   [
+    "Tipo interés medio",
+    "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/tipo-inter%C3%A9s-medio"
+   ],
+   [
+    "Tipos efectivos nuevas emisiones",
+    "https://www.tesoro.es/deuda-publica/hist%C3%B3rico-de-estadisticas/tipos-efectivos-nuevas-emisiones"
+   ],
+   [
+    "Distribución por tenedores",
+    "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/distribuci%C3%B3n-por-tenedores-2002-2017"
+   ],
+   [
+    "Letras del Tesoro",
+    "/deuda-publica/subastas/resultado-ultimas-subastas/letras-del-tesoros"
+   ],
+   [
+    "Bonos del Estado",
+    "/deuda-publica/subastas/resultado-ultimas-subastas/bonos-del-estado"
+   ],
+   [
+    "Obligaciones del Estado",
+    "/deuda-publica/subastas/resultado-ultimas-subastas/obligaciones-del-estado"
+   ],
+   [
+    "Bonos y Obligaciones indexados",
+    "/deuda-publica/subastas/resultado-ultimas-subastas/bonos-y-obligaciones-indexados"
+   ],
+   [
+    "Aviso legal",
+    "https://www.tesoro.es/aviso-legal"
+   ],
+   [
+    "Calendario de días hábiles",
+    "https://www.tesoro.es/deuda-publica/subastas/calendario"
+   ]
+  ],
+  "texto": "Letras del Tesoro - Tesoro - Elijo Tesoro {\"imports\":{\"react-dom\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom.js\",\"@clayui/breadcrumb\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$breadcrumb.js\",\"@clayui/charts\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$charts.js\",\"@clayui/empty-state\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$empty-state.js\",\"react\":\"/o/frontend-js-react-web/__liferay__/exports/react.js\",\"react-dom-16\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom-16.js\",\"@clayui/navigation-bar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$navigation-bar.js\",\"@clayui/icon\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$icon.js\",\"@clayui/table\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$table.js\",\"@clayui/slider\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$slider.js\",\"@clayui/multi-select\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$multi-select.js\",\"@clayui/nav\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$nav.js\",\"@clayui/provider\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$provider.js\",\"@clayui/panel\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$panel.js\",\"@clayui/list\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$list.js\",\"@liferay/dynamic-data-mapping-form-field-type\":\"/o/dynamic-data-mapping-form-field-type/__liferay__/index.js\",\"@clayui/date-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$date-picker.js\",\"@clayui/label\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$label.js\",\"@liferay/frontend-js-api/data-set\":\"/o/frontend-js-dependencies-web/__liferay__/exports/@liferay$js-api$data-set.js\",\"@clayui/core\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$core.js\",\"@clayui/pagination-bar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$pagination-bar.js\",\"@clayui/layout\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$layout.js\",\"@clayui/multi-step-nav\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$multi-step-nav.js\",\"@liferay/frontend-js-api\":\"/o/frontend-js-dependencies-web/__liferay__/exports/@liferay$js-api.js\",\"@clayui/toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$toolbar.js\",\"@clayui/badge\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$badge.js\",\"react-dom-18\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom-18.js\",\"@clayui/link\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$link.js\",\"@clayui/card\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$card.js\",\"@clayui/tooltip\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$tooltip.js\",\"@clayui/button\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$button.js\",\"@clayui/tabs\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$tabs.js\",\"@clayui/sticker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$sticker.js\",\"@clayui/form\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$form.js\",\"@clayui/popover\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$popover.js\",\"@clayui/shared\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$shared.js\",\"@clayui/localized-input\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$localized-input.js\",\"@clayui/modal\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$modal.js\",\"@clayui/color-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$color-picker.js\",\"@clayui/pagination\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$pagination.js\",\"@clayui/autocomplete\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$autocomplete.js\",\"@clayui/management-toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$management-toolbar.js\",\"@clayui/time-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$time-picker.js\",\"@clayui/upper-toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$upper-toolbar.js\",\"@clayui/loading-indicator\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$loading-indicator.js\",\"@clayui/drop-down\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayu",
+  "tablas": [
+   "Plazo 3 MESES 6 MESES 9 MESES 12 MESES Fecha subasta 13/10/2026 06/10/2026 13/10/2026 06/10/2026 Fecha vencimiento 15/01/2027 09/04/2027 09/07/2027 08/10/2027 Fecha de liquidación 16/10/2026 09/10/2026 16/10/2026 09/10/2026 Nominal solicitado 1.886,84 3.323,05 2.842,34 5.693,91 Nominal adjudicado 751,69 2.297,11 1.382,22 4.173,52 Nominal adjudicado (2ª vuelta) 0,00 0,00 82,31 0,00 Precio mínimo aceptado 99,336 98,606 97,854 97,032 Tipo de interés marginal 2,645 2,798 2,968 3,026 Precio medio 99,339 98,620 97,860 97,057 Tipo de interés medio 2,635 2,769 2,960 2,999 Adjudicado al marginal 250,00 50,00 150,00 175,00 1er precio no admitido 99,336 98,605 97,854 97,030 Volumen peticiones a ese precio 20,00 50,00 100,00 25,00 Peticiones no competitivas 136,37 988,39 211,12 1.195,20 Efectivo solicitado 1.874,21 3.276,73 2.781,12 5.524,82 Efectivo adjudicado 746,70 2.265,28 1.352,61 4.050,16 Efectivo adjudicado (2ª vuelta) 0,00 0,00 80,55 0,00 Ratio de cobertura 2,51 1,45 2,06 1,36 Anterior tipo marginal 2,464 2,641 2,783 2,846"
+  ]
  },
  "https://www.tesoro.es/deuda-publica/subastas/calendario-de-subastas": {
-  "error": "HTTPSConnectionPool(host='www.tesoro.es', port=443): Max retries exceeded with url: /deuda-publica/subastas/calendario-de-subastas (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1010)')))"
+  "http": 404,
+  "final": "https://www.tesoro.es/deuda-publica/subastas/calendario-de-subastas",
+  "len": 256985,
+  "enlaces": [
+   [
+    "Aviso legal",
+    "https://www.tesoro.es/aviso-legal"
+   ],
+   [
+    "Calendario de días hábiles",
+    "https://www.tesoro.es/deuda-publica/subastas/calendario"
+   ]
+  ],
+  "texto": "Página no encontrada - Tesoro - Elijo Tesoro {\"imports\":{\"react-dom\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom.js\",\"@clayui/breadcrumb\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$breadcrumb.js\",\"@clayui/charts\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$charts.js\",\"@clayui/empty-state\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$empty-state.js\",\"react\":\"/o/frontend-js-react-web/__liferay__/exports/react.js\",\"react-dom-16\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom-16.js\",\"@clayui/navigation-bar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$navigation-bar.js\",\"@clayui/icon\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$icon.js\",\"@clayui/table\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$table.js\",\"@clayui/slider\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$slider.js\",\"@clayui/multi-select\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$multi-select.js\",\"@clayui/nav\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$nav.js\",\"@clayui/provider\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$provider.js\",\"@clayui/panel\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$panel.js\",\"@clayui/list\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$list.js\",\"@liferay/dynamic-data-mapping-form-field-type\":\"/o/dynamic-data-mapping-form-field-type/__liferay__/index.js\",\"@clayui/date-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$date-picker.js\",\"@clayui/label\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$label.js\",\"@liferay/frontend-js-api/data-set\":\"/o/frontend-js-dependencies-web/__liferay__/exports/@liferay$js-api$data-set.js\",\"@clayui/core\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$core.js\",\"@clayui/pagination-bar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$pagination-bar.js\",\"@clayui/layout\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$layout.js\",\"@clayui/multi-step-nav\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$multi-step-nav.js\",\"@liferay/frontend-js-api\":\"/o/frontend-js-dependencies-web/__liferay__/exports/@liferay$js-api.js\",\"@clayui/toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$toolbar.js\",\"@clayui/badge\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$badge.js\",\"react-dom-18\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom-18.js\",\"@clayui/link\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$link.js\",\"@clayui/card\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$card.js\",\"@clayui/tooltip\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$tooltip.js\",\"@clayui/button\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$button.js\",\"@clayui/tabs\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$tabs.js\",\"@clayui/sticker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$sticker.js\",\"@clayui/form\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$form.js\",\"@clayui/popover\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$popover.js\",\"@clayui/shared\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$shared.js\",\"@clayui/localized-input\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$localized-input.js\",\"@clayui/modal\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$modal.js\",\"@clayui/color-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$color-picker.js\",\"@clayui/pagination\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$pagination.js\",\"@clayui/autocomplete\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$autocomplete.js\",\"@clayui/management-toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$management-toolbar.js\",\"@clayui/time-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$time-picker.js\",\"@clayui/upper-toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$upper-toolbar.js\",\"@clayui/loading-indicator\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$loading-indicator.js\",\"@clayui/drop-down\":\"/o/frontend-taglib-clay/__liferay__/exports/@cl",
+  "tablas": []
  },
  "https://www.tesoro.es/deuda-publica/estadisticas": {
-  "error": "HTTPSConnectionPool(host='www.tesoro.es', port=443): Max retries exceeded with url: /deuda-publica/estadisticas (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1010)')))"
+  "http": 200,
+  "final": "https://www.tesoro.es/deuda-publica/estadisticas",
+  "len": 291904,
+  "enlaces": [
+   [
+    "Subastas",
+    "https://www.tesoro.es/deuda-publica/subastas"
+   ],
+   [
+    "Calendario",
+    "https://www.tesoro.es/deuda-publica/subastas/calendario"
+   ],
+   [
+    "Resultado últimas subastas",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas"
+   ],
+   [
+    "Letras del Tesoro",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/letras-del-tesoro"
+   ],
+   [
+    "Bonos del Estado",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/bonos-del-estado"
+   ],
+   [
+    "Obligaciones del Estado",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/obligaciones-del-estado"
+   ],
+   [
+    "Bonos y Obligaciones indexados",
+    "https://www.tesoro.es/deuda-publica/subastas/resultado-ultimas-subastas/bonos-y-obligaciones-indexados"
+   ],
+   [
+    "Resultados subastas anteriores",
+    "https://www.tesoro.es/deuda-publica/subastas/resultados-subastas-anteriores"
+   ],
+   [
+    "Letras del Tesoro",
+    "https://www.tesoro.es/letras-del-tesoro2"
+   ],
+   [
+    "Bonos y Obligaciones del Estado",
+    "https://www.tesoro.es/bonos-y-obligaciones-del-estado1"
+   ],
+   [
+    "Procedimiento de Emisión y Subasta de los Valores del Tesoro",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro"
+   ],
+   [
+    "Calendario",
+    "/web/tesoro/deuda-publica/subastas/calendario"
+   ],
+   [
+    "La subasta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/la-subasta"
+   ],
+   [
+    "Convocatoria de la subasta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/convocatoria-de-la-subasta"
+   ],
+   [
+    "Presentación de peticiones",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/presentacion"
+   ],
+   [
+    "Publicación de los resultados de la subasta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/publicacion-de-resultados-de-la-subasta"
+   ],
+   [
+    "Segunda vuelta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/segunda-vuelta"
+   ],
+   [
+    "Pago del nominal adjudicado en la subasta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/pago-del-nominal-adjudicado-en-la-subasta"
+   ],
+   [
+    "Puesta en circulación de los Valores del Tesoro suscritos y abono en cuenta",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/procedimiento-de-emision-y-subasta-de-los-valores-del-tesoro/puesta-en-circulacion-de-los-valores-del-tesoro-suscritos-y-abono-en-las-cuentas-en-la-central-de-"
+   ],
+   [
+    "Canjes de Deuda de Estado",
+    "https://www.tesoro.es/deuda-publica/mercado/mercado-primario/canjes-de-deuda-de-estado"
+   ],
+   [
+    "Letras del Tesoro",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/letras-del-tesoro"
+   ],
+   [
+    "Bonos y Obligaciones del Estado",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/bonos-y-obligaciones-del-estado"
+   ],
+   [
+    "Tributación de las Letras del Tesoro",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/fiscalidad/residentes/impuesto-sobre-la-renta-de-las-personas-fisicas/tributacion-de-las-letras-del-tesoro"
+   ],
+   [
+    "Tributación de los Bonos y Obligaciones del Estado",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/fiscalidad/residentes/impuesto-sobre-la-renta-de-las-personas-fisicas/tributacion-de-los-bonos-y-obligaciones-del-estado"
+   ],
+   [
+    "Tributación de los Bonos y Obligaciones del Estado Segregables",
+    "https://www.tesoro.es/deuda-publica/los-valores-del-tesoro/fiscalidad/residentes/impuesto-sobre-la-renta-de-las-personas-fisicas/tributacion-de-los-bonos-y-obligaciones-del-estado-segregables"
+   ],
+   [
+    "Creadores de Mercado de Letras del Tesoro",
+    "https://www.tesoro.es/creadores-de-mercado-de-letras-del-tesoro"
+   ],
+   [
+    "Requisitos para poder acceder a la condición de Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/requisitos-para-poder-acceder-a-la-condicion-de-creador-de-mercado-de-letras"
+   ],
+   [
+    "Procedimiento para el acceso a la condición de Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/procedimiento-para-el-acceso-a-la-condicion-de-creador-de-mercado-de-letras"
+   ],
+   [
+    "Derechos del Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/derechos-del-creador-de-mercado-de-letras"
+   ],
+   [
+    "Obligaciones del Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/obligaciones-del-creador-de-mercado-de-letras"
+   ],
+   [
+    "Criterios para evaluar la actividad del Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/criterios-para-evaluar-la-actividad-del-creador-de-mercado-de-letras"
+   ],
+   [
+    "Pérdida de la condición de Creador de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/perdida-de-la-condicion-de-creador-de-mercado-de-letras"
+   ],
+   [
+    "Lista de Creadores de Mercado de Letras",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-letras-del-tesoro/lista-de-creadores-de-mercado-de-letras"
+   ],
+   [
+    "Creadores de Mercado de Bonos y Obligaciones del Estado",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado"
+   ],
+   [
+    "Requisitos para poder acceder a la condición de Creador de Mercado de Bonos y Ob",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/requisitos-para-poder-acceder-a-la-condicion-de-creador-de-mercado-de-bonos-y-obligac"
+   ],
+   [
+    "Procedimiento para el acceso a la condición de Creador de Mercado de Bonos y Obl",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/procedimiento-para-el-acceso-a-la-condicion-de-creador-de-mercado-de-bonos-y-obligaci"
+   ],
+   [
+    "Derechos del Creador de Mercado de Bonos y Obligaciones",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/derechos-del-creador-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Obligaciones del Creador de Mercado de Bonos y Obligaciones",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/obligaciones-del-creador-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Criterios para evaluar la actividad del Creador de Mercado de Bonos y Obligacion",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/criterios-para-evaluar-la-actividad-del-creador-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Pérdida de la condición de Creador de Mercado de Bonos y Obligaciones",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/perdida-de-la-condicion-de-creador-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Lista de Creadores de Mercado de Bonos y Obligaciones",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/lista-de-creadores-de-mercado-de-bonos-y-obligaciones"
+   ],
+   [
+    "Creadores de Mercado más activos",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos"
+   ],
+   [
+    "2024",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2024"
+   ],
+   [
+    "2023",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2023"
+   ],
+   [
+    "2022",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2022"
+   ],
+   [
+    "2021",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2021"
+   ],
+   [
+    "2020",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2020"
+   ],
+   [
+    "2019",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2019"
+   ],
+   [
+    "2018",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2018"
+   ],
+   [
+    "2017",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2017"
+   ],
+   [
+    "2016",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2016"
+   ],
+   [
+    "2015",
+    "https://www.tesoro.es/deuda-publica/mercado/participantes/creadores-de-mercado/creadores-de-mercado-de-bonos-y-obligaciones-del-estado/creadores-de-mercado-mas-activos/2015"
+   ],
+   [
+    "Estadísticas",
+    "https://www.tesoro.es/deuda-publica/estadisticas"
+   ],
+   [
+    "Estadísticas Mensuales",
+    "https://www.tesoro.es/deuda-publica/estad%C3%ADsticas-mensuales"
+   ],
+   [
+    "Histórico de Estadísticas",
+    "https://www.tesoro.es/hist%C3%B3rico-de-estad%C3%ADsticas"
+   ],
+   [
+    "Subastas",
+    "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/subastas"
+   ],
+   [
+    "Tipos marginales",
+    "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/tipos-marginales"
+   ],
+   [
+    "Tipo interés medio",
+    "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/tipo-inter%C3%A9s-medio"
+   ],
+   [
+    "Tipos efectivos nuevas emisiones",
+    "https://www.tesoro.es/deuda-publica/hist%C3%B3rico-de-estadisticas/tipos-efectivos-nuevas-emisiones"
+   ],
+   [
+    "Distribución por tenedores",
+    "https://www.tesoro.es/deuda-publica/historico-de-estadisticas/distribuci%C3%B3n-por-tenedores-2002-2017"
+   ],
+   [
+    "Estadísticas Mensuales",
+    "https://www.tesoro.es/deuda-publica/estad%C3%ADsticas-mensuales"
+   ],
+   [
+    "Histórico de Estadísticas",
+    "https://www.tesoro.es/hist%C3%B3rico-de-estad%C3%ADsticas"
+   ],
+   [
+    "Aviso legal",
+    "https://www.tesoro.es/aviso-legal"
+   ],
+   [
+    "Calendario de días hábiles",
+    "https://www.tesoro.es/deuda-publica/subastas/calendario"
+   ]
+  ],
+  "texto": "Estadísticas - Tesoro - Elijo Tesoro {\"imports\":{\"react-dom\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom.js\",\"@clayui/breadcrumb\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$breadcrumb.js\",\"@clayui/charts\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$charts.js\",\"@clayui/empty-state\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$empty-state.js\",\"react\":\"/o/frontend-js-react-web/__liferay__/exports/react.js\",\"react-dom-16\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom-16.js\",\"@clayui/navigation-bar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$navigation-bar.js\",\"@clayui/icon\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$icon.js\",\"@clayui/table\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$table.js\",\"@clayui/slider\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$slider.js\",\"@clayui/multi-select\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$multi-select.js\",\"@clayui/nav\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$nav.js\",\"@clayui/provider\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$provider.js\",\"@clayui/panel\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$panel.js\",\"@clayui/list\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$list.js\",\"@liferay/dynamic-data-mapping-form-field-type\":\"/o/dynamic-data-mapping-form-field-type/__liferay__/index.js\",\"@clayui/date-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$date-picker.js\",\"@clayui/label\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$label.js\",\"@liferay/frontend-js-api/data-set\":\"/o/frontend-js-dependencies-web/__liferay__/exports/@liferay$js-api$data-set.js\",\"@clayui/core\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$core.js\",\"@clayui/pagination-bar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$pagination-bar.js\",\"@clayui/layout\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$layout.js\",\"@clayui/multi-step-nav\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$multi-step-nav.js\",\"@liferay/frontend-js-api\":\"/o/frontend-js-dependencies-web/__liferay__/exports/@liferay$js-api.js\",\"@clayui/toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$toolbar.js\",\"@clayui/badge\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$badge.js\",\"react-dom-18\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom-18.js\",\"@clayui/link\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$link.js\",\"@clayui/card\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$card.js\",\"@clayui/tooltip\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$tooltip.js\",\"@clayui/button\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$button.js\",\"@clayui/tabs\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$tabs.js\",\"@clayui/sticker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$sticker.js\",\"@clayui/form\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$form.js\",\"@clayui/popover\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$popover.js\",\"@clayui/shared\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$shared.js\",\"@clayui/localized-input\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$localized-input.js\",\"@clayui/modal\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$modal.js\",\"@clayui/color-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$color-picker.js\",\"@clayui/pagination\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$pagination.js\",\"@clayui/autocomplete\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$autocomplete.js\",\"@clayui/management-toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$management-toolbar.js\",\"@clayui/time-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$time-picker.js\",\"@clayui/upper-toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$upper-toolbar.js\",\"@clayui/loading-indicator\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$loading-indicator.js\",\"@clayui/drop-down\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$dro",
+  "tablas": []
  },
  "https://www.tesoro.es/aviso-legal": {
-  "error": "HTTPSConnectionPool(host='www.tesoro.es', port=443): Max retries exceeded with url: /aviso-legal (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1010)')))"
+  "http": 200,
+  "final": "https://www.tesoro.es/aviso-legal",
+  "len": 247824,
+  "enlaces": [
+   [
+    "Aviso legal",
+    "https://www.tesoro.es/aviso-legal"
+   ],
+   [
+    "Calendario de días hábiles",
+    "https://www.tesoro.es/deuda-publica/subastas/calendario"
+   ]
+  ],
+  "texto": "Aviso legal - Tesoro - Elijo Tesoro {\"imports\":{\"react-dom\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom.js\",\"@clayui/breadcrumb\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$breadcrumb.js\",\"@clayui/charts\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$charts.js\",\"@clayui/empty-state\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$empty-state.js\",\"react\":\"/o/frontend-js-react-web/__liferay__/exports/react.js\",\"react-dom-16\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom-16.js\",\"@clayui/navigation-bar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$navigation-bar.js\",\"@clayui/icon\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$icon.js\",\"@clayui/table\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$table.js\",\"@clayui/slider\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$slider.js\",\"@clayui/multi-select\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$multi-select.js\",\"@clayui/nav\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$nav.js\",\"@clayui/provider\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$provider.js\",\"@clayui/panel\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$panel.js\",\"@clayui/list\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$list.js\",\"@liferay/dynamic-data-mapping-form-field-type\":\"/o/dynamic-data-mapping-form-field-type/__liferay__/index.js\",\"@clayui/date-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$date-picker.js\",\"@clayui/label\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$label.js\",\"@liferay/frontend-js-api/data-set\":\"/o/frontend-js-dependencies-web/__liferay__/exports/@liferay$js-api$data-set.js\",\"@clayui/core\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$core.js\",\"@clayui/pagination-bar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$pagination-bar.js\",\"@clayui/layout\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$layout.js\",\"@clayui/multi-step-nav\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$multi-step-nav.js\",\"@liferay/frontend-js-api\":\"/o/frontend-js-dependencies-web/__liferay__/exports/@liferay$js-api.js\",\"@clayui/toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$toolbar.js\",\"@clayui/badge\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$badge.js\",\"react-dom-18\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom-18.js\",\"@clayui/link\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$link.js\",\"@clayui/card\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$card.js\",\"@clayui/tooltip\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$tooltip.js\",\"@clayui/button\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$button.js\",\"@clayui/tabs\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$tabs.js\",\"@clayui/sticker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$sticker.js\",\"@clayui/form\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$form.js\",\"@clayui/popover\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$popover.js\",\"@clayui/shared\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$shared.js\",\"@clayui/localized-input\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$localized-input.js\",\"@clayui/modal\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$modal.js\",\"@clayui/color-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$color-picker.js\",\"@clayui/pagination\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$pagination.js\",\"@clayui/autocomplete\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$autocomplete.js\",\"@clayui/management-toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$management-toolbar.js\",\"@clayui/time-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$time-picker.js\",\"@clayui/upper-toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$upper-toolbar.js\",\"@clayui/loading-indicator\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$loading-indicator.js\",\"@clayui/drop-down\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$drop",
+  "tablas": []
  },
  "https://www.tesoro.es/": {
-  "error": "HTTPSConnectionPool(host='www.tesoro.es', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1010)')))"
+  "http": 200,
+  "final": "https://www.tesoro.es/",
+  "len": 288039,
+  "enlaces": [
+   [
+    "Ir al Calendario de Subastas →",
+    "/deuda-publica/subastas/calendario"
+   ],
+   [
+    "Ir a resultado de últimas subastas →",
+    "/deuda-publica/subastas/resultado-ultimas-subastas/letras-del-tesoro"
+   ],
+   [
+    "El Tesoro Público anuncia los objetivos de emisión de las próximas subastas.",
+    "https://www.tesoro.es/w/deuda-publica/noticias/el-tesoro-publico-anuncia-los-objetivos-de-emision-de-las-proximas-0?redirect=%2F"
+   ],
+   [
+    "El Tesoro anuncia el depósito previo para la subasta del día 15/10/2026",
+    "https://www.tesoro.es/w/deuda-publica/noticias/el-tesoro-anuncia-el-deposito-previo-para-la-subasta-del-dia-15102026?redirect=%2F"
+   ],
+   [
+    "El Tesoro anuncia los Bonos y Obligaciones que se subastarán el día 15/10/2026.",
+    "https://www.tesoro.es/w/el-tesoro-anuncia-los-bonos-y-obligaciones-que-se-subastar%C3%A1n-el-d%C3%ADa-15/10/2026.?redirect=%2F"
+   ],
+   [
+    "",
+    "/documents/d/tesoro/calendario-tesoro-publico-2026-espanol-121"
+   ],
+   [
+    "Aviso legal",
+    "https://www.tesoro.es/aviso-legal"
+   ],
+   [
+    "Calendario de días hábiles",
+    "https://www.tesoro.es/deuda-publica/subastas/calendario"
+   ]
+  ],
+  "texto": "Inicio - Tesoro - Elijo Tesoro {\"imports\":{\"react-dom\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom.js\",\"@clayui/breadcrumb\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$breadcrumb.js\",\"@clayui/charts\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$charts.js\",\"@clayui/empty-state\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$empty-state.js\",\"react\":\"/o/frontend-js-react-web/__liferay__/exports/react.js\",\"react-dom-16\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom-16.js\",\"@clayui/navigation-bar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$navigation-bar.js\",\"@clayui/icon\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$icon.js\",\"@clayui/table\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$table.js\",\"@clayui/slider\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$slider.js\",\"@clayui/multi-select\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$multi-select.js\",\"@clayui/nav\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$nav.js\",\"@clayui/provider\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$provider.js\",\"@clayui/panel\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$panel.js\",\"@clayui/list\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$list.js\",\"@liferay/dynamic-data-mapping-form-field-type\":\"/o/dynamic-data-mapping-form-field-type/__liferay__/index.js\",\"@clayui/date-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$date-picker.js\",\"@clayui/label\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$label.js\",\"@liferay/frontend-js-api/data-set\":\"/o/frontend-js-dependencies-web/__liferay__/exports/@liferay$js-api$data-set.js\",\"@clayui/core\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$core.js\",\"@clayui/pagination-bar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$pagination-bar.js\",\"@clayui/layout\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$layout.js\",\"@clayui/multi-step-nav\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$multi-step-nav.js\",\"@liferay/frontend-js-api\":\"/o/frontend-js-dependencies-web/__liferay__/exports/@liferay$js-api.js\",\"@clayui/toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$toolbar.js\",\"@clayui/badge\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$badge.js\",\"react-dom-18\":\"/o/frontend-js-react-web/__liferay__/exports/react-dom-18.js\",\"@clayui/link\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$link.js\",\"@clayui/card\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$card.js\",\"@clayui/tooltip\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$tooltip.js\",\"@clayui/button\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$button.js\",\"@clayui/tabs\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$tabs.js\",\"@clayui/sticker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$sticker.js\",\"@clayui/form\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$form.js\",\"@clayui/popover\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$popover.js\",\"@clayui/shared\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$shared.js\",\"@clayui/localized-input\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$localized-input.js\",\"@clayui/modal\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$modal.js\",\"@clayui/color-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$color-picker.js\",\"@clayui/pagination\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$pagination.js\",\"@clayui/autocomplete\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$autocomplete.js\",\"@clayui/management-toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$management-toolbar.js\",\"@clayui/time-picker\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$time-picker.js\",\"@clayui/upper-toolbar\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$upper-toolbar.js\",\"@clayui/loading-indicator\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$loading-indicator.js\",\"@clayui/drop-down\":\"/o/frontend-taglib-clay/__liferay__/exports/@clayui$drop-down",
+  "tablas": []
  }
 }
