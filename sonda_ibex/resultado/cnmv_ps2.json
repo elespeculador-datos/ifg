@@ -1,0 +1,79 @@
+{
+ "https://www.cnmv.es/portal/Consultas/Busqueda?id=7&nif=A48010615": {
+  "http": 200,
+  "final": "https://www.cnmv.es/portal/Consultas/Busqueda?id=7&nif=A48010615",
+  "len": 215124,
+  "title": "CNMV - Participaciones Significativas y Autocartera en Sociedades cotizadas",
+  "tablas": [],
+  "enlaces": [
+   [
+    "Español",
+    "https://www.cnmv.es/portal/consultas/busqueda?id=7&nif=A48010615&lang=es"
+   ],
+   [
+    "English",
+    "https://www.cnmv.es/portal/consultas/busqueda?id=7&nif=A48010615&lang=en"
+   ],
+   [
+    "Català",
+    "https://www.cnmv.es/portal/consultas/busqueda?id=7&nif=A48010615&lang=ca"
+   ],
+   [
+    "Euskara",
+    "https://www.cnmv.es/portal/consultas/busqueda?id=7&nif=A48010615&lang=eu"
+   ],
+   [
+    "Galego",
+    "https://www.cnmv.es/portal/consultas/busqueda?id=7&nif=A48010615&lang=gl"
+   ],
+   [
+    "Participaciones significativas y autocartera",
+    "busqueda.aspx?id=7"
+   ],
+   [
+    "Servicios de financiación participativa",
+    "Servicios-Financiacion-Participativa/Indice.aspx"
+   ],
+   [
+    "Plataformas de financiación participativa no armonizadas",
+    "Servicios-Financiacion-Participativa/Listado-PFP-No-Armonizadas.aspx"
+   ],
+   [
+    "Proveedores de servicios de financiación participativa",
+    "Servicios-Financiacion-Participativa/Listado-Proveedores.aspx"
+   ],
+   [
+    "Proveedores de servicios de financiación participativa europeos que pr",
+    "Servicios-Financiacion-Participativa/Listado-Proveedores-Europeos.aspx"
+   ],
+   [
+    "Servicios de financiación participativa",
+    "../legislacion/modelosn/modelosn.aspx?id=PFP"
+   ]
+  ]
+ },
+ "https://www.cnmv.es/portal/Consultas/EE/ParticipacionesSignificativas?nif=A48010615": {
+  "http": 403,
+  "final": "https://www.cnmv.es/portal/Error?errorcode=CVFE",
+  "len": 12266,
+  "title": "CNMV - Error",
+  "tablas": [],
+  "enlaces": []
+ },
+ "https://www.cnmv.es/portal/consultas/participacionessignificativas?nif=A48010615": {
+  "http": 403,
+  "final": "https://www.cnmv.es/portal/Error?errorcode=CVFE",
+  "len": 12266,
+  "title": "CNMV - Error",
+  "tablas": [],
+  "enlaces": []
+ },
+ "https://www.cnmv.es/portal/Consultas/EE/ParticipacionesSignificativasAutocartera?nif=A48010615": {
+  "http": 403,
+  "final": "https://www.cnmv.es/portal/Error?errorcode=CVFE",
+  "len": 12266,
+  "title": "CNMV - Error",
+  "tablas": [],
+  "enlaces": []
+ }
+}
