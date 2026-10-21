@@ -51,7 +51,7 @@ TOLERANCIA_VARIACION = 0.02   # diferencia máxima entre la variación de BME y 
 # Clases que cotizan en el mercado continuo pero no vienen en la lista de cotizadas de BME: ISIN -> companyKey de la empresa
 CLASES_FUERA_DE_LISTA = {"ES0171996095": "71996"}  # Grifols, clase B
 NOTAS_CLASE = {"ES0171996087": "clases A y B", "ES0105777017": "solo la clase B, la única que cotiza"}
-NOTAS_SEDE = {"NL0015001FS8": "Sede en Países Bajos desde 2023"}
+NOTAS_SEDE = {"NL0015001FS8": "Domicilio social en Países Bajos desde 2023"}
 
 
 class DatosRaros(Exception):
@@ -263,7 +263,7 @@ def fragmento(lista: list[dict], fecha: str) -> str:
               f"en {anio} ni las que llevan más de dos semanas sin cotizar. Variación desde el último cierre de {int(anio) - 1}, "
               f"solo por precio.</p>")
     filas_ext = "\n".join(f"<tr><td>{html.escape(e['nombre'])}{' <small>(IBEX 35)</small>' if e['ibex35'] else ''}</td>"
-                          f"<td>{_num(e['capitalizacion'] / 1e6)}</td><td>{html.escape(NOTAS_SEDE.get(e['isin'], 'Sede fuera de España'))}</td></tr>"
+                          f"<td>{_num(e['capitalizacion'] / 1e6)}</td><td>{html.escape(NOTAS_SEDE.get(e['isin'], 'Domicilio social fuera de España'))}</td></tr>"
                           for e in ext)
     return (f"<!-- capitalizacion:inicio {fecha} -->\n"
             f"{resumen(lista, fecha)}\n"
@@ -274,7 +274,7 @@ def fragmento(lista: list[dict], fecha: str) -> str:
             f"<h2>En el IBEX 35, las cinco que más suben y las cinco que más bajan en {anio}</h2>\n"
             + tabla(cab_corta, corta(ib_suben) + "\n" + corta(ib_bajan)) + "\n"
             f"<h2>Empresas extranjeras que cotizan en el mercado continuo</h2>\n"
-            f"<p>No entran en la clasificación porque tienen la sede fuera de España, aunque cotizan en las bolsas españolas.</p>\n"
+            f"<p>No entran en la clasificación porque tienen el domicilio social fuera de España, aunque cotizan en las bolsas españolas.</p>\n"
             + tabla(["Empresa", millones, "Nota"], filas_ext) + "\n"
             f'<p class="has-small-font-size">Datos al cierre del {_f(fecha)}. Fuente: BME, lista de cotizadas del mercado continuo, '
             f'ficha e histórico de precios de cada valor. Variación del año: solo precio, sin dividendos. '
