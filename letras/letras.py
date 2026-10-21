@@ -53,6 +53,7 @@ PAGINA_WP = "https://elespeculador.com/letras-del-tesoro/"
 METODOLOGIA = PAGINA_WP + "#como-se-hace"
 PAGES = "https://elespeculador-datos.github.io/ifg/letras/"
 PLAZOS = (3, 6, 9, 12)
+TEXTOS = "2"  # súbelo al cambiar los textos fijos del fragmento, para que el escenario de Make los copie
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre",
          "diciembre"]
 
@@ -302,6 +303,7 @@ def huella(datos: dict) -> str:
     base = [[f["fecha"], f["plazo"], f.get("marginal"), f.get("medio")] for f in datos["subastas"][-60:]]
     base.append([[c["subasta"], c["peticiones"]] for c in datos["proximas"][:4]])
     base.append(datos["tenedores"]["ultimo"])
+    base.append(TEXTOS)
     return hashlib.sha256(json.dumps(base, sort_keys=True).encode()).hexdigest()[:12]
 
 
@@ -345,10 +347,11 @@ def fragmento(datos: dict, fecha: str) -> str:
     prox = [c for c in datos["proximas"] if c["subasta"] >= fecha][:6]
     if prox:
         partes += ["<h2>Las próximas subastas</h2>",
-                   "<p>La columna de peticiones es el plazo del calendario del Tesoro para los particulares con Cuenta Directa "
-                   "en el Banco de España: antes de las 14:00 (hora peninsular) de ese día. Quien compre a través de un banco o un "
-                   "bróker tiene el plazo que fije su entidad.</p>",
-                   _tabla(["Subasta", "Plazos", "Peticiones con Cuenta Directa, hasta el", "Emisión"],
+                   "<p>La columna de peticiones es el plazo del calendario del Tesoro para los particulares que piden en persona "
+                   "en el Banco de España, con Cuenta Directa: antes de las 14:00 (hora peninsular) de ese día. Por internet, en la "
+                   "web del Tesoro, el mismo calendario pide presentar la petición como mínimo una semana antes de la subasta. "
+                   "Quien compre a través de un banco o un bróker tiene el plazo que fije su entidad.</p>",
+                   _tabla(["Subasta", "Plazos", "Peticiones en el Banco de España, hasta el", "Emisión"],
                           [[_f(c["subasta"]), " y ".join(f"{p}" for p in c["plazos"]) + " meses", _f(c["peticiones"]),
                             _f(c["emision"])] for c in prox])]
     # evolución: tipo medio de cada subasta de 12 meses en los últimos 24 meses
