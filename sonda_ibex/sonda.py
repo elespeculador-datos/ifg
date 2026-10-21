@@ -1,4 +1,4 @@
-"""Sonda temporal 41: estructura de los históricos de subastas del Tesoro (xlsx) y del calendario 2026 (pdf)."""
+"""Sonda temporal 42 (estadísticas 07-19 y subastas anteriores). 41: estructura de los históricos de subastas del Tesoro (xlsx) y del calendario 2026 (pdf)."""
 import json, re, ssl, socket, subprocess, tempfile, io, sys
 subprocess.run([sys.executable, "-m", "pip", "install", "-q", "openpyxl"], check=False)
 from pathlib import Path
@@ -25,7 +25,7 @@ def bundle(host):
 s = requests.Session(); s.headers.update(H); s.verify = bundle("www.tesoro.es")
 BASE = "https://www.tesoro.es/documents/d/tesoro/"
 res = {}
-for nombre in ["historico_subastas-xlsx", "historico_t-marg-xlsx", "historico_t-int-medio-xlsx", "01-xlsx", "02-xlsx", "03-xlsx", "04-xlsx", "05-xlsx", "06-xlsx"]:
+for nombre in ["%02d-xlsx" % i for i in range(7, 20)]:
     try:
         r = s.get(BASE + nombre, timeout=90)
         info = {"http": r.status_code, "tipo": r.headers.get("content-type"), "len": len(r.content)}
@@ -34,17 +34,21 @@ for nombre in ["historico_subastas-xlsx", "historico_t-marg-xlsx", "historico_t-
             xl = pd.ExcelFile(io.BytesIO(r.content))
             info["hojas"] = {}
             for h in xl.sheet_names[:8]:
-                df = xl.parse(h, header=None, nrows=40)
-                info["hojas"][h] = {"forma": list(df.shape), "filas": df.fillna("").astype(str).values.tolist()[:40]}
+                df = xl.parse(h, header=None)
+                info["hojas"][h] = {"forma": list(df.shape), "filas": df.fillna("").astype(str).values.tolist()[:12] + [["..."]] + df.fillna("").astype(str).values.tolist()[-14:]}
         res[nombre] = info
     except Exception as e:  # noqa: BLE001
         res[nombre] = {"error": str(e)[:300]}
 try:
-    r = s.get(BASE + "calendario-tesoro-publico-2026-espanol-12-pdf", timeout=90)
-    p = OUT / "calendario2026.pdf"; p.write_bytes(r.content)
-    txt = subprocess.run(["pdftotext", "-layout", str(p), "-"], capture_output=True, text=True).stdout
-    res["calendario2026"] = {"http": r.status_code, "len": len(r.content), "texto": txt[:60000]}
+    r = s.get("https://www.tesoro.es/deuda-publica/subastas/resultados-subastas-anteriores", timeout=90)
+    t = r.text
+    i = t.find("Resultados subastas anteriores", t.find("<main"))
+    (OUT / "anteriores.html").write_text(t)
+    forms = re.findall(r"<form.*?</form>", t, re.S)
+    res["anteriores"] = {"http": r.status_code, "forms": [f[:3000] for f in forms if "subasta" in f.lower() or "anio" in f.lower() or "year" in f.lower()][:3],
+                         "selects": re.findall(r"<select.*?</select>", t, re.S)[:4],
+                         "api": sorted(set(re.findall(r"/o/[a-zA-Z0-9_\-/]+", t)))[:60]}
 except Exception as e:  # noqa: BLE001
-    res["calendario2026"] = {"error": str(e)[:300]}
+    res["anteriores"] = {"error": str(e)[:300]}
 (OUT / "tesoro_hist.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
 print("ok")
