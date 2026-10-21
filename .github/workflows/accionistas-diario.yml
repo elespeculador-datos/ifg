@@ -1,0 +1,70 @@
+name: Accionistas del IBEX 35
+
+# Los accionistas significativos de cada empresa del IBEX 35, del registro de
+# participaciones significativas de la CNMV (la lista de las 35 sale de BME). Una
+# pasada cada día laborable, de madrugada (UTC). Solo lee y escribe accionistas/ y
+# docs/accionistas/; no toca el IFG ni los demás activos.
+on:
+  schedule:
+    - cron: "45 5 * * 2-6"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: accionistas-diario
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install requests
+      - name: Consultar la CNMV y preparar los archivos
+        run: python accionistas/duenos.py --salida docs/accionistas
+      - name: Guardar el resultado en el repositorio
+        run: |
+          if [ -z "$(git status --porcelain docs/accionistas)" ]; then
+            echo "Sin cambios."
+            exit 0
+          fi
+          git config user.name "Accionistas bot"
+          git config user.email "actions@github.com"
+          git add docs/accionistas
+          git commit -m "Accionistas del IBEX 35 $(date -u +%Y-%m-%d)"
+          git pull --rebase --autostash
+          git push
+
+      - name: Abrir incidencia si ha fallado
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=accionistas-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          cuerpo="La actualización de los accionistas del IBEX 35 del $(date -u +%Y-%m-%d) ha fallado. Registro: $EJECUCION. La página sigue mostrando la última actualización buena con su fecha. Lo más probable: la web de la CNMV no respondía o ha cambiado el formulario de búsqueda."
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="$cuerpo" >/dev/null
+          else
+            gh api --method POST "repos/${{ github.repository }}/labels" -f name=accionistas-fallido -f color=b60205 -f description="Los accionistas del IBEX 35 no se han actualizado" >/dev/null 2>&1 || true
+            gh api --method POST "repos/${{ github.repository }}/issues" -f title="Los accionistas del IBEX 35 no se han actualizado el $(date -u +%Y-%m-%d)" -f body="$cuerpo" -f 'labels[]=accionistas-fallido' >/dev/null
+          fi
+      - name: Cerrar la incidencia si ya funciona
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=accionistas-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="Actualización correcta el $(date -u +%Y-%m-%d). Se cierra." >/dev/null
+            gh api --method PATCH "repos/${{ github.repository }}/issues/$abierta" -f state=closed >/dev/null
+          fi
