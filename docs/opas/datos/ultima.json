@@ -1,6 +1,6 @@
 {
- "fecha": "2026-10-20",
- "generado": "2026-10-20T17:58:58+00:00",
+ "fecha": "2026-10-21",
+ "generado": "2026-10-21T17:53:30+00:00",
  "opas": 220,
  "desde": "2000-01-26",
  "ultima": {
@@ -10,5 +10,5 @@
   "resultado": "Positivo"
  },
  "fuente": "BME, registro de OPAs (CorporateActions/TakeoverBids)",
- "licencia": "CC BY 4.0 · El Especulador"
+ "licencia": "Sin licencia abierta: datos de origen de BME, sujetos a sus condiciones. Cita: El Especulador, a partir de datos de BME"
 }
