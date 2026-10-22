@@ -1,11 +1,11 @@
 {
- "fecha": "2026-10-20",
- "cierre": 19092.4,
- "variacion_dia_pct": 0.28,
- "rentabilidad_anio_pct": 10.31,
+ "fecha": "2026-10-21",
+ "cierre": 19323.5,
+ "variacion_dia_pct": 1.21,
+ "rentabilidad_anio_pct": 11.65,
  "cierre_anio_anterior": 17307.8,
- "rentabilidad_mes_pct": -1.72,
- "rentabilidad_12m_pct": 20.62,
+ "rentabilidad_mes_pct": -0.53,
+ "rentabilidad_12m_pct": 22.56,
  "maximo_historico_cierre": {
   "valor": 20213.6,
   "fecha": "2026-08-11"
@@ -14,9 +14,9 @@
   "valor": 20356.5,
   "fecha": "2026-08-13"
  },
- "distancia_maximo_pct": -5.55,
+ "distancia_maximo_pct": -4.4,
  "maximos_historicos_en_el_anio": 29,
  "fuente": "BME, cierres oficiales del IBEX 35",
- "generado": "2026-10-21T03:28:23+00:00",
+ "generado": "2026-10-22T05:46:00+00:00",
  "licencia": "Sin licencia abierta: cierres de origen de BME, sujetos a sus condiciones. Cita: El Especulador, a partir de datos de BME"
 }
