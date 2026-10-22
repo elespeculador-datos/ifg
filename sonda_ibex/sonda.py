@@ -1,25 +1,43 @@
-"""Sonda temporal 55: artículos sueltos de la Ley Concursal (BOE-A-2020-4859) y de la Ley de Sociedades de Capital (BOE-A-2010-10544) por la API del BOE."""
-import json, re, html
+"""Sonda temporal 56: salidas a bolsa. Empresas cotizadas del SIBE, ofertas públicas 2000-2026, admisiones y exclusiones del último año
+y precios históricos (cinco años) de las salidas recientes, de la API de BME."""
+import json, re, time
 from pathlib import Path
 import requests
 OUT = Path("sonda_ibex/resultado"); OUT.mkdir(parents=True, exist_ok=True)
 for f in OUT.rglob("*"):
     if f.is_file():
         f.unlink()
-H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Accept": "application/xml"}
-PEDIDOS = {"BOE-A-2020-4859": ["a5", "a1-18", "a1-19", "a1-20", "a1-39", "a1-40", "a1-41", "a2-81", "a2-92", "a2-93",
-                               "a4-41", "a4-42", "a4-45", "a4-47", "a4-48", "a4-49", "a4-55", "a4-56", "a4-57", "a4-58", "a4-59", "a4-60"],
-           "BOE-A-2010-10544": ["a363", "a365", "a367"]}
-res = {}
-for ley, bloques in PEDIDOS.items():
-    for b in bloques:
-        u = f"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/{ley}/texto/bloque/{b}"
+API = "https://apiweb.bolsasymercados.es/Market/v1/EQ/"
+H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Referer": "https://www.bolsasymercados.es/", "Accept": "application/json"}
+def get(ruta, params):
+    for i in range(3):
         try:
-            r = requests.get(u, headers=H, timeout=90)
-            vers = re.findall(r"<version[^>]*>(.*?)</version>", r.text, re.S)
-            t = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", vers[-1] if vers else r.text))).strip()
-            res[f"{ley}/{b}"] = {"http": r.status_code, "texto": t[:8000]}
+            r = requests.get(API + ruta, params=params, headers=H, timeout=60)
+            if r.status_code == 200:
+                return r.json()
+            err = f"http {r.status_code} {r.text[:200]}"
         except Exception as e:  # noqa: BLE001
-            res[f"{ley}/{b}"] = {"error": str(e)[:200]}
-(OUT / "boe_articulos.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
-print("ok")
+            err = str(e)[:200]
+        time.sleep(3)
+    return {"error": err}
+res = {}
+res["listed"] = get("ListedCompanies", {"tradingSystem": "SIBE", "page": 0, "pageSize": 0})
+res["offerings"] = get("CorporateActions/PublicOfferings", {"from": "20000101", "to": "20261231", "page": 0, "pageSize": 0})
+res["newlistings"] = get("CorporateActions/NewListings", {"from": "20000101", "to": "20261231", "page": 0, "pageSize": 0})
+res["delistings"] = get("CorporateActions/Delistings", {"from": "20000101", "to": "20261231", "page": 0, "pageSize": 0})
+listed = res["listed"].get("data", []) if isinstance(res["listed"], dict) else []
+objetivo = re.compile(r"PUIG|HBX|CIRSA|ACCIONA ENER|ECOENER|OPDENERG|LINEA DIRECTA|L[IÍ]NEA DIRECTA|SOLTEC|INMOCEMENTO|ARIMA|NEINOR|AEDAS|METROVACESA|UNICAJA", re.I)
+hist = {}
+nuevos = set()
+for d in (res["newlistings"].get("data", []) if isinstance(res["newlistings"], dict) else []):
+    for k in ("isin", "shareIsin", "ISIN"):
+        if d.get(k):
+            nuevos.add(d[k])
+for c in listed:
+    if objetivo.search(c.get("name", "") + " " + c.get("shareName", "")) or c.get("isin") in nuevos:
+        j = get("HistoricalSharesPrices", {"isin": c["isin"], "from": "20211001", "to": "20261231", "page": 0, "pageSize": 0})
+        hist[c["isin"]] = {"name": c.get("name"), "shareName": c.get("shareName"), "resp": j}
+        time.sleep(1)
+res["hist"] = hist
+(OUT / "salidas.json").write_text(json.dumps(res, ensure_ascii=False))
+print("ok", len(listed), len(hist))
