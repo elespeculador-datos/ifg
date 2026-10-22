@@ -1,0 +1,84 @@
+name: Salidas a bolsa diario
+
+# Salidas a bolsa en España desde 2000 (El Especulador): registro curado en
+# salidas_bolsa/registro.csv y, cada día hábil, estado y precios de BME. Solo escribe
+# si cambia algo. Solo lee y escribe salidas_bolsa/ y docs/salidas_bolsa/; no toca el IFG
+# ni los demás datos. Si hay algo que revisar a mano (una admisión nueva, una
+# empresa que deja de estar en el SIBE), abre una incidencia «salidas-revisar».
+on:
+  schedule:
+    - cron: "45 17 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: salidas-bolsa-diario
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install pandas requests
+      - name: Comprobar y publicar
+        run: python salidas_bolsa/salidas.py
+      - name: Guardar el resultado en el repositorio
+        run: |
+          if [ -z "$(git status --porcelain docs/salidas_bolsa)" ]; then
+            echo "Sin cambios."
+            exit 0
+          fi
+          git config user.name "Salidas bot"
+          git config user.email "actions@github.com"
+          git add docs/salidas_bolsa
+          git commit -m "Salidas a bolsa $(date -u +%Y-%m-%d)"
+          git pull --rebase --autostash
+          git push
+
+      - name: Avisar de lo que hay que revisar a mano
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          n=$(python -c "import json;print(len(json.load(open('docs/salidas_bolsa/datos/avisos.json'))))" 2>/dev/null || echo 0)
+          [ "$n" = "0" ] && exit 0
+          cuerpo=$(python -c "import json;print('\\n'.join('- '+a for a in json.load(open('docs/salidas_bolsa/datos/avisos.json'))))")
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=salidas-revisar" --jq '.[0].number // empty' 2>/dev/null || true)
+          if [ -z "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/labels" -f name=salidas-revisar -f color=fbca04 -f description="Registro de salidas a bolsa: revisar a mano" >/dev/null 2>&1 || true
+            gh api --method POST "repos/${{ github.repository }}/issues" -f title="Salidas a bolsa: hay algo que revisar a mano" -f body="$(printf "%b" "$cuerpo")" -f 'labels[]=salidas-revisar' >/dev/null
+          fi
+      - name: Abrir incidencia si ha fallado
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=salidas-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          cuerpo="La comprobación del registro de salidas a bolsa del $(date -u +%Y-%m-%d) ha fallado. Registro: $EJECUCION. La página sigue mostrando la última versión buena. Lo más probable: la API de BME no respondía o ha cambiado de formato."
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="$cuerpo" >/dev/null
+          else
+            gh api --method POST "repos/${{ github.repository }}/labels" -f name=salidas-fallido -f color=b60205 -f description="El registro de salidas a bolsa no se ha actualizado" >/dev/null 2>&1 || true
+            gh api --method POST "repos/${{ github.repository }}/issues" -f title="El registro de salidas a bolsa no se ha actualizado el $(date -u +%Y-%m-%d)" -f body="$cuerpo" -f 'labels[]=salidas-fallido' >/dev/null
+          fi
+      - name: Cerrar la incidencia si ya funciona
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=salidas-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="Comprobación correcta el $(date -u +%Y-%m-%d). Se cierra." >/dev/null
+            gh api --method PATCH "repos/${{ github.repository }}/issues/$abierta" -f state=closed >/dev/null
+          fi
