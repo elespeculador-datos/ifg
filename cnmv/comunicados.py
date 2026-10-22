@@ -450,6 +450,92 @@ def listado_html(c: pd.DataFrame, clave: str, titulo: str, hoy: pd.Timestamp, se
             f"<!-- cnmv-listado:fin -->\n")
 
 
+# --------------------------------------------------------------------------- bloque de la ficha de cada empresa
+NOMBRE_CAJA = {"resultados": "Resultados", "dividendos": "Dividendos", "recompras": "Recompra",
+               "opvs-ampliaciones": "Ampliación u OPV"}
+FICHA_COMUNICADOS = 8   # líneas de comunicados en cada ficha
+
+
+def _comunicados_empresa(c: pd.DataFrame, isin: str, hoy: pd.Timestamp) -> list[dict]:
+    x = c[c["isin"] == isin]
+    out = []
+    for clave, _, _ in CAJAS:
+        for r in entradas(x, clave, hoy, DIAS_LISTADO):
+            out.append({**r, "caja": clave})
+    out.sort(key=lambda r: r["fecha"], reverse=True)
+    return out
+
+
+def ficha_html(c: pd.DataFrame, emp: pd.Series, hoy: pd.Timestamp, sello: str, inicio: pd.Timestamp,
+               prox: pd.DataFrame | None, rent: pd.DataFrame | None, hist: pd.DataFrame | None) -> str:
+    """Bloque para la ficha de una empresa en elespeculador.com/ibex35/<ficha>/: comunicados a la CNMV y
+    dividendos, en listas sin imágenes con las mismas clases que el resto de la ficha (ef-card, ef-news, ef-note)."""
+    nombre = emp["nombre"]
+    lineas = []
+    for r in _comunicados_empresa(c, emp["isin"], hoy)[:FICHA_COMUNICADOS]:
+        tipo = r["etiqueta"] if r["caja"] == "resultados" else NOMBRE_CAJA[r["caja"]] if r["caja"] != "dividendos" else r["etiqueta"]
+        extra = f" ({r['n']} comunicados)" if r["n"] > 1 else ""
+        lineas.append(f'<li><time>{_f(r["fecha"])}</time><span><a href="{_e(r["enlace"])}" target="_blank" rel="noopener nofollow">'
+                      f'{_e(_corto(r["texto"], 150))}</a><br><small>{_e(tipo)}{_e(extra)}</small></span></li>')
+    if lineas:
+        lista = '<ul class="ef-news">\n' + "\n".join(lineas) + "\n</ul>"
+    else:
+        cuando = ("en los últimos doce meses" if hoy - inicio >= pd.Timedelta(days=DIAS_LISTADO)
+                  else f'desde el {inicio.strftime("%d/%m/%Y")}, cuando empieza este registro')
+        lista = f'<p>{_e(nombre)} no ha comunicado a la CNMV resultados, dividendos, recompras ni ampliaciones {cuando}.</p>'
+    enlaces = " · ".join(f'<a href="{LISTADOS[k][0]}">{_e(t)}</a>' for k, t, _ in CAJAS)
+    bloques = [f'<div class="ef-card">\n<h2>Comunicados de {_e(nombre)} a la CNMV</h2>\n{lista}\n'
+               f'<p class="ef-note">Resultados, dividendos, recompras y ampliaciones de los últimos doce meses. '
+               f'Los comunicados de una misma operación salen en una línea. Todas las empresas del IBEX 35: {enlaces}.</p>\n</div>']
+
+    div = []
+    if prox is not None:
+        p = prox[(prox["isin"] == emp["isin"]) & (pd.to_datetime(prox["fecha_ex"]) >= hoy)].sort_values("fecha_ex")
+        for r in p.itertuples():
+            tipo = "dividendo flexible" if str(r.flexible) == "True" else ("dividendo extraordinario" if str(r.extraordinario) == "True" else "dividendo")
+            pago = f", se paga el {_f(r.fecha_pago)}" if isinstance(r.fecha_pago, str) and r.fecha_pago else ""
+            div.append(f'<li><time>{_f(r.fecha_ex)}</time><span><strong>Próximo:</strong> {_euros(r.bruto, r.moneda)} brutos por acción '
+                       f'({_e(tipo)}{" " + _e(r.concepto) if isinstance(r.concepto, str) and r.concepto else ""}). '
+                       f'Fecha ex el {_f(r.fecha_ex)}{pago}.</span></li>')
+    if hist is not None:
+        hh = hist[(hist["isin"] == emp["isin"]) & (pd.to_datetime(hist["fecha_ex"]) < hoy)].sort_values("fecha_ex", ascending=False).head(6)
+        for r in hh.itertuples():
+            tipo = "flexible" if str(r.flexible) == "True" else ("extraordinario" if str(r.extraordinario) == "True" else "")
+            conc = " · ".join(x for x in [r.concepto if isinstance(r.concepto, str) else "", tipo] if x)
+            div.append(f'<li><time>{_f(r.fecha_ex)}</time><span>{_euros(r.bruto, r.moneda)} brutos por acción'
+                       f'{" (" + _e(conc) + ")" if conc else ""}</span></li>')
+    resumen = ""
+    if rent is not None:
+        rr = rent[rent["isin"] == emp["isin"]]
+        if not rr.empty:
+            r = rr.iloc[0]
+            veces = "un pago" if int(r.pagos) == 1 else f"{int(r.pagos)} pagos"
+            resumen = (f"<p>En los últimos doce meses ha repartido {_euros(r.bruto_ordinario, r.moneda)} brutos por acción "
+                       f"de dividendo ordinario en {veces}, un {_pct(r.rentabilidad_ordinaria_pct)} sobre el cierre del {_f(r.fecha_cierre)}.</p>")
+    if div or resumen:
+        bloques.append(f'<div class="ef-card">\n<h2>Dividendos de {_e(nombre)}</h2>\n{resumen}\n'
+                       + ('<ul class="ef-news">\n' + "\n".join(div) + "\n</ul>\n" if div else "")
+                       + f'<p class="ef-note">Fechas e importes: El Especulador, a partir de datos de BME. '
+                         f'<a href="{LISTADOS["dividendos"][0]}">Dividendos de todo el IBEX 35</a>.</p>\n</div>')
+    return (f"<!-- ficha-cnmv:inicio {emp['ficha']} {sello} -->\n" + "\n".join(bloques) + "\n<!-- ficha-cnmv:fin -->\n")
+
+
+def fichas(c: pd.DataFrame, e: pd.DataFrame, hoy: pd.Timestamp, sello: str, inicio: pd.Timestamp) -> int:
+    def leer(n):
+        try:
+            return pd.read_csv(DIVIDENDOS_BME / n, dtype={"isin": str})
+        except (FileNotFoundError, pd.errors.EmptyDataError):
+            return None
+    prox, rent, hist = leer("proximos.csv"), leer("rentabilidad.csv"), leer("dividendos.csv")
+    carpeta = SALIDA / "empresas"
+    carpeta.mkdir(parents=True, exist_ok=True)
+    for emp in e.to_dict("records"):
+        frag = ficha_html(c, pd.Series(emp), hoy, sello, inicio, prox, rent, hist)
+        assert "$" not in frag
+        (carpeta / f"{emp['ficha']}.html").write_text(frag, encoding="utf-8")
+    return len(e)
+
+
 def pagina(c: pd.DataFrame, hoy: pd.Timestamp, sello: str) -> str:
     secciones = []
     for clave, titulo, desc in CAJAS:
@@ -512,6 +598,7 @@ def escribir(h: pd.DataFrame, c: pd.DataFrame, e: pd.DataFrame, nuevos: int, for
         (SALIDA / f"listado-{clave}.html").write_text(lst, encoding="utf-8")
     assert "$" not in cajas
     (SALIDA / "cajas.html").write_text(cajas, encoding="utf-8")
+    fichas(c, e, hoy, sello, inicio)
     (SALIDA / "index.html").write_text(pagina(c, hoy, sello), encoding="utf-8")
     (DATOS / "ultima.json").write_text(json.dumps({
         "actualizado": sello, "generado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
