@@ -70,7 +70,7 @@ DIAS_LISTADO = 365      # antigüedad máxima de lo que sale en las páginas de 
 DIVIDENDOS_BME = RAIZ / "docs" / "dividendos" / "datos"   # datos del calendario de dividendos (fuente: BME)
 # Páginas de elespeculador.com con el listado completo de cada tipo (shortcode espec_cnmv_listado) y texto del botón
 # que lleva a ellas desde cada recuadro. Con BOTONES = False el botón no se publica (páginas aún en borrador).
-BOTONES = False
+BOTONES = True
 LISTADOS = {
     "resultados": ("https://elespeculador.com/ibex-35/resultados/", "Ver todos los resultados"),
     "dividendos": ("https://elespeculador.com/ibex-35/dividendos/", "Ver todos los dividendos"),
@@ -126,11 +126,13 @@ def leer_canal(xml: str, canal: str) -> list[dict]:
 
 def _bajar(canal: str, url: str) -> str:
     ultimo = ""
-    for intento in range(4):
+    # Presupuesto acotado: 3 intentos de hasta 40 s más 30 s de espera por canal (unos 2,5 min), para que los dos
+    # canales quepan con holgura en el tiempo máximo del flujo aunque la CNMV vaya lenta.
+    for intento in range(3):
         if intento:
-            time.sleep(20 * intento)
+            time.sleep(10 * intento)
         try:
-            r = requests.get(url, headers=CABECERAS, timeout=(15, 45))
+            r = requests.get(url, headers=CABECERAS, timeout=(10, 30))
         except requests.RequestException as e:
             ultimo = f"{type(e).__name__}: {e}"
             continue
@@ -138,7 +140,7 @@ def _bajar(canal: str, url: str) -> str:
             r.encoding = "utf-8"
             return r.text
         ultimo = f"HTTP {r.status_code}: {r.text[:200]!r}"
-    raise DatosRaros(f"La CNMV no responde en el canal {canal} tras 4 intentos ({ultimo})")
+    raise DatosRaros(f"La CNMV no responde en el canal {canal} tras 3 intentos ({ultimo})")
 
 
 def descargar() -> list[dict]:
@@ -228,14 +230,19 @@ def clasificar(categoria: str, texto: str) -> tuple[str, str] | None:
     if _hay(t, " resultados ", " resultado ") and _hay(t, " fecha ", " calendario ", " presentara ", " publicara ") \
             and _hay(t, " publicacion ", " presentacion ", " calendario ", " presentara ", " publicara "):
         return "resultados", "Fecha de resultados"
-    if _hay(todo, " resultados ", " cuentas ", " informe financiero ", " beneficio ") and re.search(
-            r"\b(trimestre|trimestral|semestre|semestral|ejercicio|anual|anuales|nueve meses|9m|[1-4]t(\d\d)?|[12]s(\d\d)?|situacion financiera)\b", todo):
+    # «Aena anuncia la celebración de la presentación de resultados…», «Anuncio webcast seguimiento de la actividad 9M»
+    trimestral = r"\b(trimestre|trimestral|semestre|semestral|nueve meses|9m|[1-4]t(\d\d)?|q[1-4]|[12]s(\d\d)?|h[12])\b"
+    if re.search(r"\b(anuncia|anuncio|convoca|convocatoria|celebracion|webcast)\b", t) and \
+            (_hay(t, " resultados ") or re.search(trimestral, t)):
+        return "resultados", "Fecha de resultados"
+    if _hay(todo, " resultados ", " cuentas ", " informe financiero ", " informacion financiera ", " beneficio ") and re.search(
+            r"\b(trimestre|trimestral|semestre|semestral|ejercicio|anual|anuales|nueve meses|9m|[1-4]t(\d\d)?|q[1-4]|[12]s(\d\d)?|h[12]|situacion financiera)\b", t):
         return "resultados", "Resultados"
     return None
 
 
-PERIODOS = [(r"\b(primer|1er) trimestre\b|\b1t(\d\d)?\b", "1T"), (r"\bsegundo trimestre\b|\b2t(\d\d)?\b", "2T"),
-            (r"\b(tercer|3er) trimestre\b|\b3t(\d\d)?\b|\bnueve meses\b|\b9m\b", "3T"), (r"\bcuarto trimestre\b|\b4t(\d\d)?\b", "4T"),
+PERIODOS = [(r"\b(primer|1er) trimestre\b|\b1t(\d\d)?\b|\bq1\b", "1T"), (r"\bsegundo trimestre\b|\b2t(\d\d)?\b|\bq2\b", "2T"),
+            (r"\b(tercer|3er) trimestre\b|\b3t(\d\d)?\b|\bq3\b|\bnueve meses\b|\b9m\b", "3T"), (r"\bcuarto trimestre\b|\b4t(\d\d)?\b|\bq4\b", "4T"),
             (r"\b(primer )?semestre\b|\b1s(\d\d)?\b|\bh1\b", "1S"), (r"\b(ejercicio|anuales?|anual)\b", "año")]
 
 
