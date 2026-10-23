@@ -41,6 +41,14 @@ mide en cada ejecución y se escribe en docs/revisiones.csv, que es público.
 Esa es la política de revisiones del índice y debe figurar en la
 metodología.
 
+Y DESDE AHORA SE AVISA, no solo se anota. Medir la deriva y dejarla en un CSV
+no es vigilarla: nadie entra a mirar el CSV de un flujo que lleva meses
+saliendo bien. Cuando la deriva contradice un tramo ya publicado, o cuando es
+mayor que cualquiera registrada bajo esta versión, avisar_deriva() lo escribe
+en un marcador que el flujo convierte en una incidencia. No detiene la
+publicación: un dato cerrado sigue siendo inmutable. Solo deja de moverse el
+pasado a oscuras.
+
 LÍMITE CONOCIDO DE ESTA REGLA. El valor, la variación y el tramo quedan
 congelados. El desglose por componentes que acompaña al día (los "motores"
 de ifg.json y el desglose_nivel del panel) se recalcula, porque la serie de
@@ -101,6 +109,15 @@ COLUMNAS = ["ifg", "ifg_suavizado", "variacion", "tramo", "cobertura", "parcial"
 
 RUTA_COMPONENTES = f"{DIR_PUBLICO}/componentes.csv"
 CORRECCIONES = f"{DIR_PUBLICO}/correcciones.csv"
+
+# Marcador que lee el flujo para decidir si abre una incidencia por deriva.
+#
+# VA EN LA RAÍZ Y NO EN docs/ A PROPÓSITO. No es un dato publicado, es una
+# señal interna de una ejecución para el paso siguiente del mismo flujo. El
+# paso que guarda el resultado solo añade docs/ y datos/, así que este
+# archivo nunca llega al repositorio, que es exactamente lo que se quiere:
+# el aviso vive en la incidencia, no en el histórico.
+RUTA_AVISO_DERIVA = "aviso_deriva.json"
 
 # Sesiones que un valor incompleto sigue abierto a corrección.
 #
@@ -431,19 +448,211 @@ def archivar_componentes(final: pd.DataFrame, res: dict) -> int:
     return len(nuevo)
 
 
+CABECERA_REVISIONES = ("ejecutado,sesiones_comparadas,deriva_maxima,"
+                       "fecha_peor,sesiones_movidas,version")
+
+
+def migrar_revisiones() -> None:
+    """
+    Añade la columna de versión al registro de deriva si aún no la tiene.
+
+    POR QUÉ HACÍA FALTA. Una deriva sin versión al lado no se puede
+    interpretar: el 8,87 de la semana del 12 de octubre de 2026 se midió con
+    las reglas de la 0.9.0 y no es comparable con el 10,14 de la 0.10.0, pero
+    el archivo no lo decía. Comparar los dos como si fueran la misma magnitud
+    es justo el error que este índice no se puede permitir.
+
+    La migración es puramente de forma: no toca ninguna cifra ya escrita, solo
+    deja el campo vacío en las filas antiguas y el CSV rectangular en vez de
+    con filas de distinta longitud. En este repositorio las seis filas que
+    había se rellenaron a mano al introducir la columna, porque la versión de
+    cada una consta en el historial de git (la republicación a la 0.10.0 es
+    del 18 de octubre de 2026), así que no hubo que suponer nada. La función
+    se queda como red para cualquier copia que venga de antes.
+    """
+    if not os.path.exists(REVISIONES):
+        return
+    with open(REVISIONES, encoding="utf-8") as fh:
+        lineas = fh.read().splitlines()
+    if not lineas or lineas[0].strip() == CABECERA_REVISIONES:
+        return
+    cuerpo = [f"{l}," for l in lineas[1:] if l.strip()]
+    with open(REVISIONES, "w", encoding="utf-8") as fh:
+        fh.write("\n".join([CABECERA_REVISIONES] + cuerpo) + "\n")
+    log.info("Registro de deriva migrado: %d filas antiguas quedan sin "
+             "versión, que es lo que consta.", len(cuerpo))
+
+
+def deriva_maxima_registrada(version: str = None) -> float:
+    """
+    La mayor deriva anotada hasta ahora BAJO LA VERSIÓN EN CURSO.
+
+    Se usa como referencia para avisar solo cuando la deriva es peor que
+    nunca. Se mira antes de anotar la de hoy, así que no se compara consigo
+    misma. Las filas sin versión —las de antes de la migración— se dejan
+    fuera: no se sabe con qué reglas se midieron.
+    """
+    version = version or config.VERSION
+    if not os.path.exists(REVISIONES):
+        return float("nan")
+    try:
+        reg = pd.read_csv(REVISIONES)
+    except Exception as e:                                      # noqa: BLE001
+        log.warning("No se puede leer %s (%s). No hay referencia de deriva.",
+                    REVISIONES, e)
+        return float("nan")
+    if "version" not in reg.columns or reg.empty:
+        return float("nan")
+    propias = reg[reg["version"].astype(str) == str(version)]
+    if propias.empty:
+        return float("nan")
+    return float(pd.to_numeric(propias["deriva_maxima"],
+                               errors="coerce").max())
+
+
 def anotar_revision(deriva: pd.Series, generado: str) -> None:
     """Una fila por ejecución con el tamaño de la deriva observada."""
     if deriva.empty:
         return
+    migrar_revisiones()
     peor = deriva.abs().idxmax()
     linea = (f"{generado},{len(deriva)},{deriva.abs().max():.4f},"
-             f"{peor.date()},{int((deriva.abs() > 0.005).sum())}\n")
+             f"{peor.date()},{int((deriva.abs() > 0.005).sum())},"
+             f"{config.VERSION}\n")
     nuevo = not os.path.exists(REVISIONES)
     with open(REVISIONES, "a", encoding="utf-8") as fh:
         if nuevo:
-            fh.write("ejecutado,sesiones_comparadas,deriva_maxima,"
-                     "fecha_peor,sesiones_movidas\n")
+            fh.write(CABECERA_REVISIONES + "\n")
         fh.write(linea)
+
+
+def cruces_de_tramo(final: pd.DataFrame,
+                    recalculada: pd.DataFrame) -> pd.DataFrame:
+    """
+    Filas cerradas cuyo tramo publicado ya no es el que daría el recálculo.
+
+    QUÉ PREGUNTA RESPONDE. La deriva en puntos dice cuánto se mueve el
+    pasado, pero no dice si eso importa. Un índice se lee por su tramo: una
+    sesión publicada como Tensión que hoy saldría Normal es una etiqueta
+    publicada que la propia fuente contradice, y eso sí importa. Una deriva de
+    diez puntos en el centro de un tramo ancho, no.
+
+    SIN UMBRALES INVENTADOS, igual que en verificar_estabilidad.py. Aquí no
+    hay ninguna cifra elegida a ojo: la frontera la ponen los tramos
+    publicados de config.TRAMOS, que son parte de las reglas congeladas. Si
+    algún día se cambian los tramos, este aviso se recalibra solo.
+
+    No corrige nada ni puede: una fila cerrada es inmutable. Solo la señala.
+    """
+    vacio = pd.DataFrame(columns=["valor_publicado", "valor_recalculado",
+                                  "tramo_publicado", "tramo_recalculado"])
+    if "estado" not in final.columns or "tramo" not in recalculada.columns:
+        return vacio
+
+    cerradas = final.index[final["estado"].astype(str) != PROVISIONAL]
+    comunes = cerradas.intersection(recalculada.index)
+    if not len(comunes):
+        return vacio
+
+    pub, rec = final.loc[comunes], recalculada.loc[comunes]
+    distinto = (pub["tramo"].astype(str).fillna("")
+                != rec["tramo"].astype(str).fillna(""))
+    cruzadas = comunes[distinto.fillna(False).values]
+    if not len(cruzadas):
+        return vacio
+
+    return pd.DataFrame({
+        "valor_publicado": pub.loc[cruzadas, "ifg"].round(2),
+        "valor_recalculado": rec.loc[cruzadas, "ifg"].round(2),
+        "tramo_publicado": pub.loc[cruzadas, "tramo"],
+        "tramo_recalculado": rec.loc[cruzadas, "tramo"],
+    })
+
+
+def avisar_deriva(deriva: pd.Series, cruces: pd.DataFrame,
+                  record_previo: float, generado: str) -> dict:
+    """
+    Decide si la deriva de esta ejecución merece una incidencia, y la escribe.
+
+    POR QUÉ EXISTE ESTE PASO. El 20 de octubre de 2026 el recálculo se separó
+    10,14 puntos del valor cerrado del día 14 —la mayor deriva medida hasta
+    entonces, sobre 39 sesiones— y el sistema no tenía forma de decirlo: la
+    cifra se anotó en revisiones.csv y ahí se quedó. El flujo solo avisa
+    cuando la publicación FALLA, y aquella no falló: publicó puntualmente un
+    valor correcto. Lo que se movió fue el pasado, en silencio. Un índice que
+    aspira a ser citable no puede enterarse de eso porque alguien entre a
+    mirar un CSV.
+
+    DOS DISPARADORES, NINGUNO ARBITRARIO:
+
+      1. Un tramo publicado que el recálculo contradice. Es el aviso que
+         importa editorialmente: lo que se citó ya no es lo que saldría.
+
+      2. Una deriva mayor que cualquiera registrada bajo esta versión. No es
+         un umbral a ojo, es un récord: avisa cuando pasa algo sin
+         precedentes y se calla sola en cuanto ese nivel deja de ser
+         excepcional. Sin esto, una deriva que no cruza ningún tramo —la del
+         20 de octubre, por ejemplo— seguiría siendo invisible.
+
+    EL RÉCORD EXIGE TENER CON QUÉ COMPARAR, y por eso no se declara cuando no
+    hay ninguna deriva anotada de esta versión. Las filas anteriores a la
+    migración no llevan versión y se quedan fuera a propósito: las de la 0.9.0
+    se midieron con otras reglas. Si en su lugar se usara el máximo de todo el
+    archivo, el aviso compararía magnitudes distintas, que es justo lo que la
+    columna de versión viene a evitar; y si se diera por récord la primera
+    deriva sin base, el primer día tras este cambio saltaría una alerta falsa.
+    Así que el disparador 2 empieza a funcionar en la segunda ejecución y el
+    1 funciona desde la primera, que es el que tiene consecuencia.
+
+    No interrumpe la publicación ni toca un solo valor. Un dato cerrado es
+    inmutable y lo sigue siendo: esto solo enciende una luz.
+    """
+    maxima = float(deriva.abs().max()) if not deriva.empty else 0.0
+    peor = (str(deriva.abs().idxmax().date()) if not deriva.empty else None)
+    movidas = int((deriva.abs() > 0.005).sum()) if not deriva.empty else 0
+
+    sin_base = pd.isna(record_previo)
+    hay_record = bool(maxima > 0.005 and not sin_base
+                      and maxima > record_previo)
+
+    aviso = {
+        "generado": generado,
+        "version": config.VERSION,
+        "deriva_maxima": round(maxima, 4),
+        "fecha_peor": peor,
+        "sesiones_movidas": movidas,
+        "record_previo": (None if pd.isna(record_previo)
+                          else round(float(record_previo), 4)),
+        "es_record": hay_record,
+        "sin_base_comparable": bool(sin_base),
+        "cruces_de_tramo": [
+            {"fecha": str(f.date()),
+             "valor_publicado": float(r["valor_publicado"]),
+             "valor_recalculado": float(r["valor_recalculado"]),
+             "tramo_publicado": str(r["tramo_publicado"]),
+             "tramo_recalculado": str(r["tramo_recalculado"])}
+            for f, r in cruces.iterrows()],
+    }
+    aviso["avisar"] = bool(hay_record or len(cruces))
+
+    with open(RUTA_AVISO_DERIVA, "w", encoding="utf-8") as fh:
+        json.dump(aviso, fh, ensure_ascii=False, indent=2)
+
+    if len(cruces):
+        log.warning("DERIVA CON CONSECUENCIA: %d sesiones cerradas tendrían "
+                    "hoy otro tramo. La primera, %s: %s -> %s.",
+                    len(cruces), cruces.index[0].date(),
+                    cruces.iloc[0]["tramo_publicado"],
+                    cruces.iloc[0]["tramo_recalculado"])
+    if hay_record:
+        log.warning("DERIVA SIN PRECEDENTES en la %s: %.3f puntos (%s), por "
+                    "encima del máximo anterior (%.3f).", config.VERSION,
+                    maxima, peor, record_previo)
+    elif sin_base and maxima > 0.005:
+        log.info("Deriva de %.3f puntos (%s). Es la primera anotada de la %s: "
+                 "queda como referencia, no se declara récord sin base con la "
+                 "que comparar.", maxima, peor, config.VERSION)
+    return aviso
 
 
 def escribir_serie_panel(final: pd.DataFrame, res: dict, generado: str,
@@ -561,8 +770,17 @@ def main() -> int:
     # --- Serie definitiva: lo cerrado manda ---------------------------------
     final, deriva, correcciones = fusionar(recalculada, leer_serie_publicada())
     final.to_csv(RUTA_SERIE, float_format="%.2f")
+
+    # El récord se mira ANTES de anotar la deriva de hoy, o se compararía
+    # consigo misma y nunca habría récord.
+    record_previo = deriva_maxima_registrada()
     anotar_revision(deriva, generado)
     anotar_correcciones(correcciones, generado)
+
+    # La deriva, por sí sola, no para nada: una fila cerrada es inmutable.
+    # Pero deja de ser invisible.
+    avisar_deriva(deriva, cruces_de_tramo(final, recalculada),
+                  record_previo, generado)
 
     n_comp = archivar_componentes(final, res)
     log.info("Componentes archivados: %d sesiones en %s.", n_comp, RUTA_COMPONENTES)
