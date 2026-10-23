@@ -28,3 +28,7 @@ Prueba local: `python cnmv/comunicados.py --local IP.xml OIR.xml`.
 ## En la web
 
 La página del IBEX 35 (`/ibex-35/`, página de Elementor con el shortcode `espec_indice_bloques`) pinta los cuatro recuadros. El fragmento n.º 41 de Code Snippets («ESPEC: recuadros del IBEX 35 con comunicados de la CNMV»; copia en `cnmv/wordpress-snippet.php`) lee `cajas.html` de GitHub Pages, lo guarda en caché 20 minutos y sustituye con él el contenido de cada recuadro y su descripción. Si GitHub Pages no responde o el fichero no trae las marcas, no toca nada y los recuadros siguen como los deja el shortcode. Para volver a lo anterior basta con desactivar ese fragmento.
+
+## Fichas de empresa
+
+`docs/cnmv/empresas/<ficha>.html` trae, para cada empresa del IBEX 35, sus comunicados a la CNMV de los últimos doce meses (una línea por operación) y sus dividendos (el próximo anunciado, lo pagado en doce meses con su rentabilidad y los últimos pagos, con datos de BME del calendario de dividendos). Lo pinta en `/ibex35/<ficha>/` el fragmento n.º 50 de Code Snippets «ESPEC: fichas del IBEX 35 con comunicados de la CNMV y dividendos (vista previa)» (copia en `cnmv/wordpress-fichas.php`), que además sustituye la lista fija de «Noticias relacionadas» por una automática. Mientras `ESPEC_FICHAS_CNMV_PUBLICO` sea `false`, solo lo ven los editores con sesión iniciada.
