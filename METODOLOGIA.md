@@ -1,6 +1,6 @@
 # Índice de Fricción Global (IFG) — Metodología
 
-**Versión 0.10.0** · Documento actualizado el 18 de octubre de 2026
+**Versión 0.11.0** · Documento actualizado el 20 de octubre de 2026
 Publicado por **el especulador.com**
 
 > **Estado del índice: preliminar.** Las reglas están congeladas y versionadas,
@@ -340,6 +340,42 @@ congelados con un valor degradado, porque la regla no distinguía entre un dato
 completo y un dato incompleto. Un valor al que le faltaba una fuente no
 debería haber nacido inmutable.
 
+### 8.2 bis Qué cuenta como cobertura: el arrastre no
+
+Las series no llegan todas a la vez, así que un componente sin dato ese día se
+rellena con su último valor, un máximo de tres sesiones. Eso mantiene vivo el
+índice y **no cambia**: el valor de un día con unas entradas dadas es el mismo
+desde la 0.10.0.
+
+Lo que cambia en la 0.11.0 es que ese valor arrastrado **ya no cuenta como
+cobertura**, cuando lo que se está arrastrando es una entrega pendiente. Antes
+sí contaba, y la consecuencia no era cosmética: cobertura completa significa
+cerrar la fila como definitiva ese mismo día, así que el dato real llegaba
+cuando la fila ya era inmutable. El 14, 15 y 16 de octubre de 2026 se
+publicaron con el GPR del día 13 arrastrado y cobertura 1,00; el lunes
+siguiente, con los valores reales de la Reserva Federal encima de la mesa, el
+recálculo se separaba 10,14 puntos de lo publicado y nada podía corregirlo.
+Era la misma patología de 8.2 entrando por la puerta que la cobertura no
+vigilaba.
+
+**Hay dos clases de arrastre y solo una descuenta cobertura**, porque son
+cosas distintas:
+
+| Clase | Ejemplo | ¿Llegará el dato? | ¿Cuenta como cobertura? |
+|---|---|---|---|
+| Hueco permanente | festivo en Nueva York: el cobre no imprime en una sesión hábil del IBEX | No, nunca | **Sí.** Arrastrar es el tratamiento correcto y el único posible |
+| Entrega pendiente | el GPR no ha publicado su semana; el BCE va con un día; un proveedor caído | Sí, con fecha de esa sesión | **No.** La fila nace provisional y se corrige al llegar |
+
+El criterio que las separa sale de los datos, sin lista de componentes escrita
+a mano: se mira si la fecha arrastrada cae más allá del último dato propio de
+ese componente. Más allá del final de su serie es una fuente que aún no ha
+llegado ahí; dentro de su rango es un agujero interior, o sea el festivo.
+
+La distinción no es un detalle. Medido sobre la serie completa, descontar todo
+arrastre habría marcado **439 sesiones** (el 10 %) como incompletas para
+siempre, sin que ninguna corrección pudiera llegar jamás; descontar solo la
+entrega pendiente afecta a **1 sesión**.
+
 ### 8.3 Qué se publica de cada revisión
 
 - Toda corrección aplicada a un provisional se anota en `correcciones.csv`
@@ -481,6 +517,21 @@ sección 12.
 Las reglas están congeladas y versionadas. Todo cambio se anuncia, se numera y
 obliga a recalcular la serie completa, archivando la anterior.
 
+### 0.11.0 — 20 de octubre de 2026
+
+Un valor arrastrado que espera entrega deja de contar como cobertura, de modo
+que la fila nace provisional en vez de definitiva y se corrige cuando la
+fuente publica. Ver 8.2 bis.
+
+No cambia ni un peso, ni una ventana, ni un umbral, ni la fórmula: el
+compuesto y las contribuciones de cada día son idénticos a los de la 0.10.0.
+Lo que cambia es la política de revisiones, y por eso lleva número de versión
+y obliga a recalcular la serie entera. La serie 0.10.0 queda archivada en
+`docs/historico/`.
+
+Consecuencia para la validación prospectiva: el reloj del año de episodios
+fuera de muestra se reinicia, igual que con cualquier cambio de versión.
+
 ### 0.10.0 — 18 de octubre de 2026
 
 Cuatro cambios. Los tres primeros corrigen defectos.
@@ -517,7 +568,7 @@ incluso con fines comerciales, citando la fuente.
 
 **Fórmula de citación:**
 
-> el especulador.com, *Índice de Fricción Global*, versión 0.10.0,
+> el especulador.com, *Índice de Fricción Global*, versión 0.11.0,
 > consultado el [fecha]. https://elespeculador.com/indices/friccion-global/
 
 Lo que no es abierto no es el dato: son el desglose por componente del día, las
