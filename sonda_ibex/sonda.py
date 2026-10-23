@@ -1,43 +1,34 @@
-"""Sonda temporal 56: salidas a bolsa. Empresas cotizadas del SIBE, ofertas públicas 2000-2026, admisiones y exclusiones del último año
-y precios históricos (cinco años) de las salidas recientes, de la API de BME."""
-import json, re, time
+"""Sonda temporal 57: artículos de la Ley 6/2023 de los Mercados de Valores (BOE-A-2023-7053), la LSSI (BOE-A-2002-13758),
+el TRLGDCU (BOE-A-2007-20555) y la Ley de Competencia Desleal (BOE-A-1991-628) por la API del BOE, para la entrada de TNT
+«Cómo elegir un curso de bolsa»."""
+import json, re, html
 from pathlib import Path
 import requests
 OUT = Path("sonda_ibex/resultado"); OUT.mkdir(parents=True, exist_ok=True)
 for f in OUT.rglob("*"):
     if f.is_file():
         f.unlink()
-API = "https://apiweb.bolsasymercados.es/Market/v1/EQ/"
-H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Referer": "https://www.bolsasymercados.es/", "Accept": "application/json"}
-def get(ruta, params):
-    for i in range(3):
-        try:
-            r = requests.get(API + ruta, params=params, headers=H, timeout=60)
-            if r.status_code == 200:
-                return r.json()
-            err = f"http {r.status_code} {r.text[:200]}"
-        except Exception as e:  # noqa: BLE001
-            err = str(e)[:200]
-        time.sleep(3)
-    return {"error": err}
+H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Accept": "application/xml"}
+PEDIDOS = {"BOE-A-2023-7053": ["a124", "a125", "a126", "a127", "a128", "a129", "a130"],
+           "BOE-A-2002-13758": ["a10"],
+           "BOE-A-2007-20555": ["a102", "a103", "a104", "a105", "a106", "a107"],
+           "BOE-A-1991-628": ["a5", "a7", "a8", "a23", "a26", "a27"]}
 res = {}
-res["listed"] = get("ListedCompanies", {"tradingSystem": "SIBE", "page": 0, "pageSize": 0})
-res["offerings"] = get("CorporateActions/PublicOfferings", {"from": "20000101", "to": "20261231", "page": 0, "pageSize": 0})
-res["newlistings"] = get("CorporateActions/NewListings", {"from": "20000101", "to": "20261231", "page": 0, "pageSize": 0})
-res["delistings"] = get("CorporateActions/Delistings", {"from": "20000101", "to": "20261231", "page": 0, "pageSize": 0})
-listed = res["listed"].get("data", []) if isinstance(res["listed"], dict) else []
-objetivo = re.compile(r"PUIG|HBX|CIRSA|ACCIONA ENER|ECOENER|OPDENERG|LINEA DIRECTA|L[IÍ]NEA DIRECTA|SOLTEC|INMOCEMENTO|ARIMA|NEINOR|AEDAS|METROVACESA|UNICAJA", re.I)
-hist = {}
-nuevos = set()
-for d in (res["newlistings"].get("data", []) if isinstance(res["newlistings"], dict) else []):
-    for k in ("isin", "shareIsin", "ISIN"):
-        if d.get(k):
-            nuevos.add(d[k])
-for c in listed:
-    if objetivo.search(c.get("name", "") + " " + c.get("shareName", "")) or c.get("isin") in nuevos:
-        j = get("HistoricalSharesPrices", {"isin": c["isin"], "from": "20211001", "to": "20261231", "page": 0, "pageSize": 0})
-        hist[c["isin"]] = {"name": c.get("name"), "shareName": c.get("shareName"), "resp": j}
-        time.sleep(1)
-res["hist"] = hist
-(OUT / "salidas.json").write_text(json.dumps(res, ensure_ascii=False))
-print("ok", len(listed), len(hist))
+try:
+    r = requests.get("https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/BOE-A-2023-7053/texto/indice", headers=H, timeout=90)
+    ids = re.findall(r"<id>([^<]+)</id>\s*<titulo>([^<]*)</titulo>", r.text)
+    res["indice_7053"] = {"http": r.status_code, "bloques": [f"{i} | {t}" for i, t in ids if re.search(r"Art[ií]culo 1[2-3]\d", t)][:40]}
+except Exception as e:  # noqa: BLE001
+    res["indice_7053"] = {"error": str(e)[:200]}
+for ley, bloques in PEDIDOS.items():
+    for b in bloques:
+        u = f"https://www.boe.es/datosabiertos/api/legislacion-consolidada/id/{ley}/texto/bloque/{b}"
+        try:
+            r = requests.get(u, headers=H, timeout=90)
+            vers = re.findall(r"<version[^>]*>(.*?)</version>", r.text, re.S)
+            t = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", vers[-1] if vers else r.text))).strip()
+            res[f"{ley}/{b}"] = {"http": r.status_code, "texto": t[:9000]}
+        except Exception as e:  # noqa: BLE001
+            res[f"{ley}/{b}"] = {"error": str(e)[:200]}
+(OUT / "boe_articulos.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
+print("ok")
