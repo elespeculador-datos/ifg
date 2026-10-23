@@ -1,4 +1,4 @@
-"""Sonda temporal 57: artículos de la Ley 6/2023 de los Mercados de Valores (BOE-A-2023-7053), la LSSI (BOE-A-2002-13758),
+"""Sonda temporal 57 (bis): artículos de la Ley 6/2023 de los Mercados de Valores (BOE-A-2023-7053), la LSSI (BOE-A-2002-13758),
 el TRLGDCU (BOE-A-2007-20555) y la Ley de Competencia Desleal (BOE-A-1991-628) por la API del BOE, para la entrada de TNT
 «Cómo elegir un curso de bolsa»."""
 import json, re, html
