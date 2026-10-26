@@ -11,3 +11,4 @@ ejecutado,fecha_dato,valor,tramo,cobertura
 2026-10-21T03:47:33+02:00,2026-10-20,40.17,Normal,1.0,definitivo
 2026-10-22T03:47:05+02:00,2026-10-21,49.47,Normal,1.0,definitivo
 2026-10-23T03:49:55+02:00,2026-10-22,47.51,Normal,1.0,definitivo
+2026-10-26T03:41:53+01:00,2026-10-23,50.49,Tensión,0.955,provisional
