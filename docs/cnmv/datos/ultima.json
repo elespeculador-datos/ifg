@@ -1,8 +1,8 @@
 {
- "actualizado": "2026-10-26T18:35",
- "generado": "2026-10-26T17:35:27+00:00",
- "comunicados_leidos": 72,
- "comunicados_ibex35_clasificados": 27,
+ "actualizado": "2026-10-26T19:41",
+ "generado": "2026-10-26T18:42:00+00:00",
+ "comunicados_leidos": 75,
+ "comunicados_ibex35_clasificados": 28,
  "por_recuadro": {
   "resultados": 9,
   "dividendos": 1,
@@ -11,5 +11,5 @@
  },
  "fuente": "CNMV, RSS de información privilegiada y otra información relevante",
  "licencia": "CC BY 4.0 · El Especulador",
- "bme": "d614ae8ea760c5bac61be455b13b65c6"
+ "bme": "dea5fb52d3fc41022016275c20cefb7a"
 }
