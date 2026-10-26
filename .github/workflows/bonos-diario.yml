@@ -28,7 +28,7 @@ jobs:
           python-version: "3.12"
           cache: pip
       - name: Instalar dependencias
-        run: sudo apt-get install -y poppler-utils >/dev/null && pip install requests pandas openpyxl certifi
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils >/dev/null && pip install requests pandas openpyxl certifi
       - name: Consultar el Tesoro y preparar los archivos
         run: python bonos/bonos.py --salida docs/bonos
       - name: Guardar el resultado en el repositorio

@@ -1,10 +1,10 @@
 {
- "fecha_publicacion": "2026-10-22",
- "publicacion_anterior": "2026-10-21",
- "generado": "2026-10-22T19:17:35+00:00",
- "posiciones": 64,
- "emisores": 31,
- "cambios": 3,
+ "fecha_publicacion": "2026-10-23",
+ "publicacion_anterior": "2026-10-22",
+ "generado": "2026-10-23T19:15:28+00:00",
+ "posiciones": 65,
+ "emisores": 32,
+ "cambios": 11,
  "historico": {
   "desde": "2010-06-10",
   "mayor_posicion": {
@@ -22,37 +22,37 @@
   {
    "isin": "ES0165386014",
    "emisor": "SOLARIA ENERGIA Y MEDIOAMBIENTE, S.A.",
-   "tenedores": 8,
-   "suma_publicada_pct": 6.6,
+   "tenedores": 7,
+   "suma_publicada_pct": 6.05,
    "mayor_posicion_pct": 1.33,
-   "ultima_fecha_posicion": "2026-10-20",
+   "ultima_fecha_posicion": "2026-10-22",
    "mayor_tenedor": "JPMorgan Asset Management (UK) Limited"
   },
   {
    "isin": "ES0130960018",
    "emisor": "ENAGAS, S.A.",
    "tenedores": 6,
-   "suma_publicada_pct": 4.68,
+   "suma_publicada_pct": 4.61,
    "mayor_posicion_pct": 1.15,
-   "ultima_fecha_posicion": "2026-10-21",
+   "ultima_fecha_posicion": "2026-10-22",
    "mayor_tenedor": "BlackRock Investment Management (UK) Limited"
   },
   {
    "isin": "ES0178165017",
    "emisor": "TECNICAS REUNIDAS, S.A.",
    "tenedores": 4,
-   "suma_publicada_pct": 3.93,
+   "suma_publicada_pct": 3.91,
    "mayor_posicion_pct": 1.3,
-   "ultima_fecha_posicion": "2026-10-14",
+   "ultima_fecha_posicion": "2026-10-22",
    "mayor_tenedor": "AKO Capital LLP"
   },
   {
    "isin": "LU1048328220",
    "emisor": "EDREAMS ODIGEO, S.A.",
-   "tenedores": 3,
-   "suma_publicada_pct": 3.15,
+   "tenedores": 4,
+   "suma_publicada_pct": 3.65,
    "mayor_posicion_pct": 1.5,
-   "ultima_fecha_posicion": "2026-10-19",
+   "ultima_fecha_posicion": "2026-10-22",
    "mayor_tenedor": "Citadel Advisors LLC"
   },
   {
