@@ -306,7 +306,7 @@ Nótese que «Calma» se activa muy poco. El índice rara vez baja de 20.
 | `ifg_serie_12m.json` | doce meses para el gráfico |
 | `ifg_serie.csv` | **serie histórica completa**, dato abierto |
 | `componentes.csv` | z-scores de cada componente, para reproducibilidad |
-| `revisiones.csv` | deriva observada en cada ejecución |
+| `revisiones.csv` | deriva observada en cada ejecución, con la versión que la midió |
 | `correcciones.csv` | correcciones aplicadas a valores provisionales |
 | `revision_version.md` | nota de discontinuidad del último cambio de versión |
 | `historico/` | series de versiones anteriores, archivadas |
@@ -346,7 +346,17 @@ debería haber nacido inmutable.
   con el valor anterior, el nuevo y la fecha.
 - La **deriva** —la diferencia entre lo que el recálculo de hoy daría y lo que
   está publicado, medida solo sobre filas cerradas— se publica en
-  `revisiones.csv` en cada ejecución, para que cualquiera la audite.
+  `revisiones.csv` en cada ejecución, para que cualquiera la audite. Cada fila
+  lleva la versión con la que se midió: una deriva de la 0.9.0 y una de la
+  0.10.0 no son la misma magnitud y el archivo no debe invitar a sumarlas.
+- Medir la deriva no basta, porque un número en un CSV no lo lee nadie. La
+  publicación **se avisa a sí misma** —sin detenerse, porque un dato cerrado
+  es inmutable— en dos casos, ninguno de ellos un umbral elegido a ojo:
+  cuando el recálculo contradice el **tramo** de una sesión ya publicada, que
+  es cuando la deriva tiene consecuencia editorial porque el índice se cita
+  por su tramo; y cuando la deriva es **mayor que cualquiera registrada bajo
+  la versión en curso**, que avisa de lo que no tiene precedente y se calla
+  en cuanto ese nivel deja de ser excepcional.
 - Un cambio de reglas obliga a recalcular la serie completa, archivar la
   anterior en `historico/` y publicar una nota de discontinuidad medida. La
   verificación automática de estabilidad detiene la publicación si una fila
