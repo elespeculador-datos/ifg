@@ -1,0 +1,873 @@
+/**
+ * Estilos de los índices de el especulador.
+ *
+ * TODO EL COLOR ESTÁ EN VARIABLES, arriba del todo. Si el bloque tiene que
+ * ir sobre fondo claro en algún sitio, se cambian ahí y no hay que tocar una
+ * sola regla más. Los valores de fábrica son los del diseño oscuro.
+ *
+ * LAS CLASES VAN TODAS PREFIJADAS con esp-ifg. JNews trae cientos de reglas
+ * propias y un nombre genérico como .panel o .valor chocaría tarde o
+ * temprano, probablemente un domingo.
+ *
+ * NO SE USA !important EN NINGÚN SITIO. Si algo del tema pisa un estilo, se
+ * arregla con especificidad, no a martillazos: el !important se hereda como
+ * deuda y el siguiente que toque esto no sabrá por qué está.
+ */
+
+.esp-ifg {
+	--esp-fondo: #111418;
+	--esp-borde: #1E232A;
+	--esp-borde-suave: #191E24;
+	--esp-texto: #F2F4F7;
+	--esp-texto-fuerte: #E7EAF0;
+	--esp-texto-medio: #8B94A3;
+	--esp-texto-tenue: #5A6372;
+	--esp-texto-debil: #4E5767;
+	--esp-acento: #3FCF7F;
+	--esp-acento-vivo: #74E2A6;
+	--esp-sube: #E0A944;
+	--esp-baja: #5BB8A8;
+
+	box-sizing: border-box;
+	background: var(--esp-fondo);
+	border: 1px solid var(--esp-borde);
+	border-radius: 16px;
+	color: var(--esp-texto);
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+/*
+ * El relleno vive aquí, no en .esp-ifg. JNews anula el padding horizontal de
+ * los elementos que cuelgan directamente del contenido de una página, y el
+ * bloque salía con el texto pegado al borde del recuadro. Pelearse por
+ * especificidad con una regla del tema es una carrera que se pierde en la
+ * siguiente actualización; un contenedor interior que el tema no conoce no
+ * se puede pisar. Si algún día hiciera falta, aquí es donde se toca el aire
+ * del bloque y en ningún otro sitio.
+ */
+.esp-ifg__marco {
+	padding: 26px 28px;
+}
+
+.esp-ifg *,
+.esp-ifg *::before,
+.esp-ifg *::after {
+	box-sizing: border-box;
+}
+
+.esp-ifg p {
+	margin: 0;
+}
+
+.esp-ifg a {
+	text-decoration: none;
+}
+
+/* --- Cabecera ---------------------------------------------------------- */
+
+.esp-ifg__antetitulo {
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--esp-acento);
+	margin-bottom: 10px;
+}
+
+.esp-ifg__titulo {
+	margin: 0 0 6px;
+	font-size: 25px;
+	font-weight: 600;
+	line-height: 1.15;
+	letter-spacing: -0.012em;
+	color: var(--esp-texto);
+}
+
+.esp-ifg__titulo--grande {
+	font-size: 32px;
+}
+
+.esp-ifg__entrada {
+	font-size: 13px;
+	color: var(--esp-texto-medio);
+	max-width: 62ch;
+}
+
+/* --- Bloque del índice (es un enlace entero) --------------------------- */
+
+.esp-ifg__indice {
+	display: block;
+	margin-top: 20px;
+	padding-top: 18px;
+	border-top: 1px solid var(--esp-borde);
+	color: inherit;
+}
+
+.esp-ifg__rotulo {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin-bottom: 13px;
+}
+
+.esp-ifg__nombre {
+	font-size: 9.5px;
+	font-weight: 700;
+	letter-spacing: 0.11em;
+	text-transform: uppercase;
+	color: var(--esp-texto-medio);
+}
+
+.esp-ifg__ficha {
+	font-size: 9.5px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	color: var(--esp-acento);
+}
+
+.esp-ifg__indice:hover .esp-ifg__ficha {
+	color: var(--esp-acento-vivo);
+}
+
+/* --- La cifra ---------------------------------------------------------- */
+
+.esp-ifg__cifra {
+	display: flex;
+	align-items: baseline;
+	gap: 13px;
+}
+
+.esp-ifg__valor {
+	font-weight: 700;
+	line-height: 0.95;
+	letter-spacing: -0.035em;
+	font-variant-numeric: tabular-nums;
+	color: var(--esp-texto);
+}
+
+.esp-ifg__cifra--portada .esp-ifg__valor { font-size: 54px; }
+.esp-ifg__cifra--panel .esp-ifg__valor   { font-size: 72px; }
+
+.esp-ifg__lateral {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.esp-ifg__chip {
+	align-self: flex-start;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	padding: 4px 9px;
+	border-radius: 4px;
+	border: 1px solid;
+	/* El color y el borde los pone PHP desde la tabla de tramos, que es la
+	   misma que se publica en la metodología. */
+}
+
+.esp-ifg__variacion {
+	font-size: 12px;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	color: var(--esp-texto-medio);
+}
+
+/* --- Escala de tramos --------------------------------------------------- */
+
+.esp-ifg__escala {
+	position: relative;
+	margin-top: 18px;
+}
+
+.esp-ifg__barras {
+	display: flex;
+	gap: 2px;
+	height: 6px;
+}
+
+.esp-ifg__barra {
+	opacity: 0.28;
+	border-radius: 0;
+}
+
+.esp-ifg__barra:first-child { border-radius: 3px 0 0 3px; }
+.esp-ifg__barra:last-child  { border-radius: 0 3px 3px 0; }
+.esp-ifg__barra--viva       { opacity: 1; }
+
+.esp-ifg__marca {
+	position: absolute;
+	top: -5px;
+	width: 2px;
+	height: 16px;
+	border-radius: 1px;
+	background: var(--esp-texto);
+	transform: translateX(-1px);
+	box-shadow: 0 0 0 2.5px var(--esp-fondo);
+}
+
+.esp-ifg__etiquetas {
+	display: flex;
+	gap: 2px;
+	margin-top: 8px;
+}
+
+.esp-ifg__etiqueta {
+	text-align: center;
+	white-space: nowrap;
+	font-size: 9px;
+	font-weight: 500;
+	color: var(--esp-texto-debil);
+}
+
+.esp-ifg__etiqueta--viva {
+	font-weight: 700;
+}
+
+.esp-ifg__motores {
+	margin-top: 15px;
+	font-size: 12.5px;
+	line-height: 1.45;
+	color: var(--esp-texto-medio);
+}
+
+.esp-ifg__motores strong {
+	color: var(--esp-texto-fuerte);
+	font-weight: 600;
+}
+
+/* --- Focos abiertos ----------------------------------------------------- */
+
+.esp-ifg__focos {
+	margin-top: 20px;
+	padding-top: 16px;
+	border-top: 1px solid var(--esp-borde);
+}
+
+.esp-ifg__seccion {
+	font-size: 9.5px;
+	font-weight: 600;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--esp-texto-tenue);
+	margin-bottom: 10px;
+}
+
+.esp-ifg__foco {
+	display: flex;
+	align-items: flex-start;
+	gap: 11px;
+	padding: 9px 0;
+	border-bottom: 1px solid var(--esp-borde-suave);
+	color: inherit;
+}
+
+.esp-ifg__foco:last-child {
+	border-bottom: 0;
+}
+
+.esp-ifg__numero {
+	font-size: 10px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	color: var(--esp-texto-debil);
+	padding-top: 3px;
+}
+
+.esp-ifg__texto {
+	flex: 1;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--esp-texto-fuerte);
+}
+
+.esp-ifg__foco:hover .esp-ifg__texto {
+	color: var(--esp-acento-vivo);
+}
+
+.esp-ifg__flecha {
+	font-size: 13px;
+	color: var(--esp-texto-debil);
+	padding-top: 3px;
+}
+
+/* --- Pie ---------------------------------------------------------------- */
+
+.esp-ifg__pie {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: 14px;
+	padding-top: 14px;
+	border-top: 1px solid var(--esp-borde);
+}
+
+.esp-ifg__enlace {
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--esp-acento);
+}
+
+.esp-ifg__enlace:hover {
+	color: var(--esp-acento-vivo);
+}
+
+.esp-ifg__menor {
+	font-size: 9.5px;
+	font-weight: 500;
+	color: var(--esp-texto-tenue);
+}
+
+/* El aviso legal viaja en el bloque, no en una nota al pie de la página:
+   si alguien reutiliza el marcado, el aviso se va con él. */
+.esp-ifg__aviso {
+	margin-top: 10px;
+	font-size: 9.5px;
+	line-height: 1.4;
+	color: var(--esp-texto-debil);
+}
+
+/* --- Variante compacta para la fila de portada ---------------------------
+   Todo lo de aquí abajo es recorte vertical. El bloque tiene que caber al
+   lado de "Antes de la apertura", que mide unos 400 px; suelto mide 660.
+   Se recorta el aire, no el contenido: siguen estando el valor, el tramo, la
+   escala, los motores, las noticias, los enlaces y el aviso legal. */
+
+.esp-ifg--compacto .esp-ifg__marco {
+	padding: 16px 20px;
+}
+
+.esp-ifg--compacto .esp-ifg__antetitulo {
+	font-size: 9px;
+	margin-bottom: 6px;
+}
+
+.esp-ifg--compacto .esp-ifg__titulo {
+	font-size: 19px;
+	margin-bottom: 0;
+}
+
+.esp-ifg--compacto .esp-ifg__indice {
+	margin-top: 14px;
+	padding-top: 13px;
+}
+
+.esp-ifg--compacto .esp-ifg__rotulo {
+	margin-bottom: 9px;
+}
+
+/* El número baja de 54 a 38: sigue siendo con diferencia lo más grande del
+   bloque, que es lo que tiene que ser. */
+.esp-ifg--compacto .esp-ifg__cifra--portada .esp-ifg__valor {
+	font-size: 38px;
+}
+
+.esp-ifg--compacto .esp-ifg__escala {
+	margin-top: 13px;
+}
+
+.esp-ifg--compacto .esp-ifg__motores {
+	margin-top: 11px;
+	font-size: 12px;
+}
+
+.esp-ifg--compacto .esp-ifg__focos {
+	margin-top: 12px;
+	padding-top: 11px;
+}
+
+/* Con la lista abierta, el rótulo "FOCOS ABIERTOS" se va: tres titulares
+   numerados debajo del índice ya se leen como lo que son, y esa línea
+   costaba 26 px que hacían falta en otro sitio.
+   OJO con el selector: se oculta solo el <p>, nunca el rótulo que va dentro
+   del <summary> del desplegable. La primera versión decía
+   .esp-ifg__focos .esp-ifg__seccion y dejaba el desplegable sin etiqueta,
+   con la cuenta y la flecha solas. */
+.esp-ifg--compacto .esp-ifg__focos > p.esp-ifg__seccion {
+	display: none;
+}
+
+.esp-ifg--compacto .esp-ifg__foco {
+	padding: 5px 0;
+	gap: 9px;
+}
+
+/*
+ * Titulares a dos líneas como mucho. Los de geopolítica de la casa son
+ * largos —"Moscú promete diésel a Washington mientras Kiev ataca la
+ * capacidad que debe suministrarlo" ocupa tres líneas aquí— y la tercera
+ * línea es lo que más engorda el bloque. Cortar con puntos suspensivos en
+ * una lista de avance es práctica normal y el titular entero sigue a un
+ * clic.
+ */
+.esp-ifg--compacto .esp-ifg__texto {
+	font-size: 12px;
+	line-height: 1.3;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.esp-ifg--compacto .esp-ifg__pie {
+	margin-top: 11px;
+	padding-top: 11px;
+}
+
+.esp-ifg--compacto .esp-ifg__aviso {
+	margin-top: 8px;
+	font-size: 9px;
+}
+
+/* --- Los titulares llenan el hueco ---------------------------------------
+   La lista crece hasta ocupar todo el espacio que deje el resto del bloque,
+   y recorta lo que no cabe. El JavaScript oculta entonces los titulares
+   sobrantes por completo, de modo que overflow:hidden nunca llega a cortar
+   ninguno por la mitad: está solo como red de seguridad por si el script
+   no llega a ejecutarse. */
+
+/*
+ * El bloque de portada es SIEMPRE una columna flexible, lleve altura fija o
+ * no. Da igual de dónde venga la altura —del atributo alto, o de que
+ * Elementor estire la columna para igualarla con la pieza de al lado—: en
+ * los dos casos la lista de titulares tiene que quedarse con el hueco que
+ * sobre. Esto es lo que evita el rectángulo negro vacío.
+ */
+.esp-ifg--portada {
+	display: flex;
+	flex-direction: column;
+}
+
+.esp-ifg--portada .esp-ifg__marco {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+
+	/*
+	 * min-height: 0 ES IMPRESCINDIBLE, por poco que lo parezca. Un elemento
+	 * flexible trae de serie min-height: auto, que significa "no encojas por
+	 * debajo de tu contenido". Con una altura pedida de 389 px y un contenido
+	 * de 500, el marco se quedaba en 500 y se salía de la tarjeta: el botón,
+	 * el pie y el aviso legal aparecían flotando sobre el fondo de la página,
+	 * fuera del recuadro. Con esta línea el marco sí encoge y el recorte
+	 * ocurre dentro, en la lista, que es la única que puede permitírselo.
+	 */
+	min-height: 0;
+}
+
+/* Cinturón y tirantes: aunque algo se pase de la raya, nunca se escapa de la
+   tarjeta y se dibuja encima de la página. */
+.esp-ifg--fijo {
+	overflow: hidden;
+}
+
+/* La lista es lo único que crece dentro del marco: se queda con todo el
+   hueco libre y es el JavaScript quien decide cuántos titulares caben. */
+.esp-ifg__focos--llena {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.esp-ifg__focos--abierta {
+	overflow: visible;
+}
+
+.esp-ifg__foco--oculto {
+	display: none;
+}
+
+.esp-ifg__mas {
+	display: block;
+	width: 100%;
+	margin-top: 6px;
+	padding: 7px 0;
+	border: 0;
+	border-top: 1px solid var(--esp-borde-suave);
+	background: none;
+	cursor: pointer;
+	font: inherit;
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	text-align: left;
+	color: var(--esp-texto-tenue);
+}
+
+.esp-ifg__mas:hover {
+	color: var(--esp-acento);
+}
+
+/* --- Focos en desplegable ------------------------------------------------
+   Es un <details> nativo: abre y cierra sin JavaScript, responde al teclado
+   de serie y el buscador indexa los titulares aunque estén plegados. */
+
+.esp-ifg__focos--plegable > .esp-ifg__foco {
+	display: flex;   /* details oculta a sus hijos hasta abrirse */
+}
+
+.esp-ifg__resumen {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	list-style: none;
+	padding: 2px 0;
+	user-select: none;
+}
+
+/* La flechita por defecto del navegador, fuera: se dibuja una propia que
+   encaja con el resto del bloque. Safari necesita la regla de webkit. */
+.esp-ifg__resumen::-webkit-details-marker {
+	display: none;
+}
+
+.esp-ifg__seccion--resumen {
+	margin-bottom: 0;
+}
+
+.esp-ifg__cuenta {
+	font-size: 9px;
+	font-weight: 700;
+	line-height: 1;
+	padding: 3px 6px;
+	border-radius: 20px;
+	color: var(--esp-texto-tenue);
+	background: rgba(139, 148, 163, 0.14);
+}
+
+.esp-ifg__punta {
+	margin-left: auto;
+	width: 7px;
+	height: 7px;
+	border-right: 1.5px solid var(--esp-texto-tenue);
+	border-bottom: 1.5px solid var(--esp-texto-tenue);
+	transform: rotate(45deg) translate(-2px, -2px);
+	transition: transform 0.15s ease;
+}
+
+.esp-ifg__focos--plegable[open] .esp-ifg__punta {
+	transform: rotate(225deg) translate(-2px, -2px);
+}
+
+.esp-ifg__resumen:hover .esp-ifg__seccion--resumen,
+.esp-ifg__resumen:hover .esp-ifg__punta {
+	color: var(--esp-texto-medio);
+	border-color: var(--esp-texto-medio);
+}
+
+.esp-ifg__focos--plegable[open] > .esp-ifg__foco:first-of-type {
+	margin-top: 6px;
+}
+
+/* --- Altura fija ---------------------------------------------------------
+   Para cuadrar con la pieza de al lado en la fila de portada. El marco pasa
+   a columna flexible y la lista de titulares se queda con la holgura. */
+
+/*
+ * La sección pasa a ser ella misma una caja flexible y el marco crece dentro.
+ * El primer intento daba al marco min-height: inherit, y entonces el marco
+ * medía los 385 y la sección le sumaba sus dos píxeles de borde: 387 donde se
+ * habían pedido 385. Así el min-height lo lleva solo la sección, que es quien
+ * tiene el borde, y el número que se escribe en el atributo es el que mide el
+ * bloque.
+ */
+.esp-ifg--fijo {
+	display: flex;
+	flex-direction: column;
+}
+
+.esp-ifg--fijo .esp-ifg__marco {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+}
+
+/*
+ * AQUÍ HABÍA UN RELLENO Y SE HA QUITADO. Era un div vacío que crecía para
+ * empujar el pie hasta abajo. Desde que la lista de titulares llena el hueco,
+ * los dos crecían y se repartían el espacio: el relleno se quedaba con 200 px
+ * en la portada y la lista enseñaba un titular donde cabían cinco. Se intentó
+ * desactivarlo con :not(:has(...)) y no bastó. Un elemento que no hace falta
+ * no se desactiva con una regla más: se borra.
+ */
+
+/* --- Panel de Geopolítica ----------------------------------------------- */
+
+.esp-ifg--panel {
+	border-radius: 18px;
+}
+
+/* La ficha es más ancha que el bloque de portada y necesita más aire a los
+   lados, o el texto se lee como apretado contra el borde. */
+.esp-ifg--panel .esp-ifg__marco {
+	padding: 34px 40px;
+}
+
+.esp-ifg__cabecera--panel {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 32px;
+}
+
+.esp-ifg__sello {
+	text-align: right;
+	flex-shrink: 0;
+}
+
+.esp-ifg__estado {
+	display: inline-block;
+	font-size: 9.5px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	padding: 4px 10px;
+	border-radius: 4px;
+	color: #9AA8BC;
+	background: rgba(154, 168, 188, 0.1);
+	border: 1px solid rgba(154, 168, 188, 0.25);
+}
+
+.esp-ifg__fecha {
+	margin-top: 9px;
+	font-size: 11.5px;
+	color: var(--esp-texto-tenue);
+}
+
+.esp-ifg__fecha strong {
+	color: var(--esp-texto-medio);
+	font-weight: 600;
+}
+
+.esp-ifg__cuerpo {
+	display: flex;
+	gap: 32px;
+	margin-top: 26px;
+	padding-top: 24px;
+	border-top: 1px solid var(--esp-borde);
+}
+
+.esp-ifg__columna {
+	width: 280px;
+	flex-shrink: 0;
+}
+
+.esp-ifg__grafico {
+	flex: 1;
+	min-width: 0;
+}
+
+.esp-ifg__nota {
+	margin-top: 22px;
+	font-size: 12.5px;
+	line-height: 1.55;
+	color: var(--esp-texto-medio);
+}
+
+.esp-ifg__nota strong {
+	color: var(--esp-texto-fuerte);
+	font-weight: 600;
+}
+
+.esp-ifg__lienzo {
+	position: relative;
+	color: var(--esp-texto);   /* el SVG dibuja con currentColor */
+}
+
+.esp-ifg__meses {
+	position: relative;
+	height: 14px;
+	margin-top: 6px;
+}
+
+.esp-ifg__meses span {
+	position: absolute;
+	transform: translateX(-50%);
+	font-size: 9px;
+	letter-spacing: 0.04em;
+	color: var(--esp-texto-debil);
+}
+
+/* --- Desglose por componentes ------------------------------------------- */
+
+.esp-ifg__desglose {
+	margin-top: 24px;
+	padding-top: 20px;
+	border-top: 1px solid var(--esp-borde);
+}
+
+.esp-ifg__leyenda {
+	display: block;
+	margin-top: 4px;
+	font-size: 11px;
+	font-weight: 400;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--esp-texto-debil);
+}
+
+.esp-ifg__barrasdesglose {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	columns: 2;
+	column-gap: 40px;
+}
+
+.esp-ifg__fila {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	height: 23px;
+	break-inside: avoid;
+}
+
+/* El nombre no se parte nunca: una etiqueta en dos líneas rompe la altura de
+   su fila y desalinea las dos columnas entre sí. Si algún nombre no cupiera,
+   se acorta en datos.php, no se deja envolver aquí. */
+.esp-ifg__comp {
+	width: 112px;
+	flex-shrink: 0;
+	text-align: right;
+	white-space: nowrap;
+	font-size: 11.5px;
+	color: var(--esp-texto-medio);
+}
+
+.esp-ifg__pista {
+	flex: 1;
+	position: relative;
+	height: 9px;
+}
+
+.esp-ifg__eje {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	bottom: 0;
+	width: 1px;
+	background: #2A3139;
+}
+
+.esp-ifg__trazo {
+	position: absolute;
+	top: 0;
+	height: 9px;
+}
+
+.esp-ifg__trazo--sube {
+	left: 50%;
+	border-radius: 0 3px 3px 0;
+	background: var(--esp-sube);
+}
+
+.esp-ifg__trazo--baja {
+	right: 50%;
+	border-radius: 3px 0 0 3px;
+	background: var(--esp-baja);
+}
+
+.esp-ifg__cantidad {
+	width: 46px;
+	font-size: 11px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.esp-ifg__cantidad--sube { color: var(--esp-sube); }
+.esp-ifg__cantidad--baja { color: var(--esp-baja); }
+.esp-ifg__cantidad--nulo { color: var(--esp-texto-tenue); }
+
+.esp-ifg__variacion-sola {
+	margin-top: 12px;
+}
+
+.esp-ifg__pie--panel {
+	align-items: flex-start;
+	margin-top: 18px;
+}
+
+.esp-ifg__enlaces {
+	display: flex;
+	gap: 26px;
+	flex-wrap: wrap;
+}
+
+.esp-ifg__legal {
+	font-size: 10px;
+	line-height: 1.5;
+	text-align: right;
+	color: var(--esp-texto-debil);
+}
+
+/* --- La cifra dentro de un párrafo --------------------------------------- */
+
+.esp-ifg-valor {
+	display: inline-block;
+	padding: 0 5px;
+	border-bottom: 2px solid;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.esp-ifg-valor-enlace {
+	color: inherit;
+	text-decoration: none;
+}
+
+/* --- Sin datos ----------------------------------------------------------- */
+
+.esp-ifg--vacio {
+	font-size: 13px;
+	color: var(--esp-texto-medio);
+}
+
+/* --- Móvil ---------------------------------------------------------------
+   El panel pasa a una columna y el desglose a una sola. A 360 px, dos
+   columnas de barras dejan cada barra en cuarenta píxeles, que no se lee. */
+
+@media (max-width: 860px) {
+	.esp-ifg__marco,
+	.esp-ifg--panel .esp-ifg__marco {
+		padding: 22px 20px;
+	}
+
+	.esp-ifg__cabecera--panel,
+	.esp-ifg__cuerpo,
+	.esp-ifg__pie--panel {
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.esp-ifg__sello,
+	.esp-ifg__legal {
+		text-align: left;
+	}
+
+	.esp-ifg__columna {
+		width: 100%;
+	}
+
+	.esp-ifg__barrasdesglose {
+		columns: 1;
+	}
+
+	.esp-ifg__titulo--grande {
+		font-size: 26px;
+	}
+
+	.esp-ifg__cifra--panel .esp-ifg__valor {
+		font-size: 56px;
+	}
+}
