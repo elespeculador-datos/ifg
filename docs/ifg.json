@@ -1,23 +1,23 @@
 {
-  "fecha": "2026-10-23",
+  "fecha": "2026-10-26",
   "version": "0.10.0",
-  "valor": 50.49,
-  "valor_crudo": 50.49,
-  "valor_tendencia": 49.26,
-  "variacion": 0.77,
+  "valor": 51.18,
+  "valor_crudo": 51.18,
+  "valor_tendencia": 50.26,
+  "variacion": -0.04,
   "tramo": "Tensión",
-  "cobertura": 0.955,
+  "cobertura": 1.0,
   "parcial": false,
   "motores": [
     {
-      "componente": "gpr",
-      "aporte_cambio": -0.3429,
-      "aporte_nivel": 0.0
+      "componente": "energia",
+      "aporte_cambio": -0.2029,
+      "aporte_nivel": 0.0003
     },
     {
-      "componente": "transporte",
-      "aporte_cambio": 0.2322,
-      "aporte_nivel": -0.3424
+      "componente": "fletes",
+      "aporte_cambio": 0.1992,
+      "aporte_nivel": 0.3109
     }
   ],
   "componentes_activos": [
@@ -33,10 +33,10 @@
     "gdelt",
     "gpr"
   ],
-  "estado_dato": "provisional",
+  "estado_dato": "definitivo",
   "licencia": "CC BY 4.0. Cita: el especulador.com, Índice de Fricción Global, versión 0.10.0.",
   "aviso": "Contenido informativo y educativo. No constituye asesoramiento financiero ni recomendación de inversión.",
   "estado": "preliminar: reglas congeladas, índice en validación prospectiva, no publicado como referencia citable",
   "revisiones": "Un valor definitivo no se revisa nunca. Un valor provisional —al que le falta algún componente— queda abierto 5 sesiones por si la fuente vuelve, y toda corrección aplicada se publica en correcciones.csv. La deriva observada entre el recálculo y lo ya cerrado se publica en revisiones.csv.",
-  "generado": "2026-10-26T03:41:53+01:00"
+  "generado": "2026-10-27T03:38:58+01:00"
 }
