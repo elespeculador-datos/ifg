@@ -1,12 +1,12 @@
 {
- "actualizado": "2026-10-26T22:31",
- "generado": "2026-10-26T21:31:23+00:00",
- "comunicados_leidos": 77,
- "comunicados_ibex35_clasificados": 28,
+ "actualizado": "2026-10-27T06:31",
+ "generado": "2026-10-27T05:31:31+00:00",
+ "comunicados_leidos": 79,
+ "comunicados_ibex35_clasificados": 29,
  "por_recuadro": {
   "resultados": 9,
   "dividendos": 1,
-  "recompras": 10,
+  "recompras": 11,
   "opvs-ampliaciones": 0
  },
  "fuente": "CNMV, RSS de información privilegiada y otra información relevante",
