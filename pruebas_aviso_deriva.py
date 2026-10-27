@@ -14,9 +14,14 @@ QUÉ SE COMPRUEBA Y POR QUÉ CADA COSA:
   4. El récord de deriva se mide solo sobre la versión en curso. Comparar el
      8,87 de la 0.9.0 con el 10,14 de la 0.10.0 es comparar dos reglas
      distintas.
-  5. La migración del registro añade la columna sin tocar ninguna cifra.
+  5. La migración del registro añade la columna sin tocar ninguna cifra, y
+     etiqueta cada fila con la versión que deducen las fotos archivadas.
   6. avisar_deriva se calla cuando no hay cruce y la deriva no es récord, y
      habla cuando lo es.
+  7. Sobre el revisiones.csv REAL del repositorio, la migración reproduce el
+     etiquetado que se hizo a mano contra el historial de git, deja las cinco
+     columnas publicadas byte a byte, es idempotente y deja el récord de la
+     versión en curso disponible desde la primera ejecución.
 
 Ejecución:
     python pruebas_aviso_deriva.py
@@ -90,9 +95,20 @@ print("\n4-6. Récord de deriva, migración y aviso")
 
 tmp = tempfile.mkdtemp()
 rev_real, aviso_real = pub.REVISIONES, pub.RUTA_AVISO_DERIVA
+hist_real = pub.DIR_HISTORICO
 try:
     pub.REVISIONES = os.path.join(tmp, "revisiones.csv")
     pub.RUTA_AVISO_DERIVA = os.path.join(tmp, "aviso_deriva.json")
+
+    # Caso «primer día de una versión nueva»: todas las filas heredadas son
+    # de la versión anterior, porque la foto archivada de esa versión es
+    # posterior a ellas. No hay base de la versión en curso.
+    pub.DIR_HISTORICO = os.path.join(tmp, "historico")
+    os.makedirs(pub.DIR_HISTORICO)
+    with open(os.path.join(pub.DIR_HISTORICO, "ifg_0.9.0.json"), "w",
+              encoding="utf-8") as fh:
+        json.dump({"version": "0.9.0",
+                   "generado": "2026-10-19T03:45:30+02:00"}, fh)
 
     # Registro heredado: cabecera vieja, sin columna de versión.
     with open(pub.REVISIONES, "w", encoding="utf-8") as fh:
@@ -110,14 +126,15 @@ try:
     comprobar(len(reg) == 2 and float(reg["deriva_maxima"].max()) == 8.87,
               "la migración no toca ninguna cifra",
               str(reg["deriva_maxima"].tolist()))
-    comprobar(reg["version"].isna().all(),
-              "las filas antiguas quedan sin versión, que es lo que consta")
+    comprobar(reg["version"].astype(str).tolist() == ["0.9.0", "0.9.0"],
+              "las filas heredadas llevan la versión con que se midieron",
+              str(reg["version"].tolist()))
     comprobar(pd.isna(pub.deriva_maxima_registrada()),
-              "las filas sin versión no cuentan para el récord")
+              "las filas de otra versión no cuentan para el récord")
 
     # Primera deriva de esta versión: 10,14, pero SIN base con la que
-    # comparar. No se declara récord: si se declarara, el primer día tras
-    # desplegar esto saltaria una alerta falsa. Avisa por el cruce de tramo,
+    # comparar. No se declara récord: si se declarara, el primer día de una
+    # versión nueva saltaría una alerta falsa. Avisa por el cruce de tramo,
     # que es el disparador que sí funciona desde la primera ejecución.
     deriva = pd.Series({pd.Timestamp("2026-10-14"): -10.14,
                         pd.Timestamp("2026-10-13"): 2.0})
@@ -170,8 +187,69 @@ try:
     comprobar(len(aviso3["cruces_de_tramo"]) == 1
               and aviso3["cruces_de_tramo"][0]["fecha"] == "2026-10-16",
               "el marcador detalla el cruce")
+
+    # --- 7: el registro real del repositorio ---------------------------------
+    print("\n7. Migración del revisiones.csv real")
+    pub.DIR_HISTORICO = hist_real
+    with open(rev_real, encoding="utf-8") as fh:
+        lineas = fh.read().splitlines()
+    # Si el archivo real ya está migrado (después de fusionar esto), se le
+    # quita la sexta columna para probar la migración desde el original.
+    if lineas[0].strip() == pub.CABECERA_REVISIONES:
+        lineas = [",".join(l.split(",")[:5]) for l in lineas]
+    original = "\n".join(lineas) + "\n"
+    with open(pub.REVISIONES, "w", encoding="utf-8") as fh:
+        fh.write(original)
+
+    pub.migrar_revisiones()
+    with open(pub.REVISIONES, encoding="utf-8") as fh:
+        migrado = fh.read()
+    filas_m = migrado.splitlines()
+
+    comprobar(filas_m[0] == pub.CABECERA_REVISIONES, "cabecera nueva")
+    comprobar("\n".join(",".join(l.split(",")[:5]) for l in filas_m) + "\n"
+              == original,
+              "las cinco columnas publicadas quedan byte a byte")
+
+    # Etiquetado hecho a mano el 20 de octubre de 2026 contra el historial
+    # de git (la republicación a la 0.10.0 es del 18 de octubre). Lo que
+    # deduce el código tiene que coincidir fila a fila.
+    a_mano = {
+        "2026-10-13T03:35:21+02:00": "0.9.0",
+        "2026-10-14T03:41:55+02:00": "0.9.0",
+        "2026-10-15T03:44:07+02:00": "0.9.0",
+        "2026-10-16T03:43:24+02:00": "0.9.0",
+        "2026-10-19T03:45:30+02:00": "0.10.0",
+        "2026-10-20T03:46:49+02:00": "0.10.0",
+        "2026-10-21T03:47:33+02:00": "0.10.0",
+        "2026-10-22T03:47:05+02:00": "0.10.0",
+        "2026-10-23T03:49:55+02:00": "0.10.0",
+    }
+    deducido = {l.split(",")[0]: l.split(",")[5] for l in filas_m[1:]}
+    discrepan = [k for k, v in a_mano.items() if deducido.get(k) != v]
+    comprobar(not discrepan, "reproduce el etiquetado hecho a mano",
+              str(discrepan))
+    posteriores = [v for k, v in deducido.items() if k not in a_mano
+                   and pd.Timestamp(k) > pd.Timestamp("2026-10-23T03:49:55+02:00")]
+    comprobar(all(v == config.VERSION for v in posteriores),
+              "las ejecuciones posteriores llevan la versión en curso",
+              str(posteriores))
+    comprobar(all(deducido.values()), "ninguna fila real queda sin versión")
+
+    pub.migrar_revisiones()
+    with open(pub.REVISIONES, encoding="utf-8") as fh:
+        comprobar(fh.read() == migrado, "migrar dos veces no cambia nada")
+
+    comprobar(pub.deriva_maxima_registrada() == 10.14,
+              "el récord de la versión en curso existe desde el primer día",
+              str(pub.deriva_maxima_registrada()))
+
+    # Una marca ilegible o sin zona horaria no se atribuye a ninguna versión.
+    comprobar(pub.version_de_cada_ejecucion(["basura", "2026-10-20T03:00:00"])
+              == ["", ""], "una marca ilegible o sin zona queda sin versión")
 finally:
     pub.REVISIONES, pub.RUTA_AVISO_DERIVA = rev_real, aviso_real
+    pub.DIR_HISTORICO = hist_real
     shutil.rmtree(tmp, ignore_errors=True)
 
 print("\n" + ("TODO OK" if not fallos

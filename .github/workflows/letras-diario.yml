@@ -1,0 +1,70 @@
+name: Letras del Tesoro
+
+# Resultados de las subastas de Letras del Tesoro, calendario de subastas y Letras en manos
+# de particulares, con los datos del Tesoro Público. Una pasada cada día laborable a las
+# 12:30 UTC: los martes de subasta el Tesoro ya ha publicado el resultado. Solo lee y
+# escribe letras/ y docs/letras/; no toca el IFG ni los demás activos.
+on:
+  schedule:
+    - cron: "30 12 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: letras-diario
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils >/dev/null && pip install requests pandas openpyxl certifi
+      - name: Consultar el Tesoro y preparar los archivos
+        run: python letras/letras.py --salida docs/letras
+      - name: Guardar el resultado en el repositorio
+        run: |
+          if [ -z "$(git status --porcelain docs/letras)" ]; then
+            echo "Sin cambios."
+            exit 0
+          fi
+          git config user.name "Letras bot"
+          git config user.email "actions@github.com"
+          git add docs/letras
+          git commit -m "Letras del Tesoro $(date -u +%Y-%m-%d)"
+          git pull --rebase --autostash
+          git push
+
+      - name: Abrir incidencia si ha fallado
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=letras-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          cuerpo="La actualización de las Letras del Tesoro del $(date -u +%Y-%m-%d) ha fallado. Registro: $EJECUCION. La página sigue mostrando la última actualización buena con su fecha. Lo más probable: tesoro.es no respondía o ha cambiado una tabla o un Excel."
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="$cuerpo" >/dev/null
+          else
+            gh api --method POST "repos/${{ github.repository }}/labels" -f name=letras-fallido -f color=b60205 -f description="Las Letras del Tesoro no se han actualizado" >/dev/null 2>&1 || true
+            gh api --method POST "repos/${{ github.repository }}/issues" -f title="Las Letras del Tesoro no se han actualizado el $(date -u +%Y-%m-%d)" -f body="$cuerpo" -f 'labels[]=letras-fallido' >/dev/null
+          fi
+      - name: Cerrar la incidencia si ya funciona
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=letras-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="Actualización correcta el $(date -u +%Y-%m-%d). Se cierra." >/dev/null
+            gh api --method PATCH "repos/${{ github.repository }}/issues/$abierta" -f state=closed >/dev/null
+          fi

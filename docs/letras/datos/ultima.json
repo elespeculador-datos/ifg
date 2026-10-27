@@ -1,0 +1,162 @@
+{
+ "fecha": "2026-10-21",
+ "comprobado": "2026-10-26T15:03:36+00:00",
+ "huella": "5c97bcf6391c",
+ "ultimas": {
+  "12": {
+   "fecha": "2026-10-06",
+   "plazo": 12,
+   "vencimiento": "2027-10-08",
+   "liquidacion": "2026-10-09",
+   "solicitado": 5693.91,
+   "adjudicado": 4173.52,
+   "segunda_vuelta": 0.0,
+   "precio_minimo": 97.032,
+   "marginal": 3.026,
+   "precio_medio": 97.057,
+   "medio": 2.999,
+   "fuente": "web"
+  },
+  "6": {
+   "fecha": "2026-10-06",
+   "plazo": 6,
+   "vencimiento": "2027-04-09",
+   "liquidacion": "2026-10-09",
+   "solicitado": 3323.05,
+   "adjudicado": 2297.11,
+   "segunda_vuelta": 0.0,
+   "precio_minimo": 98.606,
+   "marginal": 2.798,
+   "precio_medio": 98.62,
+   "medio": 2.769,
+   "fuente": "web"
+  },
+  "3": {
+   "fecha": "2026-10-13",
+   "plazo": 3,
+   "vencimiento": "2027-01-15",
+   "liquidacion": "2026-10-16",
+   "solicitado": 1886.84,
+   "adjudicado": 751.69,
+   "segunda_vuelta": 0.0,
+   "precio_minimo": 99.336,
+   "marginal": 2.645,
+   "precio_medio": 99.339,
+   "medio": 2.635,
+   "fuente": "web"
+  },
+  "9": {
+   "fecha": "2026-10-13",
+   "plazo": 9,
+   "vencimiento": "2027-07-09",
+   "liquidacion": "2026-10-16",
+   "solicitado": 2842.34,
+   "adjudicado": 1382.22,
+   "segunda_vuelta": 82.31,
+   "precio_minimo": 97.854,
+   "marginal": 2.968,
+   "precio_medio": 97.86,
+   "medio": 2.96,
+   "fuente": "web"
+  }
+ },
+ "proximas": [
+  {
+   "subasta": "2026-01-13",
+   "plazos": [
+    6,
+    12
+   ],
+   "peticiones": "2026-01-09",
+   "pago": "2026-01-15",
+   "emision": "2026-01-16",
+   "anio_calendario": 2026
+  },
+  {
+   "subasta": "2026-01-20",
+   "plazos": [
+    3,
+    9
+   ],
+   "peticiones": "2026-01-16",
+   "pago": "2026-01-22",
+   "emision": "2026-01-23",
+   "anio_calendario": 2026
+  },
+  {
+   "subasta": "2026-02-03",
+   "plazos": [
+    6,
+    12
+   ],
+   "peticiones": "2026-01-30",
+   "pago": "2026-02-05",
+   "emision": "2026-02-06",
+   "anio_calendario": 2026
+  },
+  {
+   "subasta": "2026-02-10",
+   "plazos": [
+    3,
+    9
+   ],
+   "peticiones": "2026-02-06",
+   "pago": "2026-02-12",
+   "emision": "2026-02-13",
+   "anio_calendario": 2026
+  },
+  {
+   "subasta": "2026-03-03",
+   "plazos": [
+    6,
+    12
+   ],
+   "peticiones": "2026-02-27",
+   "pago": "2026-03-05",
+   "emision": "2026-03-06",
+   "anio_calendario": 2026
+  },
+  {
+   "subasta": "2026-03-10",
+   "plazos": [
+    3,
+    9
+   ],
+   "peticiones": "2026-03-06",
+   "pago": "2026-03-12",
+   "emision": "2026-03-13",
+   "anio_calendario": 2026
+  },
+  {
+   "subasta": "2026-04-07",
+   "plazos": [
+    6,
+    12
+   ],
+   "peticiones": "2026-04-01",
+   "pago": "2026-04-09",
+   "emision": "2026-04-10",
+   "anio_calendario": 2026
+  },
+  {
+   "subasta": "2026-04-14",
+   "plazos": [
+    3,
+    9
+   ],
+   "peticiones": "2026-04-10",
+   "pago": "2026-04-16",
+   "emision": "2026-04-17",
+   "anio_calendario": 2026
+  }
+ ],
+ "tenedores": {
+  "anio": 2026,
+  "mes": 7,
+  "personas_fisicas": 22080.894224,
+  "total": 84940.66
+ },
+ "fuente_tenedores": "Tesoro Público, Letras del Tesoro: distribución por tenedores (estadísticas mensuales); según su nota, 2002-2015 Banco de España (Iberclear) y 2016-2023 Banco de España (Securities Holdings Statistics)",
+ "fuente": "D. G. del Tesoro y Política Financiera (www.tesoro.es)",
+ "condiciones": "Reproducción fiel de la información del Tesoro Público, que la ofrece gratuitamente en www.tesoro.es. Cita: El Especulador, a partir de datos de la D. G. del Tesoro y Política Financiera"
+}

@@ -115,7 +115,8 @@ jobs:
             + (if .es_record then "\n\n**Deriva sin precedentes en esta version.** Maximo anterior: \(.record_previo // "ninguno")." else "" end)
             + (if (.cruces_de_tramo | length) > 0 then
                  "\n\n**Hay tramos publicados que el recalculo contradice** (esto es lo que importa editorialmente, porque el indice se cita por su tramo):\n\n| Fecha | Publicado | Recalculado |\n|---|---|---|\n"
-                 + ([.cruces_de_tramo[] | "| \(.fecha) | \(.valor_publicado) \(.tramo_publicado) | \(.valor_recalculado) \(.tramo_recalculado) |"] | join("\n"))
+                 + ([.cruces_de_tramo[:50][] | "| \(.fecha) | \(.valor_publicado) \(.tramo_publicado) | \(.valor_recalculado) \(.tramo_recalculado) |"] | join("\n"))
+                 + (if (.cruces_de_tramo | length) > 50 then "\n\n... y \((.cruces_de_tramo | length) - 50) sesiones mas con el tramo contradicho; aqui se muestran las 50 primeras." else "" end)
                else "\n\nNingun tramo publicado cambia de etiqueta." end)
             + "\n\nQue mirar, por orden de probabilidad:\n1. el GPR de la Fed revisa sus ultimos dias en cada entrega de los lunes, y ademas llega con unos seis dias de retraso: compara datos/gpr.csv entre dos ejecuciones;\n2. alinear() arrastra un componente hasta tres sesiones y ese arrastre cuenta como cobertura disponible, asi que la fila cierra como definitiva sobre un dato prestado;\n3. GDELT rellena huecos hacia atras (backfill_gdelt.py).\n\nNO se republica por esto sin decision expresa: republicar sustituye valores ya publicados. Este aviso solo informa."
             ' aviso_deriva.json)

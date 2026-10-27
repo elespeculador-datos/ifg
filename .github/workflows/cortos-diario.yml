@@ -1,16 +1,19 @@
 name: Cortos diario
 
 # Rastreador de posiciones cortas de El Especulador. La CNMV publica las
-# posiciones a las 15:30 del día hábil siguiente; aquí se descarga a las 16:20,
-# hora de Madrid. Dos horarios porque GitHub Actions solo entiende UTC y España
-# cambia de hora: el script no publica dos veces la misma fecha de la CNMV, así
-# que de las dos ejecuciones solo una escribe.
+# posiciones en su web a lo largo del día, pero el fichero NetShortPositions.xls
+# se regenera por la noche (el 19/10/2026, a las 18:18 UTC, 20:18 en Madrid).
+# Por eso se mira tres veces: 18:40 y 19:40 UTC (después de esa hora, con horario
+# de verano y de invierno) y a las 05:00 UTC por si la CNMV se retrasa. El
+# script no publica dos veces la misma fecha de la CNMV, así que solo escribe
+# la primera ejecución que encuentra un fichero nuevo.
 #
 # Es independiente del IFG: solo lee y escribe cortos/ y docs/cortos/.
 on:
   schedule:
-    - cron: "20 14 * * 1-5"   # 16:20 en Madrid con horario de verano
-    - cron: "20 15 * * 1-5"   # 16:20 en Madrid con horario de invierno
+    - cron: "40 18 * * 1-5"
+    - cron: "40 19 * * 1-5"
+    - cron: "0 5 * * 2-6"
   workflow_dispatch:
 
 permissions:

@@ -1,4 +1,4 @@
-Date,ifg,ifg_suavizado,variacion,tramo,cobertura,parcial,estado
+,ifg,ifg_suavizado,variacion,tramo,cobertura,parcial,estado
 2010-01-04,65.99,66.29,-0.83,Tensión,0.82,False,definitivo_incompleto
 2010-01-05,69.43,67.86,3.44,Tensión,0.82,False,definitivo_incompleto
 2010-01-06,74.38,71.12,4.95,Tensión,0.82,False,definitivo_incompleto
@@ -4294,3 +4294,8 @@ Date,ifg,ifg_suavizado,variacion,tramo,cobertura,parcial,estado
 2026-10-15,54.40,60.40,-8.73,Tensión,1.00,False,definitivo
 2026-10-16,50.20,55.30,-4.20,Tensión,1.00,False,definitivo
 2026-10-19,44.25,46.67,2.22,Normal,1.00,False,definitivo
+2026-10-20,40.17,43.69,-5.17,Normal,1.00,False,definitivo
+2026-10-21,49.47,46.69,8.87,Normal,1.00,False,definitivo
+2026-10-22,47.51,46.93,-1.30,Normal,1.00,False,definitivo
+2026-10-23,51.22,49.34,1.57,Tensión,1.00,False,definitivo
+2026-10-26,51.18,50.26,-0.04,Tensión,1.00,False,definitivo
