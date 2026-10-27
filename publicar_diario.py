@@ -97,6 +97,7 @@ DIR_PUBLICO = "docs"
 RUTA_SERIE = f"{DIR_PUBLICO}/ifg_serie.csv"
 REGISTRO = f"{DIR_PUBLICO}/registro_publicaciones.csv"
 REVISIONES = f"{DIR_PUBLICO}/revisiones.csv"
+DIR_HISTORICO = f"{DIR_PUBLICO}/historico"    # fotos archivadas al republicar
 VENTANA_PUBLICACION = (3, 5)      # horas locales de Madrid: vale las 3 y las 4
 ZONA = ZoneInfo("Europe/Madrid")
 
@@ -452,6 +453,71 @@ CABECERA_REVISIONES = ("ejecutado,sesiones_comparadas,deriva_maxima,"
                        "fecha_peor,sesiones_movidas,version")
 
 
+def version_de_cada_ejecucion(marcas: list[str],
+                               dir_historico: str = None) -> list[str]:
+    """
+    Con qué versión se hizo cada ejecución, deducido de lo que el propio
+    sistema dejó escrito, no de una suposición.
+
+    LA FUENTE. Cada republicación archiva en docs/historico/ la foto que
+    estaba publicada justo antes de cambiar de reglas (ifg_<versión>.json).
+    Esa foto lleva su versión y la marca «generado» de la última ejecución
+    hecha con esas reglas, que es la misma marca que esa ejecución escribió
+    como «ejecutado» en revisiones.csv. Así que la frontera entre versiones
+    está registrada al segundo:
+
+      - una ejecución cuya marca es igual o anterior a la de la foto
+        archivada de la versión V, y posterior a la de la versión archivada
+        previa, se hizo con V;
+      - una ejecución posterior a la última foto archivada se hizo con la
+        versión en curso (config.VERSION): la guardia de versión impide
+        publicar si config.py y ifg.json no coinciden, y toda republicación
+        archiva antes de tocar nada, así que no puede haber una versión
+        intermedia sin rastro.
+
+    Las marcas se comparan como instantes con su zona horaria, no como
+    texto: el registro cruza el cambio de hora (+02:00 / +01:00).
+
+    LÍMITE CONOCIDO. Una ejecución anterior a la foto archivada más antigua
+    se atribuye a esa versión. Es exacto en este repositorio —la primera
+    fila de revisiones.csv es del 13 de octubre de 2026, con la 0.9.0, y la
+    0.9.0 es la versión archivada más antigua—, pero si alguna vez apareciera
+    un registro de antes de que existiera el archivado, esa atribución no
+    estaría demostrada. Una marca ilegible se deja sin versión.
+    """
+    dir_historico = dir_historico or DIR_HISTORICO
+    fronteras = []
+    if os.path.isdir(dir_historico):
+        for nombre in os.listdir(dir_historico):
+            if not (nombre.startswith("ifg_") and nombre.endswith(".json")):
+                continue
+            try:
+                with open(os.path.join(dir_historico, nombre),
+                          encoding="utf-8") as fh:
+                    foto = json.load(fh)
+                fronteras.append((pd.Timestamp(foto["generado"]),
+                                  str(foto["version"])))
+            except Exception as e:                              # noqa: BLE001
+                log.warning("Foto archivada ilegible, se ignora: %s (%s)",
+                            nombre, e)
+    fronteras.sort()
+
+    versiones = []
+    for marca in marcas:
+        try:
+            t = pd.Timestamp(marca)
+        except Exception:                                       # noqa: BLE001
+            versiones.append("")
+            continue
+        if t.tzinfo is None:
+            versiones.append("")
+            continue
+        v = next((ver for limite, ver in fronteras if t <= limite),
+                 config.VERSION)
+        versiones.append(v)
+    return versiones
+
+
 def migrar_revisiones() -> None:
     """
     Añade la columna de versión al registro de deriva si aún no la tiene.
@@ -462,13 +528,19 @@ def migrar_revisiones() -> None:
     el archivo no lo decía. Comparar los dos como si fueran la misma magnitud
     es justo el error que este índice no se puede permitir.
 
-    La migración es puramente de forma: no toca ninguna cifra ya escrita, solo
-    deja el campo vacío en las filas antiguas y el CSV rectangular en vez de
-    con filas de distinta longitud. En este repositorio las seis filas que
-    había se rellenaron a mano al introducir la columna, porque la versión de
-    cada una consta en el historial de git (la republicación a la 0.10.0 es
-    del 18 de octubre de 2026), así que no hubo que suponer nada. La función
-    se queda como red para cualquier copia que venga de antes.
+    POR QUÉ SE HACE AQUÍ Y NO A MANO EN EL REPOSITORIO. La primera versión de
+    este cambio llevaba revisiones.csv ya migrado. Como la publicación diaria
+    añade una fila a ese mismo archivo cada madrugada, la rama quedaba en
+    conflicto todos los días y había que rehacerla a mano. Ahora el archivo
+    no se toca en el cambio: la primera ejecución tras fusionarlo lo migra
+    sola, una vez, y la versión de cada fila sale de
+    version_de_cada_ejecucion(), que la deduce de las fotos archivadas en
+    cada republicación. Da exactamente el mismo etiquetado que se hizo a
+    mano contra el historial de git (lo comprueba pruebas_aviso_deriva.py).
+
+    La migración es puramente de forma: no toca ninguna cifra ya escrita.
+    Las cinco columnas de cada fila quedan byte a byte como estaban; solo se
+    añade la sexta. Si el archivo ya tiene la cabecera nueva, no hace nada.
     """
     if not os.path.exists(REVISIONES):
         return
@@ -476,11 +548,14 @@ def migrar_revisiones() -> None:
         lineas = fh.read().splitlines()
     if not lineas or lineas[0].strip() == CABECERA_REVISIONES:
         return
-    cuerpo = [f"{l}," for l in lineas[1:] if l.strip()]
+    filas = [l for l in lineas[1:] if l.strip()]
+    versiones = version_de_cada_ejecucion([l.split(",")[0] for l in filas])
+    cuerpo = [f"{l},{v}" for l, v in zip(filas, versiones)]
     with open(REVISIONES, "w", encoding="utf-8") as fh:
         fh.write("\n".join([CABECERA_REVISIONES] + cuerpo) + "\n")
-    log.info("Registro de deriva migrado: %d filas antiguas quedan sin "
-             "versión, que es lo que consta.", len(cuerpo))
+    sin = sum(1 for v in versiones if not v)
+    log.info("Registro de deriva migrado: %d filas etiquetadas con su "
+             "versión, %d sin versión demostrable.", len(cuerpo) - sin, sin)
 
 
 def deriva_maxima_registrada(version: str = None) -> float:
@@ -595,14 +670,17 @@ def avisar_deriva(deriva: pd.Series, cruces: pd.DataFrame,
          20 de octubre, por ejemplo— seguiría siendo invisible.
 
     EL RÉCORD EXIGE TENER CON QUÉ COMPARAR, y por eso no se declara cuando no
-    hay ninguna deriva anotada de esta versión. Las filas anteriores a la
-    migración no llevan versión y se quedan fuera a propósito: las de la 0.9.0
-    se midieron con otras reglas. Si en su lugar se usara el máximo de todo el
-    archivo, el aviso compararía magnitudes distintas, que es justo lo que la
-    columna de versión viene a evitar; y si se diera por récord la primera
-    deriva sin base, el primer día tras este cambio saltaría una alerta falsa.
-    Así que el disparador 2 empieza a funcionar en la segunda ejecución y el
-    1 funciona desde la primera, que es el que tiene consecuencia.
+    hay ninguna deriva anotada de esta versión. Solo cuentan las filas de la
+    versión en curso: las de la 0.9.0 se midieron con otras reglas, y las que
+    no tengan versión demostrable se quedan fuera. Si en su lugar se usara el
+    máximo de todo el archivo, el aviso compararía magnitudes distintas, que
+    es justo lo que la columna de versión viene a evitar; y si se diera por
+    récord la primera deriva sin base, saltaría una alerta falsa. Como el
+    registro se migra antes de leer el récord, la base existe ya en la
+    primera ejecución tras introducir este cambio; el caso sin base queda
+    para el primer día de una versión nueva, y entonces el disparador 2
+    arranca en la segunda ejecución. El 1 funciona siempre desde la primera,
+    que es el que tiene consecuencia.
 
     No interrumpe la publicación ni toca un solo valor. Un dato cerrado es
     inmutable y lo sigue siendo: esto solo enciende una luz.
@@ -772,7 +850,10 @@ def main() -> int:
     final.to_csv(RUTA_SERIE, float_format="%.2f")
 
     # El récord se mira ANTES de anotar la deriva de hoy, o se compararía
-    # consigo misma y nunca habría récord.
+    # consigo misma y nunca habría récord. Y DESPUÉS de migrar el registro:
+    # si se leyera sin la columna de versión, el primer día tras introducirla
+    # no habría base y el disparador del récord se perdería esa sesión.
+    migrar_revisiones()
     record_previo = deriva_maxima_registrada()
     anotar_revision(deriva, generado)
     anotar_correcciones(correcciones, generado)
