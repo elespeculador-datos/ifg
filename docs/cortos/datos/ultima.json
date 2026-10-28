@@ -1,10 +1,10 @@
 {
- "fecha_publicacion": "2026-10-27",
- "publicacion_anterior": "2026-10-26",
- "generado": "2026-10-27T19:26:03+00:00",
- "posiciones": 65,
- "emisores": 32,
- "cambios": 11,
+ "fecha_publicacion": "2026-10-28",
+ "publicacion_anterior": "2026-10-27",
+ "generado": "2026-10-28T19:28:49+00:00",
+ "posiciones": 64,
+ "emisores": 31,
+ "cambios": 8,
  "historico": {
   "desde": "2010-06-10",
   "mayor_posicion": {
@@ -23,18 +23,18 @@
    "isin": "ES0165386014",
    "emisor": "SOLARIA ENERGIA Y MEDIOAMBIENTE, S.A.",
    "tenedores": 9,
-   "suma_publicada_pct": 7.67,
-   "mayor_posicion_pct": 1.82,
-   "ultima_fecha_posicion": "2026-10-26",
+   "suma_publicada_pct": 8.44,
+   "mayor_posicion_pct": 2.37,
+   "ultima_fecha_posicion": "2026-10-27",
    "mayor_tenedor": "JPMorgan Asset Management (UK) Limited"
   },
   {
    "isin": "ES0130960018",
    "emisor": "ENAGAS, S.A.",
    "tenedores": 6,
-   "suma_publicada_pct": 4.39,
+   "suma_publicada_pct": 4.31,
    "mayor_posicion_pct": 0.94,
-   "ultima_fecha_posicion": "2026-10-26",
+   "ultima_fecha_posicion": "2026-10-27",
    "mayor_tenedor": "Point 72 Europe (London) LLP"
   },
   {
@@ -50,9 +50,9 @@
    "isin": "LU1048328220",
    "emisor": "EDREAMS ODIGEO, S.A.",
    "tenedores": 3,
-   "suma_publicada_pct": 3.14,
-   "mayor_posicion_pct": 1.49,
-   "ultima_fecha_posicion": "2026-10-26",
+   "suma_publicada_pct": 3.15,
+   "mayor_posicion_pct": 1.5,
+   "ultima_fecha_posicion": "2026-10-27",
    "mayor_tenedor": "Citadel Advisors LLC"
   },
   {
