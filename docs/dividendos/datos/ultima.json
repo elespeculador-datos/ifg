@@ -1,23 +1,24 @@
 {
- "fecha": "2026-10-28",
- "generado": "2026-10-28T17:49:30+00:00",
- "proximos": 9,
+ "fecha": "2026-10-29",
+ "generado": "2026-10-29T17:52:13+00:00",
+ "proximos": 8,
  "siguiente": {
-  "fecha_ex": "2026-10-28",
+  "fecha_ex": "2026-10-29",
   "empresas": [
-   "DESA"
+   "BANCO SANTANDER",
+   "IND. DE DISEÑO TEXTIL (INDITEX)"
   ]
  },
  "mayor_rentabilidad": [
   {
    "empresa": "MFE-MEDIAFOREUROPE",
    "isin": "NL0015001OI1",
-   "rentabilidad_ordinaria_pct": 10.41
+   "rentabilidad_ordinaria_pct": 10.38
   },
   {
    "empresa": "TELEFONICA",
    "isin": "ES0178430E18",
-   "rentabilidad_ordinaria_pct": 9.21
+   "rentabilidad_ordinaria_pct": 9.15
   },
   {
    "empresa": "NATURHOUSE HEALTH",
