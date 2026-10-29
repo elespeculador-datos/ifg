@@ -1,23 +1,23 @@
 {
-  "fecha": "2026-10-27",
+  "fecha": "2026-10-28",
   "version": "0.10.0",
-  "valor": 49.82,
-  "valor_crudo": 49.82,
-  "valor_tendencia": 49.71,
-  "variacion": -0.03,
+  "valor": 49.46,
+  "valor_crudo": 49.46,
+  "valor_tendencia": 49.63,
+  "variacion": -0.53,
   "tramo": "Normal",
   "cobertura": 1.0,
   "parcial": false,
   "motores": [
     {
       "componente": "transporte",
-      "aporte_cambio": 0.2401,
-      "aporte_nivel": -0.1553
+      "aporte_cambio": -0.1972,
+      "aporte_nivel": -0.38
     },
     {
       "componente": "energia",
-      "aporte_cambio": -0.1599,
-      "aporte_nivel": 0.0503
+      "aporte_cambio": -0.1538,
+      "aporte_nivel": -0.0098
     }
   ],
   "componentes_activos": [
@@ -38,5 +38,5 @@
   "aviso": "Contenido informativo y educativo. No constituye asesoramiento financiero ni recomendación de inversión.",
   "estado": "preliminar: reglas congeladas, índice en validación prospectiva, no publicado como referencia citable",
   "revisiones": "Un valor definitivo no se revisa nunca. Un valor provisional —al que le falta algún componente— queda abierto 5 sesiones por si la fuente vuelve, y toda corrección aplicada se publica en correcciones.csv. La deriva observada entre el recálculo y lo ya cerrado se publica en revisiones.csv.",
-  "generado": "2026-10-28T03:04:52+01:00"
+  "generado": "2026-10-29T03:06:01+01:00"
 }
