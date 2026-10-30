@@ -1,29 +1,28 @@
 {
- "fecha": "2026-10-29",
- "generado": "2026-10-29T17:52:13+00:00",
- "proximos": 8,
+ "fecha": "2026-10-30",
+ "generado": "2026-10-30T17:45:40+00:00",
+ "proximos": 5,
  "siguiente": {
-  "fecha_ex": "2026-10-29",
+  "fecha_ex": "2026-11-02",
   "empresas": [
-   "BANCO SANTANDER",
-   "IND. DE DISEÑO TEXTIL (INDITEX)"
+   "RENTA 4 BANCO"
   ]
  },
  "mayor_rentabilidad": [
   {
    "empresa": "MFE-MEDIAFOREUROPE",
    "isin": "NL0015001OI1",
-   "rentabilidad_ordinaria_pct": 10.38
+   "rentabilidad_ordinaria_pct": 10.31
   },
   {
    "empresa": "TELEFONICA",
    "isin": "ES0178430E18",
-   "rentabilidad_ordinaria_pct": 9.15
+   "rentabilidad_ordinaria_pct": 9.02
   },
   {
    "empresa": "NATURHOUSE HEALTH",
    "isin": "ES0105043006",
-   "rentabilidad_ordinaria_pct": 8.81
+   "rentabilidad_ordinaria_pct": 8.77
   }
  ],
  "fuente": "BME, operaciones financieras: dividendos; cierres de la ficha de cada valor",
