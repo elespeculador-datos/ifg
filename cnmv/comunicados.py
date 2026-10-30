@@ -64,8 +64,13 @@ CAJAS = [  # clave (igual que el id del panel en la plantilla de la web), títul
     ("dividendos", "Dividendos", "Anuncios de dividendo y dividendos flexibles."),
     ("recompras", "Recompras", "Programas de recompra en curso y su último informe."),
     ("opvs-ampliaciones", "OPVs y ampliaciones", "Ampliaciones de capital, colocaciones y salidas a bolsa."),
+    ("opas", "OPAs", "Ofertas públicas de adquisición sobre empresas del IBEX 35 o lanzadas por ellas."),
 ]
-VENTANA = {"resultados": 30, "dividendos": 10, "recompras": 45, "opvs-ampliaciones": 10}  # días para seguir en la misma operación
+# Tipos que ya tienen recuadro en /ibex-35/ y página propia en la web. «opas» se publica en GitHub Pages
+# (listado-opas.html, fichas e index.html) pero no se enlaza desde la web hasta que existan su recuadro
+# (panel opas_panel) y la página /ibex-35/opas/ con [espec_cnmv_listado tipo="opas"]: entonces se añade aquí.
+EN_WEB = {"resultados", "dividendos", "recompras", "opvs-ampliaciones"}
+VENTANA = {"resultados": 30, "dividendos": 10, "recompras": 45, "opvs-ampliaciones": 10, "opas": 120}  # días para seguir en la misma operación
 DIAS_LISTADO = 365      # antigüedad máxima de lo que sale en las páginas de cada tipo
 DIVIDENDOS_BME = RAIZ / "docs" / "dividendos" / "datos"   # datos del calendario de dividendos (fuente: BME)
 # Páginas de elespeculador.com con el listado completo de cada tipo (shortcode espec_cnmv_listado) y texto del botón
@@ -76,12 +81,14 @@ LISTADOS = {
     "dividendos": ("https://elespeculador.com/ibex-35/dividendos/", "Ver todos los dividendos"),
     "recompras": ("https://elespeculador.com/ibex-35/recompras/", "Ver todas las recompras"),
     "opvs-ampliaciones": ("https://elespeculador.com/ibex-35/ampliaciones-y-opvs/", "Ver todas las ampliaciones y OPVs"),
+    "opas": ("https://elespeculador.com/ibex-35/opas/", "Ver todas las OPAs"),
 }
 INTRO = {
     "resultados": "Publicaciones de resultados y anuncios de la fecha en que se van a presentar, tal como las comunican a la CNMV las empresas del IBEX 35. Cuando una empresa anuncia la fecha y después publica las cuentas del mismo periodo, sale una sola línea con lo último.",
     "dividendos": "Anuncios de dividendo comunicados a la CNMV por las empresas del IBEX 35, incluidos los dividendos flexibles (ampliaciones liberadas).",
     "recompras": "Programas de recompra de acciones de las empresas del IBEX 35. Mientras dura un programa, la empresa informa cada semana de las compras que ha hecho: aquí sale una sola línea por programa, con el último informe y el número de comunicados.",
     "opvs-ampliaciones": "Ampliaciones de capital, colocaciones de acciones y salidas a bolsa comunicadas a la CNMV por las empresas del IBEX 35.",
+    "opas": "Ofertas públicas de adquisición comunicadas a la CNMV por las empresas del IBEX 35: las que reciben y las que lanzan, incluidas las de exclusión. Los comunicados de una misma oferta salen en una línea.",
 }
 
 
@@ -206,6 +213,11 @@ def clasificar(categoria: str, texto: str) -> tuple[str, str] | None:
     todo = c + t
     if _hay(c, " contratos de liquidez "):
         return None
+    deuda = _hay(todo, " bonos ", " obligaciones ", " pagares ", " notas ", " warrants ", " turbos ",
+                 " certificados ", " renta fija ", " cedulas ")
+    if not deuda and _hay(todo, " oferta publica de adquisicion ", " ofertas publicas de adquisicion ", " opa ", " opas ",
+                          " tender offer ", " takeover bid ", " oferta publica voluntaria ", " oferta publica obligatoria "):
+        return "opas", ("OPA de exclusión" if _hay(todo, " exclusion ") else "OPA")
     if _hay(todo, " ampliacion de capital liberada ", " aumento de capital liberado ", " dividendo flexible ",
             " retribucion flexible ", " scrip ", " derechos de asignacion gratuita "):
         return "dividendos", "Dividendo flexible"
@@ -323,7 +335,8 @@ def entradas(c: pd.DataFrame, caja: str, hoy: pd.Timestamp, dias: int = DIAS_CAJ
             if ult.periodo:
                 etiqueta += f" {ult.periodo}"
         out.append({"grupo": gid, "empresa": ult.empresa, "ficha": ult.ficha, "fecha": g.iloc[0].fecha,
-                    "etiqueta": etiqueta, "texto": ult.texto or ult.categoria, "enlace": ult.enlace, "n": len(g)})
+                    "etiqueta": etiqueta, "texto": ult.texto or ult.categoria, "enlace": ult.enlace, "n": len(g),
+                    "todos": [(y.nreg, y.enlace) for y in g.itertuples()]})
     out.sort(key=lambda r: r["fecha"], reverse=True)
     return out
 
@@ -345,9 +358,19 @@ def vacio(titulo: str, inicio: pd.Timestamp, hoy: pd.Timestamp) -> str:
     return f"Sin comunicados de {t} de empresas del IBEX 35 desde el {inicio.strftime('%d/%m/%Y')}, cuando empieza este registro."
 
 
+def todos_html(r: dict) -> str:
+    """Todos los comunicados de una operación, cada uno con su enlace a la CNMV: ningún hecho queda sin enlace."""
+    if r["n"] <= 1:
+        return ""
+    enl = " · ".join(f'<a href="{_e(u)}" target="_blank" rel="noopener nofollow">nº {_e(n)}</a>' for n, u in r["todos"])
+    return f"{r['n']} comunicados: {enl}"
+
+
 def cajas_html(c: pd.DataFrame, hoy: pd.Timestamp, sello: str, inicio: pd.Timestamp) -> str:
     bloques = []
     for clave, titulo, desc in CAJAS:
+        if clave not in EN_WEB:
+            continue
         es = entradas(c, clave, hoy)[:POR_CAJA]
         cuerpo = "\n".join(articulo(r) for r in es) or f'<p class="efsec-item-excerpt">{_e(vacio(titulo, inicio, hoy))}</p>'
         if BOTONES:
@@ -360,6 +383,8 @@ def cajas_html(c: pd.DataFrame, hoy: pd.Timestamp, sello: str, inicio: pd.Timest
 def navegacion(actual: str) -> str:
     enlaces = []
     for clave, titulo, _ in CAJAS:
+        if clave not in EN_WEB and clave != actual:
+            continue
         if clave == actual:
             enlaces.append(f"<strong>{_e(titulo)}</strong>")
         else:
@@ -432,7 +457,7 @@ def listado_html(c: pd.DataFrame, clave: str, titulo: str, hoy: pd.Timestamp, se
         f'<td><a href="{FICHAS}{r["ficha"]}/">{_e(r["empresa"])}</a></td><td>{_e(r["etiqueta"])}</td>'
         f'<td>{_e(_corto(r["texto"], 300))}</td>'
         f'<td><a href="{_e(r["enlace"])}" target="_blank" rel="noopener nofollow">CNMV</a>'
-        f'{" (" + str(r["n"]) + " comunicados)" if r["n"] > 1 else ""}</td></tr>' for r in es)
+        f'{" (" + todos_html(r) + ")" if r["n"] > 1 else ""}</td></tr>' for r in es)
     if not filas:
         filas = f'<tr><td colspan="5">{_e(vacio(titulo, inicio, hoy))}</td></tr>'
     desde = max(inicio, hoy - pd.Timedelta(days=DIAS_LISTADO))
@@ -452,7 +477,7 @@ def listado_html(c: pd.DataFrame, clave: str, titulo: str, hoy: pd.Timestamp, se
 
 # --------------------------------------------------------------------------- bloque de la ficha de cada empresa
 NOMBRE_CAJA = {"resultados": "Resultados", "dividendos": "Dividendos", "recompras": "Recompra",
-               "opvs-ampliaciones": "Ampliación u OPV"}
+               "opvs-ampliaciones": "Ampliación u OPV", "opas": "OPA"}
 FICHA_COMUNICADOS = 8   # líneas de comunicados en cada ficha
 
 
@@ -473,20 +498,20 @@ def ficha_html(c: pd.DataFrame, emp: pd.Series, hoy: pd.Timestamp, sello: str, i
     nombre = emp["nombre"]
     lineas = []
     for r in _comunicados_empresa(c, emp["isin"], hoy)[:FICHA_COMUNICADOS]:
-        tipo = r["etiqueta"] if r["caja"] == "resultados" else NOMBRE_CAJA[r["caja"]] if r["caja"] != "dividendos" else r["etiqueta"]
-        extra = f" ({r['n']} comunicados)" if r["n"] > 1 else ""
+        tipo = r["etiqueta"] if r["caja"] in ("resultados", "dividendos", "opas") else NOMBRE_CAJA[r["caja"]]
+        extra = f" ({todos_html(r)})" if r["n"] > 1 else ""
         lineas.append(f'<li><time>{_f(r["fecha"])}</time><span><a href="{_e(r["enlace"])}" target="_blank" rel="noopener nofollow">'
-                      f'{_e(_corto(r["texto"], 150))}</a><br><small>{_e(tipo)}{_e(extra)}</small></span></li>')
+                      f'{_e(_corto(r["texto"], 150))}</a><br><small>{_e(tipo)}{extra}</small></span></li>')
     if lineas:
         lista = '<ul class="ef-news">\n' + "\n".join(lineas) + "\n</ul>"
     else:
         cuando = ("en los últimos doce meses" if hoy - inicio >= pd.Timedelta(days=DIAS_LISTADO)
                   else f'desde el {inicio.strftime("%d/%m/%Y")}, cuando empieza este registro')
-        lista = f'<p>{_e(nombre)} no ha comunicado a la CNMV resultados, dividendos, recompras ni ampliaciones {cuando}.</p>'
-    enlaces = " · ".join(f'<a href="{LISTADOS[k][0]}">{_e(t)}</a>' for k, t, _ in CAJAS)
+        lista = f'<p>{_e(nombre)} no ha comunicado a la CNMV resultados, dividendos, recompras, ampliaciones ni OPAs {cuando}.</p>'
+    enlaces = " · ".join(f'<a href="{LISTADOS[k][0]}">{_e(t)}</a>' for k, t, _ in CAJAS if k in EN_WEB)
     bloques = [f'<div class="ef-card">\n<h2>Comunicados de {_e(nombre)} a la CNMV</h2>\n{lista}\n'
-               f'<p class="ef-note">Resultados, dividendos, recompras y ampliaciones de los últimos doce meses. '
-               f'Los comunicados de una misma operación salen en una línea. Todas las empresas del IBEX 35: {enlaces}.</p>\n</div>']
+               f'<p class="ef-note">Resultados, dividendos, recompras, ampliaciones y OPAs de los últimos doce meses. '
+               f'Los comunicados de una misma operación salen en una línea, con un enlace a cada uno. Todas las empresas del IBEX 35: {enlaces}.</p>\n</div>']
 
     div = []
     if prox is not None:

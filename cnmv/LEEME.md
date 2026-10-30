@@ -16,12 +16,13 @@ El tipo sale de la categoría oficial de la CNMV y del texto del comunicado, con
 - **Dividendos**: dividendos, pagos a cuenta, devoluciones de prima y dividendos flexibles (ampliaciones liberadas).
 - **OPVs y ampliaciones**: ampliaciones de capital, OPV, salidas a bolsa y colocaciones de acciones (no las emisiones de deuda).
 - **Resultados**: publicación de resultados y anuncios de la fecha en que se publicarán.
+- **OPAs**: ofertas públicas de adquisición que reciben o lanzan, incluidas las de exclusión (no las ofertas sobre bonos u otra deuda). Se publican en `listado-opas.html`, en las fichas y en `index.html`, pero **no se enlazan desde la web** mientras `opas` no esté en `EN_WEB`: hace falta antes el recuadro `opas_panel` en `/ibex-35/`, la página `/ibex-35/opas/` y añadir `opas` a los tipos del fragmento 42.
 
 Lo demás (juntas, ratings, nombramientos…) se guarda en el histórico pero no sale en los recuadros.
 
 ## Duplicados
 
-Dos comunicados distintos no se pisan nunca: cada uno tiene su número de registro en la CNMV. Lo que se agrupa es la **operación**: misma empresa, mismo tipo y, en resultados, mismo periodo. Así, los informes semanales de un programa de recompra, los dos comunicados de una misma ampliación o el anuncio de fecha y la publicación de unos resultados salen como una sola entrada, con el último comunicado y cuántos hay. Una ampliación y un dividendo de la misma empresa son dos entradas, cada una en su recuadro.
+Dos comunicados distintos no se pisan nunca: cada uno tiene su número de registro en la CNMV. Lo que se agrupa es la **operación**: misma empresa, mismo tipo y, en resultados, mismo periodo. Así, los informes semanales de un programa de recompra, los dos comunicados de una misma ampliación o el anuncio de fecha y la publicación de unos resultados salen como una sola entrada, con el último comunicado y cuántos hay; en los listados y en las fichas, la entrada enlaza además cada comunicado por su número de registro, para que ningún hecho quede sin enlace. Una ampliación y un dividendo de la misma empresa son dos entradas, cada una en su recuadro.
 
 Prueba local: `python cnmv/comunicados.py --local IP.xml OIR.xml`.
 
