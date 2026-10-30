@@ -108,7 +108,18 @@ SESIONES_PANEL = 260
 # Columnas de la serie pública, en orden.
 COLUMNAS = ["ifg", "ifg_suavizado", "variacion", "tramo", "cobertura", "parcial"]
 
-RUTA_COMPONENTES = f"{DIR_PUBLICO}/componentes.csv"
+# El archivo de componentes NO va en DIR_PUBLICO. GitHub Pages sirve ese
+# directorio entero, y este archivo es la versión estandarizada, sesión a
+# sesión, de los precios de origen: un derivado directo de datos de terceros
+# cuyas licencias están sin resolver (cambio P3 de la revisión de cumplimiento
+# del 27-10-2026). Se sigue archivando, porque es la única prueba de con qué
+# se calculó cada día, pero deja de ofrecerse como descarga.
+#
+# Queda pendiente, y no se decide aquí: llevarlo a un sitio privado de verdad
+# —el repositorio es público—, añadir la desviación típica de escala de cada
+# día y archivar la fila definitiva en vez de la provisional cuando un
+# provisional se cierra. Eso es de Federico y Tecnología.
+RUTA_COMPONENTES = "datos/componentes.csv"
 CORRECCIONES = f"{DIR_PUBLICO}/correcciones.csv"
 
 # Marcador que lee el flujo para decidir si abre una incidencia por deriva.
@@ -429,9 +440,15 @@ def archivar_componentes(final: pd.DataFrame, res: dict) -> int:
     números, y sin este archivo no habrá forma de demostrar que los nuestros
     estaban bien.
 
-    Archivando los componentes, cualquiera coge esta tabla, aplica la fórmula
-    publicada y obtiene exactamente el valor publicado. Eso es lo que separa
-    un índice reproducible de uno que hay que creerse.
+    HASTA DÓNDE LLEGA, dicho con exactitud desde la fe de erratas del
+    27-10-2026: con esta tabla NO se reconstruye la serie completa. La escala
+    divide por una desviación típica expansiva que usa historia anterior a
+    2010 y que no se publica, así que la reconstrucción solo funciona desde el
+    3 de diciembre de 2012, con 3,5 puntos de diferencia media y 13,6 de
+    máxima. Y cuando un provisional se cierra, la fila archivada conserva los
+    componentes provisionales: la del 23-10-2026 da 50,49 y el definitivo es
+    51,22. Sirve como prueba de con qué se calculó cada día, no como receta
+    para reproducirlo.
 
     Se escribe con la misma regla que la serie: las filas ya cerradas no se
     tocan, las provisionales se refrescan y las nuevas se añaden.
