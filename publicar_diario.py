@@ -200,12 +200,23 @@ def sellar_foto(ultimo: dict, generado: str,
     'revisiones' se puede sobrescribir, porque la republicación por cambio de
     versión tiene que contar otra cosa que la publicación diaria.
     """
-    ultimo["licencia"] = ("CC BY 4.0. Cita: el especulador.com, Índice de "
-                          f"Fricción Global, versión {config.VERSION}.")
+    # P2 de la revisión de cumplimiento del 27-10-2026. La CC BY 4.0 nunca
+    # pudo cubrir los precios de terceros de los que salen ocho de los once
+    # componentes (cl. 1: solo se licencia lo que el licenciante puede
+    # licenciar). Se deja de ofrecer para lo que se publique desde ahora; es
+    # irrevocable para quien ya recibió la serie con ella, así que no se
+    # «suspende», y la fe de erratas de la metodología lo explica.
+    ultimo["licencia"] = ("Consulta y cita. Sin licencia de reutilización "
+                          "comercial ni de redistribución. Ver "
+                          "https://elespeculador.com/indices/friccion-global/"
+                          "#ifg-licencia")
     ultimo["aviso"] = ("Contenido informativo y educativo. No constituye "
                        "asesoramiento financiero ni recomendación de inversión.")
+    # Fila 13 de la revisión: «índice de referencia» es un término definido
+    # por el Reglamento (UE) 2016/1011 y el JSON contradecía a la ficha, que
+    # dice que sí puede citarse. Lo que está en validación son las reglas.
     ultimo["estado"] = ("preliminar: reglas congeladas, índice en validación "
-                        "prospectiva, no publicado como referencia citable")
+                        "prospectiva")
     ultimo["revisiones"] = revisiones or (
         "Un valor definitivo no se revisa nunca. Un valor provisional —al que "
         f"le falta algún componente— queda abierto {VENTANA_PROVISIONAL} "
@@ -787,8 +798,11 @@ def escribir_serie_panel(final: pd.DataFrame, res: dict, generado: str,
         "sesiones_por_tramo": {t: int((tramos == t).sum())
                                for _, _, t in config.TRAMOS},
         "desglose_nivel": {c: round(float(nivel[c]), 4) for c in nivel.index},
-        "licencia": ("CC BY 4.0. Cita: el especulador.com, Índice de "
-                     f"Fricción Global, versión {config.VERSION}."),
+        # P2: misma licencia que la foto del día. Ver sellar_foto().
+        "licencia": ("Consulta y cita. Sin licencia de reutilización "
+                     "comercial ni de redistribución. Ver "
+                     "https://elespeculador.com/indices/friccion-global/"
+                     "#ifg-licencia"),
     }
 
     with open(f"{DIR_PUBLICO}/ifg_serie_12m.json", "w", encoding="utf-8") as fh:
