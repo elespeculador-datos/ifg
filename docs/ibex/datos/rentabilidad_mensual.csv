@@ -1,5 +1,4 @@
 anio,mes,cierre,rentabilidad_pct,completo
-2021,11,8305.11,-8.31,True
 2021,12,8713.77,4.92,True
 2022,1,8612.78,-1.16,True
 2022,2,8479.15,-1.55,True
@@ -58,4 +57,4 @@ anio,mes,cierre,rentabilidad_pct,completo
 2026,7,19782.9,1.6,True
 2026,8,19974.1,0.97,True
 2026,9,19426.2,-2.74,True
-2026,10,18883.5,-2.79,False
+2026,10,18857.6,-2.93,False
