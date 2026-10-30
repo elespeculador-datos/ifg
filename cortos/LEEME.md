@@ -11,3 +11,7 @@ Es independiente del IFG: solo lee y escribe `cortos/` y `docs/cortos/`. Si el f
 Prueba local con un fichero ya descargado: `python cortos/rastreador.py --local NetShortPositions.xls`.
 
 Rehacer solo el fragmento con los CSV ya publicados: `python cortos/rastreador.py --solo-fragmento`.
+
+Comprobaciones, sin red: `python cortos/pruebas_rastreador.py`.
+
+La hoja «Última» de la CNMV no garantiza una sola fila por (ISIN, tenedor): el mismo tenedor puede aparecer dos veces sobre el mismo valor cuando el fichero recoge a la vez una posición y la comunicación con la que cruza el 0,5 %. Para los cambios del día y la suma por emisor se usa la comunicación de `fecha_posicion` más reciente, y el registro de la ejecución lo avisa. La tabla de todas las posiciones sí las muestra las dos: son dos comunicaciones reales.
