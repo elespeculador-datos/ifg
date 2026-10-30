@@ -1,13 +1,24 @@
 # Índice de Fricción Global (IFG) — Metodología
 
-**Versión 0.10.0** · Documento actualizado el 18 de octubre de 2026
+**Versión 0.10.0** · Reglas congeladas el 18 de octubre de 2026 · Documento
+corregido el 30 de octubre de 2026 (fe de erratas, sección 15)
 Publicado por **el especulador.com**
 
 > **Estado del índice: preliminar.** Las reglas están congeladas y versionadas,
-> y la serie histórica está publicada, pero el IFG **no se presenta todavía
-> como referencia citable**. Pasará a 1.0.0 cuando acumule un año de episodios
-> genuinamente fuera de muestra y cumpla sus umbrales sin que se toque nada.
-> El motivo está explicado sin rodeos en la sección 10.
+> y la serie histórica está publicada. Puede citarse, siempre con su versión,
+> pero **sus reglas todavía están en validación**: pasará a 1.0.0 cuando
+> acumule un año de episodios genuinamente fuera de muestra y cumpla sus
+> umbrales sin que se toque nada. El motivo está explicado sin rodeos en la
+> sección 10. No es un índice de referencia en el sentido del Reglamento (UE)
+> 2016/1011; ver la sección 13.
+
+> **Fe de erratas del 30 de octubre de 2026.** Este documento corrige
+> afirmaciones de la versión publicada el 18 de octubre de 2026 que los datos
+> publicados no sostenían, y retira la oferta de licencia Creative Commons BY
+> 4.0 de la serie. El detalle está al final, en la sección 15. El PDF
+> `metodologia-ifg-0.10.0.pdf` se conserva sin cambios, porque es el documento
+> que puede haberse citado: sus apartados de licencia y de prima de riesgo
+> quedan sustituidos por esta fe de erratas.
 
 ---
 
@@ -49,13 +60,13 @@ Once componentes, agrupados por el canal de fricción que capturan.
 | **vol_energia** | nivel logarítmico de la volatilidad implícita del crudo | `^OVX` |
 | **refugios** | media de: oro/bolsa, −CHF, −JPY | `GC=F`, `^GSPC`, `EURCHF=X`, `EURJPY=X` |
 | **defensa** | cesta de defensa europea / Stoxx 600 | RHM.DE, BA.L, HO.PA, LDO.MI, AM.PA, IDR.MC; `^STOXX` |
-| **prima** | bono español 10a − Bund 10a, mitad nivel y mitad variación | fuente externa en cascada |
+| **prima** | diferencial de la zona euro frente a la curva AAA a 10 años, mitad nivel y mitad variación | curvas de rendimiento del BCE |
 | **transporte** | (IAG + Amadeus) / IBEX 35 | `IAG.MC`, `AMS.MC`, `^IBEX` |
 | **fletes** | cesta de petroleros / mercado | `FRO`, `DHT`, `NAT` |
 | **grano** | trigo | `ZW=F` |
 | **gas** | TTF europeo | `TTF=F` |
-| **gdelt** | proporción de eventos de conflicto, media móvil de 3 días | GDELT |
-| **gpr** | índice GPR diario | Caldara e Iacoviello, Reserva Federal |
+| **gdelt** | proporción de eventos de conflicto material en una muestra de **un día por semana** de GDELT; cada muestra se mantiene hasta la siguiente (como máximo 10 sesiones) y se suaviza con una media móvil de 3 sesiones | GDELT |
+| **gpr** | índice GPR diario | Caldara e Iacoviello (matteoiacoviello.com/gpr.htm) |
 
 Convención de signo: **todos** los componentes se orientan de forma que valor
 más alto significa más fricción. El franco y el yen entran con signo
@@ -80,6 +91,15 @@ mercado sobre la tarifa en vez de la tarifa. Se eligen petroleros y no
 graneleros ni contenedores: el flete de crudo responde a cierres de estrecho,
 sanciones y desvíos de ruta, que es lo que aquí interesa, mientras el granelero
 responde al ciclo de materias primas y el contenedor al ciclo comercial.
+
+**`prima` no es el diferencial España–Bund.** La especificación original
+preveía el bono español a 10 años menos el Bund. La fuente que se usa son las
+curvas de rendimiento de la zona euro del BCE, que publican a diario el
+rendimiento de **todos** los soberanos del área y el de los de máxima
+calificación, no el de cada país por separado. El componente es, por tanto, un
+diferencial de crédito de la zona euro en conjunto: se mueve con los episodios
+de aversión al riesgo periférico, pero no es el dato español. Se declara
+porque la versión 0.10.0 lo describió mal.
 
 **`defensa` mezcla divisas.** Las rentabilidades de la cesta se toman en
 moneda local, de modo que BAE (en peniques) ignora el efecto divisa. Es
@@ -116,6 +136,13 @@ ratio oro/bolsa tiene beta cercana a −1: no filtra la bolsa, es una posición
 corta de bolsa encubierta, y sube en **cualquier** caída. Para cumplir el
 criterio de diseño de la sección 1 hay que retirar explícitamente la parte del
 componente explicada por el mercado y quedarse con el residuo.
+
+**A qué componentes se les aplica.** A los nueve de precios y de prima.
+`gdelt` y `gpr` entran **sin** esta neutralización: no son series de precios y
+no tienen beta frente a la bolsa. Además, en la volatilidad del crudo y en el
+nivel de la prima el factor que se descuenta no es el S&P 500 sino su
+volatilidad realizada. Decir «a todos se les descuenta el S&P 500» era
+inexacto.
 
 ### 3.3 Estandarización
 
@@ -216,10 +243,10 @@ veredicto de la prueba de sensibilidad (sección 10).
 
 | Fuente | Qué aporta | Licencia / condiciones |
 |---|---|---|
-| Yahoo Finance | precios de materias primas, divisas, índices y acciones | uso sujeto a sus condiciones |
-| GDELT Project | flujo diario de eventos de conflicto | datos abiertos |
-| **GPR de Caldara e Iacoviello** (Reserva Federal) | ancla de nivel y validación externa | **Creative Commons BY**: uso permitido citando a los autores |
-| Prima de riesgo | diferencial España–Alemania a 10 años | fuente externa en cascada |
+| Yahoo Finance | precios de materias primas, divisas, índices y acciones | **Sin licencia.** Las condiciones de Yahoo exigen su permiso escrito para la recogida automatizada, el uso comercial y la redistribución, y la librería `yfinance` advierte de que el servicio es para uso personal. El IFG no tiene hoy ese permiso, ni la licencia de las bolsas y proveedores de índices de los que proceden esos precios para usarlos en un índice publicado |
+| GDELT Project | muestra de un día por semana del flujo de eventos de conflicto | datos abiertos |
+| **GPR de Caldara e Iacoviello** | ancla de nivel y validación externa | **Creative Commons BY**: uso permitido citando a los autores |
+| Curvas de rendimiento del BCE | diferencial de la zona euro frente a la curva AAA, a 10 años | estadísticas del BCE, reutilización permitida citando la fuente. El propio BCE advierte de que estas curvas no están pensadas para calcular cotizaciones ni para identificar oportunidades de inversión |
 
 **Cita obligada de la fuente externa principal:** Dario Caldara y Matteo
 Iacoviello, *Measuring Geopolitical Risk*, Board of Governors of the Federal
@@ -243,6 +270,12 @@ deliberado: sin él, una serie que deja de publicarse seguiría inyectando su
 último valor indefinidamente y el índice parecería vivo cuando en realidad
 estaría congelado.
 
+**GDELT es la excepción al arrastre de 3 sesiones.** El flujo diario toma una
+muestra de un solo día por semana, de modo que su último valor se mantiene
+hasta la muestra siguiente, con un tope de 10 sesiones, antes de entrar en el
+arrastre general. El muestreo semanal es una decisión del índice, no una
+limitación de GDELT, que publica ficheros diarios.
+
 **El GPR se arrastra, no se interpola.** Interpolar parece más fino y es un
 *look-ahead* encubierto: el valor de un miércoles saldría de promediar la
 muestra del lunes anterior con la del lunes siguiente, que todavía no existe
@@ -263,19 +296,21 @@ sesiones, de modo que cualquiera puede descartar las que no le sirvan.
 
 ## 6. Tramos
 
-| Tramo | Rango | Frecuencia observada |
+| Tramo | Rango | Días por año natural, del 4-1-2010 al 29-10-2026 |
 |---|---|---|
-| Calma | 0 – 20 | 6,4 días/año |
-| Normal | 20 – 50 | 115,7 días/año |
-| Tensión | 50 – 75 | 118,2 días/año |
-| Alta | 75 – 90 | 10,5 días/año |
-| Extrema | 90 – 100 | 4,2 días/año |
+| Calma | 0 – 20 | 6,4 |
+| Normal | 20 – 50 | 116,3 |
+| Tensión | 50 – 75 | 118,4 |
+| Alta | 75 – 90 | 10,5 |
+| Extrema | 90 – 100 | 4,2 |
 
 Los tramos se asignan sobre el **valor crudo**, no sobre el suavizado.
 
-Las frecuencias son las observadas en la serie completa 2010–2026, y son
-coherentes con lo que la calibración logística predecía antes de medirlas
-(unos 3–4 días al año en «Extrema»). Se publican porque son el control de
+Las frecuencias son las observadas en la serie publicada entre el 4 de enero
+de 2010 y el 29 de octubre de 2026 —4.303 sesiones, 16,82 años naturales— y
+son coherentes con lo que la calibración logística predecía antes de medirlas
+(unos 3–4 días al año en «Extrema»). Llevan fecha de corte porque cambian con
+cada sesión que se publica. Se publican porque son el control de
 sanidad de la escala: si «Extrema» se activara 25 días al año, la palabra
 perdería su autoridad editorial.
 
@@ -285,7 +320,9 @@ Nótese que «Calma» se activa muy poco. El índice rara vez baja de 20.
 
 ## 7. Publicación
 
-- **Hora: 03:15 de Madrid**, de lunes a viernes.
+- **Hora:** el cálculo arranca a las **03:15 de Madrid**, de lunes a viernes, y
+  se publica en cuanto termina. La hora exacta de publicación figura junto al
+  dato: en el registro de octubre de 2026 va de las 03:04 a las 03:50.
 - **Por qué de madrugada y no a las 8:30:** la hora de corte queda coherente
   con el cierre de Wall Street de la víspera, y el texto editorial de cada
   mañana necesita el valor ya publicado.
@@ -304,12 +341,15 @@ Nótese que «Calma» se activa muy poco. El índice rara vez baja de 20.
 |---|---|
 | `ifg.json` | foto del día: valor, variación, tramo, cobertura, descomposición |
 | `ifg_serie_12m.json` | doce meses para el gráfico |
-| `ifg_serie.csv` | **serie histórica completa**, dato abierto |
-| `componentes.csv` | z-scores de cada componente, para reproducibilidad |
+| `ifg_serie.csv` | **serie histórica completa**, para consulta y cita (sección 13) |
 | `revisiones.csv` | deriva observada en cada ejecución, con la versión que la midió |
 | `correcciones.csv` | correcciones aplicadas a valores provisionales |
 | `revision_version.md` | nota de discontinuidad del último cambio de versión |
 | `historico/` | series de versiones anteriores, archivadas |
+
+`componentes.csv` —los valores estandarizados de cada componente, sesión a
+sesión— se sigue archivando, pero **no se publica en abierto**: es un derivado
+directo de los precios de origen, cuyas licencias están sin resolver.
 
 ---
 
@@ -327,8 +367,9 @@ así que es explícita.
 | `definitivo_incompleto` | salió de la ventana sin completarse | No, y queda marcado como lo que es |
 
 **La ventana es de 5 sesiones.** Cubre los dos plazos reales de las fuentes:
-una caída de precios se resuelve en uno o dos días hábiles, y GDELT publica su
-muestra semanal dentro de los siete naturales siguientes. Más ventana no
+una caída de precios se resuelve en uno o dos días hábiles, y la muestra
+semanal de GDELT que toma el índice llega dentro de los siete días naturales
+siguientes. Más ventana no
 recupera casi nada y retrasa el cierre; menos deja fuera la mitad de los
 casos.
 
@@ -371,10 +412,19 @@ Los datos de origen no son inmutables: el proveedor de precios devuelve series
 ajustadas y reescribe su histórico con cada dividendo, y GDELT rellena huecos
 hacia atrás. Quien recalcule mañana obtendrá números distintos.
 
-Por eso se publica `componentes.csv` con los z-scores exactos con los que se
-calculó cada día. **Cualquiera puede coger esa tabla, aplicar la fórmula de la
-sección 3 y obtener exactamente el valor publicado.** Eso es lo que separa un
-índice reproducible de uno que hay que creerse.
+Por eso El Especulador **archiva** cada día los valores estandarizados de cada
+componente con los que calcula el índice, junto con la desviación típica de
+escala de ese día. Mientras no se resuelvan las licencias de los precios de
+origen, ese archivo no se publica en abierto.
+
+Conviene ser exacto sobre su alcance: ese archivo **no permite reconstruir la
+serie completa**. La escala de la sección 3.6 divide por una desviación típica
+expansiva que usa historia anterior a 2010 y que no se publica, de modo que
+con los componentes archivados el índice solo se reconstruye desde el 3 de
+diciembre de 2012, con 3,5 puntos de diferencia media y 13,6 de máxima.
+Además, cuando un valor provisional se cierra, la fila archivada conserva los
+componentes provisionales: la del 23 de octubre de 2026 da 50,49 y el valor
+definitivo es 51,22.
 
 ---
 
@@ -396,10 +446,13 @@ La prueba B es la importante. Sin ella, cualquier índice de aversión al riesgo
 aprueba la A y no aporta nada.
 
 Un hito se considera detectado si el índice supera 75 en una ventana de −2 a
-+10 sesiones alrededor del evento. La lista de 23 hitos y 17 controles se fijó
-antes de medir, y los controles se eligieron **por su causa documentada**
-—monetaria, crediticia, sanitaria, de microestructura o de política interna—
-nunca por cómo responde el índice.
++10 sesiones alrededor del evento. **Los umbrales y la lista de 23 hitos se
+fijaron antes de ver resultados. La lista de controles se amplió hasta 17
+durante el desarrollo, después de ver resultados de calibración**, porque con
+solo tres controles anteriores a 2020 la calibración no se sostenía. Cada
+control se eligió **por su causa documentada** —monetaria, crediticia,
+sanitaria, de microestructura o de política interna— nunca por cómo responde
+el índice.
 
 ### 10.2 Resultados sobre la serie 0.10.0
 
@@ -410,11 +463,11 @@ nunca por cómo responde el índice.
 | C. Corr. VIX (variaciones) | **−0,03** | ≤ 0,60 | cumple |
 | C. Corr. GPR (niveles) | **+0,38** | 0,25 – 0,90 | cumple |
 
-### 10.3 Por qué esto NO basta para llamarlo referencia citable
+### 10.3 Por qué esto NO basta para darlo por validado
 
 Los cuatro umbrales se cumplen, y aun así el índice sigue en 0.10.0. El motivo
 es que **la muestra de validación está agotada**: esos 23 hitos se han mirado
-tantas veces al calibrar que ya no miden capacidad predictiva, sino ajuste. Un
+tantas veces al calibrar que ya no miden capacidad de detección, sino ajuste. Un
 resultado favorable sobre datos vistos veinte veces no es evidencia.
 
 Se exploró el atajo de validar hacia atrás, con episodios de 1996–2009 nunca
@@ -452,22 +505,26 @@ que vea que el IFG marcó 92 durante la pandemia tendrá razón en preguntar.
 **11.3 Tres hitos mayores que no detecta.** El referéndum del Brexit (máximo
 62), el ataque a Abqaiq (69) y el pico de la crisis del gas (67).
 
-- En el Brexit **el índice se comporta bien**: la capa de precios no se movió
-  en absoluto, porque el Brexit no dejó firma de fricción geopolítica en los
-  canales que el IFG mide. Cabe sostener que el episodio está mal clasificado
-  como hito geopolítico. No se ha reclasificado: quitar un hito que falla
-  mejora la tasa sin mejorar el índice.
+- En el Brexit el índice llegó a 62,04, empujado por el componente de
+  transporte aéreo, que tocó el tope de 4 desviaciones, y por el de activos
+  refugio. La energía, la defensa, los fletes y el trigo no se movieron como en
+  un episodio de fricción geopolítica. Cabe sostener que el episodio está mal
+  clasificado como hito geopolítico, pero no se ha reclasificado: quitar un
+  hito que falla mejora la tasa sin mejorar el índice.
 - Abqaiq es más grave, porque es el mayor shock de oferta de crudo del periodo
   y la energía debería capturarlo. El componente de energía marcó 2,0
-  desviaciones, el valor más alto de todos los hitos examinados, pero las
-  capas lentas diluyeron la señal.
+  desviaciones el primer día hábil tras el ataque, de los valores más altos
+  entre los hitos examinados, pero el índice se quedó en 69,11, por debajo del
+  umbral de 75: la volatilidad del crudo, los fletes y el GPR acompañaron,
+  pero GDELT y la prima restaron.
 
 **11.4 `vol_energia` tiene una sola pata.** Ver sección 2.
 
 **11.5 La serie no es homogénea en cobertura.** Entre 2010 y 2014 la cobertura
 media ronda 0,82; alcanza el 100 % el 11 de junio de 2021, cuando entra el
-gas. El TTF no existía antes de octubre de 2017 y eso no tiene arreglo. La
-cobertura se publica para cada sesión.
+gas. La serie de futuros del TTF que usa el índice empieza en octubre de 2017
+—el mercado TTF existe desde 2003— y el componente de gas no emite valor hasta
+el 11 de junio de 2021. La cobertura se publica para cada sesión.
 
 **11.6 Dos discontinuidades metodológicas declaradas.** El crudo usa WTI
 reencadenado antes de julio de 2007, y el factor de mercado cambió de un ETF
@@ -491,8 +548,8 @@ Cuatro cambios. Los tres primeros corrigen defectos.
    componentes. Efecto medido: la cobertura de 2010 pasa de 0,15 a 0,82.
 2. **Inicio de la muestra:** de 2007 a 2000. Estaba recortando series que
    tenían más historia disponible.
-3. **Crudo empalmado:** Brent donde existe, WTI reencadenado antes de julio de
-   2007. El empalme se hace sobre rentabilidades y no sobre niveles: el
+3. **Crudo empalmado:** Brent donde existe, WTI reencadenado antes de julio
+   de 2007\. El empalme se hace sobre rentabilidades y no sobre niveles: el
    diferencial Brent–WTI ha superado los 25 dólares, y pegar los niveles
    habría introducido un salto artificial que el índice habría leído como un
    pico de fricción.
@@ -511,20 +568,41 @@ y el archivo de componentes.
 
 ## 13. Licencia y citación
 
-**La serie histórica es un dato abierto**, publicada en CSV bajo licencia
-**Creative Commons BY 4.0**. Puede reutilizarse, redistribuirse y analizarse,
-incluso con fines comerciales, citando la fuente.
+**Licencia de la serie.** Desde el 30 de octubre de 2026, la serie del IFG y
+los archivos publicados se difunden solo para consultarlos y citarlos con la
+atribución de la fórmula de citación. **No se concede licencia para
+reutilizarlos con fines comerciales ni para redistribuirlos:** parte de los
+datos de origen son precios de mercado de terceros cuyas condiciones no lo
+permiten.
+
+Hasta esa fecha, esta metodología ofrecía la serie con licencia **Creative
+Commons BY 4.0**. El Especulador ha dejado de ofrecerla. Conviene ser preciso
+sobre lo que eso significa y lo que no: la CC BY 4.0 es irrevocable para quien
+ya recibió la serie con ella (cl. 2.a.1), de modo que no se «suspende» ni se
+retira a nadie; simplemente deja de ofrecerse para lo que se publique desde
+ahora. Y nunca cubrió los derechos de terceros sobre los datos de origen,
+porque una licencia solo puede licenciar lo que el licenciante tiene derecho a
+licenciar (cl. 1).
+
+Los datos de GDELT, del GPR y del BCE conservan sus propias condiciones, que
+son las de sus titulares y no las de El Especulador.
 
 **Fórmula de citación:**
 
 > el especulador.com, *Índice de Fricción Global*, versión 0.10.0,
 > consultado el [fecha]. https://elespeculador.com/indices/friccion-global/
 
-Lo que no es abierto no es el dato: son el desglose por componente del día, las
-alertas y la lectura de impacto sobre el IBEX 35.
+**No es un índice de referencia.** El IFG es un indicador informativo. No se
+ofrece para fijar el precio, el pago o la rentabilidad de ningún instrumento
+financiero, contrato o fondo, y El Especulador no lo administra como índice de
+referencia en el sentido del Reglamento (UE) 2016/1011.
 
-Si se reutiliza la serie, debe citarse también la fuente externa del componente
-GPR, como se indica en la sección 4.
+**Qué contiene la serie publicada:** solo el valor del índice, su tendencia, su
+tramo, su cobertura y el estado de cada sesión. No forman parte de ella el
+desglose por componente del día ni la lectura de impacto sobre el IBEX 35.
+
+Si se cita la serie, debe citarse también la fuente externa del componente GPR,
+como se indica en la sección 4.
 
 ---
 
@@ -540,3 +618,95 @@ inversión.
 
 el especulador.com no es un asesor de inversiones registrado y no mantiene
 relación de asesoramiento con los lectores del índice.
+
+---
+
+## 15. Fe de erratas del 30 de octubre de 2026
+
+Las reglas de cálculo **no han cambiado**: ni un peso, ni una ventana, ni un
+umbral, ni la lista de hitos. La versión sigue siendo la 0.10.0 y la serie
+publicada no se ha tocado. Lo que cambia es lo que este documento **dice**, en
+los puntos en los que decía algo que los datos publicados no sostienen, y la
+licencia que ofrecía. Se recoge aquí, y no en silencio, porque un documento
+citable que se corrige tiene que dejar constancia de qué corrigió.
+
+Origen: revisión de cumplimiento normativo de Stock Market Pro SL del 27 de
+octubre de 2026.
+
+**Licencia y encuadre**
+
+1. **La serie deja de ofrecerse con licencia Creative Commons BY 4.0**
+   (sección 13). La versión anterior la ofrecía «incluso con fines
+   comerciales», y esa licencia nunca pudo cubrir los precios de terceros de
+   los que salen ocho de los once componentes.
+2. **Se retira la expresión «referencia citable»** del título de la sección
+   10.3 y se añade a la sección 13 que el IFG no es un índice de referencia en
+   el sentido del Reglamento (UE) 2016/1011. «Índice de referencia» es un
+   término legal y el IFG no tiene administrador autorizado ni licencias de
+   datos.
+3. **Se retira la mención a «alertas»** de la sección 13. No existe ningún
+   producto de alertas, y anunciarlo en una pieza del medio abre la puerta a
+   que el índice se lea como recomendación de inversión.
+
+**Afirmaciones que los datos no sostenían**
+
+4. **Reproducibilidad** (sección 9). Se decía que cualquiera podía reconstruir
+   «exactamente el valor publicado» con los componentes archivados. Es falso:
+   la escala divide por una desviación típica expansiva que usa historia
+   anterior a 2010 y que no se publica, de modo que la reconstrucción solo
+   funciona desde el 3 de diciembre de 2012, con 3,5 puntos de diferencia
+   media y 13,6 de máxima. Además, la fila archivada de un provisional que se
+   cierra conserva los componentes provisionales.
+5. **Factor de mercado** (sección 3.2). Se decía que a todos los componentes
+   se les descuenta el S&P 500. `gdelt` y `gpr` entran sin esa neutralización,
+   y en la volatilidad del crudo y en el nivel de la prima el factor que se
+   descuenta es la volatilidad realizada del S&P 500, no el índice.
+6. **Prima de riesgo** (secciones 2 y 4). Se describía como el diferencial
+   entre el bono español a 10 años y el Bund. La fuente son las curvas de
+   rendimiento del BCE, que dan todos los soberanos de la zona euro frente a
+   los de máxima calificación: es un diferencial de crédito del área, no el
+   dato español. Desde esta versión del documento, además, **esa es la única
+   fuente** del componente.
+7. **Brexit** (sección 11.3). Se decía que la capa de precios «no se movió en
+   absoluto». Entre el 27 y el 30 de junio de 2016 el transporte aéreo tocó el
+   tope de 4 desviaciones y los refugios llegaron a 2,3, con el índice en
+   62,04. Se retira también «el índice se comporta bien», que era una
+   valoración presentada como hecho.
+8. **Abqaiq** (sección 11.3). El 2,0 de desviaciones de la energía no era «el
+   valor más alto de todos los hitos examinados»: entre los 23 hitos de la
+   validación, la energía llegó a 3,06 en el ataque a Irán de 2025, a 2,59 en
+   Crimea y a 2,19 en París. Y no fueron las capas lentas las que diluyeron la
+   señal: el GPR acompañó y solo GDELT y la prima restaron.
+9. **GDELT** (secciones 2, 5 y 8.1). El documento no decía que el flujo diario
+   toma una muestra de **un solo día por semana** y la mantiene hasta 10
+   sesiones, antes del arrastre general de 3. Tampoco que ese muestreo es una
+   decisión del índice: GDELT publica ficheros diarios.
+10. **TTF** (sección 11.5). «El TTF no existía antes de octubre de 2017» es
+    falso: el mercado existe desde 2003. Lo que empieza en octubre de 2017 es
+    la serie de futuros que usa el índice.
+11. **Hitos y controles** (sección 10.1). Se decía que la lista de 23 hitos y
+    17 controles se fijó antes de medir. Los umbrales y los hitos, sí; la
+    lista de controles se amplió durante el desarrollo, después de ver
+    resultados de calibración. También se corrige «capacidad predictiva» por
+    «capacidad de detección» en la sección 10.3, por coherencia con que el
+    índice no es una previsión.
+12. **Frecuencias por tramo** (sección 6). No llevaban fecha de corte, y las
+    de «Normal» y «Tensión» no salían de la serie publicada. Ahora llevan la
+    fecha y las cifras calculadas sobre ella.
+13. **Hora de publicación** (sección 7). «03:15 de Madrid» es la hora a la que
+    arranca el cálculo, no la de publicación, que en octubre de 2026 va de las
+    03:04 a las 03:50.
+14. **Atribución del GPR** (sección 2). La serie se atribuía a la Reserva
+    Federal. Es de Caldara e Iacoviello, y su página no dice que la Reserva
+    Federal la publique ni la respalde. La cita del artículo, con su
+    afiliación, sigue en la sección 4.
+15. **Erratas de formato** (sección 12). «WTI reencadenado antes de julio de
+    2007» quedaba partido al convertirse a PDF, porque «2007.» se
+    interpretaba como el primer número de una lista.
+
+**Archivos publicados**
+
+16. **`componentes.csv` deja de publicarse en abierto** (secciones 7 y 9). Es
+    un derivado directo de los precios de origen. Se sigue archivando.
+17. **Los precios en bruto dejan de publicarse** en el repositorio de datos.
+    Nada del cálculo los leía de ahí: se descargan en cada ejecución.

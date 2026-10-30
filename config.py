@@ -256,10 +256,12 @@ BCE_BASE = "https://data-api.ecb.europa.eu/service/data/"
 BCE_CURVA_TODOS = "YC/B.U2.EUR.4F.G_N_C.SV_C_YM.SR_10Y"
 BCE_CURVA_AAA = "YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y"
 # Stooq publica rendimientos de deuda en CSV abierto. HIPÓTESIS POR VALIDAR.
+# SIN USO desde el cambio P4 (27-10-2026): la prima sale solo del BCE.
 STOOQ_BONO_ES = "10esy.b"
 STOOQ_BONO_DE = "10dey.b"
 # Fichero puesto a mano: dos columnas, fecha y prima en puntos básicos.
 # Sirve una descarga del Banco de España. Es la vía que se usa primero.
+# SIN USO desde el cambio P4 (27-10-2026): la prima sale solo del BCE.
 RUTA_PRIMA_MANUAL = "datos/prima_manual.csv"
 
 # GDELT: el backfill histórico es pesado (un fichero diario desde 2013).
