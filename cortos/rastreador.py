@@ -121,7 +121,11 @@ def leer(contenido: bytes) -> tuple[str, pd.DataFrame, pd.DataFrame, pd.DataFram
 
 # --------------------------------------------------------------------------- cálculos
 def resumen(vig: pd.DataFrame) -> pd.DataFrame:
-    vig = vig[vig["posicion_pct"] >= 0.5 - 1e-9]
+    # Una sola comunicación por tenedor y valor: «suma_publicada_pct» es la
+    # cifra de titular de la página y sumar dos veces al mismo tenedor la
+    # inflaría. Si no hay duplicados —el caso normal— esto no cambia nada.
+    vig = _una_por_clave(vig[vig["posicion_pct"] >= 0.5 - 1e-9], ["isin", "tenedor"],
+                         "resumen por emisor")
     g = vig.groupby(["isin", "emisor"], as_index=False).agg(
         tenedores=("tenedor", "nunique"),
         suma_publicada_pct=("posicion_pct", "sum"),
@@ -134,13 +138,51 @@ def resumen(vig: pd.DataFrame) -> pd.DataFrame:
     return g.sort_values(["suma_publicada_pct", "tenedores"], ascending=False).reset_index(drop=True)
 
 
+def _una_por_clave(df: pd.DataFrame, clave: list[str], nombre: str) -> pd.DataFrame:
+    """
+    Deja una sola fila por clave: la comunicación más reciente de ese tenedor.
+
+    POR QUÉ EXISTE. La hoja «Última» de la CNMV no garantiza una fila por
+    (ISIN, tenedor). El mismo tenedor puede aparecer dos veces sobre el mismo
+    valor cuando el fichero recoge a la vez una posición y la comunicación con
+    la que ese tenedor cruza el 0,5 %. El 29 de octubre de 2026 ocurrió por
+    primera vez y el rastreador se detuvo tres ejecuciones seguidas con
+    «TypeError: float() argument must be ... not 'Series'», porque indexar por
+    esa clave devolvía dos filas donde el código esperaba un número.
+
+    No era un cambio de formato de la CNMV: las guardas de `_tabla()` y
+    `leer()` pasaron. Era una suposición nuestra —clave única— que el fichero
+    no promete.
+
+    CRITERIO, SIN CIFRAS ELEGIDAS A OJO. Gana la `fecha_posicion` más alta y,
+    a igualdad, la última fila del fichero, que es el orden en que la CNMV las
+    publica. No se suma ni se promedia nada: las dos filas describen al mismo
+    tenedor en dos momentos, y la que retrata el día es la posterior.
+
+    Deja rastro en el registro de la ejecución. Un duplicado es legítimo, pero
+    es lo bastante infrecuente para querer verlo cuando pase.
+    """
+    dup = df.duplicated(subset=clave, keep=False)
+    if not dup.any():
+        return df
+    for _, r in df[dup].sort_values(clave).iterrows():
+        print(f"AVISO  {nombre}: {r['isin']} / {r['tenedor']} aparece más de una vez "
+              f"(fecha {r['fecha_posicion']}, {r['posicion_pct']} %).", file=sys.stderr)
+    orden = pd.to_datetime(df["fecha_posicion"], errors="coerce")
+    return (df.assign(_fecha=orden, _fila=range(len(df)))
+              .sort_values(["_fecha", "_fila"], na_position="first")
+              .drop_duplicates(subset=clave, keep="last")
+              .drop(columns=["_fecha", "_fila"])
+              .sort_index())
+
+
 def cambios(prev: pd.DataFrame | None, vig: pd.DataFrame, fecha: str) -> pd.DataFrame:
     clave = ["isin", "tenedor"]
     cols = ["fecha_publicacion", "isin", "emisor", "tenedor", "tipo", "antes_pct", "ahora_pct", "fecha_posicion"]
     if prev is None or prev.empty:
         return pd.DataFrame(columns=cols)
-    a = prev.set_index(clave)
-    b = vig.set_index(clave)
+    a = _una_por_clave(prev, clave, "publicación anterior").set_index(clave)
+    b = _una_por_clave(vig, clave, "fichero de la CNMV").set_index(clave)
     filas = []
     for k in b.index.difference(a.index):
         r = b.loc[k]
