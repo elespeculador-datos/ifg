@@ -352,7 +352,7 @@ def articulo(r: dict) -> str:
 
 
 def vacio(titulo: str, inicio: pd.Timestamp, hoy: pd.Timestamp) -> str:
-    t = titulo if titulo.startswith("OPV") else titulo.lower()
+    t = titulo if titulo.startswith("OP") else titulo.lower()
     if hoy - inicio >= pd.Timedelta(days=DIAS_CAJA):
         return f"Ninguna empresa del IBEX 35 ha comunicado a la CNMV {t} en los últimos {DIAS_CAJA} días."
     return f"Sin comunicados de {t} de empresas del IBEX 35 desde el {inicio.strftime('%d/%m/%Y')}, cuando empieza este registro."
