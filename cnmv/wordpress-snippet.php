@@ -39,10 +39,38 @@ add_action('wp_footer', function () {
 (function () {
 	var src = document.getElementById('espec-cnmv-cajas');
 	if (!src) { return; }
+	function especCnmvNuevaCaja(b) {
+		var titulos = { opas: 'OPAs' };
+		var clave = b.getAttribute('data-caja');
+		var base = document.getElementById('opvs-ampliaciones_panel');
+		var card = base && base.closest ? base.closest('.efsec-card') : null;
+		if (!clave || !titulos[clave] || !card || !card.parentNode) { return null; }
+		var nueva = card.cloneNode(true);
+		var btn = nueva.querySelector('.efsec-card-head');
+		var pan = nueva.querySelector('.efsec-card-panel');
+		var tit = nueva.querySelector('.efsec-card-title');
+		if (!btn || !pan || !tit) { return null; }
+		nueva.removeAttribute('data-efsec-card');
+		nueva.className = 'efsec-card efsec-card--red';
+		pan.id = clave + '_panel';
+		btn.setAttribute('aria-controls', pan.id);
+		btn.setAttribute('aria-expanded', 'false');
+		tit.textContent = titulos[clave];
+		btn.addEventListener('click', function (e) {
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			var abierta = !nueva.classList.contains('is-open');
+			nueva.classList.toggle('is-open', abierta);
+			btn.setAttribute('aria-expanded', abierta ? 'true' : 'false');
+		});
+		card.parentNode.insertBefore(nueva, card.nextSibling);
+		return pan;
+	}
 	var bloques = src.querySelectorAll('[data-caja]');
 	for (var i = 0; i < bloques.length; i++) {
 		var b = bloques[i];
 		var panel = document.getElementById(b.getAttribute('data-caja') + '_panel');
+		if (!panel) { panel = especCnmvNuevaCaja(b); }
 		if (!panel) { continue; }
 		var items = panel.querySelector('.efsec-items') || panel;
 		items.innerHTML = b.innerHTML;

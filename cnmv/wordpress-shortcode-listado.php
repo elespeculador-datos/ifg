@@ -9,7 +9,7 @@
  */
 add_shortcode('espec_cnmv_listado', function ($atts) {
 	$a     = shortcode_atts(array('tipo' => ''), $atts, 'espec_cnmv_listado');
-	$tipos = array('resultados', 'dividendos', 'recompras', 'opvs-ampliaciones');
+	$tipos = array('resultados', 'dividendos', 'recompras', 'opvs-ampliaciones', 'opas');
 	if (!in_array($a['tipo'], $tipos, true)) {
 		return '';
 	}
