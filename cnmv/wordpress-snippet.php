@@ -51,7 +51,7 @@ add_action('wp_footer', function () {
 		var tit = nueva.querySelector('.efsec-card-title');
 		if (!btn || !pan || !tit) { return null; }
 		nueva.removeAttribute('data-efsec-card');
-		nueva.className = 'efsec-card efsec-card--red';
+		nueva.className = 'efsec-card efsec-card--red'; nueva.style.gridColumn = '1 / -1';
 		pan.id = clave + '_panel';
 		btn.setAttribute('aria-controls', pan.id);
 		btn.setAttribute('aria-expanded', 'false');
@@ -59,7 +59,7 @@ add_action('wp_footer', function () {
 		btn.addEventListener('click', function (e) {
 			e.preventDefault();
 			e.stopImmediatePropagation();
-			var abierta = !nueva.classList.contains('is-open');
+			var abierta = !nueva.classList.contains('is-open'); if (abierta) { var otras = document.querySelectorAll('.efsec-card.is-open .efsec-card-head'); for (var k = 0; k < otras.length; k++) { if (otras[k] !== btn) { otras[k].click(); } } }
 			nueva.classList.toggle('is-open', abierta);
 			btn.setAttribute('aria-expanded', abierta ? 'true' : 'false');
 		});
