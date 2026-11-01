@@ -66,10 +66,10 @@ CAJAS = [  # clave (igual que el id del panel en la plantilla de la web), títul
     ("opvs-ampliaciones", "OPVs y ampliaciones", "Ampliaciones de capital, colocaciones y salidas a bolsa."),
     ("opas", "OPAs", "Ofertas públicas de adquisición sobre empresas del IBEX 35 o lanzadas por ellas."),
 ]
-# Tipos que ya tienen recuadro en /ibex-35/ y página propia en la web. «opas» se publica en GitHub Pages
-# (listado-opas.html, fichas e index.html) pero no se enlaza desde la web hasta que existan su recuadro
-# (panel opas_panel) y la página /ibex-35/opas/ con [espec_cnmv_listado tipo="opas"]: entonces se añade aquí.
-EN_WEB = {"resultados", "dividendos", "recompras", "opvs-ampliaciones"}
+# Tipos que tienen recuadro en /ibex-35/ y página propia en la web. Un tipo nuevo se publica antes en GitHub
+# Pages y solo se añade aquí cuando existen su recuadro y su página /ibex-35/<tipo>/ con [espec_cnmv_listado].
+# «opas»: recuadro creado por el fragmento 41 a partir de data-caja="opas" y página /ibex-35/opas/ (02/11/2026).
+EN_WEB = {"resultados", "dividendos", "recompras", "opvs-ampliaciones", "opas"}
 VENTANA = {"resultados": 30, "dividendos": 10, "recompras": 45, "opvs-ampliaciones": 10, "opas": 120}  # días para seguir en la misma operación
 DIAS_LISTADO = 365      # antigüedad máxima de lo que sale en las páginas de cada tipo
 DIVIDENDOS_BME = RAIZ / "docs" / "dividendos" / "datos"   # datos del calendario de dividendos (fuente: BME)
