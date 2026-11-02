@@ -214,6 +214,8 @@ def _v(x: float | None, dec: int = 3) -> str:
 def _dif(x: float | None) -> str:
     if x is None or pd.isna(x):
         return "—"
+    if abs(x) < 0.0005:
+        return "0,000"
     return ("+" if x > 0 else "") + f"{x:.3f}".replace(".", ",")
 
 
@@ -236,8 +238,9 @@ def grafico_svg(series: dict[str, pd.Series]) -> str:
               '<style>.eje{font:11px sans-serif;fill:#5b6675}.lin{fill:none;stroke-width:1.6}</style>']
     for i in range(5):
         v = y1 * i / 4
+        etiqueta = f"{v:.2f}".replace(".", ",")
         partes.append(f'<line x1="{ml}" y1="{Y(v):.1f}" x2="{W - mr}" y2="{Y(v):.1f}" stroke="#e3e8ef"/>'
-                      f'<text class="eje" x="{ml - 4}" y="{Y(v) + 4:.1f}" text-anchor="end">{v:.2f}</text>'.replace(".", ","))
+                      f'<text class="eje" x="{ml - 4}" y="{Y(v) + 4:.1f}" text-anchor="end">{etiqueta}</text>')
     for a in range(x0.year, x1.year + 1):
         t = pd.Timestamp(year=a, month=1, day=1)
         if x0 <= t <= x1:
@@ -256,8 +259,8 @@ def fragmento(res: dict, fecha_pub: str) -> str:
     partes = [f"<!-- estres:inicio {huella(res)} -->",
               f'<p class="has-small-font-size">Actualizado el {_f(fecha_pub)} con el dato del BCE del {_f(es["fecha"])}.</p>']
     frase = (f"<p>El indicador de estrés financiero de España (CISS del BCE) marcó <strong>{_v(es['valor'])}</strong> el {_f(es['fecha'])}, "
-             f"en una escala de 0 a 1. Es el percentil {_v(es['percentil'], 0)} de su historia desde {es['desde'][:4]}: ha estado igual o más bajo "
-             f"el {_v(es['percentil'], 0)} % de las sesiones: un nivel {es['tramo']} en términos históricos.")
+             f"en una escala de 0 a 1. Es el percentil {_v(es['percentil'], 0)} de su historia desde {es['desde'][:4]} (ha estado igual o más bajo "
+             f"el {_v(es['percentil'], 0)} % de las sesiones), un nivel {es['tramo']} en términos históricos.")
     if es["ultima_vez_igual_o_mayor"]:
         frase += f" La última vez que estuvo igual o más alto, sin contar los últimos seis meses, fue el {_f(es['ultima_vez_igual_o_mayor'])}."
     frase += (f" Su máximo histórico es {_v(es['maximo'])}, el {_f(es['fecha_maximo'])}. En las últimas cuatro semanas ha variado "
@@ -281,9 +284,9 @@ def fragmento(res: dict, fecha_pub: str) -> str:
         partes += ["<h2>Los episodios de referencia</h2>",
                    "<p>Máximo que marcó el CISS de España dentro de cada episodio, con su fecha. Las ventanas están fijadas de antemano; "
                    "el valor es el que da el dato.</p>",
-                   _tabla(["Episodio", "Máximo del CISS", "Fecha", "Dato actual como parte de ese máximo"],
+                   _tabla(["Episodio", "Máximo del CISS", "Fecha", "Dato actual respecto a ese máximo"],
                           [[e["episodio"], _v(e["maximo"]), _f(e["fecha_maximo"]),
-                            f"{es['valor'] / e['maximo'] * 100:.0f} %" if e["maximo"] else "—"] for e in res["episodios"]])]
+                            (f"{es['valor'] / e['maximo'] * 100:.1f} %".replace(".", ",")) if e["maximo"] else "—"] for e in res["episodios"]])]
     svg = grafico_svg(res["grafico"])
     if svg:
         partes += ["<h2>Los últimos tres años</h2>", f'<figure class="wp-block-image">{svg}</figure>']
