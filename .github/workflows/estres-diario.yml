@@ -1,0 +1,76 @@
+name: Estrés financiero
+
+# Indicador 2 del catálogo de Datos: el CISS del BCE para España, la zona euro, Alemania,
+# Francia e Italia, y el CISS soberano. Una pasada cada día laborable a las 11:20 UTC
+# (el portal de datos del BCE actualiza a lo largo de la mañana). Solo lee y escribe
+# estres/ y docs/estres/; no toca el IFG ni los demás activos. Solo guarda si cambian
+# los datos (la huella del fragmento).
+on:
+  schedule:
+    - cron: "20 11 * * 1-5"
+  workflow_dispatch:
+  push:
+    branches: [estres-financiero]   # solo mientras la rama está en desarrollo: se quita al fusionar
+    paths: ["estres/**", ".github/workflows/estres-diario.yml"]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: estres-diario
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install requests pandas numpy scipy
+      - name: Comprobaciones sin red
+        run: python estres/pruebas_estres.py
+      - name: Consultar el portal del BCE y preparar los archivos
+        run: python estres/estres.py --salida docs/estres
+      - name: Guardar el resultado en el repositorio
+        run: |
+          if [ -z "$(git status --porcelain docs/estres)" ]; then
+            echo "Sin cambios."
+            exit 0
+          fi
+          git config user.name "Estrés bot"
+          git config user.email "actions@github.com"
+          git add docs/estres
+          git commit -m "Estrés financiero $(date -u +%Y-%m-%d)"
+          git pull --rebase --autostash
+          git push
+
+      - name: Abrir incidencia si ha fallado
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=estres-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          cuerpo="La actualización del indicador de estrés financiero del $(date -u +%Y-%m-%d) ha fallado. Registro: $EJECUCION. La página sigue mostrando la última publicación buena con su fecha. Lo más probable: el portal de datos del BCE no respondía o ha cambiado el formato del CSV."
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="$cuerpo" >/dev/null
+          else
+            gh api --method POST "repos/${{ github.repository }}/labels" -f name=estres-fallido -f color=b60205 -f description="El indicador de estrés financiero no se ha actualizado" >/dev/null 2>&1 || true
+            gh api --method POST "repos/${{ github.repository }}/issues" -f title="El indicador de estrés financiero no se ha actualizado el $(date -u +%Y-%m-%d)" -f body="$cuerpo" -f 'labels[]=estres-fallido' >/dev/null
+          fi
+      - name: Cerrar la incidencia si ya funciona
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=estres-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="Actualización correcta el $(date -u +%Y-%m-%d). Se cierra." >/dev/null
+            gh api --method PATCH "repos/${{ github.repository }}/issues/$abierta" -f state=closed >/dev/null
+          fi
