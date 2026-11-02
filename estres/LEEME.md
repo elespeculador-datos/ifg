@@ -12,8 +12,8 @@ Fuente y licencia: BCE, portal de datos, conjunto CISS (clave `D.ES+U2+DE+FR+IT.
 
 Reglas: sin predicción; percentiles y tramos describen el presente frente al pasado. Si el portal no responde, el CSV cambia de forma, hay valores fuera de 0-1 o el último dato tiene más de 45 días, el script se para sin publicar y el flujo abre una incidencia con la etiqueta `estres-fallido`. Con más de 10 días de desfase solo avisa.
 
-Comprobaciones sin red: `python estres/pruebas_estres.py` (30 comprobaciones, con un caso de control contra `scipy.stats.percentileofscore`).
+Comprobaciones sin red: `python estres/pruebas_estres.py` (32 comprobaciones, con un caso de control contra `scipy.stats.percentileofscore`).
 
-Prueba local con un CSV del portal ya descargado: `python estres/estres.py --salida docs/estres --local ciss.csv --fecha 2026-11-02`.
+Prueba local con un CSV del portal ya descargado: `python estres/estres.py --salida docs/estres --local ciss.csv --fecha 2026-11-02`. Si la huella no cambia, el script no reescribe nada (así no hay un commit diario por la hora de comprobación); tras cambiar el código o las plantillas, `--forzar` regenera los ficheros.
 
 Entrega a Tecnología: fragmento `docs/estres/fragmento-wp.html` (marcas `estres:inicio`/`estres:fin`), JSON `docs/estres/datos/ultima.json`; flujo a las 11:20 UTC L-V; hay dato nuevo cuando cambia la huella de la primera línea. Página de WordPress por crear (borrador): /estres-financiero-espana/. El texto pasa por Cumplimiento antes de publicar.

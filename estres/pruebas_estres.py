@@ -154,6 +154,11 @@ with tempfile.TemporaryDirectory() as tmp:
     cambia1 = e.escribir(df, res, HOY, salida)
     cambia2 = e.escribir(df, e.calcular(e.leer(texto), HOY), HOY, salida)
     comprobar("escribir(): la primera vez hay datos nuevos; la segunda, con los mismos datos, no", cambia1 and not cambia2)
+    marca = (salida / "datos" / "ultima.json").stat().st_mtime_ns
+    e.escribir(df, e.calcular(e.leer(texto), HOY), HOY, salida)
+    comprobar("escribir(): sin cambios no reescribe ningún fichero", (salida / "datos" / "ultima.json").stat().st_mtime_ns == marca)
+    e.escribir(df, e.calcular(e.leer(texto), HOY), HOY, salida, forzar=True)
+    comprobar("escribir(): con forzar=True reescribe aunque la huella no cambie", (salida / "datos" / "ultima.json").stat().st_mtime_ns != marca)
     comprobar("escribir(): deja los cuatro ficheros", all((salida / p).exists() for p in ("fragmento-wp.html", "index.html", "datos/serie.csv", "datos/ultima.json")))
     import json  # noqa: E402
     u = json.loads((salida / "datos" / "ultima.json").read_text(encoding="utf-8"))

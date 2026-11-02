@@ -321,13 +321,18 @@ def ld_wp(fecha: str) -> str:
     }, ensure_ascii=False) + "</script>"
 
 
-def escribir(df: pd.DataFrame, res: dict, hoy: date, salida: Path) -> bool:
+def escribir(df: pd.DataFrame, res: dict, hoy: date, salida: Path, forzar: bool = False) -> bool:
+    """Escribe los cuatro ficheros. Si la huella no cambia y no se fuerza, no toca nada:
+    así el flujo no guarda un commit diario solo por la hora de comprobación."""
     dd = salida / "datos"
     dd.mkdir(parents=True, exist_ok=True)
     previo = dd / "ultima.json"
     antes = json.loads(previo.read_text(encoding="utf-8")) if previo.exists() else {}
     nueva = huella(res)
     cambia = antes.get("huella") != nueva
+    completos = all((salida / p).exists() for p in ("fragmento-wp.html", "index.html", "datos/serie.csv"))
+    if not cambia and not forzar and completos:
+        return False
     fecha_pub = hoy.isoformat() if cambia else antes.get("fecha_publicacion", hoy.isoformat())
     with (dd / "serie.csv").open("w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
@@ -374,12 +379,13 @@ def main() -> int:
     ap.add_argument("--salida", required=True)
     ap.add_argument("--local", help="CSV del portal del BCE ya descargado (pruebas)")
     ap.add_argument("--fecha", help="día de referencia AAAA-MM-DD (por defecto, hoy en UTC)")
+    ap.add_argument("--forzar", action="store_true", help="reescribir los ficheros aunque la huella no cambie (tras cambiar el código)")
     a = ap.parse_args()
     hoy = date.fromisoformat(a.fecha) if a.fecha else datetime.now(timezone.utc).date()
     texto = Path(a.local).read_text(encoding="utf-8") if a.local else descargar()
     df = leer(texto)
     res = calcular(df, hoy)
-    cambia = escribir(df, res, hoy, Path(a.salida))
+    cambia = escribir(df, res, hoy, Path(a.salida), forzar=a.forzar)
     for av in AVISOS:
         print(f"::warning::{av}")
     es = res["series"]["es"]

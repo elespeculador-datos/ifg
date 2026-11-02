@@ -9,9 +9,6 @@ on:
   schedule:
     - cron: "20 11 * * 1-5"
   workflow_dispatch:
-  push:
-    branches: [estres-financiero]   # solo mientras la rama está en desarrollo: se quita al fusionar
-    paths: ["estres/**", ".github/workflows/estres-diario.yml"]
 
 permissions:
   contents: write
