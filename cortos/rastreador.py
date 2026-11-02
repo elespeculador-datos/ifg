@@ -54,18 +54,32 @@ class DatosRaros(Exception):
 
 
 # --------------------------------------------------------------------------- descarga
-def descargar() -> bytes:
+# Esperas entre intentos, en segundos. Siete intentos repartidos en unos seis
+# minutos de espera (más el tiempo de cada petición), dentro de los 20 minutos
+# del flujo. Entre el 21 y el 31 de octubre de 2026 la CNMV cerró la conexión
+# sin responder en seis ejecuciones («Remote end closed connection without
+# response»); con cuatro intentos en poco más de tres minutos no bastaba.
+ESPERAS = [10, 20, 40, 60, 90, 120]
+CABECERAS = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Connection": "close"}
+
+
+def descargar(esperas: list[int] | None = None, dormir=time.sleep) -> bytes:
+    """Descarga el .xls de la CNMV con reintentos espaciados; cada fallo queda en el registro."""
+    esperas = ESPERAS if esperas is None else esperas
     ultimo_error = None
-    for intento in range(4):
+    for intento in range(len(esperas) + 1):
         try:
-            r = requests.get(URL, timeout=90, headers={"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)"})
+            r = requests.get(URL, timeout=(20, 60), headers=CABECERAS)
             if r.status_code == 200 and r.content[:4] == b"\xd0\xcf\x11\xe0":
                 return r.content
             ultimo_error = f"HTTP {r.status_code}, {len(r.content)} bytes, cabecera {r.content[:8]!r}"
         except requests.RequestException as e:
             ultimo_error = str(e)
-        time.sleep(20 * (intento + 1))
-    raise DatosRaros(f"No se pudo descargar el fichero de la CNMV: {ultimo_error}")
+        print(f"AVISO  descarga, intento {intento + 1} de {len(esperas) + 1} "
+              f"({datetime.now(timezone.utc).strftime('%H:%M:%S')} UTC): {ultimo_error}", file=sys.stderr)
+        if intento < len(esperas):
+            dormir(esperas[intento])
+    raise DatosRaros(f"No se pudo descargar el fichero de la CNMV tras {len(esperas) + 1} intentos: {ultimo_error}")
 
 
 # --------------------------------------------------------------------------- lectura
@@ -97,10 +111,18 @@ def _tabla(df: pd.DataFrame, nombre: str) -> pd.DataFrame:
 
 
 def leer(contenido: bytes) -> tuple[str, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    # pandas 4 avisa de que el motor xlrd (el único que leía .xls hasta ahora)
+    # está en desuso. Se sigue leyendo con xlrd, que es lo probado con el
+    # fichero real; si un día deja de funcionar, se prueba calamine antes de
+    # rendirse. El flujo instala los dos.
     try:
         libro = pd.read_excel(io.BytesIO(contenido), sheet_name=None, header=None, engine="xlrd")
-    except Exception:
-        libro = pd.read_excel(io.BytesIO(contenido), sheet_name=None, header=None)
+    except Exception as e_xlrd:
+        try:
+            libro = pd.read_excel(io.BytesIO(contenido), sheet_name=None, header=None, engine="calamine")
+            print(f"AVISO  lectura: xlrd ha fallado ({e_xlrd}); leído con calamine.", file=sys.stderr)
+        except Exception as e_cal:
+            raise DatosRaros(f"No se puede leer el .xls ni con xlrd ({e_xlrd}) ni con calamine ({e_cal})")
     fecha_df = _hoja(libro, "fecha")
     texto = " ".join(str(v) for v in fecha_df.values.ravel() if pd.notna(v))
     fecha = pd.to_datetime(next((p for p in texto.split() if p[:2] == "20" and len(p) >= 10), ""), errors="coerce")

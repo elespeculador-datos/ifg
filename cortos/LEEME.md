@@ -12,6 +12,8 @@ Prueba local con un fichero ya descargado: `python cortos/rastreador.py --local 
 
 Rehacer solo el fragmento con los CSV ya publicados: `python cortos/rastreador.py --solo-fragmento`.
 
-Comprobaciones, sin red: `python cortos/pruebas_rastreador.py`.
+Comprobaciones, sin red: `python cortos/pruebas_rastreador.py` (cálculos) y `python cortos/pruebas_descarga.py` (descarga).
 
 La hoja «Última» de la CNMV no garantiza una sola fila por (ISIN, tenedor): el mismo tenedor puede aparecer dos veces sobre el mismo valor cuando el fichero recoge a la vez una posición y la comunicación con la que cruza el 0,5 %. Para los cambios del día y la suma por emisor se usa la comunicación de `fecha_posicion` más reciente, y el registro de la ejecución lo avisa. La tabla de todas las posiciones sí las muestra las dos: son dos comunicaciones reales.
+
+La CNMV cierra la conexión sin responder de vez en cuando (seis ejecuciones entre el 21 y el 31 de octubre de 2026). La descarga lo intenta siete veces, con esperas de 10 a 120 segundos, y cada intento fallido queda en el registro de la ejecución. Si falla igualmente, el flujo abre o comenta la incidencia `cortos-fallido` y las otras dos pasadas del día vuelven a intentarlo.
