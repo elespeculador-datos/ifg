@@ -14,3 +14,6 @@ entrada/
 # Marcador interno que publicar_diario.py deja para el paso del flujo que
 # abre la incidencia por deriva. Es una señal de una ejecución, no un dato.
 aviso_deriva.json
+
+# Marcador hermano del anterior: la sesión hábil que falta en la serie.
+aviso_sesion_perdida.json
