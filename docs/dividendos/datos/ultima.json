@@ -1,28 +1,28 @@
 {
- "fecha": "2026-11-02",
- "generado": "2026-11-02T17:58:35+00:00",
- "proximos": 5,
+ "fecha": "2026-11-03",
+ "generado": "2026-11-03T17:53:38+00:00",
+ "proximos": 11,
  "siguiente": {
-  "fecha_ex": "2026-11-02",
+  "fecha_ex": "2026-11-03",
   "empresas": [
-   "RENTA 4 BANCO"
+   "NATURGY ENERGY GROUP"
   ]
  },
  "mayor_rentabilidad": [
   {
    "empresa": "MFE-MEDIAFOREUROPE",
    "isin": "NL0015001OI1",
-   "rentabilidad_ordinaria_pct": 10.59
+   "rentabilidad_ordinaria_pct": 10.37
   },
   {
    "empresa": "TELEFONICA",
    "isin": "ES0178430E18",
-   "rentabilidad_ordinaria_pct": 8.89
+   "rentabilidad_ordinaria_pct": 8.88
   },
   {
    "empresa": "NATURHOUSE HEALTH",
    "isin": "ES0105043006",
-   "rentabilidad_ordinaria_pct": 8.81
+   "rentabilidad_ordinaria_pct": 8.66
   }
  ],
  "fuente": "BME, operaciones financieras: dividendos; cierres de la ficha de cada valor",
