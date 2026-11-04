@@ -1,28 +1,30 @@
 {
- "fecha": "2026-11-03",
- "generado": "2026-11-03T17:53:38+00:00",
- "proximos": 11,
+ "fecha": "2026-11-04",
+ "generado": "2026-11-04T17:55:49+00:00",
+ "proximos": 10,
  "siguiente": {
-  "fecha_ex": "2026-11-03",
+  "fecha_ex": "2026-11-04",
   "empresas": [
-   "NATURGY ENERGY GROUP"
+   "CAIXABANK",
+   "LIBERTAS 7",
+   "NATURHOUSE HEALTH"
   ]
  },
  "mayor_rentabilidad": [
   {
    "empresa": "MFE-MEDIAFOREUROPE",
    "isin": "NL0015001OI1",
-   "rentabilidad_ordinaria_pct": 10.37
+   "rentabilidad_ordinaria_pct": 10.33
   },
   {
    "empresa": "TELEFONICA",
    "isin": "ES0178430E18",
-   "rentabilidad_ordinaria_pct": 8.88
+   "rentabilidad_ordinaria_pct": 8.99
   },
   {
    "empresa": "NATURHOUSE HEALTH",
    "isin": "ES0105043006",
-   "rentabilidad_ordinaria_pct": 8.66
+   "rentabilidad_ordinaria_pct": 8.7
   }
  ],
  "fuente": "BME, operaciones financieras: dividendos; cierres de la ficha de cada valor",
