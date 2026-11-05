@@ -19,3 +19,4 @@ ejecutado,fecha_dato,valor,tramo,cobertura,estado
 2026-11-02T03:14:49+01:00,2026-10-30,17.74,Calma,0.864,provisional
 2026-11-03T03:11:38+01:00,2026-10-30,36.03,Normal,1.0,definitivo
 2026-11-04T03:09:08+01:00,2026-11-02,5.51,Calma,1.0,definitivo
+2026-11-05T03:21:12+01:00,2026-11-03,9.2,Calma,0.864,provisional
