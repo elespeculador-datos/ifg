@@ -1,29 +1,27 @@
 {
- "fecha": "2026-11-04",
- "generado": "2026-11-04T17:55:49+00:00",
- "proximos": 10,
+ "fecha": "2026-11-05",
+ "generado": "2026-11-05T17:58:11+00:00",
+ "proximos": 7,
  "siguiente": {
-  "fecha_ex": "2026-11-04",
+  "fecha_ex": "2026-11-05",
   "empresas": [
-   "CAIXABANK",
-   "LIBERTAS 7",
-   "NATURHOUSE HEALTH"
+   "FERROVIAL N.V."
   ]
  },
  "mayor_rentabilidad": [
   {
+   "empresa": "NATURHOUSE HEALTH",
+   "isin": "ES0105043006",
+   "rentabilidad_ordinaria_pct": 10.96
+  },
+  {
    "empresa": "MFE-MEDIAFOREUROPE",
    "isin": "NL0015001OI1",
-   "rentabilidad_ordinaria_pct": 10.33
+   "rentabilidad_ordinaria_pct": 10.05
   },
   {
    "empresa": "TELEFONICA",
    "isin": "ES0178430E18",
-   "rentabilidad_ordinaria_pct": 8.99
-  },
-  {
-   "empresa": "NATURHOUSE HEALTH",
-   "isin": "ES0105043006",
    "rentabilidad_ordinaria_pct": 8.7
   }
  ],
