@@ -1,6 +1,6 @@
 {
- "actualizado": "2026-11-06T18:45",
- "generado": "2026-11-06T17:45:31+00:00",
+ "actualizado": "2026-11-06T19:48",
+ "generado": "2026-11-06T18:48:02+00:00",
  "comunicados_leidos": 315,
  "comunicados_ibex35_clasificados": 93,
  "por_recuadro": {
@@ -12,5 +12,5 @@
  },
  "fuente": "CNMV, RSS de información privilegiada y otra información relevante",
  "licencia": "CC BY 4.0 · El Especulador",
- "bme": "2e887cb548e50f0e9c3e5417cd3780b9"
+ "bme": "bfba32d56c0a6b62bf38695368e7c488"
 }
