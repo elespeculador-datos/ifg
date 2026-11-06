@@ -1,23 +1,23 @@
 {
- "fecha": "2026-11-05",
- "generado": "2026-11-05T17:58:11+00:00",
- "proximos": 7,
+ "fecha": "2026-11-06",
+ "generado": "2026-11-06T17:51:49+00:00",
+ "proximos": 6,
  "siguiente": {
-  "fecha_ex": "2026-11-05",
+  "fecha_ex": "2026-11-12",
   "empresas": [
-   "FERROVIAL N.V."
+   "ARCELORMITTAL"
   ]
  },
  "mayor_rentabilidad": [
   {
    "empresa": "NATURHOUSE HEALTH",
    "isin": "ES0105043006",
-   "rentabilidad_ordinaria_pct": 10.96
+   "rentabilidad_ordinaria_pct": 11.06
   },
   {
    "empresa": "MFE-MEDIAFOREUROPE",
    "isin": "NL0015001OI1",
-   "rentabilidad_ordinaria_pct": 10.05
+   "rentabilidad_ordinaria_pct": 9.72
   },
   {
    "empresa": "TELEFONICA",
