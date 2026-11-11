@@ -214,6 +214,16 @@ try:
     # Etiquetado hecho a mano el 20 de octubre de 2026 contra el historial
     # de git (la republicación a la 0.10.0 es del 18 de octubre). Lo que
     # deduce el código tiene que coincidir fila a fila.
+    #
+    # ESTA AFIRMACIÓN SE PONE EN ROJO A PROPÓSITO EN UN CASO, Y NO HAY QUE
+    # APAGARLA: cuando config.VERSION ya es la nueva pero la serie todavía no
+    # se ha republicado. En ese hueco no existe la foto archivada que marca la
+    # frontera, así que las ejecuciones de la versión anterior se atribuyen a
+    # la nueva, y eso es falso. El rojo está diciendo exactamente eso: «has
+    # subido la versión y no has republicado». Es el mismo hueco en el que la
+    # guardia de comprobar_version() detiene la publicación diaria, así que en
+    # producción la migración no llega a ejecutarse ahí. Se arregla
+    # republicando, no tocando esta prueba.
     a_mano = {
         "2026-10-13T03:35:21+02:00": "0.9.0",
         "2026-10-14T03:41:55+02:00": "0.9.0",
@@ -229,19 +239,45 @@ try:
     discrepan = [k for k, v in a_mano.items() if deducido.get(k) != v]
     comprobar(not discrepan, "reproduce el etiquetado hecho a mano",
               str(discrepan))
-    posteriores = [v for k, v in deducido.items() if k not in a_mano
-                   and pd.Timestamp(k) > pd.Timestamp("2026-10-23T03:49:55+02:00")]
+    # La frontera NO se clava en una fecha. Lo que se comprueba es el
+    # invariante: lo posterior a la última foto archivada lleva la versión en
+    # curso. Clavar "después del 23 de octubre" daba por supuesto que no
+    # habría más republicaciones, y la primera —la de la 0.11.0, que archiva
+    # la foto de la 0.10.0— ponía la prueba en rojo sin que nada estuviera
+    # mal: las filas del 26 y el 27 pasan a ser 0.10.0 legítimamente. Es el
+    # mismo cable trampa que se quitó de pruebas_0_10_0.py.
+    ultima_frontera = max(
+        (pd.Timestamp(json.load(open(os.path.join(hist_real, n),
+                                     encoding="utf-8"))["generado"])
+         for n in os.listdir(hist_real)
+         if n.startswith("ifg_") and n.endswith(".json")),
+        default=None)
+    posteriores = [v for k, v in deducido.items()
+                   if ultima_frontera is not None
+                   and pd.Timestamp(k) > ultima_frontera]
     comprobar(all(v == config.VERSION for v in posteriores),
-              "las ejecuciones posteriores llevan la versión en curso",
+              "lo posterior a la última foto archivada lleva la versión en curso",
               str(posteriores))
+    anteriores_ok = all(v and v != config.VERSION for k, v in deducido.items()
+                        if ultima_frontera is not None
+                        and pd.Timestamp(k) <= ultima_frontera)
+    comprobar(anteriores_ok,
+              "y lo anterior lleva la versión con la que se midió, no la de hoy")
     comprobar(all(deducido.values()), "ninguna fila real queda sin versión")
 
     pub.migrar_revisiones()
     with open(pub.REVISIONES, encoding="utf-8") as fh:
         comprobar(fh.read() == migrado, "migrar dos veces no cambia nada")
 
-    comprobar(pub.deriva_maxima_registrada() == 10.14,
-              "el récord de la versión en curso existe desde el primer día",
+    # El récord solo existe si hay alguna fila de la versión en curso. Justo
+    # después de una republicación no la hay todavía —todas las filas son de
+    # la versión anterior— y entonces NaN es la respuesta correcta: sin base
+    # con la que comparar no se declara nada. Afirmar que el récord existe
+    # "desde el primer día" solo era cierto mientras no se republicara.
+    hay_filas_de_hoy = config.VERSION in deducido.values()
+    record = pub.deriva_maxima_registrada()
+    comprobar((record == 10.14) if hay_filas_de_hoy else pd.isna(record),
+              "hay récord si existe alguna ejecución de la versión en curso",
               str(pub.deriva_maxima_registrada()))
 
     # Una marca ilegible o sin zona horaria no se atribuye a ninguna versión.

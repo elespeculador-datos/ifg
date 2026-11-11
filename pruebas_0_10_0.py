@@ -78,7 +78,12 @@ ok(abs(d["valor"] - float(t.loc[fecha, "ifg"])) < 1e-9,
 ok(abs(d["valor_tendencia"] - float(t.loc[fecha, "ifg_suavizado"])) < 1e-9,
    f"'valor_tendencia' es el suavizado ({d['valor_tendencia']})")
 ok(d["valor"] == d["valor_crudo"], "'valor_crudo' coincide con 'valor'")
-ok(d["version"] == "0.10.0", f"la versión que se publica es {d['version']}")
+# Se compara con config.VERSION y no con la cadena literal: lo que esta
+# prueba comprueba es que la foto del día LLEVA la versión con la que se ha
+# calculado, no cuál es ese número. Clavar "0.10.0" aquí convertía la prueba
+# en un cable trampa que salta en cada versión nueva sin señalar ningún fallo.
+ok(d["version"] == config.VERSION,
+   f"la foto lleva la versión con la que se calcula ({d['version']})")
 
 print("\n== 3. El empalme del crudo, sin respaldo ==")
 #

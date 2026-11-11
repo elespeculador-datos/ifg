@@ -376,35 +376,122 @@ def construir_componentes(precios: pd.DataFrame,
 # ---------------------------------------------------------------------------
 # Alineación al calendario de publicación
 # ---------------------------------------------------------------------------
-def alinear(componentes: pd.DataFrame,
-            calendario: pd.DatetimeIndex,
-            max_arrastre: int = 3) -> pd.DataFrame:
+def alinear_con_arrastre(componentes: pd.DataFrame,
+                         calendario: pd.DatetimeIndex,
+                         max_arrastre: int = 3
+                         ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Reindexa al calendario de referencia (sesiones del IBEX) y arrastra
-    valores un máximo de `max_arrastre` sesiones.
+    Reindexa al calendario de referencia y arrastra valores un máximo de
+    `max_arrastre` sesiones, diciendo ADEMÁS qué celdas son arrastradas.
 
     Motivo del límite: sin él, una serie que deja de publicarse (GPR entre
     lunes, un futuro suspendido) seguiría inyectando su último valor
     indefinidamente y el índice parecería vivo cuando en realidad está
     congelado.
+
+    POR QUÉ HACE FALTA DISTINGUIR EL ARRASTRE. Hasta la 0.11.0 esta función
+    devolvía solo la tabla, y una celda arrastrada era indistinguible de una
+    con dato propio. Consecuencia: el cálculo de cobertura la contaba como
+    dato disponible, la fila nacía con cobertura completa, se cerraba como
+    definitiva ese mismo día y cuando llegaba el valor de verdad ya era
+    inmutable. El 14, 15 y 16 de octubre de 2026 se publicaron así, con el
+    GPR del día 13 arrastrado, y el lunes siguiente —cuando la Reserva
+    Federal entregó sus valores reales— el recálculo se separaba 10,14
+    puntos de lo publicado sin que nada pudiera corregirlo.
+
+    PERO NO TODO ARRASTRE ES LO MISMO, y confundirlos fue el primer intento
+    fallido de arreglar esto. Hay dos clases, y la diferencia no es de grado:
+
+      - HUECO PERMANENTE. El calendario de referencia son las sesiones del
+        IBEX, y los demás mercados cierran otros días. Un festivo en Nueva
+        York deja sin cierre al cobre, al oro o al ACWI en una sesión que
+        para el IBEX es hábil. Arrastrar el último cierre es el tratamiento
+        correcto y además el único posible: ese dato no existe y no va a
+        existir nunca. Medido sobre la serie real, esto es el 10 % de las
+        sesiones. Descontarlo de la cobertura las dejaría marcadas como
+        incompletas para siempre sin que ninguna corrección pueda llegar
+        jamás: puro ruido, y encima haría saltar la marca de "parcial" en
+        cientos de filas.
+
+      - ENTREGA PENDIENTE. El GPR aún no ha publicado su semana, el BCE va
+        con un día de retraso, GDELT no ha subido su muestra, un proveedor
+        de precios se ha caído. Aquí el dato SÍ va a llegar, y con fecha de
+        esa sesión. Contarlo como cobertura es afirmar un dato que todavía
+        no se tiene, y esa afirmación cierra la fila antes de tiempo.
+
+    EL CRITERIO QUE LOS SEPARA SALE DE LOS PROPIOS DATOS, sin lista de
+    componentes escrita a mano ni ninguna cifra elegida a ojo: se mira si la
+    fecha arrastrada cae MÁS ALLÁ del último dato propio de ese componente.
+    Más allá del final de su serie significa que la fuente todavía no ha
+    llegado ahí; dentro de su rango significa un agujero interior, que es el
+    festivo. El caso del 14 de octubre es el primero: el archivo del GPR
+    terminaba el día 13. Y una caída de precios al borde de la serie cae
+    también en el primero, que es lo que se quiere.
+
+    Devuelve (tabla, pendiente), donde `pendiente` marca solo la segunda
+    clase. Ver agregar().
     """
-    df = componentes.reindex(componentes.index.union(calendario)).sort_index()
-    df = df.ffill(limit=max_arrastre)
-    return df.reindex(calendario)
+    bruto = componentes.reindex(componentes.index.union(calendario)).sort_index()
+    lleno = bruto.ffill(limit=max_arrastre)
+
+    # Arrastrada = vacía antes del ffill y llena después.
+    arrastrado = bruto.isna() & lleno.notna()
+
+    # Último dato propio de cada componente. Lo que se arrastra más allá de
+    # esa fecha está esperando a su fuente; lo de dentro es un hueco que no
+    # se va a rellenar.
+    pendiente = arrastrado.copy()
+    for col in bruto.columns:
+        ultimo = bruto[col].last_valid_index()
+        if ultimo is None:
+            pendiente[col] = False          # sin un solo dato propio: no hay nada que esperar
+        else:
+            pendiente.loc[pendiente.index <= ultimo, col] = False
+
+    return (lleno.reindex(calendario),
+            pendiente.reindex(calendario).fillna(False))
+
+
+def alinear(componentes: pd.DataFrame,
+            calendario: pd.DatetimeIndex,
+            max_arrastre: int = 3) -> pd.DataFrame:
+    """La tabla alineada, sin la máscara. Se mantiene por compatibilidad."""
+    return alinear_con_arrastre(componentes, calendario, max_arrastre)[0]
 
 
 # ---------------------------------------------------------------------------
 # Agregación
 # ---------------------------------------------------------------------------
 def agregar(componentes: pd.DataFrame,
-            pesos: dict[str, float] = None) -> tuple[pd.Series, pd.DataFrame, pd.Series]:
+            pesos: dict[str, float] = None,
+            pendiente: pd.DataFrame = None) -> tuple[pd.Series, pd.DataFrame, pd.Series]:
     """
     Suma ponderada con reparto proporcional del peso ausente.
 
     Devuelve (compuesto, contribuciones, cobertura).
       - compuesto: serie del índice antes de percentilizar.
       - contribuciones: peso normalizado x z-score, por componente y día.
-      - cobertura: fracción del peso nominal disponible cada día.
+      - cobertura: fracción del peso nominal CON DATO PROPIO cada día.
+
+    UN DATO PENDIENTE SUMA PERO NO CUENTA COMO COBERTURA (desde la 0.11.0).
+    Son dos preguntas distintas y antes se respondían con la misma máscara:
+
+      - "¿con qué calculo hoy?" -> con todo lo que haya, arrastre incluido.
+        Para eso existe el arrastre: que un retraso de una fuente no deje al
+        índice sin valor. Esto NO cambia, y por tanto el valor del índice de
+        un día dado con unas entradas dadas es exactamente el mismo que antes.
+      - "¿cuánto de lo que calculo es dato de esa sesión?" -> aquí un valor
+        que está esperando a su fuente es justo lo que no hay. Contarlo era
+        afirmar una cobertura que no existía, y esa afirmación tenía una
+        consecuencia: cobertura completa significa cerrar la fila como
+        definitiva el mismo día, de modo que el dato real llegaba cuando ya
+        no se podía usar.
+
+    `pendiente` marca solo el arrastre que espera entrega, no el festivo de
+    otro mercado: la diferencia, y por qué importa, está en
+    alinear_con_arrastre(). Con la máscara, esas filas nacen provisionales y
+    se corrigen solas cuando la fuente entrega, que es para lo que se
+    inventaron los provisionales. Sin ella, el comportamiento es el de antes.
     """
     pesos = pesos or config.PESOS
     cols = [c for c in componentes.columns if c in pesos]
@@ -417,9 +504,15 @@ def agregar(componentes: pd.DataFrame,
     x = componentes[cols]
     disponible = x.notna()
 
-    # Peso nominal disponible cada día, sobre el total de pesos configurados.
+    # Peso nominal CON DATO DE ESA SESIÓN, sobre el total configurado. Una
+    # celda que espera entrega se descuenta aquí y solo aquí: sigue entrando
+    # en la suma de abajo, porque el índice tiene que dar un valor.
+    propio = disponible
+    if pendiente is not None:
+        propio = disponible & ~(pendiente.reindex(index=x.index, columns=cols)
+                                .fillna(False).astype(bool))
     peso_total_config = sum(pesos.values())
-    cobertura = (disponible * pd.Series({c: pesos[c] for c in cols})).sum(axis=1) \
+    cobertura = (propio * pd.Series({c: pesos[c] for c in cols})).sum(axis=1) \
         / peso_total_config
 
     # Renormalización diaria: el peso de lo que falta se reparte en proporción.
@@ -513,11 +606,14 @@ def calcular(precios: pd.DataFrame,
         calendario = precios["ibex"].dropna().index
     else:
         calendario = precios.dropna(how="all").index
-    componentes = alinear(componentes, calendario)
+    componentes, pendiente = alinear_con_arrastre(componentes, calendario)
 
     # La cobertura se calcula siempre con el reparto de pesos nominales: es
-    # una medida de cuántos datos hay ese día, no del agregador elegido.
-    compuesto, contribuciones, cobertura = agregar(componentes, pesos)
+    # una medida de cuántos datos hay ese día, no del agregador elegido. Y de
+    # cuántos hay DE ESA SESIÓN: lo que está esperando entrega no cuenta,
+    # aunque sí se use para calcular. Ver agregar().
+    compuesto, contribuciones, cobertura = agregar(componentes, pesos,
+                                                   pendiente=pendiente)
 
     direccion = diag_firma = coseno = None
     if agregacion.startswith("iguales"):
