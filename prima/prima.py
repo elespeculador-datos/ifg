@@ -382,8 +382,9 @@ def grafico_svg(series: dict[str, pd.Series]) -> str:
               '<style>.eje{font:11px sans-serif;fill:#5b6675}.lin{fill:none;stroke-width:1.6}</style>']
     for i in range(5):
         v = y0 + (y1 - y0) * i / 4
+        etiqueta = f"{v:.0f}".replace("-0", "0")
         partes.append(f'<line x1="{ml}" y1="{Y(v):.1f}" x2="{W - mr}" y2="{Y(v):.1f}" stroke="#e3e8ef"/>'
-                      f'<text class="eje" x="{ml - 4}" y="{Y(v) + 4:.1f}" text-anchor="end">{v:.0f}</text>')
+                      f'<text class="eje" x="{ml - 4}" y="{Y(v) + 4:.1f}" text-anchor="end">{etiqueta}</text>')
     for a in range(x0.year, x1.year + 1):
         t = pd.Timestamp(year=a, month=1, day=1)
         if x0 <= t <= x1:

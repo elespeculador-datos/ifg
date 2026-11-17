@@ -8,9 +8,6 @@ name: Prima de riesgo (validación a mano)
 # artefacto. Dependencias del colector: requests pandas numpy scipy.
 on:
   workflow_dispatch:
-  push:
-    branches: [prima-riesgo]   # solo mientras la rama está en desarrollo (registra el flujo y lo valida en cada push): se quita al fusionar
-    paths: ["prima/**", ".github/workflows/prima-validacion.yml"]
 
 permissions:
   contents: read
