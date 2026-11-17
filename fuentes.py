@@ -47,6 +47,77 @@ def _leer_cache(nombre: str, dias_validez: int = 1) -> pd.DataFrame | None:
     return df
 
 
+def _leer_cache_bruto(nombre: str) -> pd.DataFrame | None:
+    """
+    Devuelve el caché guardado SIN mirar si ha caducado.
+
+    `_leer_cache` sirve para decidir si hace falta descargar. Esto es otra
+    cosa: el histórico que ya está en el repositorio, que se necesita para
+    comprobar que la descarga de hoy no se lleva por delante lo de ayer.
+    """
+    ruta = _ruta_cache(nombre)
+    if not os.path.exists(ruta):
+        return None
+    try:
+        return pd.read_csv(ruta, index_col=0, parse_dates=True)
+    except Exception as exc:                          # noqa: BLE001
+        log.warning("No se ha podido leer el histórico de %s: %s", nombre, exc)
+        return None
+
+
+def _conservar_historia(nuevo: pd.DataFrame,
+                        previo: pd.DataFrame) -> pd.DataFrame:
+    """
+    Funde la descarga de hoy con el histórico guardado: lo que ya estaba NO
+    se pierde nunca; donde hay dato fresco, manda el fresco.
+
+    POR QUÉ EXISTE ESTO. El 2 de noviembre de 2026, TTF=F devolvió UNA sesión
+    en vez de 2.269. El aviso salió en el registro -"Histórico insuficiente
+    para gas_ttf: 1 sesiones"- y no sirvió de nada, porque era solo un aviso:
+    la descarga se escribió encima del caché y se llevó nueve años de gas
+    europeo. Consecuencias de ese único volcado:
+
+      - el componente de gas se quedó sin z-score ese día (le hace falta la
+        ventana de 750 sesiones), la cobertura bajó a 0,864 y el valor
+        publicado del 30 de octubre salió unos 13 puntos por debajo de lo que
+        le correspondía, con el tramo equivocado;
+      - el recálculo se separó 18,07 puntos de filas YA CERRADAS, con 180
+        sesiones cambiando de tramo desde 2021. La guardia de estabilidad
+        aguantó y la serie publicada no se movió, pero una republicación
+        lanzada en ese estado habría reescrito nueve años de historia.
+
+    Un cierre pasado no cambia: si estaba y la descarga no lo trae, falta la
+    descarga, no el dato. De ahí la regla, que es la misma que ya gobierna la
+    serie publicada en publicar_diario.py: lo que está escrito se conserva y
+    solo se añade.
+
+    LO QUE ESTO CUESTA, dicho claro: si una fuente retira de verdad un cierre
+    porque estaba mal, esta función lo mantiene. Se acepta a sabiendas: una
+    retirada legítima es rarísima y deja rastro en el registro de abajo,
+    mientras que un volcado por descarga corta ya ha pasado una vez y pasa sin
+    hacer ruido.
+    """
+    columnas_perdidas = []
+    for col in previo.columns:
+        antes = int(previo[col].notna().sum())
+        if not antes:
+            continue
+        ahora = int(nuevo[col].notna().sum()) if col in nuevo.columns else 0
+        if ahora < antes:
+            columnas_perdidas.append((col, antes, ahora))
+
+    for col, antes, ahora in columnas_perdidas:
+        log.error("DESCARGA CORTA en %s: %d sesiones frente a %d guardadas. "
+                  "Se conserva el histórico y solo se añade lo nuevo.",
+                  col, ahora, antes)
+
+    fundido = nuevo.combine_first(previo).sort_index()
+    log.info("Histórico conservado: %d sesiones (%d en la descarga, %d en el "
+             "caché), %d columnas con descarga corta.",
+             len(fundido), len(nuevo), len(previo), len(columnas_perdidas))
+    return fundido
+
+
 def _escribir_cache(nombre: str, df: pd.DataFrame) -> None:
     df.to_csv(_ruta_cache(nombre))
 
@@ -160,6 +231,12 @@ def descargar_precios(tickers: dict[str, str],
     df = pd.DataFrame(series).sort_index()
     df.index = pd.to_datetime(df.index).tz_localize(None).normalize()
     df = df[~df.index.duplicated(keep="last")]
+    # La descarga NUNCA se escribe a pelo: se funde con lo que ya había. Ver
+    # _conservar_historia, que explica el volcado que obligó a poner esto.
+    previo = _leer_cache_bruto("precios")
+    if previo is not None and not previo.empty:
+        df = _conservar_historia(df, previo)
+
     _escribir_cache("precios", df)
     return df
 
