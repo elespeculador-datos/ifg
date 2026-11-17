@@ -53,9 +53,9 @@ jobs:
         run: python prima/prima.py --salida salida/prima --local salida/eurostat.json --tesoro docs --forzar
       - name: Resumen
         run: |
-          echo "## Prima de riesgo: salida de validación" >> "$GITHUB_STEP_SUMMARY"
-          head -n 1 salida/prima/fragmento-wp.html >> "$GITHUB_STEP_SUMMARY"
-          python - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          echo "## Prima de riesgo: salida de validación" | tee -a "$GITHUB_STEP_SUMMARY"
+          head -n 1 salida/prima/fragmento-wp.html | tee -a "$GITHUB_STEP_SUMMARY"
+          python - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
           import json
           d = json.load(open("salida/prima/datos/ultima.json"))
           print("```")
