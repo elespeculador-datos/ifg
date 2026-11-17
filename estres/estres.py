@@ -28,6 +28,7 @@ import hashlib
 import html
 import io
 import json
+import os
 import sys
 import time
 from datetime import date, datetime, timedelta, timezone
@@ -44,7 +45,9 @@ CLAVE = "D.ES+U2+DE+FR+IT.Z0Z.4F.EC.SS_CIN+SOV_CIN.IDX"
 PARAMS = {"format": "csvdata", "startPeriod": "1980-01-01"}
 PORTAL = "https://data.ecb.europa.eu/data/datasets/CISS"
 PAGINA_WP = "https://elespeculador.com/estres-financiero-espana/"
-PAGES = "https://elespeculador-datos.github.io/ifg/estres/"
+# Dirección pública de la salida. Sin la variable de entorno, GitHub Pages (valor histórico);
+# en el servidor smpro-datos-1, ESPEC_DATOS_BASE vale https://datos.elespeculador.com/.
+PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/estres/"
 METODOLOGIA = PAGINA_WP + "#metodo"
 
 ZONAS = {"ES": "España", "U2": "Zona euro", "DE": "Alemania", "FR": "Francia", "IT": "Italia"}

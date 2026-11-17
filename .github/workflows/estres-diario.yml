@@ -1,25 +1,21 @@
 name: Estrés financiero
 
 # Indicador 2 del catálogo de Datos: el CISS del BCE para España, la zona euro, Alemania,
-# Francia e Italia, y el CISS soberano. Una pasada cada día laborable a las 11:20 UTC
-# (el portal de datos del BCE actualiza a lo largo de la mañana). Solo lee y escribe
-# estres/ y docs/estres/; no toca el IFG ni los demás activos. Solo guarda si cambian
-# los datos (la huella del fragmento).
+# Francia e Italia, y el CISS soberano.
+#
+# En producción el colector corre en el servidor smpro-datos-1 (servidor/ejecutar.sh estres,
+# a las 11:20 UTC de lunes a viernes; ver DESPLIEGUE.md) y escribe fuera del git. Este flujo
+# NO tiene horario ni guarda nada en el repositorio: se lanza a mano para validar una rama
+# con datos reales del portal del BCE (el entorno de Datos no llega a ese portal) y deja la
+# salida como artefacto de la ejecución. Dependencias del colector: requests pandas numpy scipy.
 on:
-  schedule:
-    - cron: "20 11 * * 1-5"
   workflow_dispatch:
 
 permissions:
-  contents: write
-  issues: write
-
-concurrency:
-  group: estres-diario
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  publicar:
+  validar:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -33,41 +29,17 @@ jobs:
       - name: Comprobaciones sin red
         run: python estres/pruebas_estres.py
       - name: Consultar el portal del BCE y preparar los archivos
-        run: python estres/estres.py --salida docs/estres
-      - name: Guardar el resultado en el repositorio
-        run: |
-          if [ -z "$(git status --porcelain docs/estres)" ]; then
-            echo "Sin cambios."
-            exit 0
-          fi
-          git config user.name "Estrés bot"
-          git config user.email "actions@github.com"
-          git add docs/estres
-          git commit -m "Estrés financiero $(date -u +%Y-%m-%d)"
-          git pull --rebase --autostash
-          git push
-
-      - name: Abrir incidencia si ha fallado
-        if: failure()
         env:
-          GH_TOKEN: ${{ github.token }}
-          EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ESPEC_DATOS_BASE: https://datos.elespeculador.com/
+        run: python estres/estres.py --salida salida/estres --forzar
+      - name: Resumen
         run: |
-          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=estres-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
-          cuerpo="La actualización del indicador de estrés financiero del $(date -u +%Y-%m-%d) ha fallado. Registro: $EJECUCION. La página sigue mostrando la última publicación buena con su fecha. Lo más probable: el portal de datos del BCE no respondía o ha cambiado el formato del CSV."
-          if [ -n "$abierta" ]; then
-            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="$cuerpo" >/dev/null
-          else
-            gh api --method POST "repos/${{ github.repository }}/labels" -f name=estres-fallido -f color=b60205 -f description="El indicador de estrés financiero no se ha actualizado" >/dev/null 2>&1 || true
-            gh api --method POST "repos/${{ github.repository }}/issues" -f title="El indicador de estrés financiero no se ha actualizado el $(date -u +%Y-%m-%d)" -f body="$cuerpo" -f 'labels[]=estres-fallido' >/dev/null
-          fi
-      - name: Cerrar la incidencia si ya funciona
-        if: success()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=estres-fallido" --jq '.[0].number // empty' 2>/dev/null || true)
-          if [ -n "$abierta" ]; then
-            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" -f body="Actualización correcta el $(date -u +%Y-%m-%d). Se cierra." >/dev/null
-            gh api --method PATCH "repos/${{ github.repository }}/issues/$abierta" -f state=closed >/dev/null
-          fi
+          echo "## Estrés financiero: salida de validación" >> "$GITHUB_STEP_SUMMARY"
+          head -n 1 salida/estres/fragmento-wp.html >> "$GITHUB_STEP_SUMMARY"
+          python -c "import json; d=json.load(open('salida/estres/datos/ultima.json')); print(json.dumps({k: d[k] for k in list(d)[:12]}, ensure_ascii=False, indent=1))" >> "$GITHUB_STEP_SUMMARY"
+      - name: Guardar la salida como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: estres-salida
+          path: salida/estres
+          retention-days: 14
