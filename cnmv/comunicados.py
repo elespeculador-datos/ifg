@@ -48,7 +48,10 @@ CANALES = {
 CABECERAS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36", "Accept": "application/rss+xml, application/xml, text/xml, */*"}
 MADRID = ZoneInfo("Europe/Madrid")
 RAIZ = Path(__file__).resolve().parent.parent
-SALIDA = RAIZ / "docs" / "cnmv"
+# Carpeta de salida. Por defecto, docs/cnmv del repositorio (GitHub Pages); en el
+# servidor, ESPEC_DATOS_DIR apunta a la carpeta que sirve datos.elespeculador.com,
+# fuera del git, para que git pull nunca choque con los datos.
+SALIDA = Path(os.environ.get("ESPEC_DATOS_DIR", RAIZ / "docs")) / "cnmv"
 DATOS = SALIDA / "datos"
 HISTORICO = DATOS / "comunicados.csv"
 EMPRESAS = Path(__file__).resolve().parent / "empresas.csv"

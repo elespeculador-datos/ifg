@@ -32,7 +32,10 @@ API = "https://apiweb.bolsasymercados.es/Market/v1/EQ/CorporateActions/TakeoverB
 CABECERAS = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Referer": "https://www.bolsasymercados.es/",
              "Accept": "application/json, text/plain, */*"}
 RAIZ = Path(__file__).resolve().parent.parent
-SALIDA = RAIZ / "docs" / "opas"
+# Carpeta de salida. Por defecto, docs/opas del repositorio (GitHub Pages); en el
+# servidor, ESPEC_DATOS_DIR apunta a la carpeta que sirve datos.elespeculador.com,
+# fuera del git, para que git pull nunca choque con los datos.
+SALIDA = Path(os.environ.get("ESPEC_DATOS_DIR", RAIZ / "docs")) / "opas"
 DATOS = SALIDA / "datos"
 PILAR = "https://elespeculador.com/opa-que-pasa-con-mis-acciones/"
 PAGINA_WP = "https://elespeculador.com/opas-bolsa-espanola/"

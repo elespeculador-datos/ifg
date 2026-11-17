@@ -1,0 +1,7 @@
+# Copiar a /etc/smpro/entorno (solo lectura para el usuario que ejecuta los colectores). Sin comillas.
+# Carpeta que sirve https://datos.elespeculador.com/ (fuera del git del repositorio).
+ESPEC_DATOS_DIR=/var/www/datos.elespeculador.com
+# Dirección pública que los colectores escriben en sus salidas (enlaces, JSON-LD).
+ESPEC_DATOS_BASE=https://datos.elespeculador.com/
+# Token de GitHub con permiso de incidencias (issues: read/write) sobre elespeculador-datos/ifg. Nunca en el repositorio.
+GH_TOKEN=

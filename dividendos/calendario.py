@@ -34,7 +34,10 @@ FICHA = "https://apiweb.bolsasymercados.es/Market/v1/EQ/ShareDetailsInfo"
 COTIZADAS = "https://apiweb.bolsasymercados.es/Market/v1/EQ/ListedCompanies"
 CABECERAS = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Referer": "https://www.bolsasymercados.es/"}
 RAIZ = Path(__file__).resolve().parent.parent
-SALIDA = RAIZ / "docs" / "dividendos"
+# Carpeta de salida. Por defecto, docs/dividendos del repositorio (GitHub Pages); en el
+# servidor, ESPEC_DATOS_DIR apunta a la carpeta que sirve datos.elespeculador.com,
+# fuera del git, para que git pull nunca choque con los datos.
+SALIDA = Path(os.environ.get("ESPEC_DATOS_DIR", RAIZ / "docs")) / "dividendos"
 DATOS = SALIDA / "datos"
 PILAR = "https://elespeculador.com/dividendos-fecha-ex-dividendo/"
 PAGINA_WP = "https://elespeculador.com/calendario-dividendos/"

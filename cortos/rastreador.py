@@ -46,7 +46,10 @@ PAGINA_WP = "https://elespeculador.com/posiciones-cortas-hoy/"
 # "https://datos.elespeculador.com/". Siempre termina en barra.
 PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/cortos/"
 RAIZ = Path(__file__).resolve().parent.parent
-SALIDA = RAIZ / "docs" / "cortos"
+# Carpeta de salida. Por defecto, docs/cortos del repositorio (GitHub Pages); en el
+# servidor, ESPEC_DATOS_DIR apunta a la carpeta que sirve datos.elespeculador.com,
+# fuera del git, para que git pull nunca choque con los datos.
+SALIDA = Path(os.environ.get("ESPEC_DATOS_DIR", RAIZ / "docs")) / "cortos"
 DATOS = SALIDA / "datos"
 
 COLUMNAS = ["lei", "isin", "emisor", "tenedor", "fecha_posicion", "posicion_pct"]

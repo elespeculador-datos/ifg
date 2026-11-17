@@ -32,7 +32,10 @@ from pathlib import Path
 import pandas as pd
 
 RAIZ = Path(__file__).resolve().parent.parent
-SALIDA = RAIZ / "docs" / "ibex"
+# Carpeta de salida. Por defecto, docs/ibex del repositorio (GitHub Pages); en el
+# servidor, ESPEC_DATOS_DIR apunta a la carpeta que sirve datos.elespeculador.com,
+# fuera del git, para que git pull nunca choque con los datos.
+SALIDA = Path(os.environ.get("ESPEC_DATOS_DIR", RAIZ / "docs")) / "ibex"
 DATOS = SALIDA / "datos"
 HISTORICO = Path(__file__).resolve().parent / "historico_anual.csv"
 PILAR = "https://elespeculador.com/historico-ibex-35-records/"
