@@ -568,7 +568,7 @@ y el archivo de componentes.
 
 ## 13. Licencia y citación
 
-**Licencia de la serie.** Desde el 30 de octubre de 2026, la serie del IFG y
+**Licencia de la serie.** Desde el 12 de noviembre de 2026, la serie del IFG y
 los archivos publicados se difunden solo para consultarlos y citarlos con la
 atribución de la fórmula de citación. **No se concede licencia para
 reutilizarlos con fines comerciales ni para redistribuirlos:** parte de los
