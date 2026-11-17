@@ -96,12 +96,12 @@ jobs:
         run: python ahorro/ahorro.py --salida salida/ahorro --meses-atras 3 --tesoro docs --forzar
       - name: Resumen
         run: |
-          echo "## Rentabilidad real del ahorro: salida de validación" >> "$GITHUB_STEP_SUMMARY"
-          head -n 1 salida/ahorro/fragmento-wp.html >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          cat salida/ahorro/datos/euribor_boe.csv >> "$GITHUB_STEP_SUMMARY" || true
-          python -c "import json; d=json.load(open('salida/ahorro/datos/ultima.json')); [d.pop(k, None) for k in ('condiciones','fuente')]; print(json.dumps(d, ensure_ascii=False, indent=1))" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "## Rentabilidad real del ahorro: salida de validación" | tee -a "$GITHUB_STEP_SUMMARY"
+          head -n 1 salida/ahorro/fragmento-wp.html | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+          cat salida/ahorro/datos/euribor_boe.csv | tee -a "$GITHUB_STEP_SUMMARY" || true
+          python -c "import json; d=json.load(open('salida/ahorro/datos/ultima.json')); [d.pop(k, None) for k in ('condiciones','fuente')]; print(json.dumps(d, ensure_ascii=False, indent=1))" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Guardar la salida como artefacto
         if: always()
         uses: actions/upload-artifact@v4
