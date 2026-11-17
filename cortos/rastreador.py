@@ -15,7 +15,8 @@ capital) y lo convierte en datos abiertos y en una página legible:
   docs/cortos/fragmento-wp.html          tablas en HTML para la página de elespeculador.com
 
 Fuente: CNMV, «Posiciones cortas netas», fichero NetShortPositions.xls.
-Licencia de los datos derivados: CC BY 4.0, citando a El Especulador y a la CNMV.
+Los datos de la CNMV se reproducen fielmente (son gratuitos en cnmv.es); solo la elaboración
+de El Especulador (sumas, cambios, histórico) lleva licencia CC BY 4.0, citando a El Especulador y a la CNMV.
 
 Uso:
   python cortos/rastreador.py                 descarga y publica
@@ -302,7 +303,7 @@ a{{color:var(--a)}} .pie{{color:var(--s);font-size:.85rem;margin-top:2em}}
 {filas_vig}
 </tbody></table></div>
 <h2>Datos abiertos</h2>
-<p>Descarga en CSV: <a href="datos/vigentes.csv">posiciones vigentes</a> · <a href="datos/resumen_emisores.csv">resumen por emisor</a> · <a href="datos/serie.csv">evolución de las vigentes</a> · <a href="datos/anteriores.csv">posiciones anteriores desde 2010</a> · <a href="datos/historial_cambios.csv">historial de cambios</a> · <a href="datos/ultima.json">JSON</a>. Licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>: puedes reutilizarlos citando «El Especulador, a partir de datos de la CNMV».</p>
+<p>Descarga en CSV: <a href="datos/vigentes.csv">posiciones vigentes</a> · <a href="datos/resumen_emisores.csv">resumen por emisor</a> · <a href="datos/serie.csv">evolución de las vigentes</a> · <a href="datos/anteriores.csv">posiciones anteriores desde 2010</a> · <a href="datos/historial_cambios.csv">historial de cambios</a> · <a href="datos/ultima.json">JSON</a>. Fuente: CNMV, registro de posiciones cortas netas, reproducido fielmente (la CNMV lo ofrece gratis en cnmv.es). La elaboración de El Especulador (sumas por emisor, cambios, histórico) se publica con licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>, citando «El Especulador, a partir de datos de la CNMV».</p>
 <p class="pie">Fuente: CNMV, <a href="{FICHA_CNMV}">posiciones cortas netas</a> (fichero <a href="{URL}">NetShortPositions.xls</a>). La fecha de posición es el día en que la posición alcanzó, cambió o bajó del umbral; la CNMV la publica al día hábil siguiente. Contenido informativo; no constituye asesoramiento financiero.</p>
 </body></html>
 """
@@ -486,7 +487,7 @@ def main() -> int:
         "cambios": int(len(cam)),
         "historico": hist,
         "top": res.head(10).assign(ultima_fecha_posicion=res.head(10)["ultima_fecha_posicion"].astype(str)).to_dict("records"),
-        "fuente": URL, "licencia": "CC BY 4.0 · El Especulador a partir de datos de la CNMV",
+        "fuente": URL, "licencia": "Datos de la CNMV reproducidos fielmente (gratuitos en cnmv.es); elaboración de El Especulador con licencia CC BY 4.0",
     }, ensure_ascii=False, indent=1), encoding="utf-8")
     (SALIDA / "index.html").write_text(pagina(fecha, vig, res, cam, primera=previo is None, hist=hist), encoding="utf-8")
     (SALIDA / "fragmento-wp.html").write_text(con_ld(
