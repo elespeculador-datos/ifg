@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Ejecuta un colector en el servidor smpro-datos-1 con el código de main de GitHub.
 #
-#   servidor/ejecutar.sh <colector>      colector: cortos, letras, bonos, cnmv, accionistas, estres
+#   servidor/ejecutar.sh <colector>      colector: cortos, cnmv, accionistas, letras, bonos, estres y los que sigan la convención
 #
 # Qué hace, en orden:
 #   1. carga el entorno (/etc/smpro/entorno o $SMPRO_ENTORNO): ESPEC_DATOS_DIR, ESPEC_DATOS_BASE, GH_TOKEN
@@ -31,15 +31,19 @@ if ! git pull --ff-only --quiet origin main; then
 fi
 echo "código: $(git rev-parse --short HEAD) ($(git log -1 --format=%cd --date=short)) · intérprete: $PYTHON"
 
+# Convención: el colector <nombre> vive en <nombre>/<nombre>.py y admite --salida (letras, bonos,
+# estres y los que vengan). Las excepciones van explícitas.
 case "$COLECTOR" in
   cortos)      ORDEN=("$PYTHON" cortos/rastreador.py) ;;
   cnmv)        ORDEN=("$PYTHON" cnmv/comunicados.py) ;;
-  letras)      ORDEN=("$PYTHON" letras/letras.py --salida "$ESPEC_DATOS_DIR/letras") ;;
-  bonos)       ORDEN=("$PYTHON" bonos/bonos.py --salida "$ESPEC_DATOS_DIR/bonos") ;;
   accionistas) ORDEN=("$PYTHON" accionistas/duenos.py --salida "$ESPEC_DATOS_DIR/accionistas") ;;
-  estres)      ORDEN=("$PYTHON" estres/estres.py --salida "$ESPEC_DATOS_DIR/estres") ;;
   opas|dividendos|ibex) echo "ERROR  $COLECTOR lee la API de BME sin licencia: no se ejecuta (P3 del catálogo)."; exit 3 ;;
-  *) echo "ERROR  colector desconocido: $COLECTOR"; exit 2 ;;
+  *)
+    if [ -f "$COLECTOR/$COLECTOR.py" ]; then
+      ORDEN=("$PYTHON" "$COLECTOR/$COLECTOR.py" --salida "$ESPEC_DATOS_DIR/$COLECTOR")
+    else
+      echo "ERROR  colector desconocido: $COLECTOR (no existe $COLECTOR/$COLECTOR.py)"; exit 2
+    fi ;;
 esac
 
 if "${ORDEN[@]}"; then
