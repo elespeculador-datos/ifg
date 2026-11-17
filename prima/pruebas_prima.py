@@ -37,19 +37,20 @@ def ok(cond: bool, texto: str) -> None:
 
 
 # --------------------------------------------------------------------------- datos simulados
-def dias_habiles(desde: str, hasta: str) -> pd.DatetimeIndex:
-    return pd.bdate_range(desde, hasta)
+def meses(desde: str, hasta: str) -> pd.DatetimeIndex:
+    """Primer día de cada mes, como guarda el colector los periodos «AAAA-MM» de Eurostat."""
+    return pd.date_range(desde, hasta, freq="MS")
 
 
 def rendimientos(fechas: pd.DatetimeIndex) -> dict[str, pd.Series]:
-    """Alemania sube y baja suavemente; los demás llevan un diferencial conocido, con picos en fechas fijadas."""
+    """Alemania sube y baja suavemente; los demás llevan un diferencial conocido, con picos en meses fijados."""
     t = np.arange(len(fechas))
-    de = pd.Series(2.5 + 1.5 * np.sin(t / 900.0), index=fechas)
+    de = pd.Series(2.5 + 1.5 * np.sin(t / 40.0), index=fechas)
     prima_es = pd.Series(100.0, index=fechas)  # puntos básicos
     prima_es[(fechas >= "2010-04-01") & (fechas <= "2012-12-31")] = 300.0
-    prima_es[fechas == "2012-07-24"] = 638.0
-    prima_es[fechas == "2020-03-18"] = 155.0
-    prima_es[fechas == "2022-06-14"] = 140.0
+    prima_es[fechas == "2012-07-01"] = 560.0
+    prima_es[fechas == "2020-03-01"] = 140.0
+    prima_es[fechas == "2022-06-01"] = 120.0
     prima_es[fechas >= "2024-01-01"] = 70.0
     prima_es[fechas >= "2026-10-01"] = 85.0
     es = de + prima_es / 100
@@ -72,7 +73,7 @@ def jsonstat(series: dict[str, pd.Series], valor_lista: bool = False, orden: tup
     for ig, g in enumerate(geos):
         s = series[g]
         for it_, f in enumerate(fechas):
-            if f in s.index and (g, f.strftime("%Y-%m-%d")) not in quitar:
+            if f in s.index and (g, f.strftime("%Y-%m")) not in quitar:
                 idx = ig * pasos["geo"] + it_ * pasos["time"]
                 valores[str(idx) if claves_str else idx] = round(float(s.loc[f]), 2)
     if valor_lista:
@@ -85,13 +86,13 @@ def jsonstat(series: dict[str, pd.Series], valor_lista: bool = False, orden: tup
         "freq": {"label": "Time frequency", "category": {"index": {"D": 0}, "label": {"D": "Daily"}}},
         "int_rt": {"label": "Interest rate", "category": {"index": {"MCBY": 0}, "label": {"MCBY": "Maastricht criterion bond yields"}}},
         "geo": {"label": "Geopolitical entity (reporting)", "category": {"index": {g: i for i, g in enumerate(geos)}, "label": {g: g for g in geos}}},
-        "time": {"label": "Time", "category": {"index": {f.strftime("%Y-%m-%d"): i for i, f in enumerate(fechas)}}},
+        "time": {"label": "Time", "category": {"index": {f.strftime("%Y-%m"): i for i, f in enumerate(fechas)}}},
     }
-    return json.dumps({"version": "2.0", "label": "EMU convergence criterion series - daily data", "source": "ESTAT",
-                       "updated": "2026-11-17T11:00:00+0100", "id": list(orden), "size": size, "dimension": dim, "value": valores})
+    return json.dumps({"version": "2.0", "label": "EMU convergence criterion series - monthly data", "source": "ESTAT",
+                       "updated": "2026-11-12T11:00:00+0100", "id": list(orden), "size": size, "dimension": dim, "value": valores})
 
 
-FECHAS = dias_habiles("1995-01-02", "2026-11-16")
+FECHAS = meses("1995-01-01", "2026-10-01")
 SERIES = rendimientos(FECHAS)
 HOY = date(2026, 11, 17)
 
@@ -102,21 +103,22 @@ def prueba_lectura():
     ok(set(df["pais"]) == {"ES", "DE", "IT", "FR"}, "leer: los cuatro países")
     ok(len(df) == 4 * len(FECHAS), f"leer: {len(df)} filas, se esperaban {4 * len(FECHAS)}")
     ult = df[(df["pais"] == "ES")].iloc[-1]
-    ok(ult["fecha"] == pd.Timestamp("2026-11-16") and abs(ult["valor"] - round(float(SERIES["ES"].iloc[-1]), 2)) < 1e-9,
+    ok(ult["fecha"] == pd.Timestamp("2026-10-01") and abs(ult["valor"] - round(float(SERIES["ES"].iloc[-1]), 2)) < 1e-9,
        "leer: el último dato español es el que se puso")
-    ok(meta["actualizado"] == "2026-11-17T11:00:00+0100" and "convergence" in meta["etiqueta"], "leer: metadatos")
+    ok(meta["actualizado"] == "2026-11-12T11:00:00+0100" and "convergence" in meta["etiqueta"], "leer: metadatos")
     df2, _ = prima.leer(jsonstat(SERIES, valor_lista=True))
     ok(df2.equals(df), "leer: `value` como lista da lo mismo que como diccionario")
     df3, _ = prima.leer(jsonstat(SERIES, orden=("geo", "time", "freq", "int_rt")))
     ok(df3.equals(df), "leer: otro orden de dimensiones da lo mismo")
     df4, _ = prima.leer(jsonstat(SERIES, claves_str=False))
     ok(df4.equals(df), "leer: claves enteras en `value` dan lo mismo")
-    df5, _ = prima.leer(jsonstat(SERIES, quitar=(("DE", "2026-11-16"),)))
-    ok(len(df5) == len(df) - 1 and df5[df5["pais"] == "DE"].iloc[-1]["fecha"] == pd.Timestamp("2026-11-13"),
+    df5, _ = prima.leer(jsonstat(SERIES, quitar=(("DE", "2026-10"),)))
+    ok(len(df5) == len(df) - 1 and df5[df5["pais"] == "DE"].iloc[-1]["fecha"] == pd.Timestamp("2026-09-01"),
        "leer: una celda sin dato simplemente no está")
     for nombre, texto in [
         ("sin España", jsonstat({k: v for k, v in SERIES.items() if k != "ES"})),
         ("pocas observaciones", jsonstat({k: v.iloc[-100:] for k, v in SERIES.items()})),
+        ("periodos que no son meses", re.sub(r'"(\d{4})-(\d{2})":', r'"\1M\2":', jsonstat(SERIES))),
         ("fuera de rango", jsonstat({**SERIES, "ES": SERIES["ES"] + 50})),
         ("error de Eurostat", json.dumps({"error": {"status": 400, "label": "Dataset contains no data"}})),
         ("no es JSON", "<html>mantenimiento</html>"),
@@ -134,11 +136,11 @@ def prueba_calculos():
     niveles = {p: s.round(2) for p, s in SERIES.items()}
     difs = prima.diferenciales(niveles)
     ok(set(difs) == {"es_de", "it_de", "fr_de", "es_it", "es_fr"}, "diferenciales: los cinco")
-    ok(abs(difs["es_de"].loc["2012-07-24"] - 638.0) < 1.01, f"diferenciales: pico de 2012 = {difs['es_de'].loc['2012-07-24']}")
+    ok(abs(difs["es_de"].loc["2012-07-01"] - 560.0) < 1.01, f"diferenciales: pico de 2012 = {difs['es_de'].loc['2012-07-01']}")
     ok(abs(difs["it_de"].iloc[-1] - 130.0) < 1.01, "diferenciales: Italia-Alemania 130 pb")
-    sin = {**niveles, "DE": niveles["DE"].drop(pd.Timestamp("2026-11-16"))}
+    sin = {**niveles, "DE": niveles["DE"].drop(pd.Timestamp("2026-10-01"))}
     d2 = prima.diferenciales(sin)
-    ok(d2["es_de"].index[-1] == pd.Timestamp("2026-11-13") and d2["es_it"].index[-1] == pd.Timestamp("2026-11-16"),
+    ok(d2["es_de"].index[-1] == pd.Timestamp("2026-09-01") and d2["es_it"].index[-1] == pd.Timestamp("2026-10-01"),
        "diferenciales: solo fechas comunes a los dos países")
 
     rng = np.random.default_rng(7)
@@ -158,18 +160,18 @@ def prueba_calculos():
     ok([prima.semaforo(p) for p in (0, 49.9, 50, 89.9, 90, 100)] == ["verde", "verde", "ámbar", "ámbar", "rojo", "rojo"],
        "semáforo: verde < 50, ámbar < 90, rojo desde 90")
 
-    s = pd.Series([10.0, 12.0, 15.0, 11.0, 20.0], index=pd.to_datetime(["2026-10-01", "2026-10-08", "2026-10-20", "2026-11-05", "2026-11-16"]))
-    f = pd.Timestamp("2026-11-16")
-    ok(prima.variacion(s, f, 7) == 9.0, "variación: 1 semana toma el último dato de hace 7 días o antes")
-    ok(prima.variacion(s, f, 28) == 8.0, "variación: 4 semanas toma el dato del 08/10 (último hasta el 19/10)")
+    s = pd.Series([10.0, 12.0, 15.0, 11.0, 20.0], index=pd.to_datetime(["2026-06-01", "2026-07-01", "2026-08-01", "2026-09-01", "2026-10-01"]))
+    f = pd.Timestamp("2026-10-01")
+    ok(prima.variacion(s, f, 28) == 9.0, "variación: un mes toma el mes anterior")
+    ok(prima.variacion(s, f, 91) == 8.0, "variación: tres meses toma julio")
     ok(prima.variacion(s, f, 364) is None, "variación: sin historia suficiente, None")
     ok(prima.ultima_vez_igual_o_mayor(pd.Series([5.0, 9.0, 3.0], index=pd.to_datetime(["2025-01-01", "2025-06-01", "2026-11-16"])),
                                       pd.Timestamp("2026-11-16"), 4.0) == "2025-06-01", "última vez igual o mayor, fuera de los seis meses")
 
     ep = prima.episodios(difs["es_de"])
     por = {e["episodio"]: e for e in ep}
-    ok(por["Crisis del euro"]["maximo"] == 638.0 and por["Crisis del euro"]["fecha_maximo"] == "2012-07-24", "episodios: máximo y fecha de 2012")
-    ok(por["Pandemia"]["fecha_maximo"] == "2020-03-18", "episodios: máximo de 2020 en su fecha")
+    ok(por["Crisis del euro"]["maximo"] == 560.0 and por["Crisis del euro"]["fecha_maximo"] == "2012-07-01", "episodios: máximo y mes de 2012")
+    ok(por["Pandemia"]["fecha_maximo"] == "2020-03-01", "episodios: máximo de 2020 en su mes")
     ok("Crisis del Sistema Monetario Europeo" not in por, "episodios: sin datos en la ventana, no se publica")
 
 
@@ -178,23 +180,23 @@ def prueba_calcular():
     df, _ = prima.leer(jsonstat(SERIES))
     res = prima.calcular(df, HOY, {})
     d = res["diferenciales"]["es_de"]
-    ok(res["fecha"] == "2026-11-16" and res["desfase_dias"] == 1, "calcular: fecha y desfase")
+    ok(res["fecha"] == "2026-10-01" and res["mes"] == "2026-10" and res["desfase_dias"] == 17, "calcular: mes y desfase desde el fin de mes")
     ok(abs(d["valor"] - 85.0) < 1.01, f"calcular: prima actual 85 pb ({d['valor']})")
     ok(d["semaforo"] == "rojo" and d["percentil_3a"] > 90, "calcular: 85 pb tras tres años a 70 es rojo frente a tres años")
     ok(d["tramo_historico"] in ("bajo", "habitual") and d["percentil_historico"] < 50, "calcular: pero habitual o bajo desde 2000")
-    ok(d["desde_historico"] == "2000-01-03", "calcular: el histórico empieza en 2000")
-    ok(d["maximo_historico"] == 638.0 and d["fecha_maximo_historico"] == "2012-07-24", "calcular: máximo histórico 2012")
+    ok(d["desde_historico"] == "2000-01-01", "calcular: el histórico empieza en 2000")
+    ok(d["maximo_historico"] == 560.0 and d["fecha_maximo_historico"] == "2012-07-01", "calcular: máximo histórico 2012")
     ok(res["ranking"] == ["Italia", "España", "Francia", "Alemania"], f"calcular: ranking {res['ranking']}")
-    ok(set(res["grafico"]) == {"es_de", "it_de", "fr_de"} and res["grafico"]["es_de"].index[0] >= pd.Timestamp("2023-11-16"),
-       "calcular: gráfico de tres años")
+    ok(set(res["grafico"]) == {"es_de", "it_de", "fr_de"} and res["grafico"]["es_de"].index[0] >= pd.Timestamp("2016-10-01")
+       and len(res["grafico"]["es_de"]) == 120, "calcular: gráfico de diez años (120 meses)")
     ok(res["niveles"]["ES"]["pais"] == "España" and isinstance(res["niveles"]["ES"]["valor"], float), "calcular: ficha de nivel")
     ok(not prima.AVISOS, f"calcular: sin avisos con datos al día ({prima.AVISOS})")
     prima.AVISOS.clear()
-    prima.calcular(df, HOY + timedelta(days=12), {})
-    ok(any("desfase" in a for a in prima.AVISOS), "calcular: aviso con más de 7 días de desfase")
+    prima.calcular(df, HOY + timedelta(days=40), {})
+    ok(any("desde su fin" in a for a in prima.AVISOS), "calcular: aviso pasados 50 días del fin de mes")
     try:
-        prima.calcular(df, HOY + timedelta(days=60), {})
-        ok(False, "calcular: más de 45 días debería parar")
+        prima.calcular(df, HOY + timedelta(days=100), {})
+        ok(False, "calcular: pasados 100 días debería parar")
     except prima.DatosRaros:
         ok(True, "")
     prima.AVISOS.clear()
@@ -253,7 +255,7 @@ def prueba_escritura():
         ok(u["huella"] == h1 and u["semaforo"] == "rojo" and u["version"] == prima.VERSION and u["eurostat_actualizado"] == meta["actualizado"],
            "escribir: ultima.json")
         csvt = (salida / "datos" / "serie.csv").read_text(encoding="utf-8").splitlines()
-        ok(csvt[0] == "fecha,serie,unidad,valor" and any(",es_de,puntos_basicos," in l for l in csvt) and any(",de,porcentaje," in l for l in csvt),
+        ok(csvt[0] == "mes,serie,unidad,valor" and any("2026-10,es_de,puntos_basicos," in l for l in csvt) and any(",de,porcentaje," in l for l in csvt),
            "escribir: serie.csv con niveles y diferenciales")
         antes = (salida / "fragmento-wp.html").stat().st_mtime_ns
         ok(prima.escribir(df, res, meta, HOY + timedelta(days=1), salida) is False, "escribir: sin cambios no reescribe")

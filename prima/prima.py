@@ -2,15 +2,17 @@
 
 Indicador 3 del catálogo de Datos de El Especulador. Lee de Eurostat los tipos de interés
 a largo plazo del criterio de convergencia (rendimiento del bono a diez años en el mercado
-secundario, dato diario recogido por el BCE de los bancos centrales nacionales) de España,
-Alemania, Italia y Francia, y publica:
+secundario, media mensual; los datos los recoge el BCE de los bancos centrales nacionales)
+de España, Alemania, Italia y Francia, y publica:
 
   <salida>/fragmento-wp.html   texto, tablas y gráfico entre <!-- prima:inicio HUELLA --> y <!-- prima:fin -->
   <salida>/index.html          página propia de la salida
-  <salida>/datos/serie.csv     rendimientos (%) y diferenciales (puntos básicos), formato largo
+  <salida>/datos/serie.csv     rendimientos (%) y diferenciales (puntos básicos), mensual, formato largo
   <salida>/datos/ultima.json   resumen versionado para webs y widgets
 
-Fuente: Eurostat, conjunto irt_lt_mcby_d. Política de Eurostat: reutilización libre, también
+Fuente: Eurostat, conjunto irt_lt_mcby_m (el diario, irt_lt_mcby_d, dejó de difundirse: comprobado
+el 17/11/2026; para una versión diaria hace falta otra fuente, p. ej. el Banco de España, con su
+licencia verificada). Política de Eurostat: reutilización libre, también
 comercial, citando «Fuente: Eurostat» y declarando las modificaciones. Los rendimientos se
 reproducen sin modificar; los diferenciales, percentiles, variaciones y episodios son cálculos
 propios de El Especulador (CC BY 4.0). El pulso del Tesoro sale de las salidas de letras/ y
@@ -38,10 +40,10 @@ import pandas as pd
 import requests
 
 VERSION = "1.0.0"
-API = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/irt_lt_mcby_d"
+API = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/irt_lt_mcby_m"
 PAISES = {"ES": "España", "DE": "Alemania", "IT": "Italia", "FR": "Francia"}
 PARAMS = [("format", "JSON"), ("lang", "EN")] + [("geo", p) for p in PAISES]
-PORTAL = "https://ec.europa.eu/eurostat/databrowser/view/irt_lt_mcby_d/default/table?lang=en"
+PORTAL = "https://ec.europa.eu/eurostat/databrowser/view/irt_lt_mcby_m/default/table?lang=en"
 METADATOS = "https://ec.europa.eu/eurostat/cache/metadata/en/irt_lt_mcby_esms.htm"
 PAGINA_WP = "https://elespeculador.com/prima-de-riesgo-espana/"
 # Dirección pública de la salida. Sin la variable de entorno, GitHub Pages (valor histórico);
@@ -54,7 +56,8 @@ DIFERENCIALES = [("es_de", "ES", "DE"), ("it_de", "IT", "DE"), ("fr_de", "FR", "
 NOMBRE_DIF = {"es_de": "España-Alemania", "it_de": "Italia-Alemania", "fr_de": "Francia-Alemania",
               "es_it": "España-Italia", "es_fr": "España-Francia"}
 DESDE_HISTORICO = "2000-01-01"   # el percentil histórico se calcula desde aquí (toda la vida del euro)
-VENTANA_SEMAFORO_DIAS = 3 * 365  # el semáforo compara con los últimos tres años
+VENTANA_SEMAFORO_DIAS = 3 * 365  # el semáforo compara con los últimos tres años (36 meses)
+VENTANA_GRAFICO_DIAS = 10 * 365  # el gráfico enseña diez años
 # Episodios de referencia: ventanas fijadas de antemano; se publica el máximo que marcó el
 # diferencial España-Alemania dentro de cada una (dato, no decisión).
 EPISODIOS = [
@@ -90,7 +93,7 @@ def descargar(esperas: list[int] | None = None, dormir=time.sleep) -> str:
         print(f"AVISO  descarga, intento {intento + 1} de {len(esperas) + 1}: {ultimo}", file=sys.stderr)
         if intento < len(esperas):
             dormir(esperas[intento])
-    raise DatosRaros(f"No se pudo descargar irt_lt_mcby_d de Eurostat tras {len(esperas) + 1} intentos: {ultimo}")
+    raise DatosRaros(f"No se pudo descargar irt_lt_mcby_m de Eurostat tras {len(esperas) + 1} intentos: {ultimo}")
 
 
 # --------------------------------------------------------------------------- lectura
@@ -152,15 +155,18 @@ def leer(texto: str) -> tuple[pd.DataFrame, dict]:
     df = pd.DataFrame(filas, columns=["fecha", "pais", "valor"])
     if df.empty:
         raise DatosRaros("Eurostat no ha devuelto ningún valor para los países pedidos")
-    df["fecha"] = pd.to_datetime(df["fecha"], errors="coerce")
+    # Los periodos vienen como «2026-10»: se guardan como el primer día del mes.
+    df["fecha"] = pd.to_datetime(df["fecha"].astype(str).str.slice(0, 7), format="%Y-%m", errors="coerce")
+    if df["fecha"].isna().mean() > 0.05:
+        raise DatosRaros(f"Los periodos de Eurostat no tienen la forma AAAA-MM: {cats['time'][:3]}")
     df["valor"] = pd.to_numeric(df["valor"], errors="coerce")
     df = df.dropna().sort_values(["pais", "fecha"]).drop_duplicates(["pais", "fecha"], keep="last").reset_index(drop=True)
     faltan = [p for p in PAISES if p not in set(df["pais"])]
     if faltan:
         raise DatosRaros(f"Eurostat no ha devuelto datos de {', '.join(PAISES[p] for p in faltan)}")
     n_es = int((df["pais"] == "ES").sum())
-    if n_es < 2000:
-        raise DatosRaros(f"El rendimiento español trae {n_es} observaciones: demasiado pocas para una serie diaria desde los años noventa")
+    if n_es < 200:
+        raise DatosRaros(f"El rendimiento español trae {n_es} meses: demasiado pocos para una serie mensual desde los años noventa")
     if ((df["valor"] < -3) | (df["valor"] > 40)).any():
         raise DatosRaros("Hay rendimientos fuera del rango -3 % a 40 %: el conjunto ha cambiado de unidad o de criterio")
     meta = {"etiqueta": d.get("label"), "actualizado": d.get("updated"), "fuente": d.get("source")}
@@ -239,8 +245,8 @@ def _ficha(s: pd.Series, f: pd.Timestamp, hoy: date, dec: int) -> dict:
         "fecha": f.date().isoformat(), "valor": round(v, dec), "desde": s.index[0].date().isoformat(), "observaciones": int(len(s)),
         "percentil_historico": _r(p), "tramo_historico": tramo(p), "desde_historico": hist.index[0].date().isoformat() if len(hist) else None,
         "percentil_3a": _r(p3), "semaforo": semaforo(p3),
-        "variacion_1s": _r(variacion(s, f, 7), dec), "variacion_4s": _r(variacion(s, f, 28), dec),
-        "variacion_13s": _r(variacion(s, f, 91), dec), "variacion_52s": _r(variacion(s, f, 364), dec),
+        "variacion_1m": _r(variacion(s, f, 28), dec), "variacion_3m": _r(variacion(s, f, 91), dec),
+        "variacion_12m": _r(variacion(s, f, 364), dec),
         "maximo_historico": round(float(hist.max()), dec) if len(hist) else None,
         "fecha_maximo_historico": hist.idxmax().date().isoformat() if len(hist) else None,
         "minimo_historico": round(float(hist.min()), dec) if len(hist) else None,
@@ -256,11 +262,12 @@ def calcular(df: pd.DataFrame, hoy: date, tesoro: dict | None = None) -> dict:
         raise DatosRaros("No hay fechas comunes entre los rendimientos de España y Alemania")
     es_de = difs["es_de"]
     f = es_de.index[-1]
-    res = {"fecha": f.date().isoformat(), "desfase_dias": (hoy - f.date()).days, "niveles": {}, "diferenciales": {}}
-    if res["desfase_dias"] > 7:
-        AVISOS.append(f"El último diferencial España-Alemania es del {res['fecha']}: {res['desfase_dias']} días de desfase")
-    if res["desfase_dias"] > 45:
-        raise DatosRaros(f"El diferencial lleva {res['desfase_dias']} días sin dato nuevo: comprobar Eurostat")
+    fin_mes = (f + pd.offsets.MonthEnd(0)).date()
+    res = {"fecha": f.date().isoformat(), "mes": f.strftime("%Y-%m"), "desfase_dias": (hoy - fin_mes).days, "niveles": {}, "diferenciales": {}}
+    if res["desfase_dias"] > 50:
+        AVISOS.append(f"El último mes con diferencial España-Alemania es {res['mes']}: {res['desfase_dias']} días desde su fin")
+    if res["desfase_dias"] > 100:
+        raise DatosRaros(f"El diferencial lleva {res['desfase_dias']} días sin mes nuevo: comprobar Eurostat")
     for p, s in niveles.items():
         fp = s.index[-1]
         res["niveles"][p] = {"pais": PAISES[p], **_ficha(s, fp, hoy, 2)}
@@ -273,7 +280,7 @@ def calcular(df: pd.DataFrame, hoy: date, tesoro: dict | None = None) -> dict:
     res["episodios"] = episodios(es_de)
     orden = sorted(res["niveles"].values(), key=lambda v: v["valor"], reverse=True)
     res["ranking"] = [v["pais"] for v in orden]
-    desde = pd.Timestamp(f) - pd.Timedelta(days=VENTANA_SEMAFORO_DIAS)
+    desde = pd.Timestamp(f) - pd.Timedelta(days=VENTANA_GRAFICO_DIAS)
     res["grafico"] = {n: difs[n][difs[n].index >= desde] for n in ("es_de", "it_de", "fr_de") if n in difs}
     res["tesoro"] = tesoro or {}
     return res
@@ -322,8 +329,19 @@ def huella(res: dict) -> str:
 
 
 # --------------------------------------------------------------------------- textos
+MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+
+
 def _f(iso: str | None) -> str:
     return "—" if not iso else pd.Timestamp(iso).strftime("%d/%m/%Y")
+
+
+def _m(iso: str | None) -> str:
+    """Un mes en letras: «octubre de 2026»."""
+    if not iso:
+        return "—"
+    t = pd.Timestamp(iso)
+    return f"{MESES[t.month - 1]} de {t.year}"
 
 
 def _v(x: float | None, dec: int = 1) -> str:
@@ -360,7 +378,7 @@ def grafico_svg(series: dict[str, pd.Series]) -> str:
     y1 = max(10.0, float(todas.max()) * 1.1)
     def X(t): return ml + (t - x0) / max((x1 - x0), pd.Timedelta(days=1)) * (W - ml - mr)
     def Y(v): return mt + (1 - (v - y0) / (y1 - y0)) * (H - mt - mb)
-    partes = [f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" aria-label="Prima de riesgo frente a Alemania: España, Italia y Francia, últimos tres años" xmlns="http://www.w3.org/2000/svg">',
+    partes = [f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" aria-label="Prima de riesgo frente a Alemania: España, Italia y Francia, medias mensuales de los últimos diez años" xmlns="http://www.w3.org/2000/svg">',
               '<style>.eje{font:11px sans-serif;fill:#5b6675}.lin{fill:none;stroke-width:1.6}</style>']
     for i in range(5):
         v = y0 + (y1 - y0) * i / 4
@@ -387,31 +405,31 @@ def fragmento(res: dict, fecha_pub: str) -> str:
     es_de = res["diferenciales"]["es_de"]
     es, de = res["niveles"]["ES"], res["niveles"]["DE"]
     partes = [f"<!-- prima:inicio {huella(res)} -->",
-              f'<p class="has-small-font-size">Actualizado el {_f(fecha_pub)} con los rendimientos de Eurostat del {_f(es_de["fecha"])}.</p>']
+              f'<p class="has-small-font-size">Actualizado el {_f(fecha_pub)} con las medias mensuales de Eurostat hasta {_m(es_de["fecha"])}.</p>']
     frase = (f"<p><strong>Semáforo: {es_de['semaforo']}.</strong> La prima de riesgo de España (diferencial entre el bono español y el alemán "
-             f"a diez años) marcó <strong>{_v(es_de['valor'])} puntos básicos</strong> el {_f(es_de['fecha'])}: el bono español rendía el "
+             f"a diez años) fue de <strong>{_v(es_de['valor'])} puntos básicos</strong> de media en {_m(es_de['fecha'])}: el bono español rendía el "
              f"{_v(es['valor'], 2)} % y el alemán el {_v(de['valor'], 2)} %. Frente a los últimos tres años está en el percentil "
-             f"{_v(es_de['percentil_3a'], 0)} (ha estado igual o más baja el {_v(es_de['percentil_3a'], 0)} % de las sesiones); "
+             f"{_v(es_de['percentil_3a'], 0)} (ha estado igual o más baja el {_v(es_de['percentil_3a'], 0)} % de los meses); "
              f"desde {es_de['desde_historico'][:4]}, en el percentil {_v(es_de['percentil_historico'], 0)}, un nivel {es_de['tramo_historico']} "
              f"en términos históricos.")
     if es_de["ultima_vez_igual_o_mayor"]:
-        frase += f" La última vez que estuvo igual o más alta, sin contar los últimos seis meses, fue el {_f(es_de['ultima_vez_igual_o_mayor'])}."
-    frase += (f" En una semana ha variado {_dif(es_de['variacion_1s'])} puntos básicos; en cuatro, {_dif(es_de['variacion_4s'])}; en trece, "
-              f"{_dif(es_de['variacion_13s'])}; en un año, {_dif(es_de['variacion_52s'])}. Máximo desde {es_de['desde_historico'][:4]}: "
-              f"{_v(es_de['maximo_historico'])} puntos básicos el {_f(es_de['fecha_maximo_historico'])}.</p>")
+        frase += f" La última vez que estuvo igual o más alta, sin contar los últimos seis meses, fue en {_m(es_de['ultima_vez_igual_o_mayor'])}."
+    frase += (f" En un mes ha variado {_dif(es_de['variacion_1m'])} puntos básicos; en tres, {_dif(es_de['variacion_3m'])}; en un año, "
+              f"{_dif(es_de['variacion_12m'])}. Máximo mensual desde {es_de['desde_historico'][:4]}: "
+              f"{_v(es_de['maximo_historico'])} puntos básicos en {_m(es_de['fecha_maximo_historico'])}.</p>")
     partes.append(frase)
     partes += ["<h2>Los cuatro bonos a diez años</h2>",
-               "<p>Rendimiento del bono a diez años en el mercado secundario, del más alto al más bajo. Es el tipo de interés al que cada "
-               "Estado se financia a largo plazo en el mercado.</p>",
-               _tabla(["País", "Rendimiento a 10 años", "1 semana (pb)", "4 semanas (pb)", "1 año (pb)", "Percentil desde 2000", "Dato del"],
-                      [[v["pais"], _v(v["valor"], 2) + " %", _pb(v["variacion_1s"]), _pb(v["variacion_4s"]), _pb(v["variacion_52s"]),
-                        _v(v["percentil_historico"], 0), _f(v["fecha"])]
+               "<p>Rendimiento medio del mes del bono a diez años en el mercado secundario, del más alto al más bajo. Es el tipo de interés "
+               "al que cada Estado se financia a largo plazo en el mercado.</p>",
+               _tabla(["País", "Rendimiento a 10 años", "1 mes (pb)", "3 meses (pb)", "1 año (pb)", "Percentil desde 2000", "Mes"],
+                      [[v["pais"], _v(v["valor"], 2) + " %", _pb(v["variacion_1m"]), _pb(v["variacion_3m"]), _pb(v["variacion_12m"]),
+                        _v(v["percentil_historico"], 0), _m(v["fecha"])]
                        for p in res["ranking"] for v in [next(x for x in res["niveles"].values() if x["pais"] == p)]])]
     partes += ["<h2>Diferenciales: quién paga más que quién</h2>",
                "<p>En puntos básicos (100 puntos básicos = 1 punto porcentual). Un diferencial positivo significa que el primer país paga "
                "más que el segundo por financiarse a diez años.</p>",
-               _tabla(["Diferencial", "Puntos básicos", "1 semana", "4 semanas", "13 semanas", "1 año", "Percentil 3 años", "Percentil desde 2000", "Semáforo"],
-                      [[v["nombre"], _v(v["valor"]), _dif(v["variacion_1s"]), _dif(v["variacion_4s"]), _dif(v["variacion_13s"]), _dif(v["variacion_52s"]),
+               _tabla(["Diferencial", "Puntos básicos", "1 mes", "3 meses", "1 año", "Percentil 3 años", "Percentil desde 2000", "Semáforo"],
+                      [[v["nombre"], _v(v["valor"]), _dif(v["variacion_1m"]), _dif(v["variacion_3m"]), _dif(v["variacion_12m"]),
                         _v(v["percentil_3a"], 0), _v(v["percentil_historico"], 0), v["semaforo"]]
                        for n, _, _ in DIFERENCIALES if (v := res["diferenciales"].get(n))])]
     t = res.get("tesoro") or {}
@@ -431,24 +449,24 @@ def fragmento(res: dict, fecha_pub: str) -> str:
                        _tabla(["Subasta", "Fecha", "Tipo marginal", "Cobertura"], filas)]
     if res["episodios"]:
         partes += ["<h2>Los episodios de referencia</h2>",
-                   "<p>Máximo que marcó la prima de riesgo España-Alemania dentro de cada episodio, con su fecha. Las ventanas están fijadas de "
-                   "antemano; el valor es el que da el dato.</p>",
-                   _tabla(["Episodio", "Máximo (puntos básicos)", "Fecha", "Dato actual respecto a ese máximo"],
-                          [[e["episodio"], _v(e["maximo"]), _f(e["fecha_maximo"]),
+                   "<p>Máximo mensual que marcó la prima de riesgo España-Alemania dentro de cada episodio, con su mes. Las ventanas están "
+                   "fijadas de antemano; el valor es el que da el dato (media del mes, no el pico de un día).</p>",
+                   _tabla(["Episodio", "Máximo mensual (puntos básicos)", "Mes", "Dato actual respecto a ese máximo"],
+                          [[e["episodio"], _v(e["maximo"]), _m(e["fecha_maximo"]),
                             (f"{es_de['valor'] / e['maximo'] * 100:.0f} %") if e["maximo"] else "—"] for e in res["episodios"]])]
     svg = grafico_svg(res["grafico"])
     if svg:
-        partes += ["<h2>Los últimos tres años</h2>", f'<figure class="wp-block-image">{svg}</figure>']
+        partes += ["<h2>Los últimos diez años</h2>", f'<figure class="wp-block-image">{svg}</figure>']
     partes += ['<h2 id="metodo">Cómo se hace</h2>',
-               "<p>Los rendimientos son los tipos de interés a largo plazo del criterio de convergencia que publica Eurostat: el rendimiento "
-               "del bono del Estado a diez años en el mercado secundario, bruto de impuestos, dato diario que el Banco Central Europeo recoge "
+               "<p>Los rendimientos son los tipos de interés a largo plazo del criterio de convergencia que publica Eurostat: la media mensual "
+               "del rendimiento del bono del Estado a diez años en el mercado secundario, bruto de impuestos, que el Banco Central Europeo recoge "
                "de los bancos centrales nacionales. El Especulador no modifica esas series; calcula sobre ellas los diferenciales en puntos "
-               "básicos (solo en las fechas en que los dos países tienen dato), las variaciones a una, cuatro, trece y cincuenta y dos semanas, "
+               "básicos (solo en los meses en que los dos países tienen dato), las variaciones a uno, tres y doce meses, "
                "y dos percentiles: el de los últimos tres años, que mueve el semáforo (verde por debajo del percentil 50, ámbar entre el 50 y "
                "el 90, rojo desde el 90), y el histórico desde 2000, que da el contexto (tramos «bajo», «habitual», «por encima de lo habitual», "
                "«alto» y «muy alto» en los percentiles 25, 50, 75 y 90). El semáforo describe el presente frente al pasado reciente; no "
                "anticipa nada. El pulso del Tesoro reproduce los resultados de las últimas subastas tal como los publica el Tesoro.</p>",
-               f'<p class="has-small-font-size">Fuente: Eurostat, <a href="{PORTAL}">conjunto irt_lt_mcby_d</a> (tipos de interés a largo plazo '
+               f'<p class="has-small-font-size">Fuente: Eurostat, <a href="{PORTAL}">conjunto irt_lt_mcby_m</a> (tipos de interés a largo plazo '
                f"del criterio de convergencia, recogidos por el BCE), reproducido sin modificar; pulso del Tesoro: D. G. del Tesoro y Política "
                f"Financiera, a través de las páginas de letras y bonos de El Especulador. Los diferenciales, percentiles, variaciones y episodios "
                f"son cálculos de El Especulador y se publican con licencia CC BY 4.0. Contenido informativo y educativo; no es asesoramiento "
@@ -463,10 +481,10 @@ def ld_wp(fecha: str) -> str:
         "name": "Prima de riesgo de España frente a Alemania, Italia y Francia, con semáforo histórico (El Especulador)",
         "description": "Rendimiento del bono a diez años de España, Alemania, Italia y Francia (Eurostat, criterio de convergencia) y sus "
                        "diferenciales en puntos básicos, con percentil de tres años, percentil histórico desde 2000, variaciones y máximos "
-                       "de cada episodio de referencia, actualizado cada día hábil.",
+                       "de cada episodio de referencia, con el pulso de las subastas del Tesoro, actualizado cada día hábil.",
         "url": PAGINA_WP, "inLanguage": "es", "spatialCoverage": "España",
         "creator": {"@type": "Organization", "name": "El Especulador", "url": "https://elespeculador.com/"},
-        "creditText": "El Especulador, a partir de datos de Eurostat (irt_lt_mcby_d)", "license": "https://creativecommons.org/licenses/by/4.0/",
+        "creditText": "El Especulador, a partir de datos de Eurostat (irt_lt_mcby_m)", "license": "https://creativecommons.org/licenses/by/4.0/",
         "isBasedOn": PORTAL, "dateModified": fecha,
         "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"{PAGES}datos/serie.csv"},
                          {"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": f"{PAGES}datos/ultima.json"}],
@@ -489,21 +507,21 @@ def escribir(df: pd.DataFrame, res: dict, meta: dict, hoy: date, salida: Path, f
     difs = diferenciales(niveles)
     with (dd / "serie.csv").open("w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
-        w.writerow(["fecha", "serie", "unidad", "valor"])
+        w.writerow(["mes", "serie", "unidad", "valor"])
         for p, s in niveles.items():
             for t, v in s.items():
-                w.writerow([t.date().isoformat(), p.lower(), "porcentaje", f"{v:.4g}"])
+                w.writerow([t.strftime("%Y-%m"), p.lower(), "porcentaje", f"{v:.4g}"])
         for n, s in difs.items():
             for t, v in s.items():
-                w.writerow([t.date().isoformat(), n, "puntos_basicos", f"{v:.1f}"])
+                w.writerow([t.strftime("%Y-%m"), n, "puntos_basicos", f"{v:.1f}"])
     previo.write_text(json.dumps({
-        "version": VERSION, "fecha_publicacion": fecha_pub, "fecha_dato": res["fecha"], "desfase_dias": res["desfase_dias"],
+        "version": VERSION, "fecha_publicacion": fecha_pub, "mes_dato": res["mes"], "fecha_dato": res["fecha"], "desfase_dias": res["desfase_dias"],
         "comprobado": datetime.now(timezone.utc).isoformat(timespec="seconds"), "huella": nueva,
         "eurostat_actualizado": meta.get("actualizado"),
         "semaforo": res["diferenciales"]["es_de"]["semaforo"], "prima_es_de": res["diferenciales"]["es_de"]["valor"],
         "niveles": res["niveles"], "diferenciales": res["diferenciales"], "ranking": res["ranking"],
         "episodios": res["episodios"], "tesoro": res["tesoro"],
-        "fuente": "Eurostat, conjunto irt_lt_mcby_d (" + PORTAL + "); pulso del Tesoro: D. G. del Tesoro y Política Financiera",
+        "fuente": "Eurostat, conjunto irt_lt_mcby_m (" + PORTAL + "); pulso del Tesoro: D. G. del Tesoro y Política Financiera",
         "condiciones": "Rendimientos de Eurostat reproducidos sin modificar, citando la fuente; diferenciales, percentiles, variaciones y "
                        "episodios son cálculos de El Especulador (CC BY 4.0). Contenido informativo; no es asesoramiento financiero.",
     }, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -526,7 +544,7 @@ a{{color:#1f4e8c}} .pie{{color:#5b6675;font-size:.85rem;margin-top:2em}}
 <h1>Prima de riesgo de España: semáforo frente a Alemania, Italia y Francia</h1>
 {cuerpo}
 <h2>Datos abiertos</h2>
-<p>CSV: <a href="datos/serie.csv">rendimientos y diferenciales diarios</a> · <a href="datos/ultima.json">JSON</a>. Los rendimientos son de Eurostat y se reutilizan sin modificar, citando «Fuente: Eurostat»; los diferenciales, percentiles, variaciones y episodios son cálculos de El Especulador (CC BY 4.0). Explicación completa: <a href="{PAGINA_WP}">la página de elespeculador.com</a>.</p>
+<p>CSV: <a href="datos/serie.csv">rendimientos y diferenciales mensuales</a> · <a href="datos/ultima.json">JSON</a>. Los rendimientos son de Eurostat y se reutilizan sin modificar, citando «Fuente: Eurostat»; los diferenciales, percentiles, variaciones y episodios son cálculos de El Especulador (CC BY 4.0). Explicación completa: <a href="{PAGINA_WP}">la página de elespeculador.com</a>.</p>
 <p class="pie">Comprobado el {_f(hoy.isoformat())}. Contenido informativo; no constituye asesoramiento financiero ni recomendación de inversión.</p>
 </body></html>
 """, encoding="utf-8")
@@ -552,7 +570,7 @@ def main() -> int:
     for av in AVISOS:
         print(f"::warning::{av}")
     d = res["diferenciales"]["es_de"]
-    print(f"Prima España-Alemania {d['valor']} pb ({d['fecha']}), semáforo {d['semaforo']}, percentil 3 años {d['percentil_3a']}, "
+    print(f"Prima España-Alemania {d['valor']} pb (media de {res['mes']}), semáforo {d['semaforo']}, percentil 3 años {d['percentil_3a']}, "
           f"histórico {d['percentil_historico']}. Eurostat actualizado: {meta.get('actualizado')}. {len(df)} observaciones. "
           f"{'Datos nuevos.' if cambia else 'Sin cambios.'}")
     return 0
