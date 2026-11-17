@@ -84,7 +84,7 @@ def descargar(esperas: list[int] | None = None, dormir=time.sleep) -> str:
                              headers={"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Accept": "application/json"})
             if r.status_code == 200 and '"value"' in r.text:
                 return r.text
-            ultimo = f"HTTP {r.status_code}, {len(r.text)} caracteres, empieza por {r.text[:80]!r}"
+            ultimo = f"HTTP {r.status_code}, {len(r.text)} caracteres, empieza por {r.text[:300]!r}"
         except requests.RequestException as e:
             ultimo = str(e)
         print(f"AVISO  descarga, intento {intento + 1} de {len(esperas) + 1}: {ultimo}", file=sys.stderr)
