@@ -12,7 +12,8 @@ Acordado entre Datos y el proyecto IFG el 17/11/2026, pendiente de que Federico 
 
 ## Servidor smpro-datos-1: cómo se ejecutan los colectores
 
-- Entorno en `/etc/smpro/entorno` (plantilla en `servidor/entorno.ejemplo`): `ESPEC_DATOS_DIR` (carpeta que sirve datos.elespeculador.com, fuera del git), `ESPEC_DATOS_BASE` y `GH_TOKEN` (incidencias).
+- Entorno en `/etc/smpro/entorno` (plantilla en `servidor/entorno.ejemplo`): `ESPEC_DATOS_DIR` (carpeta que sirve datos.elespeculador.com, fuera del git; en smpro-datos-1, `/var/www/datos`), `ESPEC_DATOS_BASE`, `SMPRO_PYTHON` (el intérprete del entorno virtual del servidor, `/home/smpro/venv/bin/python`) y `GH_TOKEN` (incidencias).
+- El IFG escribe en la misma carpeta (`$ESPEC_DATOS_DIR/ifg/`) desde su propio `ifg-diario.sh`, sin commits en el git del servidor: el checkout de `/home/smpro/ifg` se queda siempre en `main` limpio, que es lo que `ejecutar.sh` exige para su `git pull --ff-only`.
 - Cada pasada: `servidor/ejecutar.sh <colector>`. Trae `main` con avance rápido, ejecuta el colector escribiendo en `$ESPEC_DATOS_DIR/<colector>`, y abre, comenta o cierra la incidencia `<colector>-fallido` en GitHub con `servidor/avisar.sh`. Registro en `$ESPEC_DATOS_DIR/registro/<colector>-AAAA-MM-DD.log`.
 - `opas`, `dividendos` e `ibex` no se ejecutan (API de BME sin licencia, P3); el script lo rechaza.
 - Antes de la primera pasada, copiar los datos actuales de cada colector a `$ESPEC_DATOS_DIR/<colector>/` (cortos y cnmv leen su publicación anterior para calcular los cambios).
@@ -30,5 +31,5 @@ CRON_TZ=UTC
 20 11 * * 1-5  /home/smpro/ifg/servidor/ejecutar.sh estres
 ```
 
-  Si el cron del servidor no admite `CRON_TZ`, se convierten las horas a la zona del servidor. La ruta `/home/smpro/ifg` es orientativa: la real la fija quien administra el servidor.
+  Si el cron del servidor no admite `CRON_TZ`, se convierten las horas a la zona del servidor. El checkout está en `/home/smpro/ifg` (el mismo que usa `ifg-diario.sh`); el cron corre como el usuario dueño de ese checkout y de `$ESPEC_DATOS_DIR`.
 - Dependencias de Python en el servidor: `pandas xlrd python-calamine requests openpyxl certifi numpy scipy` y el paquete del sistema `poppler-utils` (letras y bonos leen PDF).

@@ -1,7 +1,11 @@
 # Copiar a /etc/smpro/entorno (solo lectura para el usuario que ejecuta los colectores). Sin comillas.
 # Carpeta que sirve https://datos.elespeculador.com/ (fuera del git del repositorio).
-ESPEC_DATOS_DIR=/var/www/datos.elespeculador.com
+# En smpro-datos-1 es /var/www/datos (la misma que ya usa el IFG para /var/www/datos/ifg).
+ESPEC_DATOS_DIR=/var/www/datos
 # Dirección pública que los colectores escriben en sus salidas (enlaces, JSON-LD).
 ESPEC_DATOS_BASE=https://datos.elespeculador.com/
+# Intérprete de Python con las dependencias instaladas. Si el servidor usa un entorno virtual, su python;
+# si las dependencias están en el sistema, se puede omitir (vale python3).
+SMPRO_PYTHON=/home/smpro/venv/bin/python
 # Token de GitHub con permiso de incidencias (issues: read/write) sobre elespeculador-datos/ifg. Nunca en el repositorio.
 GH_TOKEN=

@@ -4,7 +4,8 @@
 #   servidor/ejecutar.sh <colector>      colector: cortos, letras, bonos, cnmv, accionistas, estres
 #
 # Qué hace, en orden:
-#   1. carga el entorno (/etc/smpro/entorno o $SMPRO_ENTORNO): ESPEC_DATOS_DIR, ESPEC_DATOS_BASE, GH_TOKEN;
+#   1. carga el entorno (/etc/smpro/entorno o $SMPRO_ENTORNO): ESPEC_DATOS_DIR, ESPEC_DATOS_BASE, GH_TOKEN
+#      y, si el servidor usa un entorno virtual, SMPRO_PYTHON (el intérprete de ese entorno);
 #   2. trae main de GitHub con avance rápido (si el servidor tuviera commits propios, avisa y sigue con lo que hay);
 #   3. ejecuta el colector escribiendo en $ESPEC_DATOS_DIR/<colector>, fuera del git;
 #   4. si falla, abre o comenta la incidencia <colector>-fallido en GitHub (servidor/avisar.sh); si va bien, la cierra.
@@ -17,6 +18,7 @@ if [ -f "$ENTORNO" ]; then set -a; . "$ENTORNO"; set +a; fi
 : "${ESPEC_DATOS_DIR:?Falta ESPEC_DATOS_DIR en $ENTORNO}"
 : "${ESPEC_DATOS_BASE:?Falta ESPEC_DATOS_BASE en $ENTORNO}"
 export ESPEC_DATOS_DIR ESPEC_DATOS_BASE
+PYTHON="${SMPRO_PYTHON:-python3}"
 mkdir -p "$ESPEC_DATOS_DIR/registro"
 REGISTRO="$ESPEC_DATOS_DIR/registro/$COLECTOR-$(date -u +%F).log"
 exec >>"$REGISTRO" 2>&1
@@ -27,15 +29,15 @@ if ! git pull --ff-only --quiet origin main; then
   echo "AVISO  git pull --ff-only ha fallado: el servidor no está en main limpio. Se ejecuta el código actual."
   "$REPO/servidor/avisar.sh" "$COLECTOR" abrir "git pull --ff-only ha fallado en el servidor: hay commits locales o conflicto. Código ejecutado: $(git rev-parse --short HEAD)." || true
 fi
-echo "código: $(git rev-parse --short HEAD) ($(git log -1 --format=%cd --date=short))"
+echo "código: $(git rev-parse --short HEAD) ($(git log -1 --format=%cd --date=short)) · intérprete: $PYTHON"
 
 case "$COLECTOR" in
-  cortos)      ORDEN=(python3 cortos/rastreador.py) ;;
-  cnmv)        ORDEN=(python3 cnmv/comunicados.py) ;;
-  letras)      ORDEN=(python3 letras/letras.py --salida "$ESPEC_DATOS_DIR/letras") ;;
-  bonos)       ORDEN=(python3 bonos/bonos.py --salida "$ESPEC_DATOS_DIR/bonos") ;;
-  accionistas) ORDEN=(python3 accionistas/duenos.py --salida "$ESPEC_DATOS_DIR/accionistas") ;;
-  estres)      ORDEN=(python3 estres/estres.py --salida "$ESPEC_DATOS_DIR/estres") ;;
+  cortos)      ORDEN=("$PYTHON" cortos/rastreador.py) ;;
+  cnmv)        ORDEN=("$PYTHON" cnmv/comunicados.py) ;;
+  letras)      ORDEN=("$PYTHON" letras/letras.py --salida "$ESPEC_DATOS_DIR/letras") ;;
+  bonos)       ORDEN=("$PYTHON" bonos/bonos.py --salida "$ESPEC_DATOS_DIR/bonos") ;;
+  accionistas) ORDEN=("$PYTHON" accionistas/duenos.py --salida "$ESPEC_DATOS_DIR/accionistas") ;;
+  estres)      ORDEN=("$PYTHON" estres/estres.py --salida "$ESPEC_DATOS_DIR/estres") ;;
   opas|dividendos|ibex) echo "ERROR  $COLECTOR lee la API de BME sin licencia: no se ejecuta (P3 del catálogo)."; exit 3 ;;
   *) echo "ERROR  colector desconocido: $COLECTOR"; exit 2 ;;
 esac
