@@ -2,7 +2,7 @@
 
 Cada lunes a las 07:30 UTC, el servidor smpro-datos-1 (`servidor/ejecutar.sh ahorro`, ver `DESPLIEGUE.md`) junta tres fuentes y publica en `$ESPEC_DATOS_DIR/ahorro/` (https://datos.elespeculador.com/ahorro/):
 
-- `fragmento-wp.html`: la lectura del mes (tipo de los depósitos, inflación y rentabilidad real, con racha y percentil desde 2003), la tabla de referencias (depósitos a la vista y a plazo de España y de la zona euro, euríbor a un año), las Letras a 12 meses como alternativa sin riesgo, un gráfico SVG de la rentabilidad real de los depósitos a plazo desde 2003 y el método, entre `<!-- ahorro:inicio HUELLA -->` y `<!-- ahorro:fin -->`;
+- `fragmento-wp.html`: la lectura del mes (tipo de los depósitos, inflación y rentabilidad real, con racha y percentil desde 2003), la tabla de referencias (depósitos a la vista y a plazo de España y de la zona euro, euríbor a un año), las Letras a 12 meses como referencia del Tesoro, un gráfico SVG de la rentabilidad real de los depósitos a plazo desde 2003 y el método, entre `<!-- ahorro:inicio HUELLA -->` y `<!-- ahorro:fin -->`;
 - `index.html`: página propia de la salida;
 - `datos/serie.csv` (mensual, formato largo: tipos, IPC, euríbor y rentabilidades reales), `datos/ultima.json` (resumen versionado, `version` 1.0.1) y `datos/euribor_boe.csv` (el euríbor acumulado mes a mes con la referencia del BOE de cada dato: es el estado que conserva el colector).
 

@@ -11,7 +11,7 @@ verificada y publica, una vez por semana:
     (Resolución «por la que se publican determinados tipos de interés oficiales de referencia del
     mercado hipotecario»), leído por la API de datos abiertos del BOE;
   - y, si la salida de letras/ está al lado, el tipo marginal de la última subasta de Letras a 12
-    meses (D. G. del Tesoro y Política Financiera), como alternativa sin riesgo.
+    meses (D. G. del Tesoro y Política Financiera), como referencia pública.
 
 Salida en <salida>/: fragmento-wp.html (entre <!-- ahorro:inicio HUELLA --> y <!-- ahorro:fin -->),
 index.html, datos/serie.csv (mensual, formato largo), datos/ultima.json y datos/euribor_boe.csv
@@ -557,10 +557,10 @@ def fragmento(res: dict, fecha_pub: str) -> str:
                        for n in orden if (t := res["tipos"].get(n))])]
     if res.get("letras_12m"):
         l = res["letras_12m"]
-        partes += ["<h2>La alternativa sin riesgo: Letras del Tesoro a 12 meses</h2>",
+        partes += ["<h2>La referencia del Tesoro: Letras a 12 meses</h2>",
                    f"<p>La última subasta de Letras a 12 meses ({_f(l['fecha'])}) se adjudicó a un tipo marginal del <strong>{_v(l['marginal'], 3)} %</strong>, "
                    f"según el Tesoro. Frente al último IPC ({_v(l['ipc_usado'])} %), eso sería un {_dif(l['real'])} % real si la inflación se mantuviera; "
-                   f"es un cálculo ilustrativo, no una previsión. Detalles en la página de Letras del Tesoro.</p>"]
+                   f"es un cálculo ilustrativo, no una previsión ni una comparación entre productos. Detalles en la página de Letras del Tesoro.</p>"]
     svg = grafico_svg(res["grafico"])
     if svg:
         partes += ["<h2>Desde 2003: la rentabilidad real de los depósitos a plazo</h2>", f'<figure class="wp-block-image">{svg}</figure>']
