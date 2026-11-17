@@ -14,3 +14,15 @@ entrada/
 # Marcador interno que publicar_diario.py deja para el paso del flujo que
 # abre la incidencia por deriva. Es una señal de una ejecución, no un dato.
 aviso_deriva.json
+
+# Precios en bruto descargados de Yahoo Finance (cambio P1 de la revisión de
+# cumplimiento del 27-10-2026). Tenerlos versionados en un repositorio público
+# es redistribuir datos de terceros, y las condiciones de Yahoo exigen su
+# permiso escrito para la recogida automatizada, el uso comercial y la
+# redistribución. Nada en producción los lee: publicar_diario.py y
+# republicar_version.py llaman a descargar_precios() con usar_cache=False, así
+# que este archivo era solo el caché que la ejecución dejaba detrás y el flujo
+# subía con «git add datos». Sigue existiendo en local; deja de publicarse.
+# El historial ya los contiene: si hay que limpiarlo lo decide Federico con el
+# abogado (pregunta 5.c de la revisión).
+datos/precios.csv

@@ -241,33 +241,6 @@ def _serie_bce(clave: str) -> pd.Series | None:
     return serie
 
 
-def _prima_stooq() -> pd.Series | None:
-    """
-    Rendimientos de deuda a 10 años desde Stooq, que publica series de bonos
-    en CSV abierto. HIPÓTESIS POR VALIDAR: los identificadores son los que usa
-    Stooq para España y Alemania, pero no se han podido comprobar.
-    """
-    import requests
-    series = {}
-    for pais, ticker in (("es", config.STOOQ_BONO_ES), ("de", config.STOOQ_BONO_DE)):
-        try:
-            resp = requests.get("https://stooq.com/q/d/l/",
-                                params={"s": ticker, "i": "d"}, timeout=60)
-            resp.raise_for_status()
-            df = pd.read_csv(io.StringIO(resp.text))
-            if "Date" not in df.columns or "Close" not in df.columns:
-                log.info("Stooq %s: respuesta sin datos utilizables.", ticker)
-                return None
-            series[pais] = (df.assign(Date=pd.to_datetime(df["Date"]))
-                              .set_index("Date")["Close"].sort_index())
-        except Exception as exc:                      # noqa: BLE001
-            log.info("Stooq %s no disponible: %s", ticker, exc)
-            return None
-    prima = ((series["es"] - series["de"]) * 100).dropna()
-    log.info("Prima de riesgo obtenida de Stooq.")
-    return prima
-
-
 def _prima_bce_curva() -> pd.Series | None:
     """
     Aproximación con las curvas de tipos del BCE: rendimiento a 10 años de
@@ -286,60 +259,58 @@ def _prima_bce_curva() -> pd.Series | None:
     return prima
 
 
-def _prima_manual() -> pd.Series | None:
-    """
-    Fichero puesto a mano por el usuario: dos columnas, fecha y valor en
-    puntos básicos. Vale una descarga del Banco de España o del Tesoro.
-    """
-    ruta = config.RUTA_PRIMA_MANUAL
-    if not os.path.exists(ruta):
-        return None
-    try:
-        df = pd.read_csv(ruta)
-        serie = pd.Series(pd.to_numeric(df.iloc[:, 1], errors="coerce").values,
-                          index=_parsear_fechas(df.iloc[:, 0])).dropna()
-        log.info("Prima de riesgo leída del fichero manual %s.", ruta)
-        return serie
-    except Exception as exc:                          # noqa: BLE001
-        log.warning("No se ha podido leer %s: %s", ruta, exc)
-        return None
-
-
 def descargar_prima_riesgo(usar_cache: bool = True) -> pd.Series | None:
     """
-    Diferencial España-Alemania a 10 años, en puntos básicos.
+    Diferencial periférico a 10 años, en puntos básicos. FUENTE ÚNICA: las
+    curvas de rendimiento de la zona euro del BCE.
 
-    Se intentan varias fuentes en orden y se registra cuál ha funcionado. Si
-    ninguna responde, el componente se desactiva y su peso se reparte: es
-    preferible a inventarse una aproximación silenciosa.
+    POR QUÉ UNA SOLA FUENTE (cambio P4 de la revisión de cumplimiento del
+    27-10-2026). Antes se intentaban tres en orden —un fichero manual, Stooq y
+    el BCE— y ganaba la primera que respondiera, sin caché y en cada ejecución
+    de madrugada. La serie guardada sale del BCE, pero si Stooq hubiera
+    contestado un día la fuente habría cambiado sola, sin aviso y sin versión
+    nueva, y la tabla de fuentes de la ficha pública habría quedado falsa. Una
+    fuente declarada en público no puede depender de quién contesta primero.
+    Las otras dos vías no se dejan desactivadas: se quitan, para que no puedan
+    volver por descuido. Están en el historial de git si alguna vez hacen
+    falta.
 
-    Nota sobre el BCE: su portal publica la curva agregada de la zona euro a
-    diario, pero el rendimiento diario del bono español a 10 años no está ahí,
-    y por eso las claves del intento anterior devolvían 404. Para el dato
-    exacto, la fuente natural es el Banco de España.
+    SI EL BCE NO RESPONDE no se busca sustituto. Se devuelve None, el
+    componente se desactiva y la fila nace provisional, que es el tratamiento
+    previsto para una fuente caída: el índice se publica puntualmente aunque
+    le falte un componente. Detener la publicación entera por esto cambiaría
+    el requisito de puntualidad, y aceptar una aproximación de otra
+    procedencia es justo lo que este cambio viene a impedir.
+
+    OJO CON EL NOMBRE, que la metodología corrige desde la fe de erratas del
+    27-10-2026: lo que publica el BCE a diario no es España menos Alemania,
+    sino el rendimiento a 10 años de todos los soberanos de la zona euro menos
+    el de los de máxima calificación. Es un diferencial de crédito de la zona
+    euro en conjunto, no el diferencial España-Bund.
     """
     if usar_cache:
         cacheado = _leer_cache("prima", dias_validez=1)
         if cacheado is not None:
             return cacheado.iloc[:, 0]
 
-    for intento in (_prima_manual, _prima_stooq, _prima_bce_curva):
-        prima = intento()
-        if prima is None or prima.empty:
-            continue
-        prima.index = pd.to_datetime(prima.index).normalize()
-        prima.name = "prima"
-        prima = _validar_serie(prima, "Prima de riesgo")
-        if prima is None:
-            continue
-        _escribir_cache("prima", prima.to_frame())
-        log.info("Prima de riesgo: %d días de %s a %s",
-                 len(prima), prima.index[0].date(), prima.index[-1].date())
-        return prima
+    prima = _prima_bce_curva()
+    if prima is None or prima.empty:
+        log.warning("Prima de riesgo no disponible en el BCE. El componente se "
+                    "desactiva y su peso se reparte; no se usa otra fuente.")
+        return None
 
-    log.warning("Prima de riesgo no disponible por ninguna vía. "
-                "El componente se desactiva y su peso se reparte.")
-    return None
+    prima.index = pd.to_datetime(prima.index).normalize()
+    prima.name = "prima"
+    prima = _validar_serie(prima, "Prima de riesgo")
+    if prima is None:
+        log.warning("La prima del BCE no pasa la validación de serie. El "
+                    "componente se desactiva; no se usa otra fuente.")
+        return None
+
+    _escribir_cache("prima", prima.to_frame())
+    log.info("Prima de riesgo (BCE): %d días de %s a %s",
+             len(prima), prima.index[0].date(), prima.index[-1].date())
+    return prima
 
 
 # ---------------------------------------------------------------------------
