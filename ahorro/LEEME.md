@@ -18,7 +18,7 @@ Método: rentabilidad real = (1 + tipo) ÷ (1 + inflación) − 1, con el tipo y
 
 Reglas: si una fuente no responde, cambia de forma, la serie del INE no se llama como debe, hay valores fuera de rango o el último mes común tiene más de 150 días, el script se para sin publicar y `servidor/ejecutar.sh` abre la incidencia `ahorro-fallido`. Pasados 75 días solo avisa. Si el euríbor del BOE no se encuentra, el bloque no se publica y se avisa (el resto sí). La dirección pública sale de `ESPEC_DATOS_BASE`.
 
-Comprobaciones sin red: `python ahorro/pruebas_ahorro.py` (65 comprobaciones con datos simulados: lectura de las tres fuentes y paradas, búsqueda y lectura de la resolución del BOE, acumulación del euríbor, fórmula de Fisher, caso de control del percentil contra scipy, rachas, escritura sin reescritura).
+Comprobaciones sin red: `python ahorro/pruebas_ahorro.py` (66 comprobaciones con datos simulados: lectura de las tres fuentes y paradas, búsqueda y lectura de la resolución del BOE, acumulación del euríbor, fórmula de Fisher, caso de control del percentil contra scipy, rachas, escritura sin reescritura).
 
 Primera pasada en el servidor: `python ahorro/ahorro.py --salida $ESPEC_DATOS_DIR/ahorro --meses-atras 36` rellena tres años de euríbor del BOE (unas cuatro llamadas al sumario por mes); las pasadas siguientes solo buscan el mes anterior. Prueba local con respuestas ya descargadas: `--local carpeta` con `mir.csv`, `ipc_meta.json`, `ipc.json` y `euribor.csv`. El flujo de GitHub `ahorro-validacion` no tiene horario ni escribe en el repositorio: se lanza a mano para validar una rama con datos reales y deja las respuestas y la salida como artefacto.
 
