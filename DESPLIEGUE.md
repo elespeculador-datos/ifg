@@ -29,7 +29,7 @@ CRON_TZ=UTC
 40 12 * * 1-5  /home/smpro/ifg/servidor/ejecutar.sh bonos
 45 5  * * 2-6  /home/smpro/ifg/servidor/ejecutar.sh accionistas
 20 11 * * 1-5  /home/smpro/ifg/servidor/ejecutar.sh estres
-10 12 * * 1-5  /home/smpro/ifg/servidor/ejecutar.sh prima
+10 13 * * 1-5  /home/smpro/ifg/servidor/ejecutar.sh prima
 30 7  * * 1    /home/smpro/ifg/servidor/ejecutar.sh ahorro
 ```
 

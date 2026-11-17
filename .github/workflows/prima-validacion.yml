@@ -2,7 +2,7 @@ name: Prima de riesgo (validación a mano)
 
 # Indicador 3 del catálogo de Datos: semáforo de la prima de riesgo con los rendimientos a
 # diez años de Eurostat (irt_lt_mcby_m, medias mensuales). En producción corre en el servidor smpro-datos-1
-# (servidor/ejecutar.sh prima, 12:10 UTC L-V; ver DESPLIEGUE.md) y escribe fuera del git.
+# (servidor/ejecutar.sh prima, 13:10 UTC L-V; ver DESPLIEGUE.md) y escribe fuera del git.
 # Este flujo NO tiene horario ni guarda nada en el repositorio: se lanza a mano para validar
 # una rama con datos reales (el entorno de Datos no llega a Eurostat) y deja la salida como
 # artefacto. Dependencias del colector: requests pandas numpy scipy.
