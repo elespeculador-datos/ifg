@@ -54,11 +54,12 @@ ESPERAS = [15, 30, 60, 120]
 # (2250 = hogares), moneda, cobertura (N = nuevas operaciones, O = saldos vivos).
 BCE_API = "https://data-api.ecb.europa.eu/service/data/MIR/"
 BCE_PORTAL = "https://data.ecb.europa.eu/data/datasets/MIR"
-SERIES_BCE = {  # nombre interno -> (área, partida, vencimiento, cobertura)
-    "es_vista": ("ES", "L21", "A", "O"), "es_plazo_1a": ("ES", "L22", "F", "N"),
-    "ea_vista": ("U2", "L21", "A", "O"), "ea_plazo_1a": ("U2", "L22", "F", "N"),
+SERIES_BCE = {  # nombre interno -> (área, partida, vencimiento, cobertura). Comprobado en el portal el 17/11/2026:
+    # los depósitos a la vista (L21) solo existen con cobertura N; los de plazo hasta un año (L22, F) con N.
+    "es_vista": ("ES", "L21", "A", "N"), "es_plazo_1a": ("ES", "L22", "F", "N"),
+    "ea_vista": ("U2", "L21", "A", "N"), "ea_plazo_1a": ("U2", "L22", "F", "N"),
 }
-CLAVE_BCE = "M.ES+U2.B.L21+L22.A+F.R.A.2250.EUR.N+O"
+CLAVE_BCE = "M.ES+U2.B.L21+L22.A+F.R.A.2250.EUR.N"
 NOMBRES = {"es_vista": "Depósitos a la vista (España)", "es_plazo_1a": "Depósitos a plazo hasta 1 año (España)",
            "ea_vista": "Depósitos a la vista (zona euro)", "ea_plazo_1a": "Depósitos a plazo hasta 1 año (zona euro)"}
 
@@ -67,6 +68,10 @@ NOMBRES = {"es_vista": "Depósitos a la vista (España)", "es_plazo_1a": "Depós
 INE_SERIE = "IPC251856"
 INE_API = f"https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/{INE_SERIE}"
 INE_META = f"https://servicios.ine.es/wstempus/js/ES/SERIE/{INE_SERIE}"
+# Si la serie se queda antigua (el INE cambia de base cada cinco años y renumera), se busca en la tabla
+# de grupos especiales la serie «Índice general · Variación anual» y se avisa para actualizar el código.
+INE_TABLA = "67260"
+INE_TABLA_API = f"https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/{INE_TABLA}"
 INE_PORTAL = "https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176802&menu=ultiDatos&idp=1254735976607"
 INE_NOMBRE_DEBE = ("índice general", "variación anual")
 
@@ -144,10 +149,34 @@ def leer_bce(texto: str) -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------- INE (inflación)
-def descargar_ine() -> tuple[str, str]:
+def descargar_ine(hoy: date | None = None) -> tuple[str, str]:
+    """Serie configurada y, si se ha quedado antigua (más de 75 días desde su último mes), la tabla de respaldo."""
     meta = _get(INE_META, params={"det": "2"}, aceptar="application/json").text
     datos = _get(INE_API, params={"date": DESDE.replace("-", "") + "01:"}, aceptar="application/json").text
+    if hoy is not None:
+        try:
+            ultimo = leer_ine(meta, datos)["mes"].iloc[-1]
+        except DatosRaros:
+            ultimo = None
+        if ultimo is None or (hoy - date(int(ultimo[:4]), int(ultimo[5:7]), 28)).days > 75:
+            AVISOS.append(f"La serie {INE_SERIE} del INE se queda en {ultimo}: se usa la tabla {INE_TABLA} de respaldo (actualizar INE_SERIE)")
+            tabla = _get(INE_TABLA_API, params={"date": DESDE.replace("-", "") + "01:"}, aceptar="application/json").text
+            return meta, serie_de_tabla(tabla)
     return meta, datos
+
+
+def serie_de_tabla(texto: str) -> str:
+    """De la tabla del INE, la serie «Índice general · Variación anual», devuelta como si fuera DATOS_SERIE."""
+    try:
+        filas = json.loads(texto)
+    except json.JSONDecodeError as e:
+        raise DatosRaros(f"La tabla del INE no es JSON: {e}") from None
+    candidatas = [f for f in (filas if isinstance(filas, list) else []) if isinstance(f, dict)
+                  and all(t in str(f.get("Nombre", "")).lower() for t in INE_NOMBRE_DEBE)]
+    if not candidatas:
+        raise DatosRaros(f"En la tabla {INE_TABLA} del INE no hay ninguna serie «índice general, variación anual»")
+    f = candidatas[0]
+    return json.dumps({"COD": f.get("COD"), "Nombre": f.get("Nombre"), "Data": f.get("Data", [])})
 
 
 def leer_ine(meta: str, datos: str) -> pd.DataFrame:
@@ -157,7 +186,7 @@ def leer_ine(meta: str, datos: str) -> pd.DataFrame:
         d = json.loads(datos)
     except json.JSONDecodeError as e:
         raise DatosRaros(f"La respuesta del INE no es JSON: {e}") from None
-    nombre = str((m if isinstance(m, dict) else {}).get("Nombre") or (d if isinstance(d, dict) else {}).get("Nombre") or "")
+    nombre = str((d if isinstance(d, dict) else {}).get("Nombre") or (m if isinstance(m, dict) else {}).get("Nombre") or "")
     bajo = nombre.lower()
     if not all(t in bajo for t in INE_NOMBRE_DEBE):
         raise DatosRaros(f"La serie {INE_SERIE} del INE se llama «{nombre}»: no es el índice general en variación anual")
@@ -233,17 +262,24 @@ def leer_resolucion(xml_texto: str) -> dict:
     cuerpo = xml_texto.split("<texto>", 1)[1] if "<texto>" in xml_texto else xml_texto
     texto = html.unescape(re.sub(r"<[^>]+>", " | ", cuerpo))
     texto = re.sub(r"\s+", " ", texto)
-    # Fila «Euríbor | Un año | 3,247» (las celdas quedan separadas por « | »).
-    m = re.search(r"Eur[ií]bor(?:[^|]*\|){1,3}\s*(?:a\s+)?(?:un\s+a[ñn]o|1\s+a[ñn]o|12\s+meses)[^|]*\|\s*([-]?\d{1,2},\d{1,4})", texto, re.I)
+    # El BOE lo publica por grupos: «1. Euríbor. Plazos:» y debajo las filas «– Una semana. | | 2,289», ...,
+    # «– Un año. | | 3,247»; luego «2. Permuta de intereses...», «€STR», «Míbor». Se toma el «Un año» del grupo
+    # del euríbor, es decir, antes del siguiente grupo (las celdas quedan separadas por « | »).
+    m_eur = re.search(r"Eur[ií]bor", texto, re.I)
+    if not m_eur:
+        raise DatosRaros("No aparece el euríbor en la resolución del BOE: " + texto[:200])
+    resto = texto[m_eur.end():]
+    m_fin = re.search(r"\|\s*\d{1,2}\.\s|Permuta|\bIRS\b|€STR|\bSTR\b|M[ií]bor", resto, re.I)
+    grupo = resto[: m_fin.start()] if m_fin else resto
+    m = re.search(r"(?:un\s+a[ñn]o|1\s+a[ñn]o|12\s+meses)[^0-9|]*[\s|]*([-]?\d{1,2},\d{1,4})", grupo, re.I)
     if not m:
-        m = re.search(r"Eur[ií]bor[^0-9]{0,80}?(?:un\s+a[ñn]o|12\s+meses)[^0-9-]{0,40}([-]?\d{1,2},\d{1,4})", texto, re.I)
-    if not m:
-        raise DatosRaros("No se encuentra el euríbor a un año en la resolución del BOE: " + texto[:200])
+        raise DatosRaros("No se encuentra el plazo de un año en el grupo del euríbor de la resolución del BOE: " + grupo[:200])
     valor = float(m.group(1).replace(",", "."))
     if not -2 <= valor <= 20:
         raise DatosRaros(f"Euríbor a un año fuera de rango en el BOE: {valor}")
-    # El mes al que se refiere la tabla: la última mención «mes de año» antes de la fila del euríbor.
-    menciones = [x for x in re.finditer(r"\b(" + "|".join(MESES) + r")\s+de\s+(\d{4})", texto, re.I) if x.start() < m.start()]
+    # El mes al que se refiere la tabla: la última mención «mes de año» antes del dato del euríbor.
+    pos_dato = m_eur.end() + m.start()
+    menciones = [x for x in re.finditer(r"\b(" + "|".join(MESES) + r")\s+de\s+(\d{4})", texto, re.I) if x.start() < pos_dato]
     m_mes = menciones[-1] if menciones else re.search(r"\b(" + "|".join(MESES) + r")\s+de\s+(\d{4})", texto, re.I)
     mes = f"{int(m_mes.group(2)):04d}-{MESES.index(m_mes.group(1).lower()) + 1:02d}" if m_mes else None
     return {"mes": mes, "euribor_12m": valor}
@@ -606,7 +642,7 @@ def main() -> int:
             else pd.DataFrame(columns=["mes", "euribor_12m", "boe", "fecha_boe"])
     else:
         bce = leer_bce(descargar_bce())
-        ipc = leer_ine(*descargar_ine())
+        ipc = leer_ine(*descargar_ine(hoy))
         euribor = actualizar_euribor(ruta_euribor, hoy, meses_atras=a.meses_atras)
     if not len(euribor):
         AVISOS.append("Sin euríbor del BOE todavía: el bloque del euríbor no se publica")

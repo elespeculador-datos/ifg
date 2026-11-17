@@ -72,16 +72,23 @@ XML_RESOLUCION = """<?xml version="1.0" encoding="utf-8"?>
 <documento><metadatos><identificador>BOE-A-2026-20519</identificador>
 <titulo>Resolución de 1 de octubre de 2026, del Banco de España, por la que se publican determinados tipos de interés oficiales de referencia del mercado hipotecario.</titulo>
 </metadatos><texto><p class="parrafo">Mensualmente se hacen públicos los índices de referencia oficiales para los préstamos hipotecarios a tipo variable...</p>
-<p class="centro_negrita">Tipos de referencia (septiembre de 2026)</p>
-<table><tr><td>Tipo</td><td>Plazo</td><td>Porcentaje</td></tr>
-<tr><td>Eur&iacute;bor</td><td>Una semana</td><td>2,289</td></tr>
-<tr><td>Eur&iacute;bor</td><td>Un mes</td><td>2,414</td></tr>
-<tr><td>Eur&iacute;bor</td><td>Tres meses</td><td>2,635</td></tr>
-<tr><td>Eur&iacute;bor</td><td>Seis meses</td><td>2,922</td></tr>
-<tr><td>Eur&iacute;bor</td><td>Un a&ntilde;o</td><td>3,247</td></tr>
-<tr><td>Permuta de intereses (IRS)</td><td>Cinco a&ntilde;os</td><td>3,450</td></tr>
-<tr><td>M&iacute;bor (interbancario a un a&ntilde;o)</td><td>Un a&ntilde;o</td><td>3,247</td></tr>
+<table><tr><td class="cabeza"></td><td class="cabeza" colspan="2">Septiembre de 2026</td></tr>
+<tr><td class="cabeza">Tipos de referencia</td><td class="cabeza">1</td><td class="cabeza">Porcentaje</td></tr>
+<tr><td class="cuerpo">1. Eur&iacute;bor. Plazos:</td><td></td><td></td></tr>
+<tr><td class="cuerpo">&ndash; Una semana.</td><td></td><td class="cuerpo">2,289</td></tr>
+<tr><td class="cuerpo">&ndash; Un mes.</td><td></td><td class="cuerpo">2,414</td></tr>
+<tr><td class="cuerpo">&ndash; Tres meses.</td><td></td><td class="cuerpo">2,635</td></tr>
+<tr><td class="cuerpo">&ndash; Seis meses.</td><td></td><td class="cuerpo">2,922</td></tr>
+<tr><td class="cuerpo">&ndash; Un a&ntilde;o.</td><td></td><td class="cuerpo">3,247</td></tr>
+<tr><td class="cuerpo">2. Permuta de intereses (IRS). Plazo cinco a&ntilde;os.</td><td></td><td class="cuerpo">3,450</td></tr>
+<tr><td class="cuerpo">3. &euro;STR. Plazos:</td><td></td><td></td></tr>
+<tr><td class="cuerpo">&ndash; Un a&ntilde;o.</td><td></td><td class="cuerpo">2,034</td></tr>
+<tr><td class="cuerpo">4. M&iacute;bor (interbancario a un a&ntilde;o).</td><td></td><td class="cuerpo">3,247</td></tr>
 </table></texto></documento>"""
+
+XML_SIMPLE = """<documento><metadatos><titulo>Resolución de 1 de octubre de 2026</titulo></metadatos><texto>
+<p>Tipos de referencia (septiembre de 2026)</p><table><tr><td>Euríbor</td><td>Un año</td><td>3,247</td></tr>
+<tr><td>Míbor</td><td>Un año</td><td>3,247</td></tr></table></texto></documento>"""
 
 
 def sumario(dia: date, ident: str | None) -> str:
@@ -110,6 +117,15 @@ def prueba_bce():
 
 def prueba_ine():
     meta, datos = json_ine()
+    tabla = json.dumps([{"COD": "IPC9", "Nombre": "Índice general. Índice. ", "Data": []},
+                        {"COD": "IPC8", "Nombre": "Índice general. Variación anual. ", "Data": json.loads(datos)["Data"]}])
+    desde_tabla = ahorro.leer_ine(meta, ahorro.serie_de_tabla(tabla))
+    ok(desde_tabla["mes"].iloc[-1] == "2026-10" and json.loads(ahorro.serie_de_tabla(tabla))["COD"] == "IPC8", "INE: la tabla de respaldo da la serie de variación anual")
+    try:
+        ahorro.serie_de_tabla(json.dumps([{"COD": "IPC9", "Nombre": "Índice general. Índice. ", "Data": []}]))
+        ok(False, "INE: tabla sin variación anual debería parar")
+    except ahorro.DatosRaros:
+        ok(True, "")
     ipc = ahorro.leer_ine(meta, datos)
     ok(len(ipc) == len(MESES) + 1 and ipc["mes"].iloc[-1] == "2026-10", "INE: todos los meses, el último es octubre")
     ok(ipc["valor"].iloc[-1] == ipc_valores()[-1], "INE: último valor")
@@ -132,7 +148,14 @@ def prueba_boe():
                'por la que se publican determinados tipos de interés oficiales de referencia del mercado hipotecario.</titulo></item></departamento></seccion></diario></sumario>')
     ok(ahorro.buscar_resolucion(date(2026, 10, 2), lambda d: xml_sum) == "BOE-A-2026-20519", "BOE: también lee el sumario en XML")
     r = ahorro.leer_resolucion(XML_RESOLUCION)
-    ok(r == {"mes": "2026-09", "euribor_12m": 3.247}, f"BOE: euríbor a un año y mes de la resolución ({r})")
+    ok(r == {"mes": "2026-09", "euribor_12m": 3.247}, f"BOE: euríbor a un año y mes de la resolución, forma real por grupos ({r})")
+    ok(ahorro.leer_resolucion(XML_SIMPLE) == {"mes": "2026-09", "euribor_12m": 3.247}, "BOE: también con la tabla en forma simple")
+    sin_un_anio = XML_RESOLUCION.replace("&ndash; Un a&ntilde;o.</td><td></td><td class=\"cuerpo\">3,247", "&ndash; Nueve meses.</td><td></td><td class=\"cuerpo\">3,100", 1)
+    try:
+        ahorro.leer_resolucion(sin_un_anio)
+        ok(False, "BOE: sin «un año» en el grupo del euríbor no debe tomar el del €STR")
+    except ahorro.DatosRaros:
+        ok(True, "")
     try:
         ahorro.leer_resolucion("<documento><texto><p>Nada que ver</p></texto></documento>")
         ok(False, "BOE: sin euríbor debería parar")
@@ -161,7 +184,7 @@ def prueba_boe():
         def xml_todo(ident):
             a, m = ident.split("-")[2:]
             mes_ant = ahorro._mes_menos(f"{int(a):04d}-{int(m):02d}", 1)
-            return XML_RESOLUCION.replace("septiembre de 2026", f"{ahorro.MESES[int(mes_ant[5:]) - 1]} de {mes_ant[:4]}").replace("3,247", "3,100")
+            return XML_RESOLUCION.replace("Septiembre de 2026", f"{ahorro.MESES[int(mes_ant[5:]) - 1]} de {mes_ant[:4]}").replace("3,247", "3,100")
 
         llamadas.clear()
         ahorro.AVISOS.clear()

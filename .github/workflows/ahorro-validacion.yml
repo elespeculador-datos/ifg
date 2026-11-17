@@ -50,7 +50,15 @@ jobs:
           r = requests.get(ahorro.INE_META, params={"det": "2"}, headers=H, timeout=120)
           print("\nINE meta:", r.status_code, r.text[:400])
           r = requests.get(ahorro.INE_API, params={"nult": 3}, headers=H, timeout=120)
-          print("INE datos:", r.status_code, r.text[:600])
+          print("INE datos (nult=3):", r.status_code, r.text[:900])
+          r = requests.get(ahorro.INE_TABLA_API, params={"nult": 1}, headers=H, timeout=120)
+          print("INE tabla", ahorro.INE_TABLA, ":", r.status_code, len(r.text), "caracteres")
+          try:
+              for f in json.loads(r.text):
+                  if "general" in str(f.get("Nombre", "")).lower():
+                      print("  ", f.get("COD"), "|", f.get("Nombre"), "|", (f.get("Data") or [{}])[-1])
+          except Exception as e:
+              print("  no se pudo leer la tabla:", e, r.text[:300])
           # BOE: sumario de un día con resolución conocida (02/10/2026) y su XML.
           r = requests.get(ahorro.BOE_SUMARIO + "20261002", headers={**H, "Accept": "application/json"}, timeout=120)
           print("\nBOE sumario 20261002:", r.status_code, r.headers.get("content-type"), len(r.text), "caracteres")
