@@ -28,6 +28,7 @@ import argparse
 import hashlib
 import html
 import json
+import os
 import re
 import sys
 import time
@@ -47,14 +48,20 @@ CANALES = {
 CABECERAS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36", "Accept": "application/rss+xml, application/xml, text/xml, */*"}
 MADRID = ZoneInfo("Europe/Madrid")
 RAIZ = Path(__file__).resolve().parent.parent
-SALIDA = RAIZ / "docs" / "cnmv"
+# Carpeta de salida. Por defecto, docs/cnmv del repositorio (GitHub Pages); en el
+# servidor, ESPEC_DATOS_DIR apunta a la carpeta que sirve datos.elespeculador.com,
+# fuera del git, para que git pull nunca choque con los datos.
+SALIDA = Path(os.environ.get("ESPEC_DATOS_DIR", RAIZ / "docs")) / "cnmv"
 DATOS = SALIDA / "datos"
 HISTORICO = DATOS / "comunicados.csv"
 EMPRESAS = Path(__file__).resolve().parent / "empresas.csv"
 IBEX35 = RAIZ / "dividendos" / "ibex35.csv"      # la misma composición que usa el calendario de dividendos
 IBEX35_VALIDA_HASTA = "2026-12-20"                 # mover junto con la de dividendos/calendario.py tras cada revisión
 FICHAS = "https://elespeculador.com/ibex35/"
-PAGES = "https://elespeculador-datos.github.io/ifg/cnmv/"
+# Dirección pública de esta salida. Por defecto, GitHub Pages; en el servidor
+# smpro-datos-1, la variable de entorno ESPEC_DATOS_BASE vale
+# "https://datos.elespeculador.com/". Siempre termina en barra.
+PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/cnmv/"
 DIAS_CAJA = 60          # antigüedad máxima de lo que sale en los recuadros
 POR_CAJA = 6            # entradas por recuadro
 COLUMNAS = ["canal", "nreg", "fecha", "emisor", "categoria", "texto", "enlace"]

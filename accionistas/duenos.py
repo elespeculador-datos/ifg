@@ -31,6 +31,7 @@ import csv
 import hashlib
 import html
 import json
+import os
 import re
 import sys
 import time
@@ -40,7 +41,7 @@ from pathlib import Path
 
 import requests
 
-BME = "https://apiweb.bolsasymercados.es/Market/v1/EQ/ListedCompanies"
+# BME: ya no se consulta (ver lista_ibex)
 CAB_BME = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Referer": "https://www.bolsasymercados.es/",
            "Origin": "https://www.bolsasymercados.es"}
 CNMV_BUSQUEDA = "https://www.cnmv.es/portal/Consultas/Busqueda?id=7"
@@ -49,7 +50,10 @@ CAB_CNMV = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Apple
                           "Chrome/124 Safari/537.36 (El Especulador, datos abiertos)", "Accept-Language": "es-ES,es;q=0.9"}
 PAGINA_WP = "https://elespeculador.com/accionistas-ibex-35/"
 METODOLOGIA = PAGINA_WP + "#como-se-hace"
-PAGES = "https://elespeculador-datos.github.io/ifg/accionistas/"
+# Dirección pública de esta salida. Por defecto, GitHub Pages; en el servidor
+# smpro-datos-1, la variable de entorno ESPEC_DATOS_BASE vale
+# "https://datos.elespeculador.com/". Siempre termina en barra.
+PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/accionistas/"
 MAX_FALLOS = 5
 PAUSA = 2.0  # segundos entre consultas a la CNMV
 DIAS_RECIENTES = 30  # ventana de la tabla de notificaciones recientes
@@ -139,19 +143,13 @@ def _f(iso: str) -> str:
 
 # --------------------------------------------------------------------------- descargas
 def lista_ibex() -> list[dict]:
-    for i in range(3):
-        try:
-            r = requests.get(BME, params={"tradingSystem": "SIBE", "page": 0, "pageSize": 0}, headers=CAB_BME, timeout=60)
-            r.raise_for_status()
-            j = r.json()
-            break
-        except (requests.RequestException, ValueError):
-            time.sleep(5 * (i + 1))
-    else:
-        raise DatosRaros("BME no devuelve la lista de cotizadas")
-    ibex = [{"isin": c["isin"], "nombre_bme": c["name"]} for c in j.get("data", []) if "IBEX 35" in (c.get("indices") or "")]
+    """Composición del IBEX 35 desde dividendos/ibex35.csv (mantenida a mano, sin consultar a BME:
+    las webs de BME reservan su información al uso interno)."""
+    ruta = Path(__file__).resolve().parent.parent / "dividendos" / "ibex35.csv"
+    with open(ruta, encoding="utf-8", newline="") as fh:
+        ibex = [{"isin": r["isin"].strip(), "nombre_bme": r["nombre"].strip()} for r in csv.DictReader(fh) if r.get("isin")]
     if not 33 <= len(ibex) <= 37:
-        raise DatosRaros(f"la lista de BME da {len(ibex)} valores del IBEX 35")
+        raise DatosRaros(f"{ruta} da {len(ibex)} valores del IBEX 35")
     return ibex
 
 
