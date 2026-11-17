@@ -29,7 +29,11 @@ CRON_TZ=UTC
 40 12 * * 1-5  /home/smpro/ifg/servidor/ejecutar.sh bonos
 45 5  * * 2-6  /home/smpro/ifg/servidor/ejecutar.sh accionistas
 20 11 * * 1-5  /home/smpro/ifg/servidor/ejecutar.sh estres
+10 12 * * 1-5  /home/smpro/ifg/servidor/ejecutar.sh prima
+30 7  * * 1    /home/smpro/ifg/servidor/ejecutar.sh ahorro
 ```
 
+  `estres` (PR #73), `prima` (PR #84) y `ahorro` (PR #85) se añaden al crontab cuando su PR esté fusionada; antes de la primera pasada de `ahorro`, ejecutar a mano `python ahorro/ahorro.py --salida $ESPEC_DATOS_DIR/ahorro --meses-atras 36` para rellenar tres años de euríbor del BOE.
+
   Si el cron del servidor no admite `CRON_TZ`, se convierten las horas a la zona del servidor. El checkout está en `/home/smpro/ifg` (el mismo que usa `ifg-diario.sh`); el cron corre como el usuario dueño de ese checkout y de `$ESPEC_DATOS_DIR`.
-- Dependencias de Python en el servidor: `pandas xlrd python-calamine requests openpyxl certifi numpy scipy` y el paquete del sistema `poppler-utils` (letras y bonos leen PDF).
+- Dependencias de Python en el servidor: `pandas xlrd python-calamine requests openpyxl certifi numpy scipy` y el paquete del sistema `poppler-utils` (letras y bonos leen PDF). `prima` y `ahorro` solo necesitan `requests pandas numpy scipy`.
