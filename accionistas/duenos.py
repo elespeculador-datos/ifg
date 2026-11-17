@@ -31,6 +31,7 @@ import csv
 import hashlib
 import html
 import json
+import os
 import re
 import sys
 import time
@@ -49,7 +50,10 @@ CAB_CNMV = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Apple
                           "Chrome/124 Safari/537.36 (El Especulador, datos abiertos)", "Accept-Language": "es-ES,es;q=0.9"}
 PAGINA_WP = "https://elespeculador.com/accionistas-ibex-35/"
 METODOLOGIA = PAGINA_WP + "#como-se-hace"
-PAGES = "https://elespeculador-datos.github.io/ifg/accionistas/"
+# Dirección pública de esta salida. Por defecto, GitHub Pages; en el servidor
+# smpro-datos-1, la variable de entorno ESPEC_DATOS_BASE vale
+# "https://datos.elespeculador.com/". Siempre termina en barra.
+PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/accionistas/"
 MAX_FALLOS = 5
 PAUSA = 2.0  # segundos entre consultas a la CNMV
 DIAS_RECIENTES = 30  # ventana de la tabla de notificaciones recientes

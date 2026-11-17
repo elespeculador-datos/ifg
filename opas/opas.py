@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
 import re
 import sys
 from datetime import datetime, timezone
@@ -35,7 +36,10 @@ SALIDA = RAIZ / "docs" / "opas"
 DATOS = SALIDA / "datos"
 PILAR = "https://elespeculador.com/opa-que-pasa-con-mis-acciones/"
 PAGINA_WP = "https://elespeculador.com/opas-bolsa-espanola/"
-PAGES = "https://elespeculador-datos.github.io/ifg/opas/"
+# Dirección pública de esta salida. Por defecto, GitHub Pages; en el servidor
+# smpro-datos-1, la variable de entorno ESPEC_DATOS_BASE vale
+# "https://datos.elespeculador.com/". Siempre termina en barra.
+PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/opas/"
 DESDE_TABLA = 2015          # la tabla detallada de la página empieza aquí; el CSV lo tiene todo
 MINIMO_FILAS = 200          # el 20/10/2026 el registro tenía 220 OPAs desde 2000
 RESULTADOS = {"P": "Positivo", "N": "Negativo"}

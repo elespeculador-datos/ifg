@@ -28,6 +28,7 @@ import argparse
 import hashlib
 import html
 import json
+import os
 import re
 import sys
 import time
@@ -54,7 +55,10 @@ EMPRESAS = Path(__file__).resolve().parent / "empresas.csv"
 IBEX35 = RAIZ / "dividendos" / "ibex35.csv"      # la misma composición que usa el calendario de dividendos
 IBEX35_VALIDA_HASTA = "2026-12-20"                 # mover junto con la de dividendos/calendario.py tras cada revisión
 FICHAS = "https://elespeculador.com/ibex35/"
-PAGES = "https://elespeculador-datos.github.io/ifg/cnmv/"
+# Dirección pública de esta salida. Por defecto, GitHub Pages; en el servidor
+# smpro-datos-1, la variable de entorno ESPEC_DATOS_BASE vale
+# "https://datos.elespeculador.com/". Siempre termina en barra.
+PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/cnmv/"
 DIAS_CAJA = 60          # antigüedad máxima de lo que sale en los recuadros
 POR_CAJA = 6            # entradas por recuadro
 COLUMNAS = ["canal", "nreg", "fecha", "emisor", "categoria", "texto", "enlace"]

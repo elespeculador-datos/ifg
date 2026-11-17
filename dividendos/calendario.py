@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
 import sys
 import time
 from datetime import datetime, timezone
@@ -45,7 +46,10 @@ NOMBRES = {"CASH": "PROSEGUR CASH"}
 # no responde o no da 35 valores. Pasada esta fecha, la reserva deja de valer.
 IBEX35 = Path(__file__).resolve().parent / "ibex35.csv"
 IBEX35_VALIDA_HASTA = "2026-12-20"
-PAGES = "https://elespeculador-datos.github.io/ifg/dividendos/"
+# Dirección pública de esta salida. Por defecto, GitHub Pages; en el servidor
+# smpro-datos-1, la variable de entorno ESPEC_DATOS_BASE vale
+# "https://datos.elespeculador.com/". Siempre termina en barra.
+PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/dividendos/"
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
          "septiembre", "octubre", "noviembre", "diciembre"]
 CONCEPTOS = {"A": "a cuenta", "C": "complementario", "E": "especial", "R": "con cargo a reservas", "P": "prima de emisión",

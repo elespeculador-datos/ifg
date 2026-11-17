@@ -28,6 +28,7 @@ import argparse
 import html
 import io
 import json
+import os
 import sys
 import time
 from datetime import datetime, timezone
@@ -40,7 +41,10 @@ URL = "https://www.cnmv.es/DocPortal/Posiciones-Cortas/NetShortPositions.xls"
 FICHA_CNMV = "https://www.cnmv.es/portal/consultas/busqueda?id=29"
 PILAR = "https://elespeculador.com/posiciones-cortas-bolsa-espanola/"
 PAGINA_WP = "https://elespeculador.com/posiciones-cortas-hoy/"
-PAGES = "https://elespeculador-datos.github.io/ifg/cortos/"
+# Dirección pública de esta salida. Por defecto, GitHub Pages; en el servidor
+# smpro-datos-1, la variable de entorno ESPEC_DATOS_BASE vale
+# "https://datos.elespeculador.com/". Siempre termina en barra.
+PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/cortos/"
 RAIZ = Path(__file__).resolve().parent.parent
 SALIDA = RAIZ / "docs" / "cortos"
 DATOS = SALIDA / "datos"

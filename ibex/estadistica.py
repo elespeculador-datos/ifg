@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -36,7 +37,10 @@ DATOS = SALIDA / "datos"
 HISTORICO = Path(__file__).resolve().parent / "historico_anual.csv"
 PILAR = "https://elespeculador.com/historico-ibex-35-records/"
 PAGINA_WP = "https://elespeculador.com/ibex-35-en-cifras/"
-PAGES = "https://elespeculador-datos.github.io/ifg/ibex/"
+# Dirección pública de esta salida. Por defecto, GitHub Pages; en el servidor
+# smpro-datos-1, la variable de entorno ESPEC_DATOS_BASE vale
+# "https://datos.elespeculador.com/". Siempre termina en barra.
+PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/ibex/"
 
 # Récords anteriores a la ventana de la API: 15.945,70 puntos al cierre y
 # 16.040,40 intradía, los dos del 8/11/2007. Ningún cierre ni máximo intradía
