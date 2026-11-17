@@ -41,7 +41,7 @@ from pathlib import Path
 
 import requests
 
-BME = "https://apiweb.bolsasymercados.es/Market/v1/EQ/ListedCompanies"
+# BME: ya no se consulta (ver lista_ibex)
 CAB_BME = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Referer": "https://www.bolsasymercados.es/",
            "Origin": "https://www.bolsasymercados.es"}
 CNMV_BUSQUEDA = "https://www.cnmv.es/portal/Consultas/Busqueda?id=7"
@@ -143,19 +143,13 @@ def _f(iso: str) -> str:
 
 # --------------------------------------------------------------------------- descargas
 def lista_ibex() -> list[dict]:
-    for i in range(3):
-        try:
-            r = requests.get(BME, params={"tradingSystem": "SIBE", "page": 0, "pageSize": 0}, headers=CAB_BME, timeout=60)
-            r.raise_for_status()
-            j = r.json()
-            break
-        except (requests.RequestException, ValueError):
-            time.sleep(5 * (i + 1))
-    else:
-        raise DatosRaros("BME no devuelve la lista de cotizadas")
-    ibex = [{"isin": c["isin"], "nombre_bme": c["name"]} for c in j.get("data", []) if "IBEX 35" in (c.get("indices") or "")]
+    """Composición del IBEX 35 desde dividendos/ibex35.csv (mantenida a mano, sin consultar a BME:
+    las webs de BME reservan su información al uso interno)."""
+    ruta = Path(__file__).resolve().parent.parent / "dividendos" / "ibex35.csv"
+    with open(ruta, encoding="utf-8", newline="") as fh:
+        ibex = [{"isin": r["isin"].strip(), "nombre_bme": r["nombre"].strip()} for r in csv.DictReader(fh) if r.get("isin")]
     if not 33 <= len(ibex) <= 37:
-        raise DatosRaros(f"la lista de BME da {len(ibex)} valores del IBEX 35")
+        raise DatosRaros(f"{ruta} da {len(ibex)} valores del IBEX 35")
     return ibex
 
 
