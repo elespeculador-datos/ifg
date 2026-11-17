@@ -139,6 +139,72 @@ jobs:
             echo "Abierta una incidencia de deriva"
           fi
 
+      # LA OTRA FORMA DE DEJAR DE PUBLICAR EN SILENCIO: publicar a tu hora
+      # el dia de antes. El 3 de noviembre de 2026 el flujo salio en verde,
+      # con todas las claves de ifg.json y cobertura 1,00, y publico el
+      # viernes 30 de octubre: la sesion del lunes 2 no estaba. El calendario
+      # del indice son los cierres del IBEX, y esa madrugada Yahoo no
+      # devolvio ni un cierre de renta variable. Sin cierre del IBEX no hay
+      # sesion, y una sesion que no existe es igual que un festivo: nada
+      # fallo y nada aviso.
+      #
+      # Este paso NO detiene nada ni rellena nada: solo convierte el
+      # marcador de publicar_diario.py en una incidencia, con el mismo
+      # patron que los otros dos avisos. Se cierra sola cuando la fuente
+      # devuelve el cierre que faltaba.
+      - name: Avisar si falta una sesion habil en la serie
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ ! -f aviso_sesion_perdida.json ]; then
+            echo "Sin marcador: esta ejecucion no ha comprobado el calendario."
+            exit 0
+          fi
+
+          abierta=$(gh api "repos/${{ github.repository }}/issues?state=open&labels=sesion-perdida" \
+            --jq '.[0].number // empty' 2>/dev/null || true)
+
+          if [ "$(jq -r '.avisar' aviso_sesion_perdida.json)" != "true" ]; then
+            if [ -n "$abierta" ]; then
+              gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" \
+                -f body="Calendario normalizado el $(date -u +%Y-%m-%d): la serie llega al $(jq -r '.ultima_sesion_publicada' aviso_sesion_perdida.json) y no falta ninguna sesion habil. Se cierra." >/dev/null
+              gh api --method PATCH "repos/${{ github.repository }}/issues/$abierta" \
+                -f state=closed >/dev/null
+              echo "Cerrada la incidencia de sesion perdida #$abierta"
+            fi
+            exit 0
+          fi
+
+          cuerpo=$(jq -r '
+            "La ejecucion del \(.generado) ha publicado sin la sesion de \([.sesiones_perdidas[].fecha] | join(", ")). La serie se queda en **\(.ultima_sesion_publicada)**. Version \(.version)."
+            + "\n\nEse dia el S&P 500 tiene cierre y NI UNO de los \(.instrumentos_de_corro | length) instrumentos de corro (acciones, ETF e indices de contado) lo tiene. No es un festivo: un festivo europeo deja abierta Nueva York y el ETF mundial y los petroleros siguen imprimiendo cierre. Es la fuente de renta variable, que no ha devuelto nada."
+            + "\n\nEl calendario del indice son los cierres del IBEX, asi que sin ese cierre la sesion no existe para el indice y el dia se salta en silencio: el flujo sale en verde y ifg.json queda completo, pero con la fecha de la vispera. Eso incumple el requisito 5, publicacion puntual todos los dias habiles, que es el que cuenta la validacion prospectiva."
+            + "\n\n| Sesion ausente | Instrumentos de corro sin cierre | S&P 500 ese dia |\n|---|---|---|\n"
+            + ([.sesiones_perdidas[] | "| \(.fecha) | \(.instrumentos_de_corro_sin_cierre) | \(.referencia) |"] | join("\n"))
+            + "\n\nQue mirar:\n1. si la fuente ya devuelve ese cierre, la proxima ejecucion mete la sesion en la serie por su cuenta y esta incidencia se cierra sola: no hay que hacer nada;\n2. si sigue sin devolverlo varios dias, el hueco se vuelve permanente y hay que decidir si se cambia de fuente para el calendario;\n3. el valor editorial de la sesion ausente nunca sale como valor del dia, porque ifg.json publica siempre la ultima fila: eso es una decision pendiente, no un fallo de este paso."
+            + "\n\nNO se republica por esto. Republicar sustituye valores ya publicados y no es lo que falta aqui."
+            ' aviso_sesion_perdida.json)
+          cuerpo="$cuerpo
+
+          Registro: $EJECUCION"
+
+          if [ -n "$abierta" ]; then
+            gh api --method POST "repos/${{ github.repository }}/issues/$abierta/comments" \
+              -f body="$cuerpo" >/dev/null
+            echo "Comentada la incidencia de sesion perdida abierta #$abierta"
+          else
+            gh api --method POST "repos/${{ github.repository }}/labels" \
+              -f name=sesion-perdida -f color=fbca04 \
+              -f description="Falta una sesion habil en la serie del IFG" >/dev/null 2>&1 || true
+            gh api --method POST "repos/${{ github.repository }}/issues" \
+              -f title="Falta una sesion habil en la serie el $(date -u +%Y-%m-%d)" \
+              -f body="$cuerpo" \
+              -f 'labels[]=sesion-perdida' >/dev/null
+            echo "Abierta una incidencia de sesion perdida"
+          fi
+
       # UN INDICE DIARIO QUE DEJA DE PUBLICARSE EN SILENCIO ES EL PEOR FALLO
       # QUE PUEDE TENER. El requisito 5 del proyecto es puntualidad, y la
       # puntualidad no se demuestra: se vigila. Un "::error::" en el registro

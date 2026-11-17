@@ -120,6 +120,36 @@ CORRECCIONES = f"{DIR_PUBLICO}/correcciones.csv"
 # el aviso vive en la incidencia, no en el histórico.
 RUTA_AVISO_DERIVA = "aviso_deriva.json"
 
+# Marcador hermano del anterior, para la sesión que el índice no llega a
+# tener. Mismo motivo para vivir en la raíz: es señal interna, no dato
+# publicado.
+RUTA_AVISO_SESION = "aviso_sesion_perdida.json"
+
+# Instrumentos que SOLO cotizan cuando hay sesión de contado en una bolsa:
+# acciones, ETF e índices de contado. Se derivan de la configuración en vez
+# de escribirse a mano para que no se queden atrás cuando cambie un ticker.
+#
+# Se excluyen a propósito los que cotizan con las bolsas de contado cerradas
+# —futuros (=F), divisas (=X)— y los índices de volatilidad y el S&P 500,
+# que sirven de referencia y no de prueba de sesión europea.
+_FUERA_DE_CORRO = {"ovx", "vix", "vstoxx", "sp500"}
+
+
+def _instrumentos_de_corro() -> list[str]:
+    """Las claves de precio que exigen una bolsa de contado abierta."""
+    todos = {**config.TICKERS, **config.CESTA_DEFENSA, **config.CESTA_FLETES}
+    return sorted(
+        nombre for nombre, ticker in todos.items()
+        if nombre not in _FUERA_DE_CORRO
+        and not ticker.endswith("=F")
+        and not ticker.endswith("=X")
+    )
+
+
+# La prueba de que un día fue día de mercado. El S&P 500 de contado: si
+# imprimió cierre, Wall Street tuvo sesión ese día.
+REFERENCIA_SESION = "sp500"
+
 # Sesiones que un valor incompleto sigue abierto a corrección.
 #
 # POR QUÉ CINCO. Cubre los dos plazos reales de las fuentes: una caída de
@@ -733,6 +763,92 @@ def avisar_deriva(deriva: pd.Series, cruces: pd.DataFrame,
     return aviso
 
 
+def detectar_sesion_perdida(precios: pd.DataFrame, publicada: pd.DatetimeIndex,
+                            hoy, generado: str) -> dict:
+    """
+    Avisa de la sesión de bolsa que el índice NO llega a tener.
+
+    POR QUÉ EXISTE ESTE PASO. El 3 de noviembre de 2026 el flujo salió en
+    verde, publicó a su hora, con todas las claves de ifg.json presentes y
+    cobertura 1,00... y publicó el viernes 30 de octubre. La sesión del lunes
+    2 no estaba. El calendario del índice se construye con los cierres del
+    IBEX (`indice.calcular`: `precios["ibex"].dropna().index`), y aquella
+    madrugada Yahoo no devolvió ni un cierre de renta variable: faltaban las
+    15 series de acciones, ETF e índices de contado, mientras los futuros,
+    las divisas y el S&P 500 venían completos. Sin cierre del IBEX no hay
+    sesión, y una sesión que no existe es indistinguible de un festivo: nada
+    falló, nada avisó, y el índice diario se saltó un día hábil en silencio.
+    Eso ataca el requisito 5 —publicación puntual todos los días hábiles—,
+    que es justo el que la validación prospectiva está contando.
+
+    CÓMO SE DISTINGUE UN FESTIVO DE UNA FUENTE CAÍDA, sin calendario de
+    festivos que mantener y sin un umbral puesto a ojo. Un festivo europeo
+    cierra Madrid, París, Fráncfort, Milán y Londres, pero deja abierta Nueva
+    York: el ETF mundial y los tres petroleros de la cesta de fletes, que
+    cotizan en Nueva York, siguen imprimiendo cierre. No existe el día en que
+    todas las bolsas de contado del mundo estén cerradas y el S&P 500
+    publique un cierre. Así que el disparador es exactamente ese:
+
+        el S&P 500 tiene cierre ese día
+        y NI UNO de los instrumentos de corro lo tiene
+        y la sesión no está en la serie publicada
+        y el día ya está cerrado
+
+    CONTRASTADO CONTRA EL ARCHIVO ENTERO antes de escribirlo: sobre las 6.998
+    filas de datos/precios.csv (2000-01-03 a 2026-11-03) la condición se
+    cumple UNA vez, el 2026-11-02. Los 53 festivos europeos con Wall Street
+    abierto desde 2007 conservan entre 3 y 9 instrumentos de corro con dato,
+    así que ninguno la dispara. Cero falsos positivos en 26 años.
+
+    NO DETIENE NI CORRIGE NADA. Igual que avisar_deriva(): no toca un valor,
+    no cambia el calendario, no decide si un componente ausente debe impedir
+    la publicación —esa es una pregunta de contrato que pide versión nueva—.
+    Solo enciende una luz. Y se apaga sola: en cuanto la fuente devuelve el
+    cierre que faltaba, la sesión entra en el calendario y la condición deja
+    de cumplirse.
+    """
+    corro = _instrumentos_de_corro()
+    presentes = [c for c in corro if c in precios.columns]
+
+    perdidas: list[dict] = []
+    if REFERENCIA_SESION in precios.columns and presentes and len(publicada):
+        candidatas = precios.index[(precios.index.date < hoy)
+                                   & (precios.index >= publicada[0])]
+        for f in candidatas:
+            if f in publicada:
+                continue
+            if pd.isna(precios.at[f, REFERENCIA_SESION]):
+                continue                       # no hay prueba de que fuera día de mercado
+            if precios.loc[f, presentes].notna().any():
+                continue                       # alguna bolsa abrió: festivo, no fuente caída
+            perdidas.append({
+                "fecha": str(f.date()),
+                "instrumentos_de_corro_sin_cierre": len(presentes),
+                "referencia": round(float(precios.at[f, REFERENCIA_SESION]), 2),
+            })
+
+    aviso = {
+        "generado": generado,
+        "version": config.VERSION,
+        "ultima_sesion_publicada": (str(publicada[-1].date())
+                                    if len(publicada) else None),
+        "instrumentos_de_corro": presentes,
+        "sesiones_perdidas": perdidas,
+        "avisar": bool(perdidas),
+    }
+
+    with open(RUTA_AVISO_SESION, "w", encoding="utf-8") as fh:
+        json.dump(aviso, fh, ensure_ascii=False, indent=2)
+
+    if perdidas:
+        log.error("SESIÓN PERDIDA: %d día(s) hábil(es) sin entrar en la serie "
+                  "porque ninguna bolsa de contado devolvió cierre. El "
+                  "primero, %s. La serie se queda en %s.",
+                  len(perdidas), perdidas[0]["fecha"],
+                  aviso["ultima_sesion_publicada"])
+    return aviso
+
+
 def escribir_serie_panel(final: pd.DataFrame, res: dict, generado: str,
                          fecha_dia: pd.Timestamp) -> dict:
     """
@@ -862,6 +978,10 @@ def main() -> int:
     # Pero deja de ser invisible.
     avisar_deriva(deriva, cruces_de_tramo(final, recalculada),
                   record_previo, generado)
+
+    # Y la vigilancia hermana: la deriva mira si el pasado se mueve; esto
+    # mira si falta un día hábil que debería estar. Tampoco detiene nada.
+    detectar_sesion_perdida(precios, final.index, hoy, generado)
 
     n_comp = archivar_componentes(final, res)
     log.info("Componentes archivados: %d sesiones en %s.", n_comp, RUTA_COMPONENTES)
