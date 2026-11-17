@@ -54,18 +54,32 @@ class DatosRaros(Exception):
 
 
 # --------------------------------------------------------------------------- descarga
-def descargar() -> bytes:
+# Esperas entre intentos, en segundos. Siete intentos repartidos en unos seis
+# minutos de espera (más el tiempo de cada petición), dentro de los 20 minutos
+# del flujo. Entre el 21 y el 31 de octubre de 2026 la CNMV cerró la conexión
+# sin responder en seis ejecuciones («Remote end closed connection without
+# response»); con cuatro intentos en poco más de tres minutos no bastaba.
+ESPERAS = [10, 20, 40, 60, 90, 120]
+CABECERAS = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Connection": "close"}
+
+
+def descargar(esperas: list[int] | None = None, dormir=time.sleep) -> bytes:
+    """Descarga el .xls de la CNMV con reintentos espaciados; cada fallo queda en el registro."""
+    esperas = ESPERAS if esperas is None else esperas
     ultimo_error = None
-    for intento in range(4):
+    for intento in range(len(esperas) + 1):
         try:
-            r = requests.get(URL, timeout=90, headers={"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)"})
+            r = requests.get(URL, timeout=(20, 60), headers=CABECERAS)
             if r.status_code == 200 and r.content[:4] == b"\xd0\xcf\x11\xe0":
                 return r.content
             ultimo_error = f"HTTP {r.status_code}, {len(r.content)} bytes, cabecera {r.content[:8]!r}"
         except requests.RequestException as e:
             ultimo_error = str(e)
-        time.sleep(20 * (intento + 1))
-    raise DatosRaros(f"No se pudo descargar el fichero de la CNMV: {ultimo_error}")
+        print(f"AVISO  descarga, intento {intento + 1} de {len(esperas) + 1} "
+              f"({datetime.now(timezone.utc).strftime('%H:%M:%S')} UTC): {ultimo_error}", file=sys.stderr)
+        if intento < len(esperas):
+            dormir(esperas[intento])
+    raise DatosRaros(f"No se pudo descargar el fichero de la CNMV tras {len(esperas) + 1} intentos: {ultimo_error}")
 
 
 # --------------------------------------------------------------------------- lectura
@@ -97,10 +111,18 @@ def _tabla(df: pd.DataFrame, nombre: str) -> pd.DataFrame:
 
 
 def leer(contenido: bytes) -> tuple[str, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    # pandas 4 avisa de que el motor xlrd (el único que leía .xls hasta ahora)
+    # está en desuso. Se sigue leyendo con xlrd, que es lo probado con el
+    # fichero real; si un día deja de funcionar, se prueba calamine antes de
+    # rendirse. El flujo instala los dos.
     try:
         libro = pd.read_excel(io.BytesIO(contenido), sheet_name=None, header=None, engine="xlrd")
-    except Exception:
-        libro = pd.read_excel(io.BytesIO(contenido), sheet_name=None, header=None)
+    except Exception as e_xlrd:
+        try:
+            libro = pd.read_excel(io.BytesIO(contenido), sheet_name=None, header=None, engine="calamine")
+            print(f"AVISO  lectura: xlrd ha fallado ({e_xlrd}); leído con calamine.", file=sys.stderr)
+        except Exception as e_cal:
+            raise DatosRaros(f"No se puede leer el .xls ni con xlrd ({e_xlrd}) ni con calamine ({e_cal})")
     fecha_df = _hoja(libro, "fecha")
     texto = " ".join(str(v) for v in fecha_df.values.ravel() if pd.notna(v))
     fecha = pd.to_datetime(next((p for p in texto.split() if p[:2] == "20" and len(p) >= 10), ""), errors="coerce")
@@ -121,7 +143,11 @@ def leer(contenido: bytes) -> tuple[str, pd.DataFrame, pd.DataFrame, pd.DataFram
 
 # --------------------------------------------------------------------------- cálculos
 def resumen(vig: pd.DataFrame) -> pd.DataFrame:
-    vig = vig[vig["posicion_pct"] >= 0.5 - 1e-9]
+    # Una sola comunicación por tenedor y valor: «suma_publicada_pct» es la
+    # cifra de titular de la página y sumar dos veces al mismo tenedor la
+    # inflaría. Si no hay duplicados —el caso normal— esto no cambia nada.
+    vig = _una_por_clave(vig[vig["posicion_pct"] >= 0.5 - 1e-9], ["isin", "tenedor"],
+                         "resumen por emisor")
     g = vig.groupby(["isin", "emisor"], as_index=False).agg(
         tenedores=("tenedor", "nunique"),
         suma_publicada_pct=("posicion_pct", "sum"),
@@ -134,13 +160,51 @@ def resumen(vig: pd.DataFrame) -> pd.DataFrame:
     return g.sort_values(["suma_publicada_pct", "tenedores"], ascending=False).reset_index(drop=True)
 
 
+def _una_por_clave(df: pd.DataFrame, clave: list[str], nombre: str) -> pd.DataFrame:
+    """
+    Deja una sola fila por clave: la comunicación más reciente de ese tenedor.
+
+    POR QUÉ EXISTE. La hoja «Última» de la CNMV no garantiza una fila por
+    (ISIN, tenedor). El mismo tenedor puede aparecer dos veces sobre el mismo
+    valor cuando el fichero recoge a la vez una posición y la comunicación con
+    la que ese tenedor cruza el 0,5 %. El 29 de octubre de 2026 ocurrió por
+    primera vez y el rastreador se detuvo tres ejecuciones seguidas con
+    «TypeError: float() argument must be ... not 'Series'», porque indexar por
+    esa clave devolvía dos filas donde el código esperaba un número.
+
+    No era un cambio de formato de la CNMV: las guardas de `_tabla()` y
+    `leer()` pasaron. Era una suposición nuestra —clave única— que el fichero
+    no promete.
+
+    CRITERIO, SIN CIFRAS ELEGIDAS A OJO. Gana la `fecha_posicion` más alta y,
+    a igualdad, la última fila del fichero, que es el orden en que la CNMV las
+    publica. No se suma ni se promedia nada: las dos filas describen al mismo
+    tenedor en dos momentos, y la que retrata el día es la posterior.
+
+    Deja rastro en el registro de la ejecución. Un duplicado es legítimo, pero
+    es lo bastante infrecuente para querer verlo cuando pase.
+    """
+    dup = df.duplicated(subset=clave, keep=False)
+    if not dup.any():
+        return df
+    for _, r in df[dup].sort_values(clave).iterrows():
+        print(f"AVISO  {nombre}: {r['isin']} / {r['tenedor']} aparece más de una vez "
+              f"(fecha {r['fecha_posicion']}, {r['posicion_pct']} %).", file=sys.stderr)
+    orden = pd.to_datetime(df["fecha_posicion"], errors="coerce")
+    return (df.assign(_fecha=orden, _fila=range(len(df)))
+              .sort_values(["_fecha", "_fila"], na_position="first")
+              .drop_duplicates(subset=clave, keep="last")
+              .drop(columns=["_fecha", "_fila"])
+              .sort_index())
+
+
 def cambios(prev: pd.DataFrame | None, vig: pd.DataFrame, fecha: str) -> pd.DataFrame:
     clave = ["isin", "tenedor"]
     cols = ["fecha_publicacion", "isin", "emisor", "tenedor", "tipo", "antes_pct", "ahora_pct", "fecha_posicion"]
     if prev is None or prev.empty:
         return pd.DataFrame(columns=cols)
-    a = prev.set_index(clave)
-    b = vig.set_index(clave)
+    a = _una_por_clave(prev, clave, "publicación anterior").set_index(clave)
+    b = _una_por_clave(vig, clave, "fichero de la CNMV").set_index(clave)
     filas = []
     for k in b.index.difference(a.index):
         r = b.loc[k]
