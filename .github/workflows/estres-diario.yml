@@ -1,0 +1,45 @@
+name: Estrés financiero
+
+# Indicador 2 del catálogo de Datos: el CISS del BCE para España, la zona euro, Alemania,
+# Francia e Italia, y el CISS soberano.
+#
+# En producción el colector corre en el servidor smpro-datos-1 (servidor/ejecutar.sh estres,
+# a las 11:20 UTC de lunes a viernes; ver DESPLIEGUE.md) y escribe fuera del git. Este flujo
+# NO tiene horario ni guarda nada en el repositorio: se lanza a mano para validar una rama
+# con datos reales del portal del BCE (el entorno de Datos no llega a ese portal) y deja la
+# salida como artefacto de la ejecución. Dependencias del colector: requests pandas numpy scipy.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install requests pandas numpy scipy
+      - name: Comprobaciones sin red
+        run: python estres/pruebas_estres.py
+      - name: Consultar el portal del BCE y preparar los archivos
+        env:
+          ESPEC_DATOS_BASE: https://datos.elespeculador.com/
+        run: python estres/estres.py --salida salida/estres --forzar
+      - name: Resumen
+        run: |
+          echo "## Estrés financiero: salida de validación" >> "$GITHUB_STEP_SUMMARY"
+          head -n 1 salida/estres/fragmento-wp.html >> "$GITHUB_STEP_SUMMARY"
+          python -c "import json; d=json.load(open('salida/estres/datos/ultima.json')); print(json.dumps({k: d[k] for k in list(d)[:12]}, ensure_ascii=False, indent=1))" >> "$GITHUB_STEP_SUMMARY"
+      - name: Guardar la salida como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: estres-salida
+          path: salida/estres
+          retention-days: 14
