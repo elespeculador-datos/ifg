@@ -227,6 +227,10 @@ def prueba_calculos():
     ok(0 <= p["percentil_real"] <= 100 and p["racha"] in ("positiva", "negativa") and p["racha_meses"] >= 1, "calcular: percentil y racha")
     ok(p["variacion_12m"] == round(serie_bce("es_plazo_1a")[-1] - serie_bce("es_plazo_1a")[-13], 2), "calcular: variación a doce meses")
     ok("euribor_12m" in res["tipos"] and res["tipos"]["euribor_12m"]["tipo"] == 3.35, "calcular: euríbor con su ficha")
+    e = res["tipos"]["euribor_12m"]
+    ok(e.get("real") is not None and e.get("percentil_real") is None and "racha" not in e and e["meses_con_real"] == 36,
+       "calcular: con 36 meses de euríbor hay real pero no percentil ni racha")
+    ok(p["percentil_real"] is not None and p["racha_meses"] >= 1, "calcular: los depósitos, con historia desde 2003, sí llevan percentil y racha")
     ok(res["letras_12m"]["real"] == round(ahorro.real(3.068, ipc_valores()[-1]), 2) and res["letras_12m"]["ipc_usado"] == ipc_valores()[-1], "calcular: letras frente al último IPC")
     ok(res["desfase_dias"] == 48 and not ahorro.AVISOS, f"calcular: desfase 48 días sin aviso ({ahorro.AVISOS})")
     ahorro.AVISOS.clear()

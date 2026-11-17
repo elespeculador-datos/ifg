@@ -7,9 +7,6 @@ name: Rentabilidad real del ahorro (validación a mano)
 # y deja las respuestas y la salida como artefacto. Dependencias: requests pandas numpy scipy.
 on:
   workflow_dispatch:
-  push:
-    branches: [rentabilidad-real]   # solo mientras la rama está en desarrollo: se quita al fusionar
-    paths: ["ahorro/**", ".github/workflows/ahorro-validacion.yml"]
 
 permissions:
   contents: read

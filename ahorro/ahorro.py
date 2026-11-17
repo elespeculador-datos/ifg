@@ -85,6 +85,7 @@ MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto
 PAGINA_WP = "https://elespeculador.com/rentabilidad-real-del-ahorro/"
 PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/ahorro/"
 DESDE = "2003-01"
+MESES_MINIMOS = 120  # historia mínima para publicar percentil, racha y mejor/peor mes
 AVISOS: list[str] = []
 
 
@@ -419,10 +420,13 @@ def calcular(bce: pd.DataFrame, ipc: pd.DataFrame, euribor: pd.DataFrame, letras
                  "variacion_12m": _r(s.iloc[-1] - s[s.index <= _mes_menos(m_n, 12)].iloc[-1]) if (s.index <= _mes_menos(m_n, 12)).any() else None}
         if len(sr):
             mr = sr.index[-1]
-            signo, n_meses = racha(sr)
-            ficha.update({"mes_real": mr, "real": _r(sr.iloc[-1]), "percentil_real": _r(percentil(sr, sr.iloc[-1]), 1),
-                          "racha": signo, "racha_meses": n_meses,
-                          "mejor": _r(sr.max()), "mes_mejor": sr.idxmax(), "peor": _r(sr.min()), "mes_peor": sr.idxmin()})
+            ficha.update({"mes_real": mr, "real": _r(sr.iloc[-1]), "meses_con_real": int(len(sr))})
+            # Percentil, racha y mejor/peor mes solo con historia suficiente (diez años): el euríbor del BOE
+            # se acumula desde la primera pasada y tarda en tenerla.
+            if len(sr) >= MESES_MINIMOS:
+                signo, n_meses = racha(sr)
+                ficha.update({"percentil_real": _r(percentil(sr, sr.iloc[-1]), 1), "racha": signo, "racha_meses": n_meses,
+                              "mejor": _r(sr.max()), "mes_mejor": sr.idxmax(), "peor": _r(sr.min()), "mes_peor": sr.idxmin()})
         res["tipos"][n] = ficha
     if letras:
         res["letras_12m"] = {**letras, "real": _r(real(letras["marginal"], res["ipc_ultimo"])), "ipc_usado": res["ipc_ultimo"]}
@@ -487,8 +491,9 @@ def grafico_svg(s: pd.Series) -> str:
               '<style>.eje{font:11px sans-serif;fill:#5b6675}.lin{fill:none;stroke-width:1.6}</style>']
     for i in range(5):
         v = y0 + (y1 - y0) * i / 4
+        etiqueta = f"{v:.0f}".replace("-0", "0")
         partes.append(f'<line x1="{ml}" y1="{Y(v):.1f}" x2="{W - mr}" y2="{Y(v):.1f}" stroke="#e3e8ef"/>'
-                      f'<text class="eje" x="{ml - 4}" y="{Y(v) + 4:.1f}" text-anchor="end">{v:.0f}</text>')
+                      f'<text class="eje" x="{ml - 4}" y="{Y(v) + 4:.1f}" text-anchor="end">{etiqueta}</text>')
     partes.append(f'<line x1="{ml}" y1="{Y(0):.1f}" x2="{W - mr}" y2="{Y(0):.1f}" stroke="#9aa5b4" stroke-dasharray="4 3"/>')
     for a in range(x0.year, x1.year + 1, 2):
         t = pd.Timestamp(year=a, month=1, day=1)
@@ -510,8 +515,11 @@ def fragmento(res: dict, fecha_pub: str) -> str:
              f"su rentabilidad real fue del <strong>{_dif(p['real'])} %</strong>")
     if p.get("racha_meses"):
         frase += f": lleva {p['racha_meses']} {'mes' if p['racha_meses'] == 1 else 'meses'} {p['racha']}"
-    frase += (f". Es el percentil {_v(p['percentil_real'], 0)} desde 2003 (ha sido igual o peor el {_v(p['percentil_real'], 0)} % de los meses). "
-              f"El mejor momento fue {_mes(p['mes_mejor'])} ({_dif(p['mejor'])} %) y el peor, {_mes(p['mes_peor'])} ({_dif(p['peor'])} %).")
+    if p.get("percentil_real") is not None:
+        frase += (f". Es el percentil {_v(p['percentil_real'], 0)} desde 2003 (ha sido igual o peor el {_v(p['percentil_real'], 0)} % de los meses). "
+                  f"El mejor momento fue {_mes(p['mes_mejor'])} ({_dif(p['mejor'])} %) y el peor, {_mes(p['mes_peor'])} ({_dif(p['peor'])} %).")
+    else:
+        frase += "."
     if v and v.get("real") is not None:
         frase += f" El dinero en cuenta a la vista rendía el {_v(v['tipo'])} %: {_dif(v['real'])} % real."
     if res["mes_ipc"] != res["mes"]:
@@ -523,7 +531,8 @@ def fragmento(res: dict, fecha_pub: str) -> str:
                "aproximadamente, el tipo menos la inflación.</p>",
                _tabla(["Referencia", "Mes", "Tipo nominal", "Un año antes", "Real", "Percentil desde 2003", "Racha"],
                       [[t["nombre"], _mes(t["mes"]), _v(t["tipo"]) + " %", _dif(t.get("variacion_12m")) if t.get("variacion_12m") is not None else "—",
-                        _dif(t.get("real")) + " %" if t.get("real") is not None else "—", _v(t.get("percentil_real"), 0),
+                        _dif(t.get("real")) + " %" if t.get("real") is not None else "—",
+                        _v(t.get("percentil_real"), 0) if t.get("percentil_real") is not None else f"— (serie de {t.get('meses_con_real', 0)} meses)",
                         f"{t['racha_meses']} meses {t['racha']}" if t.get("racha_meses") else "—"]
                        for n in orden if (t := res["tipos"].get(n))])]
     if res.get("letras_12m"):
@@ -541,7 +550,8 @@ def fragmento(res: dict, fecha_pub: str) -> str:
                "y el tipo medio de los saldos en cuentas a la vista, en España y en la zona euro. La inflación es la variación anual del IPC "
                "general del INE. El euríbor a un año es la media mensual que el Banco de España publica cada mes en el BOE como tipo oficial de "
                "referencia. El Especulador no modifica esas series; calcula la rentabilidad real de cada mes, el percentil desde 2003 (porcentaje "
-               "de meses con una rentabilidad real igual o inferior), la racha de meses con el mismo signo y el mejor y el peor mes. Lectura "
+               "de meses con una rentabilidad real igual o inferior), la racha de meses con el mismo signo y el mejor y el peor mes, solo cuando "
+               "la serie tiene al menos diez años (el euríbor se va acumulando mes a mes desde el BOE). Lectura "
                "histórica, sin predicción: describe lo que ha pasado, no lo que viene. Cada ahorrador tiene su tipo y su cesta de consumo; estas "
                "cifras son medias.</p>",
                f'<p class="has-small-font-size">Fuentes: BCE, <a href="{BCE_PORTAL}">estadísticas de tipos de interés de las IFM (MIR)</a>; '
