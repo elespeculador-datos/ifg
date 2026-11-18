@@ -1,13 +1,11 @@
 name: Expectativas de inflación de los hogares (validación a mano)
 
 # Indicador 20c del catálogo de Datos: encuesta de expectativas de los consumidores del BCE (CES).
-# Flujo sin horario: se lanza a mano para sondear el conjunto CES del portal del BCE y validar la rama
-# con datos reales (el entorno de Datos no llega al portal).
+# En producción corre en el servidor smpro-datos-1 (servidor/ejecutar.sh expectativas; ver DESPLIEGUE.md).
+# Este flujo NO tiene horario ni guarda nada en el repositorio: se lanza a mano para validar la rama con
+# datos reales (el entorno de Datos no llega al portal del BCE).
 on:
   workflow_dispatch:
-  push:
-    branches: [expectativas]   # solo mientras la rama está en desarrollo: se quita al fusionar
-    paths: ["expectativas/**", ".github/workflows/expectativas-validacion.yml"]
 
 permissions:
   contents: read
