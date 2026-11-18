@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import html as html_mod
 import json
 import os
 import re
@@ -66,7 +67,7 @@ MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto
 
 # El lugar de la operación es un código de centro de negociación (XMAD, XMCE, BATE, TRQX...) o un texto como
 # «Fuera de un centro de negociación» / XOFF: solo lo segundo saca la operación del neto discrecional.
-FUERA = ("fuera", "off", "xoff", "otc", "no aplica", "n/a")
+FUERA = ("fuera", "off", "xoff", "xxxx", "otc", "no aplica", "n/a")
 PALABRAS_PLAN = ("plan ", "plan de", "incentiv", "retribu", "remuner", "bonus", "entrega gratuita", "gratuita", "vesting", "consolidaci",
                  "stock option", "opciones sobre", "ejercicio de", "préstamo", "prestamo", "pignor", "garantía", "garantia", "donación", "donacion",
                  "herencia", "sucesi", "canje", "scrip", "dividendo flexible", "ampliación", "ampliacion", "permuta", "aportación", "aportacion",
@@ -119,7 +120,7 @@ def leer_listado(html: str) -> tuple[list[dict], int, int]:
             continue
         texto_motivo = motivo.group(2).strip().lower()
         out.append({"registro": num, "fecha_registro": f"{fecha.group(3)}-{fecha.group(2)}-{fecha.group(1)}",
-                    "emisor": re.sub(r"\s+", " ", emisor.group(1)).strip(), "nif": (nif.group(1) if nif else "").replace("-", ""),
+                    "emisor": re.sub(r"\s+", " ", html_mod.unescape(emisor.group(1))).strip(), "nif": (nif.group(1) if nif else "").replace("-", ""),
                     "motivo": "vinculada" if "vinculad" in texto_motivo else "directivo",
                     "documento": motivo.group(1).replace("&amp;", "&")})
     return out, int(m.group(1)) if m else 1, int(m.group(2)) if m else 1
@@ -235,13 +236,34 @@ def operaciones_de(notif: dict, detalle: dict) -> list[dict]:
                     "cargo_tipo": detalle["cargo_tipo"], "instrumento": f["instrumento"], "operacion": f["operacion"], "sentido": sentido, "tipo": tipo,
                     "lugar": f["lugar"], "volumen": f["volumen"], "precio": f["precio"], "divisa": f["divisa"],
                     "importe_eur": importe if f["divisa"] == "EUR" else None, "modificacion": "1" if detalle["modificacion"] else "0",
-                    "documento": notif["documento"]})
+                    "sustituida": "0", "documento": notif["documento"]})
     return out
 
 
 # --------------------------------------------------------------------------- estado
 CAMPOS = ["registro", "linea", "fecha_registro", "fecha_operacion", "emisor", "nif", "lei", "isin", "motivo", "cargo_tipo", "instrumento", "operacion",
-          "sentido", "tipo", "lugar", "volumen", "precio", "divisa", "importe_eur", "modificacion", "documento"]
+          "sentido", "tipo", "lugar", "volumen", "precio", "divisa", "importe_eur", "modificacion", "sustituida", "documento"]
+
+
+def marcar_sustituidas(operaciones: list[dict]) -> int:
+    """Una notificación de modificación sustituye a la inicial: las filas anteriores del mismo emisor con el mismo
+    ISIN, fecha, volumen y precio (registradas en los 90 días previos) quedan marcadas y fuera de los cálculos.
+    No hace falta el nombre del declarante para casarlas. Devuelve cuántas filas quedan marcadas."""
+    for o in operaciones:
+        o["sustituida"] = "0"
+    modificaciones = [o for o in operaciones if str(o.get("modificacion")) == "1"]
+    if not modificaciones:
+        return 0
+    por_clave: dict[tuple, list[dict]] = {}
+    for o in operaciones:
+        por_clave.setdefault((o["nif"] or o["emisor"], o["isin"], o["fecha_operacion"], o["volumen"], o["precio"]), []).append(o)
+    n = 0
+    for m in modificaciones:
+        for o in por_clave.get((m["nif"] or m["emisor"], m["isin"], m["fecha_operacion"], m["volumen"], m["precio"]), []):
+            if o["registro"] < m["registro"] and o["sustituida"] == "0" and 0 <= (date.fromisoformat(m["fecha_registro"]) - date.fromisoformat(o["fecha_registro"])).days <= 90:
+                o["sustituida"] = "1"
+                n += 1
+    return n
 
 
 def cargar_operaciones(ruta: Path) -> list[dict]:
@@ -253,6 +275,7 @@ def cargar_operaciones(ruta: Path) -> list[dict]:
         for k in ("volumen", "precio", "importe_eur"):
             f[k] = float(f[k]) if f.get(k) not in (None, "") else None
         f["linea"] = int(f["linea"])
+        f.setdefault("sustituida", "0")
     return filas
 
 
@@ -411,10 +434,12 @@ def recoger(salida: Path, hoy: date, local: Path | None = None, max_documentos: 
         desde_nuevo = tramos[0][0]
     cobertura = {"desde": desde_nuevo.isoformat() if desde_nuevo else None, "hasta": hoy.isoformat(), "completo_hasta_inicio": bool(desde_nuevo and desde_nuevo <= INICIO_REGISTRO),
                  "sin_operaciones": sorted(set(cobertura.get("sin_operaciones", [])) | set(nuevos_sin_ops)), "ultima_pasada": hoy.isoformat()}
+    sustituidas = marcar_sustituidas(operaciones)
     guardar_operaciones(dd / "operaciones.csv", operaciones)
     guardar_pendientes(dd / "pendientes.csv", pendientes)
     (dd / "cobertura.json").write_text(json.dumps(cobertura, ensure_ascii=False, indent=1), encoding="utf-8")
-    return {"operaciones": operaciones, "cobertura": cobertura, "descargados": descargados, "nuevos": nuevos_registros, "fallos": fallos, "pendientes": len(pendientes)}
+    return {"operaciones": operaciones, "cobertura": cobertura, "descargados": descargados, "nuevos": nuevos_registros, "fallos": fallos, "pendientes": len(pendientes),
+            "sustituidas": sustituidas}
 
 
 # --------------------------------------------------------------------------- cálculo
@@ -477,6 +502,8 @@ def percentil(valor: float, historia: list[float]) -> int | None:
 
 
 def calcular(operaciones: list[dict], hoy: date, cobertura: dict) -> dict:
+    sustituidas = [o for o in operaciones if str(o.get("sustituida")) == "1"]
+    operaciones = [o for o in operaciones if str(o.get("sustituida")) != "1"]
     serie = serie_semanal(operaciones, hoy)
     actual = ventana_13(serie, len(serie) - 1) if serie else None
     historia = []
@@ -525,7 +552,7 @@ def calcular(operaciones: list[dict], hoy: date, cobertura: dict) -> dict:
                 "proporcion_compras": round(100 * len(c) / (len(c) + len(v)), 1) if c or v else None}
     recientes_lista = sorted([o for o in operaciones if o["fecha_registro"] >= (hoy - timedelta(days=30)).isoformat()],
                              key=lambda o: (o["fecha_registro"], o["registro"], o["linea"]), reverse=True)
-    totales = {"operaciones": len(operaciones), "discrecionales": sum(1 for o in operaciones if o["tipo"] == "discrecional"),
+    totales = {"operaciones": len(operaciones), "sustituidas": len(sustituidas), "discrecionales": sum(1 for o in operaciones if o["tipo"] == "discrecional"),
                "por_tipo": {t: sum(1 for o in operaciones if o["tipo"] == t) for t in ("discrecional", "plan", "derivado", "fuera_mercado", "otro")},
                "primera_operacion": min((o["fecha_operacion"] for o in operaciones), default=None),
                "ultimo_registro": max((o["fecha_registro"] for o in operaciones), default=None)}
@@ -576,7 +603,8 @@ def fragmento(res: dict, fecha_pub: str) -> str:
     vendedoras = sorted([e for e in emp if e["neto_eur"] < 0], key=lambda e: e["neto_eur"])[:10]
     partes = [f"<!-- directivos:inicio {res['huella']} -->",
               f'<p class="has-small-font-size">Actualizado el {_f(fecha_pub)} con las notificaciones registradas en la CNMV hasta el {_f(res["totales"]["ultimo_registro"])}. '
-              f'Operaciones desde el {_f(res["totales"]["primera_operacion"])}; {res["totales"]["operaciones"]} líneas leídas, {res["totales"]["discrecionales"]} discrecionales.</p>']
+              f'Operaciones desde el {_f(res["totales"]["primera_operacion"])}; {res["totales"]["operaciones"]} líneas leídas, {res["totales"]["discrecionales"]} discrecionales'
+              + (f'; {res["totales"]["sustituidas"]} líneas iniciales sustituidas por notificaciones de modificación' if res["totales"]["sustituidas"] else "") + ".</p>"]
     if a and a["proporcion_compras"] is not None:
         frase = (f"En las últimas {SEMANAS} semanas, administradores y directivos de las cotizadas españolas han comunicado a la CNMV <strong>{a['compras_n']} compras</strong> "
                  f"y <strong>{a['ventas_n']} ventas</strong> discrecionales de acciones de su propia empresa: las compras son el <strong>{a['proporcion_compras']:.0f} %</strong> de las operaciones")
@@ -627,7 +655,8 @@ def fragmento(res: dict, fecha_pub: str) -> str:
                   "nombre de quien la hace: empresa, tipo de cargo (consejero, directivo o persona vinculada), compra o venta, fecha, volumen y precio, con el enlace a la "
                   "notificación oficial. Cuenta como <strong>discrecional</strong> la compra o venta de acciones en un centro de negociación que la propia notificación no "
                   "atribuye a un plan de retribución, de incentivos o de compra para empleados; las entregas de acciones, el ejercicio de opciones, los derivados, "
-                  "las operaciones fuera de mercado, los préstamos y las pignoraciones se guardan con su tipo y no entran en el neto. La «proporción de compras» es el "
+                  "las operaciones fuera de mercado, los préstamos y las pignoraciones se guardan con su tipo y no entran en el neto. Cuando una notificación de "
+                  "modificación repite las operaciones de una anterior (mismo emisor, fecha, volumen y precio), la anterior deja de contar. La «proporción de compras» es el "
                   f"porcentaje de operaciones discrecionales que son compras en las últimas {SEMANAS} semanas; el percentil compara esa proporción con todas las ventanas "
                   f"de {SEMANAS} semanas anteriores (solo se publica con al menos {SEMANAS_MINIMAS} semanas de serie). Los importes son volumen por precio, solo en euros. "
                   "Lectura histórica, sin predicción: que los directivos compren o vendan describe lo que han hecho, no lo que hará la acción.</p>"
@@ -729,7 +758,8 @@ def main() -> int:
         dd = salida / "datos"
         operaciones = cargar_operaciones(dd / "operaciones.csv")
         cobertura = json.loads((dd / "cobertura.json").read_text(encoding="utf-8")) if (dd / "cobertura.json").exists() else {}
-        rec = {"operaciones": operaciones, "cobertura": cobertura, "descargados": 0, "nuevos": 0, "fallos": 0, "pendientes": 0}
+        marcar_sustituidas(operaciones)
+        rec = {"operaciones": operaciones, "cobertura": cobertura, "descargados": 0, "nuevos": 0, "fallos": 0, "pendientes": 0, "sustituidas": 0}
     else:
         rec = recoger(salida, hoy, Path(a.local) if a.local else None, a.max_documentos)
     if not rec["operaciones"]:
@@ -742,7 +772,8 @@ def main() -> int:
         print(f"::warning::… y {len(AVISOS) - 50} avisos más")
     t = res["totales"]
     print(f"Pasada del {hoy}: {rec['descargados']} PDF leídos, {rec['nuevos']} notificaciones nuevas, {rec['fallos']} fallos, {rec['pendientes']} pendientes. "
-          f"Serie: {t['operaciones']} líneas ({t['discrecionales']} discrecionales) desde {t['primera_operacion']}; registro cubierto desde {rec['cobertura'].get('desde')}. "
+          f"Serie: {t['operaciones']} líneas ({t['discrecionales']} discrecionales, {t['sustituidas']} sustituidas por modificaciones) desde {t['primera_operacion']}; "
+          f"registro cubierto desde {rec['cobertura'].get('desde')}. "
           f"{'Datos nuevos.' if cambia else 'Sin cambios.'}")
     return 0
 

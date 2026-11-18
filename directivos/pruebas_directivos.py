@@ -209,6 +209,20 @@ def prueba_clasificacion():
     ok(ops[0]["importe_eur"] == 3450.0 and ops[0]["sentido"] == "compra" and ops[0]["tipo"] == "discrecional" and ops[0]["linea"] == 1, f"operaciones: importe en euros: {ops[0]}")
     ok(ops[1]["importe_eur"] is None and ops[1]["divisa"] == "USD" and ops[1]["linea"] == 2, "operaciones: sin importe en euros si la divisa no es EUR")
     ok(set(ops[0]) == set(d.CAMPOS), "operaciones: mismos campos que el CSV")
+    # modificación que sustituye a la inicial (caso real de Puig: la inicial decía compra; la modificación, venta)
+    ini = d.operaciones_de({"registro": "2026140993", "fecha_registro": "2026-11-03", "emisor": "PUIG BRANDS, S.A.", "nif": "A1", "motivo": "directivo", "documento": "u"},
+                           d.leer_notificacion(pdf_texto("X", "CFO", "PUIG BRANDS, S.A.", "", [F_COMPRA]), "directivo"))
+    mod = d.operaciones_de({"registro": "2026141576", "fecha_registro": "2026-11-04", "emisor": "PUIG BRANDS, S.A.", "nif": "A1", "motivo": "directivo", "documento": "u"},
+                           d.leer_notificacion(pdf_texto("X", "CFO", "PUIG BRANDS, S.A.", "", [F_COMPRA.replace("Compra", "Venta ")], inicial="Modificación"), "directivo"))
+    otra = d.operaciones_de({"registro": "2026141000", "fecha_registro": "2026-11-03", "emisor": "OTRA, S.A.", "nif": "A2", "motivo": "directivo", "documento": "u"},
+                            d.leer_notificacion(pdf_texto("X", "CFO", "OTRA, S.A.", "", [F_COMPRA]), "directivo"))
+    todas = ini + mod + otra
+    n = d.marcar_sustituidas(todas)
+    ok(n == 1 and ini[0]["sustituida"] == "1" and mod[0]["sustituida"] == "0" and otra[0]["sustituida"] == "0" and mod[0]["sentido"] == "venta", f"sustituidas: la inicial deja de contar: {n} {[o['sustituida'] for o in todas]}")
+    res = d.calcular(todas, HOY, {})
+    ok(res["totales"]["operaciones"] == 2 and res["totales"]["sustituidas"] == 1 and res["actual"] is None, "calcular: la sustituida no cuenta")
+    ok(d.leer_listado(listado(1, 1, [("18/11/2026", "PROSEGUR, COMPA&#209;IA DE SEGURIDAD, S.A.", "A1", "N", "Persona con Responsabilidad de Dirección", "1")]))[0][0]["emisor"] == "PROSEGUR, COMPAÑIA DE SEGURIDAD, S.A.", "listado: entidades HTML resueltas")
+    ok(d._tipo_operacion("Acción", "Compra", "XXXX", "") == "fuera_mercado", "clasificación: XXXX es fuera de mercado")
 
 
 # --------------------------------------------------------------------------- recogida con estado
