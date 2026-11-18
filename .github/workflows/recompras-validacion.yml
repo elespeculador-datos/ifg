@@ -1,12 +1,11 @@
 name: Recompras, fase 0 (sonda a mano)
 
 # Indicador 17 del catálogo de Datos, fase 0 (viabilidad): ¿se leen de forma fiable los informes semanales de
-# recompra que las empresas envían a la CNMV (OIR)? Flujo sin horario ni escritura en el repositorio.
+# recompra que las empresas envían a la CNMV (OIR)? Flujo sin horario ni escritura en el repositorio: se lanza
+# a mano, descarga los últimos informes de hasta ocho empresas, los pasa por recompras/filas.py y compara la
+# suma de acciones con el total que declara cada documento (ver recompras/LEEME.md).
 on:
   workflow_dispatch:
-  push:
-    branches: [recompras]   # solo mientras la rama está en desarrollo
-    paths: ["recompras/**", ".github/workflows/recompras-validacion.yml"]
 
 permissions:
   contents: read
@@ -22,11 +21,14 @@ jobs:
           python-version: "3.12"
       - name: Instalar dependencias
         run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils >/dev/null && pip install requests pandas openpyxl xlrd
+      - name: Comprobaciones sin red
+        run: python recompras/pruebas_recompras.py
       - name: Sonda de los informes semanales de recompra
         run: |
           mkdir -p salida/docs
           python - <<'EOF'
-          import io, re, subprocess, requests, pandas as pd
+          import io, os, re, subprocess, sys, requests, pandas as pd
+          sys.path.insert(0, "recompras"); import filas
           H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos; +https://elespeculador.com)", "Accept-Language": "es-ES,es;q=0.9"}
           s = requests.Session(); s.headers.update(H)
           csv = s.get("https://datos.elespeculador.com/cnmv/datos/ibex35.csv", timeout=60).text
@@ -54,7 +56,12 @@ jobs:
                   if "pdf" in ct or cuerpo[:4] == b"%PDF":
                       open(nombre + ".pdf", "wb").write(cuerpo)
                       t2 = subprocess.run(["pdftotext", "-layout", nombre + ".pdf", "-"], capture_output=True, text=True).stdout
-                      print("   PDF texto (primeras 80 líneas no vacías):"); print("\n".join([l for l in t2.splitlines() if l.strip()][:80]))
+                      open(nombre + ".txt", "w", encoding="utf-8").write(t2)
+                      print("   PDF texto (primeras 40 líneas no vacías):"); print("\n".join([l for l in t2.splitlines() if l.strip()][:40]))
+                      fl = filas.leer_filas(t2); rs = filas.resumen(fl); dec = filas.totales_declarados(t2)
+                      veredicto = "COINCIDE con el total declarado" if dec and rs["acciones"] in dec else ("sin total declarado" if not dec else f"NO coincide con {dec}")
+                      print(f"   LECTOR: {rs['filas']} filas, {rs['acciones']:,} acciones, medio {rs['precio_medio']}, {rs['desde']}..{rs['hasta']}, centros {rs['centros']} -> {veredicto}")
+                      print(f"   LECTOR: {rs['filas']} filas, {rs['acciones']:,} acciones -> {veredicto}", file=open(os.environ["GITHUB_STEP_SUMMARY"], "a"))
                   elif "spreadsheet" in ct or "excel" in ct or cuerpo[:2] == b"PK" or cuerpo[:8] == b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1":
                       ext = ".xlsx" if cuerpo[:2] == b"PK" else ".xls"
                       open(nombre + ext, "wb").write(cuerpo)
