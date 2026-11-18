@@ -11,9 +11,6 @@ on:
       max_documentos:
         description: "PDF que se descargan como máximo"
         default: "80"
-  push:
-    branches: [directivos]   # solo mientras la rama está en desarrollo: se quita al fusionar
-    paths: ["directivos/**", ".github/workflows/directivos-validacion.yml"]
 
 permissions:
   contents: read
