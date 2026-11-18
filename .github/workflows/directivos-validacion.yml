@@ -1,0 +1,65 @@
+name: Directivos, operaciones comunicadas a la CNMV (validación a mano)
+
+# Indicador 10 del catálogo de Datos: operaciones de administradores y directivos comunicadas a la
+# CNMV (art. 19 del Reglamento de abuso de mercado). Este flujo NO tiene horario ni guarda nada en
+# el repositorio: se lanza a mano para sondear el registro de la CNMV y validar la rama con datos
+# reales (el entorno de Datos no llega a cnmv.es).
+on:
+  workflow_dispatch:
+  push:
+    branches: [directivos]   # solo mientras la rama está en desarrollo: se quita al fusionar
+    paths: ["directivos/**", ".github/workflows/directivos-validacion.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install requests
+      - name: Sonda del registro de operaciones de directivos de la CNMV
+        run: |
+          mkdir -p salida/respuestas
+          python - <<'EOF'
+          import re, requests
+          H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos; +https://elespeculador.com)", "Accept-Language": "es-ES,es;q=0.9"}
+          s = requests.Session()
+          def texto(html):
+              html = re.sub(r"(?is)<(script|style).*?</\1>", " ", html)
+              return re.sub(r"\s+", " ", re.sub(r"(?s)<[^>]+>", " ", html))
+          def formularios(html):
+              for m in re.finditer(r"(?is)<form[^>]*>", html):
+                  print("FORM:", m.group(0)[:300])
+              for m in re.finditer(r'(?is)<(input|select|button)[^>]*>', html):
+                  t = m.group(0)
+                  if re.search(r'name="', t):
+                      print("  ", re.sub(r"\s+", " ", t)[:220])
+          url = "https://www.cnmv.es/portal/consultas/directivos-consulta?lang=es"
+          r = s.get(url, headers=H, timeout=60)
+          print("== página:", r.status_code, r.headers.get("content-type"), len(r.text), r.url)
+          open("salida/respuestas/directivos_form.html", "w", encoding="utf-8").write(r.text)
+          formularios(r.text)
+          for m in re.finditer(r'href="([^"]*(?:xls|csv|xml|json|export|Export|descarg|Descarg|Excel)[^"]*)"', r.text):
+              print("ENLACE:", m.group(1)[:200])
+          t = texto(r.text)
+          i = t.find("Buscar")
+          print("TEXTO:", t[max(0, i - 1500): i + 800])
+          # intento de búsqueda por fechas (últimos 10 días) con los campos que encuentre
+          campos = dict(re.findall(r'<input[^>]*name="([^"]+)"[^>]*value="([^"]*)"', r.text))
+          print("CAMPOS con valor:", {k: v[:40] for k, v in campos.items()})
+          EOF
+      - name: Guardar las respuestas como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: directivos-sonda
+          path: salida
+          retention-days: 14
