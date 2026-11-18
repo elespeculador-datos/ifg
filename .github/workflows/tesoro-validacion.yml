@@ -1,0 +1,53 @@
+name: Tesoro, Letras y Bonos (validación a mano)
+
+# Letras del Tesoro (indicador 7) y Bonos y Obligaciones (indicador 8). En producción corren en el
+# servidor smpro-datos-1 (servidor/ejecutar.sh letras|bonos; ver DESPLIEGUE.md). Este flujo NO tiene
+# horario ni guarda nada en el repositorio: se lanza a mano para validar una rama con datos reales
+# del Tesoro (el entorno de Datos no llega a tesoro.es) y deja la salida como artefacto.
+on:
+  workflow_dispatch:
+  push:
+    branches: [tesoro-proximas-json]   # solo mientras la rama está en desarrollo: se quita al fusionar
+    paths: ["letras/**", "bonos/**", ".github/workflows/tesoro-validacion.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils >/dev/null && pip install requests pandas openpyxl certifi
+      - name: Comprobaciones sin red
+        run: python letras/pruebas_letras.py && python bonos/pruebas_bonos.py
+      - name: Pasada con datos reales
+        env:
+          ESPEC_DATOS_BASE: https://datos.elespeculador.com/
+        run: |
+          python letras/letras.py --salida salida/letras | tee -a "$GITHUB_STEP_SUMMARY"
+          python bonos/bonos.py --salida salida/bonos | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Próximas subastas del JSON y primera línea del fragmento
+        run: |
+          python - <<'EOF'
+          import json
+          for c in ("letras", "bonos"):
+              j = json.load(open(f"salida/{c}/datos/ultima.json", encoding="utf-8"))
+              print(f"===== {c}: fecha {j['fecha']} huella {j['huella']} ultimas {list(j['ultimas'])[:5] if isinstance(j['ultimas'], dict) else len(j['ultimas'])}")
+              for p in j["proximas"]:
+                  print("   ", p["subasta"], p.get("plazos", p.get("indexados")), p["peticiones"])
+              print("   primera línea:", open(f"salida/{c}/fragmento-wp.html", encoding="utf-8").readline().strip())
+          EOF
+      - name: Guardar la salida como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tesoro-salida
+          path: salida
+          retention-days: 14

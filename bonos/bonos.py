@@ -396,10 +396,15 @@ def _referencia(f: dict, clase: str, plazo: int) -> bool:
             and not f["sindicada"] and not f["mas_de"] and f.get("medio") is not None)
 
 
-def huella(datos: dict) -> str:
+def proximas_desde(datos: dict, fecha: str) -> list[dict]:
+    """Las subastas del calendario a partir del día dado (todas si no se da fecha), en orden."""
+    return [c for c in datos["proximas"] if not fecha or c["subasta"] >= fecha]
+
+
+def huella(datos: dict, fecha: str = "") -> str:
     base = [[f["fecha"], f.get("activo"), f.get("marginal"), f.get("medio")] for f in datos["subastas"][-60:]]
     base.append([[w["fecha"], w["denominacion"], w.get("medio")] for w in datos["ultimas"]])
-    base.append([[c["subasta"], c["peticiones"]] for c in datos["proximas"][:4]])
+    base.append([[c["subasta"], c["peticiones"]] for c in proximas_desde(datos, fecha)[:4]])
     base.append([[v["valor"], v["cupon"], v["vencimiento"]] for v in datos["en_emision"]])
     base.append(datos["tenedores"]["ultimo"])
     base.append(TEXTOS)
@@ -534,7 +539,7 @@ def escribir(datos: dict, fecha: str, salida: Path) -> bool:
     dd.mkdir(parents=True, exist_ok=True)
     previo = dd / "ultima.json"
     antes = json.loads(previo.read_text(encoding="utf-8")) if previo.exists() else {}
-    nueva = huella(datos)
+    nueva = huella(datos, fecha)
     cambia = antes.get("huella") != nueva
     fecha_pub = fecha if cambia else antes.get("fecha", fecha)
     campos = ["fecha", "activo", "clase", "plazo_anios", "mas_de", "indexado", "verde", "tipo_variable", "sindicacion", "cupon",
@@ -555,7 +560,7 @@ def escribir(datos: dict, fecha: str, salida: Path) -> bool:
             w.writerow([c["subasta"], int(c["indexados"]), c["peticiones"], c["pago"], c["emision"]])
     previo.write_text(json.dumps({
         "fecha": fecha_pub, "comprobado": datetime.now(timezone.utc).isoformat(timespec="seconds"), "huella": nueva,
-        "ultimas": datos["ultimas"], "en_emision": datos["en_emision"], "proximas": datos["proximas"][:8],
+        "ultimas": datos["ultimas"], "en_emision": datos["en_emision"], "proximas": proximas_desde(datos, fecha)[:8],
         "tenedores": datos["tenedores"]["ultimo"],
         "fuente_tenedores": "Tesoro Público, Bonos y Obligaciones del Estado no segregados: distribución por tenedores "
                             "(estadísticas mensuales)",
