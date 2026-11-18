@@ -1,0 +1,69 @@
+name: Accionistas del IBEX 35 (validación a mano)
+
+# Indicador 13 del catálogo de Datos: accionistas significativos, solo personas jurídicas. En producción corre
+# en el servidor smpro-datos-1 (servidor/ejecutar.sh accionistas; ver DESPLIEGUE.md). Este flujo NO tiene horario
+# ni guarda nada en el repositorio: se lanza a mano para validar la rama con la última consulta real del
+# servidor (datos.elespeculador.com) sin volver a consultar a la CNMV.
+on:
+  workflow_dispatch:
+  push:
+    branches: [accionistas-juridicas]   # solo mientras la rama está en desarrollo: se quita al fusionar
+    paths: ["accionistas/**", ".github/workflows/accionistas-validacion.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install requests
+      - name: Comprobaciones sin red
+        run: python accionistas/pruebas_accionistas.py
+      - name: Pasada con la última consulta real del servidor
+        env:
+          ESPEC_DATOS_BASE: https://datos.elespeculador.com/
+        run: |
+          set -o pipefail
+          mkdir -p salida/entrada
+          curl -sS -f -o salida/entrada/ultima.json https://datos.elespeculador.com/accionistas/datos/ultima.json
+          python accionistas/duenos.py --salida salida/accionistas --local salida/entrada/ultima.json | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Qué queda y qué se excluye (nombres de entidades y recuentos; sin nombres de personas)
+        run: |
+          python - <<'EOF'
+          import json, sys
+          sys.path.insert(0, "accionistas")
+          import duenos as d
+          j = json.load(open("salida/entrada/ultima.json", encoding="utf-8"))
+          total_j = total_f = 0
+          raros = []
+          for e in j["empresas"]:
+              if e.get("fuera"):
+                  continue
+              jur = [f["accionista"] for f in e["accionistas"] if d.persona_juridica(f["accionista"])]
+              fis = [f["accionista"] for f in e["accionistas"] if not d.persona_juridica(f["accionista"])]
+              total_j += len(jur); total_f += len(fis)
+              print(f"{e['empresa']}: {len(jur)} jurídicas, {len(fis)} excluidas | " + "; ".join(jur))
+              for n in fis:
+                  if not d.FORMA_PERSONA.match(d._sin_tildes(n).strip()):
+                      raros.append((e["empresa"], n))
+          print(f"\nTOTAL: {total_j} jurídicas, {total_f} excluidas")
+          print("Excluidas que NO tienen la forma «APELLIDOS , NOMBRE» (revisar: podrían ser entidades sin palabra clave):")
+          for emp, n in raros:
+              print("   ", emp, "|", n)
+          EOF
+          echo "===== fragmento (primeras 60 líneas)"; head -60 salida/accionistas/fragmento-wp.html
+      - name: Guardar la salida como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accionistas-salida
+          path: salida/accionistas
+          retention-days: 14
