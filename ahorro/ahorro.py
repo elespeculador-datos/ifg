@@ -11,7 +11,7 @@ verificada y publica, una vez por semana:
     (Resolución «por la que se publican determinados tipos de interés oficiales de referencia del
     mercado hipotecario»), leído por la API de datos abiertos del BOE;
   - y, si la salida de letras/ está al lado, el tipo marginal de la última subasta de Letras a 12
-    meses (D. G. del Tesoro y Política Financiera), como alternativa sin riesgo.
+    meses (D. G. del Tesoro y Política Financiera), como referencia pública.
 
 Salida en <salida>/: fragmento-wp.html (entre <!-- ahorro:inicio HUELLA --> y <!-- ahorro:fin -->),
 index.html, datos/serie.csv (mensual, formato largo), datos/ultima.json y datos/euribor_boe.csv
@@ -45,7 +45,7 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 CABECERAS = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)"}
 ESPERAS = [15, 30, 60, 120]
 
@@ -300,29 +300,49 @@ def euribor_del_mes(mes: str, descargar_sumario=None, descargar_xml=None, hoy: d
         ident = buscar_resolucion(dia, descargar_sumario)
         if ident:
             r = leer_resolucion(descargar_xml(ident))
+            # El mes es el anterior al de publicación, por construcción: la resolución de los primeros días de
+            # un mes publica las medias del mes que acaba de terminar. El mes que se lee del texto solo sirve de
+            # contraste (en el texto aparecen otras fechas: la de la resolución, citas de normas antiguas).
             if r["mes"] and r["mes"] != mes:
-                AVISOS.append(f"La resolución {ident} habla de {r['mes']} y se esperaba {mes}: se guarda con el mes que dice el BOE")
-            return {"mes": r["mes"] or mes, "euribor_12m": r["euribor_12m"], "boe": ident, "fecha_boe": dia.isoformat()}
+                AVISOS.append(f"La resolución {ident} menciona {r['mes']} antes del dato; se guarda como {mes}, el mes anterior a su publicación")
+            return {"mes": mes, "euribor_12m": r["euribor_12m"], "boe": ident, "fecha_boe": dia.isoformat()}
     return None
+
+
+def mes_de_publicacion(fecha_boe: str) -> str:
+    """Mes al que corresponde una resolución publicada en `fecha_boe`: el anterior."""
+    f = date.fromisoformat(fecha_boe)
+    return (f.replace(day=1) - timedelta(days=1)).strftime("%Y-%m")
 
 
 def actualizar_euribor(ruta: Path, hoy: date, meses_atras: int = 0, **descargas) -> pd.DataFrame:
     """Lee el CSV acumulado, añade los meses que faltan (el anterior al actual y, si se pide, hacia atrás) y lo guarda."""
     cols = ["mes", "euribor_12m", "boe", "fecha_boe"]
     previo = pd.read_csv(ruta, dtype={"mes": str, "boe": str, "fecha_boe": str}).astype({"mes": str, "boe": str, "fecha_boe": str}) if ruta.exists() else pd.DataFrame(columns=cols)
+    if len(previo):
+        # Saneamiento: el mes de cada fila sale de su fecha de publicación (el anterior). Repara lo que
+        # guardó la versión 1.0.0, que fechaba por el texto de la resolución y mezclaba meses.
+        correcto = previo["fecha_boe"].map(mes_de_publicacion)
+        mal = previo["mes"] != correcto
+        if mal.any():
+            AVISOS.append(f"{int(mal.sum())} filas del euríbor acumulado tenían el mes mal fechado y se han corregido por su fecha de publicación")
+            previo["mes"] = correcto
+        previo = previo.drop_duplicates("mes", keep="last")
     tengo = set(previo["mes"]) if len(previo) else set()
     ultimo_mes = (hoy.replace(day=1) - timedelta(days=1)).strftime("%Y-%m")  # el mes anterior al actual
+    # Pendientes: el mes anterior, los que se pidan hacia atrás y los huecos de los últimos 36 meses
+    # (como mucho 12 descargas por pasada, para no abusar de la API del BOE).
     pendientes = [ultimo_mes]
-    a, m = int(ultimo_mes[:4]), int(ultimo_mes[5:7])
-    for _ in range(meses_atras):
-        m -= 1
-        if m == 0:
-            a, m = a - 1, 12
-        pendientes.append(f"{a:04d}-{m:02d}")
-    nuevos = []
+    mes_i = ultimo_mes
+    for i in range(max(meses_atras, 35)):
+        mes_i = _mes_menos(mes_i, 1)
+        if i < meses_atras or mes_i not in tengo:
+            pendientes.append(mes_i)
+    nuevos, descargados = [], 0
     for mes in pendientes:
-        if mes in tengo:
+        if mes in tengo or descargados >= 12:
             continue
+        descargados += 1
         r = euribor_del_mes(mes, hoy=hoy, **descargas)
         if r:
             nuevos.append(r)
@@ -537,10 +557,10 @@ def fragmento(res: dict, fecha_pub: str) -> str:
                        for n in orden if (t := res["tipos"].get(n))])]
     if res.get("letras_12m"):
         l = res["letras_12m"]
-        partes += ["<h2>La alternativa sin riesgo: Letras del Tesoro a 12 meses</h2>",
+        partes += ["<h2>La referencia del Tesoro: Letras a 12 meses</h2>",
                    f"<p>La última subasta de Letras a 12 meses ({_f(l['fecha'])}) se adjudicó a un tipo marginal del <strong>{_v(l['marginal'], 3)} %</strong>, "
                    f"según el Tesoro. Frente al último IPC ({_v(l['ipc_usado'])} %), eso sería un {_dif(l['real'])} % real si la inflación se mantuviera; "
-                   f"es un cálculo ilustrativo, no una previsión. Detalles en la página de Letras del Tesoro.</p>"]
+                   f"es un cálculo ilustrativo, no una previsión ni una comparación entre productos. Detalles en la página de Letras del Tesoro.</p>"]
     svg = grafico_svg(res["grafico"])
     if svg:
         partes += ["<h2>Desde 2003: la rentabilidad real de los depósitos a plazo</h2>", f'<figure class="wp-block-image">{svg}</figure>']
