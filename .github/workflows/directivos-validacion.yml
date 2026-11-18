@@ -25,7 +25,7 @@ jobs:
           cache: pip
       - name: Instalar dependencias
         run: pip install requests
-      - name: Sonda 2, descarga de información de la CNMV y búsqueda por fechas en el registro de directivos
+      - name: Sonda 3, resultados por GET y documentos de las notificaciones
         run: |
           mkdir -p salida/respuestas
           python - <<'EOF'
@@ -37,55 +37,50 @@ jobs:
           def texto(html):
               html = re.sub(r"(?is)<(script|style).*?</\1>", " ", html)
               return re.sub(r"\s+", " ", re.sub(r"(?s)<[^>]+>", " ", html))
-          def ocultos(html):
-              return dict(re.findall(r'<input type="hidden" name="([^"]+)" id="[^"]*" value="([^"]*)"', html))
-          # 1) Descarga de información (¿hay un fichero del registro de directivos?)
-          r = s.get("https://www.cnmv.es/portal/Publicaciones/Descarga-Informacion-Individual.aspx?lang=es", timeout=60)
-          print("== descarga individual:", r.status_code, len(r.text), r.url)
-          open("salida/respuestas/descarga_individual.html", "w", encoding="utf-8").write(r.text)
-          for m in re.finditer(r"(?is)<select[^>]*name=\"([^\"]+)\"[^>]*>(.*?)</select>", r.text):
-              print("SELECT", m.group(1))
-              for o in re.findall(r'(?is)<option[^>]*value="([^"]*)"[^>]*>(.*?)</option>', m.group(2))[:80]:
-                  print("   ", o[0], "|", re.sub(r"\s+", " ", o[1]).strip()[:100])
-          t = texto(r.text)
-          i = t.find("Descarga")
-          print("TEXTO:", t[max(0, i - 200): i + 2500])
-          for m in re.finditer(r'href="([^"]+)"[^>]*>([^<]{0,80})', r.text):
-              if re.search(r"(?i)descarg|zip|xml|csv|xls", m.group(1) + m.group(2)):
-                  print("ENLACE:", m.group(1)[:160], "|", m.group(2).strip()[:80])
-          # 2) Búsqueda por fechas en el registro de directivos (POST ASP.NET)
-          url = "https://www.cnmv.es/portal/consultas/directivos-consulta?lang=es"
-          r = s.get(url, timeout=60)
-          campos = ocultos(r.text)
-          campos["ctl00$WucCookiesPolicy$btnCookiesConfirmTech"] = "Aceptar solo las imprescindibles"
-          r = s.post(url, data=campos, timeout=60)
-          print("== cookies:", r.status_code, len(r.text))
-          campos = ocultos(r.text)
           hoy = date.today()
-          campos.update({"ctl00$ContentPrincipal$txtNombre": "", "ctl00$ContentPrincipal$txtLEI": "", "ctl00$ContentPrincipal$txtDeclarante": "",
-                         "ctl00$ContentPrincipal$txtFechaD": (hoy - timedelta(days=7)).strftime("%d/%m/%Y"),
-                         "ctl00$ContentPrincipal$txtFechaH": hoy.strftime("%d/%m/%Y"),
-                         "ctl00$ContentPrincipal$btnBuscar": "Buscar"})
-          r = s.post(url, data=campos, timeout=90)
-          print("== búsqueda 7 días:", r.status_code, len(r.text))
-          open("salida/respuestas/directivos_resultado.html", "w", encoding="utf-8").write(r.text)
-          h = r.text
-          ids = sorted(set(re.findall(r'id="(ctl00_ContentPrincipal_[^"]+)"', h)))
-          print("IDS ContentPrincipal:", ids[:80])
-          clases = sorted(set(re.findall(r'class="([^"]*(?:result|lista|tabla|grid|item|fila|card)[^"]*)"', h, re.I)))
-          print("CLASES:", clases[:60])
-          tt = texto(h)
-          j = tt.find("Declarante")
-          print("TEXTO alrededor de Declarante (6000):", tt[max(0, j - 1500): j + 4500])
-          i = h.find("ctl00_ContentPrincipal_")
-          cuerpo = re.sub(r"(?is)<(script|style).*?</\1>", " ", h[i:])
-          cuerpo = re.sub(r"\s+", " ", cuerpo)
-          print("HTML desde ContentPrincipal (7000):", cuerpo[:7000])
-          for m in re.finditer(r'href="([^"]+)"', h):
-              u = m.group(1)
-              if "verdocumento" in u or "Directivos" in u or "directivos-" in u.lower():
-                  print("ENLACE:", u[:200])
+          base = "https://www.cnmv.es/portal/consultas/directivos-resultado.aspx"
+          # 1) GET sin cookies ni viewstate, 30 días, página 0 y última
+          params = {"fechad": (hoy - timedelta(days=30)).strftime("%d/%m/%Y"), "fechah": hoy.strftime("%d/%m/%Y"), "page": 0}
+          r = s.get(base, params=params, timeout=90)
+          print("== GET 30 días página 0:", r.status_code, len(r.text), r.url)
+          open("salida/respuestas/directivos_get_p0.html", "w", encoding="utf-8").write(r.text)
+          m = re.search(r"Página (\d+) de (\d+)", r.text)
+          print("paginación:", m.group(0) if m else "no encontrada")
+          items = re.findall(r'(?s)<li id="ctl00_ContentPrincipal_wucRegistros_repListaPrincipal_ctl\d+_elementoPrimerNivel".*?Número de registro:\s*(\d+)', r.text)
+          print("registros en la página:", len(items), items[:3])
+          bloques = re.findall(r'(?s)<li id="ctl00_ContentPrincipal_wucRegistros_repListaPrincipal_ctl\d+_elementoPrimerNivel"(.*?)Número de registro:\s*(\d+)', r.text)
+          docs = []
+          for b, num in bloques:
+              fecha = re.search(r"fecha-no-icon\">\s*([\d/]+)", b)
+              emisor = re.search(r'class="tit-small">([^<]+)<', b)
+              nif = re.search(r'datosentidad\.aspx\?nif=([^"]+)"', b)
+              motivo = re.search(r'href="(https://www\.cnmv\.es/webservices/verdocumento/ver\?e=[^"]+)"[^>]*>Motivo de la notificaci\S+n:\s*([^<]+)<', b)
+              print("   ", num, fecha.group(1) if fecha else None, emisor.group(1).strip() if emisor else None, nif.group(1) if nif else None, motivo.group(2).strip() if motivo else None)
+              if motivo:
+                  docs.append((num, motivo.group(1).replace("&amp;", "&")))
+          # 2) los documentos de las tres primeras notificaciones
+          for num, u in docs[:3]:
+              d = s.get(u, timeout=90)
+              ct = d.headers.get("content-type", "")
+              print(f"== documento {num}: {d.status_code} {ct} {len(d.content)} bytes")
+              nombre = f"salida/respuestas/doc_{num}." + ("pdf" if "pdf" in ct else "html")
+              open(nombre, "wb").write(d.content)
+              if "pdf" in ct:
+                  print("   PDF: primeros bytes", d.content[:40])
+              else:
+                  print("   TEXTO:", texto(d.text)[:3500])
+                  print("   HTML tablas:", len(re.findall(r"<table", d.text)), "formularios:", len(re.findall(r"<form", d.text)))
+          # 3) página última del rango
+          if m:
+              params["page"] = int(m.group(2)) - 1
+              r2 = s.get(base, params=params, timeout=90)
+              n2 = len(re.findall(r"Número de registro:", r2.text))
+              print("== última página:", r2.status_code, "registros:", n2)
           EOF
+      - name: Extraer texto de los PDF si los hay
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils >/dev/null
+          for f in salida/respuestas/doc_*.pdf; do [ -f "$f" ] && { echo "===== $f"; pdftotext -layout "$f" - | head -120; }; done; true
       - name: Guardar las respuestas como artefacto
         if: always()
         uses: actions/upload-artifact@v4
