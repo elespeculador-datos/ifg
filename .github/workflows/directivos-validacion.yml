@@ -70,13 +70,17 @@ jobs:
           print("== búsqueda 7 días:", r.status_code, len(r.text))
           open("salida/respuestas/directivos_resultado.html", "w", encoding="utf-8").write(r.text)
           h = r.text
-          i = h.find("<table")
-          print("HTML tabla:", re.sub(r"\s+", " ", h[i: i + 6000]) if i >= 0 else "sin <table>")
-          for m in re.finditer(r'(?i)(href|onclick)="([^"]*(?:excel|export|xls|csv|xml|descarg|pdf|Ver detalle|ctl00\$ContentPrincipal\$[^"]*)[^"]*"', h):
-              print("ENLACE/EVENTO:", m.group(2)[:200])
-          tt = texto(h)
-          j = tt.find("Resultados")
-          print("TEXTO resultados:", tt[max(0, j - 200): j + 3000])
+          k = h.find("btnLimpiar")
+          cuerpo = h[k:]
+          cuerpo = re.sub(r"(?is)<(script|style).*?</\1>", " ", cuerpo)
+          cuerpo = re.sub(r"\s+", " ", cuerpo)
+          print("HTML tras el formulario (8000):", cuerpo[:8000])
+          tt = texto(h[k:])
+          print("TEXTO tras el formulario (3000):", tt[:3000])
+          for m in re.finditer(r'href="([^"]+)"', h[k:]):
+              u = m.group(1)
+              if "ContentPrincipal" in u or "verdocumento" in u or "directivos" in u.lower() or "Excel" in u or "xls" in u.lower():
+                  print("ENLACE:", u[:200])
           EOF
       - name: Guardar las respuestas como artefacto
         if: always()
