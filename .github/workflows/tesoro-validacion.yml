@@ -6,9 +6,6 @@ name: Tesoro, Letras y Bonos (validación a mano)
 # del Tesoro (el entorno de Datos no llega a tesoro.es) y deja la salida como artefacto.
 on:
   workflow_dispatch:
-  push:
-    branches: [tesoro-proximas-json]   # solo mientras la rama está en desarrollo: se quita al fusionar
-    paths: ["letras/**", "bonos/**", ".github/workflows/tesoro-validacion.yml"]
 
 permissions:
   contents: read
