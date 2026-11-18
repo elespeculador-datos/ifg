@@ -1,0 +1,107 @@
+name: Agenda semanal (validación a mano)
+
+# Indicador 15 del catálogo de Datos: agenda semanal de catalizadores (subastas del Tesoro,
+# publicaciones del INE, reuniones del BCE y de la Fed, calendario del BLS, Eurostat).
+# En producción corre en el servidor smpro-datos-1 (servidor/ejecutar.sh agenda; ver DESPLIEGUE.md).
+# Este flujo NO tiene horario ni guarda nada en el repositorio: se lanza a mano para sondear las
+# fuentes y validar una rama con datos reales (el entorno de Datos no llega a ninguna de ellas).
+on:
+  workflow_dispatch:
+  push:
+    branches: [agenda-semanal]   # solo mientras la rama está en desarrollo: se quita al fusionar
+    paths: ["agenda/**", ".github/workflows/agenda-validacion.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install requests pandas
+      - name: Comprobaciones sin red
+        run: test -f agenda/pruebas_agenda.py && python agenda/pruebas_agenda.py || echo "sin pruebas todavía"
+      - name: Sonda de las fuentes (qué devuelve cada una)
+        run: |
+          mkdir -p salida/respuestas
+          python - <<'EOF'
+          import json, re, requests
+          H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)"}
+          def texto(html):
+              html = re.sub(r"(?is)<(script|style).*?</\1>", " ", html)
+              t = re.sub(r"(?s)<[^>]+>", " ", html)
+              return re.sub(r"\s+", " ", t)
+          def ver(nombre, url, params=None, extracto=None, guardar=None, aceptar="*/*"):
+              try:
+                  r = requests.get(url, params=params, headers={**H, "Accept": aceptar}, timeout=60)
+                  print(f"\n== {nombre}: {r.status_code} {r.headers.get('content-type')} {len(r.text)} caracteres · {r.url[:140]}")
+                  if guardar:
+                      open(f"salida/respuestas/{guardar}", "w", encoding="utf-8").write(r.text)
+                  if extracto:
+                      extracto(r)
+                  else:
+                      print(r.text[:1500])
+              except Exception as e:
+                  print(f"\n== {nombre}: EXCEPCION {e}")
+          # INE: operaciones, publicaciones de IPC y fechas
+          def ine_ops(r):
+              ops = r.json()
+              print(len(ops), "operaciones")
+              for o in ops:
+                  n = str(o.get("Nombre", ""))
+                  if any(k in n.lower() for k in ("precios de consumo", "contabilidad nacional trimestral", "población activa", "producción industrial", "comercio al por menor", "hipotecas", "sociedades mercantiles", "turismo", "ipc")):
+                      print("  ", o.get("Id"), o.get("Codigo"), "|", n)
+          ver("INE operaciones", "https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES", extracto=ine_ops, guardar="ine_operaciones.json")
+          def ine_pubs(r):
+              pubs = r.json()
+              for p in pubs:
+                  print("  ", p.get("Id"), "|", p.get("Nombre"), "|", {k: v for k, v in p.items() if k not in ("Id", "Nombre")})
+          ver("INE publicaciones de la operación 25 (IPC)", "https://servicios.ine.es/wstempus/js/ES/PUBLICACIONES_OPERACION/25", extracto=ine_pubs)
+          ver("INE publicaciones (todas, primeras 40)", "https://servicios.ine.es/wstempus/js/ES/PUBLICACIONES", extracto=lambda r: [print("  ", p.get("Id"), "|", p.get("Nombre")) for p in r.json()[:40]], guardar="ine_publicaciones.json")
+          def ine_fechas(r):
+              fs = r.json()
+              print(len(fs), "fechas; primeras:", json.dumps(fs[:3], ensure_ascii=False)[:600], "... últimas:", json.dumps(fs[-3:], ensure_ascii=False)[:600])
+          ver("INE fechas de la publicación 8", "https://servicios.ine.es/wstempus/js/ES/PUBLICACIONFECHA_PUBLICACION/8", extracto=ine_fechas)
+          # BCE: reuniones del Consejo de Gobierno
+          def bce(r):
+              t = texto(r.text)
+              i = t.find("Monetary policy meeting")
+              print(t[max(0, i - 300): i + 2500])
+          ver("BCE calendario del Consejo", "https://www.ecb.europa.eu/press/calendars/mgcgc/html/index.en.html", extracto=bce, guardar="bce_consejo.html")
+          # Fed: calendario del FOMC
+          def fed(r):
+              t = texto(r.text)
+              i = t.find("FOMC Meetings")
+              print(t[max(0, i - 200): i + 2500])
+          ver("Fed FOMC", "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm", extracto=fed, guardar="fed_fomc.html")
+          # BLS: calendario de publicaciones
+          def bls(r):
+              t = texto(r.text)
+              i = t.find("Employment Situation")
+              print(t[max(0, i - 800): i + 1500])
+          ver("BLS schedule 2026", "https://www.bls.gov/schedule/2026/home.htm", extracto=bls, guardar="bls_2026.html")
+          ver("BLS schedule 2025 (formato)", "https://www.bls.gov/schedule/2025/home.htm", extracto=bls)
+          # Eurostat: calendario de difusión (buscar la URL del iCal en la página)
+          def eurostat(r):
+              urls = sorted(set(re.findall(r'https?://[^"\' <>]+(?:ics|calendar|Calendar)[^"\' <>]*', r.text)))
+              print("URL candidatas:", urls[:30])
+              t = texto(r.text)
+              i = t.find("Want to subscribe")
+              print(t[max(0, i - 300): i + 600])
+          ver("Eurostat release calendar", "https://ec.europa.eu/eurostat/web/main/news/release-calendar", extracto=eurostat, guardar="eurostat_calendar.html")
+          ver("Eurostat ICS (candidata)", "https://ec.europa.eu/eurostat/api/dissemination/catalogue/ics/en/release-calendar.ics", extracto=lambda r: print(r.text[:800]))
+          EOF
+      - name: Guardar las respuestas como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agenda-sonda
+          path: salida
+          retention-days: 14
