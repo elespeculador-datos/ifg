@@ -46,7 +46,7 @@ Todo son datos ya publicados por otros colectores con licencia verificada: CNMV 
 
 Pasada local con las salidas guardadas en el repositorio (cortos hasta el 28/10 y cnmv hasta el 06/11): `python empresas/empresas.py --salida /tmp/empresas --datos docs --fecha 2026-11-06` → 35 fichas, 133 eventos, tres avisos (directivos, accionistas y dividendos ausentes); la segunda pasada no reescribe nada.
 
-El flujo `empresas-validacion` (solo a mano) descarga las salidas públicas de `datos.elespeculador.com` que existan y genera las fichas en el ejecutor para revisarlas antes de desplegar.
+El flujo `empresas-validacion` (solo a mano) descarga las salidas públicas de `datos.elespeculador.com` que existan y genera las fichas en el ejecutor para revisarlas antes de desplegar. Ejecución 44424375107 (19/11/2026): cortos, accionistas y cnmv presentes; 35 fichas y 181 eventos (40 comunicados de recompra, 50 de resultados, 12 de dividendos, 79 cambios de cortos); la sección de accionistas quedó en null en las 33 empresas porque el servidor aún no aplica el filtro de personas jurídicas (PR #97), que es justo lo que debe pasar.
 
 ## Pendiente
 

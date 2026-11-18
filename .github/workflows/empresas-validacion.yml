@@ -6,8 +6,6 @@ name: Ficha integrada por empresa (validación a mano)
 # como artefacto, con un resumen en el registro.
 on:
   workflow_dispatch:
-  push:
-    branches: [ficha-integrada]   # temporal, solo para registrar el flujo durante el desarrollo
 
 permissions:
   contents: read
