@@ -7,9 +7,6 @@ name: Agenda semanal (validación a mano)
 # rama con datos reales (el entorno de Datos no llega a las fuentes) y deja la salida como artefacto.
 on:
   workflow_dispatch:
-  push:
-    branches: [agenda-semanal]   # solo mientras la rama está en desarrollo: se quita al fusionar
-    paths: ["agenda/**", ".github/workflows/agenda-validacion.yml"]
 
 permissions:
   contents: read
