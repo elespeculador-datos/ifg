@@ -40,6 +40,7 @@ import requests
 VERSION = "1.0.0"
 API = "https://data-api.ecb.europa.eu/service/data/EXR/"
 DIVISAS = {"BRL": "Real brasileño", "MXN": "Peso mexicano", "TRY": "Lira turca", "USD": "Dólar estadounidense", "GBP": "Libra esterlina"}
+CON_ARTICULO = {"BRL": "el real brasileño", "MXN": "el peso mexicano", "TRY": "la lira turca", "USD": "el dólar", "GBP": "la libra"}
 CESTA = ["BRL", "MXN", "TRY"]
 CLAVE = "D." + "+".join(DIVISAS) + ".EUR.SP00.A"
 PARAMS = {"format": "csvdata", "startPeriod": "2010-01-01"}
@@ -249,7 +250,7 @@ def fragmento(res: dict, df: pd.DataFrame, fecha_pub: str) -> str:
     mayor = res["mayor_movimiento_12m"]
     frase = (f"La cesta emergente del IBEX (real brasileño, peso mexicano y lira turca, a partes iguales) se ha movido <strong>{_pct(c['variaciones']['12 meses'])}</strong> "
              f"frente al euro en doce meses, {_pct(c['variaciones']['1 mes'])} en el último mes y {_pct(c['desde_enero'])} desde enero. "
-             f"La divisa que más se ha movido en doce meses es {dv[mayor]['nombre'].lower()}: {_pct(dv[mayor]['variaciones']['12 meses'])}. "
+             f"La divisa que más se ha movido en doce meses es {CON_ARTICULO[mayor]}: {_pct(dv[mayor]['variaciones']['12 meses'])}. "
              f"Dólar {_pct(dv['USD']['variaciones']['12 meses'])} y libra {_pct(dv['GBP']['variaciones']['12 meses'])} en doce meses.")
     filas = []
     for d, v in dv.items():

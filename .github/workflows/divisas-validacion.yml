@@ -6,9 +6,6 @@ name: Divisas de exposición (validación a mano)
 # mano para validar la rama con datos reales (el entorno de Datos no llega al portal del BCE).
 on:
   workflow_dispatch:
-  push:
-    branches: [divisas]   # solo mientras la rama está en desarrollo: se quita al fusionar
-    paths: ["divisas/**", ".github/workflows/divisas-validacion.yml"]
 
 permissions:
   contents: read
