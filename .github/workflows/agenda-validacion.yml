@@ -33,14 +33,15 @@ jobs:
           mkdir -p salida/respuestas
           python - <<'EOF'
           import json, re, requests
-          H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)"}
+          from datetime import datetime, timezone
+          H = {"User-Agent": "ElEspeculadorAgenda/0.1 (+https://elespeculador.com; +https://github.com/elespeculador-datos/ifg)"}
           def texto(html):
               html = re.sub(r"(?is)<(script|style).*?</\1>", " ", html)
               t = re.sub(r"(?s)<[^>]+>", " ", html)
               return re.sub(r"\s+", " ", t)
-          def ver(nombre, url, params=None, extracto=None, guardar=None, aceptar="*/*"):
+          def ver(nombre, url, params=None, extracto=None, guardar=None, aceptar="*/*", cab=None):
               try:
-                  r = requests.get(url, params=params, headers={**H, "Accept": aceptar}, timeout=60)
+                  r = requests.get(url, params=params, headers={**(cab or H), "Accept": aceptar}, timeout=60)
                   print(f"\n== {nombre}: {r.status_code} {r.headers.get('content-type')} {len(r.text)} caracteres · {r.url[:140]}")
                   if guardar:
                       open(f"salida/respuestas/{guardar}", "w", encoding="utf-8").write(r.text)
@@ -50,53 +51,63 @@ jobs:
                       print(r.text[:1500])
               except Exception as e:
                   print(f"\n== {nombre}: EXCEPCION {e}")
-          # INE: operaciones, publicaciones de IPC y fechas
-          def ine_ops(r):
-              ops = r.json()
-              print(len(ops), "operaciones")
-              for o in ops:
-                  n = str(o.get("Nombre", ""))
-                  if any(k in n.lower() for k in ("precios de consumo", "contabilidad nacional trimestral", "población activa", "producción industrial", "comercio al por menor", "hipotecas", "sociedades mercantiles", "turismo", "ipc")):
-                      print("  ", o.get("Id"), o.get("Codigo"), "|", n)
-          ver("INE operaciones", "https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES", extracto=ine_ops, guardar="ine_operaciones.json")
-          def ine_pubs(r):
-              pubs = r.json()
-              for p in pubs:
-                  print("  ", p.get("Id"), "|", p.get("Nombre"), "|", {k: v for k, v in p.items() if k not in ("Id", "Nombre")})
-          ver("INE publicaciones de la operación 25 (IPC)", "https://servicios.ine.es/wstempus/js/ES/PUBLICACIONES_OPERACION/25", extracto=ine_pubs)
-          ver("INE publicaciones (todas, primeras 40)", "https://servicios.ine.es/wstempus/js/ES/PUBLICACIONES", extracto=lambda r: [print("  ", p.get("Id"), "|", p.get("Nombre")) for p in r.json()[:40]], guardar="ine_publicaciones.json")
+          # INE: fechas de las publicaciones que interesan, próximos 70 días (con hora)
+          ahora = datetime.now(timezone.utc)
           def ine_fechas(r):
               fs = r.json()
-              print(len(fs), "fechas; primeras:", json.dumps(fs[:3], ensure_ascii=False)[:600], "... últimas:", json.dumps(fs[-3:], ensure_ascii=False)[:600])
-          ver("INE fechas de la publicación 8", "https://servicios.ine.es/wstempus/js/ES/PUBLICACIONFECHA_PUBLICACION/8", extracto=ine_fechas)
-          # BCE: reuniones del Consejo de Gobierno
+              prox = []
+              for f in fs:
+                  t = datetime.fromtimestamp(f["Fecha"] / 1000, tz=timezone.utc)
+                  if 0 <= (t - ahora).days <= 70:
+                      prox.append((t.isoformat(), f.get("Nombre"), f.get("FK_Periodo"), f.get("Anyo"), f.get("Id")))
+              print(len(fs), "fechas;", len(prox), "en 70 días:")
+              for p in sorted(prox):
+                  print("   ", *p)
+          for pid in (8, 9, 10, 14, 15, 25, 3, 5, 24, 21, 4, 11, 1, 26):
+              ver(f"INE fechas de la publicación {pid}", f"https://servicios.ine.es/wstempus/js/ES/PUBLICACIONFECHA_PUBLICACION/{pid}", extracto=ine_fechas)
+          # BCE: reuniones del Consejo de Gobierno (estructura del HTML)
           def bce(r):
-              t = texto(r.text)
-              i = t.find("Monetary policy meeting")
-              print(t[max(0, i - 300): i + 2500])
+              h = r.text
+              for m in list(re.finditer(r"(?i)monetary policy meeting", h))[:4]:
+                  print("--- HTML:", h[max(0, m.start() - 700): m.end() + 300].replace("\n", " "))
+              t = texto(h)
+              for m in list(re.finditer(r"(?i)monetary policy meeting", t))[:3]:
+                  print("--- TEXTO:", t[max(0, m.start() - 250): m.end() + 250])
+              print("--- sin coincidencias" if "monetary policy meeting" not in t.lower() else "")
+              i = t.find("2027")
+              print("--- 2027:", t[max(0, i - 400): i + 800])
           ver("BCE calendario del Consejo", "https://www.ecb.europa.eu/press/calendars/mgcgc/html/index.en.html", extracto=bce, guardar="bce_consejo.html")
-          # Fed: calendario del FOMC
+          # Fed: calendario del FOMC (estructura del HTML)
           def fed(r):
-              t = texto(r.text)
-              i = t.find("FOMC Meetings")
-              print(t[max(0, i - 200): i + 2500])
+              h = r.text
+              i = h.find("fomc-meeting")
+              print(h[max(0, i - 1500): i + 3500])
           ver("Fed FOMC", "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm", extracto=fed, guardar="fed_fomc.html")
-          # BLS: calendario de publicaciones
+          # BLS: con identificación del robot (política de BLS: el robot debe llevar contacto)
           def bls(r):
-              t = texto(r.text)
+              h = r.text
+              t = texto(h)
               i = t.find("Employment Situation")
-              print(t[max(0, i - 800): i + 1500])
+              print(t[max(0, i - 800): i + 1200])
+              j = h.find("Employment Situation")
+              print("--- HTML:", h[max(0, j - 1200): j + 600].replace("\n", " "))
           ver("BLS schedule 2026", "https://www.bls.gov/schedule/2026/home.htm", extracto=bls, guardar="bls_2026.html")
-          ver("BLS schedule 2025 (formato)", "https://www.bls.gov/schedule/2025/home.htm", extracto=bls)
-          # Eurostat: calendario de difusión (buscar la URL del iCal en la página)
+          ver("BLS schedule (news release)", "https://www.bls.gov/schedule/news_release/", extracto=bls)
+          # BEA: calendario de publicaciones
+          def bea(r):
+              h = r.text
+              t = texto(h)
+              i = t.find("Gross Domestic Product")
+              print(t[max(0, i - 800): i + 1200])
+              j = h.find("Gross Domestic Product")
+              print("--- HTML:", h[max(0, j - 1500): j + 600].replace("\n", " "))
+          ver("BEA schedule", "https://www.bea.gov/news/schedule", extracto=bea, guardar="bea_schedule.html")
+          # Eurostat: buscar en el HTML cómo se construye la URL del iCal
           def eurostat(r):
-              urls = sorted(set(re.findall(r'https?://[^"\' <>]+(?:ics|calendar|Calendar)[^"\' <>]*', r.text)))
-              print("URL candidatas:", urls[:30])
-              t = texto(r.text)
-              i = t.find("Want to subscribe")
-              print(t[max(0, i - 300): i + 600])
+              h = r.text
+              for m in list(re.finditer(r"(?i)(webcal|\.ics|ics[A-Za-z_]*url|subscribe)", h))[:25]:
+                  print("---", h[max(0, m.start() - 200): m.end() + 250].replace("\n", " "))
           ver("Eurostat release calendar", "https://ec.europa.eu/eurostat/web/main/news/release-calendar", extracto=eurostat, guardar="eurostat_calendar.html")
-          ver("Eurostat ICS (candidata)", "https://ec.europa.eu/eurostat/api/dissemination/catalogue/ics/en/release-calendar.ics", extracto=lambda r: print(r.text[:800]))
           EOF
       - name: Guardar las respuestas como artefacto
         if: always()
