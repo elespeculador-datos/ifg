@@ -21,7 +21,7 @@ Sonda del 18/11/2026 (flujo `recompras-validacion`, ejecución 44420762376) sobr
 | BBVA | la tabla diaria no sale como texto (`pdftotext` solo devuelve el preámbulo y el importe acumulado) | 0 filas | no legible sin OCR |
 | CaixaBank | instrumento, fecha, Compra, acciones, precio, importe, centro; «TOTAL»; anexo con hora | 16 filas | 743.453 = TOTAL declarado; medio 11,5934 exacto |
 
-Siete de ocho maquetas se leen con un único lector sin reglas por empresa; en las cinco que declaran total, la suma de acciones coincide y el precio medio ponderado también (CaixaBank al cuarto decimal). BBVA incrusta la tabla como imagen: para esa empresa solo se puede leer el importe acumulado y el porcentaje del programa que figuran en el texto, o pasar el PDF por OCR (no previsto en fase 1).
+Siete de ocho maquetas se leen con un único lector sin reglas por empresa (confirmado con los PDF descargados en GitHub el 19/11/2026, ejecución 44422466552 del flujo); en las cinco que declaran total, la suma de acciones coincide y el precio medio ponderado también (CaixaBank al cuarto decimal). BBVA incrusta la tabla como imagen: para esa empresa solo se puede leer el importe acumulado y el porcentaje del programa que figuran en el texto, o pasar el PDF por OCR (no previsto en fase 1).
 
 ## Cómo lee `filas.py`
 
