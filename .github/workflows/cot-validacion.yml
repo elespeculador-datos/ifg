@@ -1,12 +1,10 @@
 name: Posicionamiento especulativo, COT de la CFTC (validación a mano)
 
-# Indicador 20a del catálogo de Datos. Flujo sin horario: se lanza a mano para sondear la API de la CFTC
-# (Socrata) y validar la rama con datos reales (el entorno de Datos no llega a la CFTC).
+# Indicador 20a del catálogo de Datos. En producción corre en el servidor smpro-datos-1 (servidor/ejecutar.sh cot;
+# ver DESPLIEGUE.md). Este flujo NO tiene horario ni guarda nada en el repositorio: se lanza a mano para validar
+# la rama con datos reales (el entorno de Datos no llega a la CFTC).
 on:
   workflow_dispatch:
-  push:
-    branches: [cot]   # solo mientras la rama está en desarrollo: se quita al fusionar
-    paths: ["cot/**", ".github/workflows/cot-validacion.yml"]
 
 permissions:
   contents: read
