@@ -1,0 +1,74 @@
+name: Recompras, fase 0 (sonda a mano)
+
+# Indicador 17 del catálogo de Datos, fase 0 (viabilidad): ¿se leen de forma fiable los informes semanales de
+# recompra que las empresas envían a la CNMV (OIR)? Flujo sin horario ni escritura en el repositorio.
+on:
+  workflow_dispatch:
+  push:
+    branches: [recompras]   # solo mientras la rama está en desarrollo
+    paths: ["recompras/**", ".github/workflows/recompras-validacion.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  sonda:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar dependencias
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils >/dev/null && pip install requests pandas openpyxl xlrd
+      - name: Sonda de los informes semanales de recompra
+        run: |
+          mkdir -p salida/docs
+          python - <<'EOF'
+          import io, re, subprocess, requests, pandas as pd
+          H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos; +https://elespeculador.com)", "Accept-Language": "es-ES,es;q=0.9"}
+          s = requests.Session(); s.headers.update(H)
+          csv = s.get("https://datos.elespeculador.com/cnmv/datos/ibex35.csv", timeout=60).text
+          df = pd.read_csv(io.StringIO(csv), dtype=str, keep_default_na=False)
+          rec = df[df["caja"] == "recompras"].sort_values("fecha", ascending=False)
+          print("recompras en el listado:", len(rec), "| empresas:", sorted(rec["empresa"].unique()))
+          vistas = set(); n = 0
+          for _, r in rec.iterrows():
+              if r["empresa"] in vistas or n >= 8:
+                  continue
+              vistas.add(r["empresa"]); n += 1
+              print(f"\n===== {r['empresa']} nreg {r['nreg']} {r['fecha']} | {r['texto'][:120]}")
+              p = s.get(r["enlace"], timeout=60)
+              docs = re.findall(r'href="([^"]*(?:verdocumento|VerDocumento|\.pdf|\.xls[x]?)[^"]*)"', p.text, re.I)
+              docs = [d.replace("&amp;", "&") for d in dict.fromkeys(docs)]
+              print("   página OIR:", p.status_code, len(p.text), "| documentos:", docs[:5])
+              for d in docs[:2]:
+                  u = d if d.startswith("http") else "https://www.cnmv.es" + (d if d.startswith("/") else "/" + d)
+                  g = s.get(u, timeout=90)
+                  ct = g.headers.get("content-type", "")
+                  print(f"   -> {g.status_code} {ct} {len(g.content)} bytes {u[:120]}")
+                  cuerpo = g.content
+                  nombre = f"salida/docs/{r['nreg']}_{len(docs)}"
+                  if "pdf" in ct or cuerpo[:4] == b"%PDF":
+                      open(nombre + ".pdf", "wb").write(cuerpo)
+                      t = subprocess.run(["pdftotext", "-layout", nombre + ".pdf", "-"], capture_output=True, text=True).stdout
+                      print("   PDF texto (primeras 60 líneas):"); print("\n".join(t.splitlines()[:60]))
+                  elif "spreadsheet" in ct or "excel" in ct or cuerpo[:2] == b"PK" or cuerpo[:8] == b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1":
+                      ext = ".xlsx" if cuerpo[:2] == b"PK" else ".xls"
+                      open(nombre + ext, "wb").write(cuerpo)
+                      try:
+                          x = pd.read_excel(nombre + ext, sheet_name=None, header=None)
+                          for hoja, t in x.items():
+                              print(f"   hoja {hoja}: {t.shape}"); print(t.head(25).to_string()[:3000])
+                      except Exception as e:
+                          print("   no se pudo leer el Excel:", e)
+                  else:
+                      print("   otro contenido:", g.text[:500])
+          EOF
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recompras-sonda
+          path: salida
+          retention-days: 14
