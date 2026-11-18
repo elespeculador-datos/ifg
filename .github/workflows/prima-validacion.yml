@@ -67,6 +67,12 @@ jobs:
           print("tesoro:", json.dumps(d["tesoro"], ensure_ascii=False))
           print("```")
           EOF
+      - name: Fragmento al registro (los artefactos no se pueden descargar desde el entorno de Datos)
+        run: |
+          echo "=== FRAGMENTO prima INICIO ==="
+          cat salida/prima/fragmento-wp.html
+          echo
+          echo "=== FRAGMENTO prima FIN ==="
       - name: Guardar la salida como artefacto
         if: always()
         uses: actions/upload-artifact@v4
