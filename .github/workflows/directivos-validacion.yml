@@ -25,36 +25,58 @@ jobs:
           cache: pip
       - name: Instalar dependencias
         run: pip install requests
-      - name: Sonda del registro de operaciones de directivos de la CNMV
+      - name: Sonda 2, descarga de información de la CNMV y búsqueda por fechas en el registro de directivos
         run: |
           mkdir -p salida/respuestas
           python - <<'EOF'
           import re, requests
+          from datetime import date, timedelta
           H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos; +https://elespeculador.com)", "Accept-Language": "es-ES,es;q=0.9"}
           s = requests.Session()
+          s.headers.update(H)
           def texto(html):
               html = re.sub(r"(?is)<(script|style).*?</\1>", " ", html)
               return re.sub(r"\s+", " ", re.sub(r"(?s)<[^>]+>", " ", html))
-          def formularios(html):
-              for m in re.finditer(r"(?is)<form[^>]*>", html):
-                  print("FORM:", m.group(0)[:300])
-              for m in re.finditer(r'(?is)<(input|select|button)[^>]*>', html):
-                  t = m.group(0)
-                  if re.search(r'name="', t):
-                      print("  ", re.sub(r"\s+", " ", t)[:220])
-          url = "https://www.cnmv.es/portal/consultas/directivos-consulta?lang=es"
-          r = s.get(url, headers=H, timeout=60)
-          print("== página:", r.status_code, r.headers.get("content-type"), len(r.text), r.url)
-          open("salida/respuestas/directivos_form.html", "w", encoding="utf-8").write(r.text)
-          formularios(r.text)
-          for m in re.finditer(r'href="([^"]*(?:xls|csv|xml|json|export|Export|descarg|Descarg|Excel)[^"]*)"', r.text):
-              print("ENLACE:", m.group(1)[:200])
+          def ocultos(html):
+              return dict(re.findall(r'<input type="hidden" name="([^"]+)" id="[^"]*" value="([^"]*)"', html))
+          # 1) Descarga de información (¿hay un fichero del registro de directivos?)
+          r = s.get("https://www.cnmv.es/portal/Publicaciones/Descarga-Informacion-Individual.aspx?lang=es", timeout=60)
+          print("== descarga individual:", r.status_code, len(r.text), r.url)
+          open("salida/respuestas/descarga_individual.html", "w", encoding="utf-8").write(r.text)
+          for m in re.finditer(r"(?is)<select[^>]*name=\"([^\"]+)\"[^>]*>(.*?)</select>", r.text):
+              print("SELECT", m.group(1))
+              for o in re.findall(r'(?is)<option[^>]*value="([^"]*)"[^>]*>(.*?)</option>', m.group(2))[:80]:
+                  print("   ", o[0], "|", re.sub(r"\s+", " ", o[1]).strip()[:100])
           t = texto(r.text)
-          i = t.find("Buscar")
-          print("TEXTO:", t[max(0, i - 1500): i + 800])
-          # intento de búsqueda por fechas (últimos 10 días) con los campos que encuentre
-          campos = dict(re.findall(r'<input[^>]*name="([^"]+)"[^>]*value="([^"]*)"', r.text))
-          print("CAMPOS con valor:", {k: v[:40] for k, v in campos.items()})
+          i = t.find("Descarga")
+          print("TEXTO:", t[max(0, i - 200): i + 2500])
+          for m in re.finditer(r'href="([^"]+)"[^>]*>([^<]{0,80})', r.text):
+              if re.search(r"(?i)descarg|zip|xml|csv|xls", m.group(1) + m.group(2)):
+                  print("ENLACE:", m.group(1)[:160], "|", m.group(2).strip()[:80])
+          # 2) Búsqueda por fechas en el registro de directivos (POST ASP.NET)
+          url = "https://www.cnmv.es/portal/consultas/directivos-consulta?lang=es"
+          r = s.get(url, timeout=60)
+          campos = ocultos(r.text)
+          campos["ctl00$WucCookiesPolicy$btnCookiesConfirmTech"] = "Aceptar solo las imprescindibles"
+          r = s.post(url, data=campos, timeout=60)
+          print("== cookies:", r.status_code, len(r.text))
+          campos = ocultos(r.text)
+          hoy = date.today()
+          campos.update({"ctl00$ContentPrincipal$txtNombre": "", "ctl00$ContentPrincipal$txtLEI": "", "ctl00$ContentPrincipal$txtDeclarante": "",
+                         "ctl00$ContentPrincipal$txtFechaD": (hoy - timedelta(days=7)).strftime("%d/%m/%Y"),
+                         "ctl00$ContentPrincipal$txtFechaH": hoy.strftime("%d/%m/%Y"),
+                         "ctl00$ContentPrincipal$btnBuscar": "Buscar"})
+          r = s.post(url, data=campos, timeout=90)
+          print("== búsqueda 7 días:", r.status_code, len(r.text))
+          open("salida/respuestas/directivos_resultado.html", "w", encoding="utf-8").write(r.text)
+          h = r.text
+          i = h.find("<table")
+          print("HTML tabla:", re.sub(r"\s+", " ", h[i: i + 6000]) if i >= 0 else "sin <table>")
+          for m in re.finditer(r'(?i)(href|onclick)="([^"]*(?:excel|export|xls|csv|xml|descarg|pdf|Ver detalle|ctl00\$ContentPrincipal\$[^"]*)[^"]*"', h):
+              print("ENLACE/EVENTO:", m.group(2)[:200])
+          tt = texto(h)
+          j = tt.find("Resultados")
+          print("TEXTO resultados:", tt[max(0, j - 200): j + 3000])
           EOF
       - name: Guardar las respuestas como artefacto
         if: always()
