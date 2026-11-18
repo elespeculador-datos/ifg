@@ -1,0 +1,60 @@
+name: Expectativas de inflación de los hogares (validación a mano)
+
+# Indicador 20c del catálogo de Datos: encuesta de expectativas de los consumidores del BCE (CES).
+# Flujo sin horario: se lanza a mano para sondear el conjunto CES del portal del BCE y validar la rama
+# con datos reales (el entorno de Datos no llega al portal).
+on:
+  workflow_dispatch:
+  push:
+    branches: [expectativas]   # solo mientras la rama está en desarrollo: se quita al fusionar
+    paths: ["expectativas/**", ".github/workflows/expectativas-validacion.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install requests pandas scipy
+      - name: Comprobaciones sin red
+        run: test -f expectativas/pruebas_expectativas.py && python expectativas/pruebas_expectativas.py || echo "sin pruebas todavía"
+      - name: Sonda del conjunto CES (claves, títulos, últimas observaciones)
+        run: |
+          mkdir -p salida/respuestas
+          python - <<'EOF'
+          import io, requests, pandas as pd
+          H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Accept": "text/csv"}
+          def ver(nombre, clave, start="2020-01-01"):
+              url = "https://data-api.ecb.europa.eu/service/data/CES/" + clave
+              r = requests.get(url, params={"format": "csvdata", "startPeriod": start}, headers=H, timeout=120)
+              print(f"\n== {nombre}: {r.status_code} {len(r.text)} caracteres · {r.url[:160]}")
+              if r.status_code != 200 or "TIME_PERIOD" not in r.text[:2000]:
+                  print(r.text[:500]); return None
+              df = pd.read_csv(io.StringIO(r.text))
+              open(f"salida/respuestas/{nombre}.csv", "w", encoding="utf-8").write(r.text)
+              print("columnas:", list(df.columns)[:40])
+              for k, g in df.groupby("KEY"):
+                  g = g.sort_values("TIME_PERIOD")
+                  t = g["TITLE"].iloc[0] if "TITLE" in g else ""
+                  tc = g["TITLE_COMPL"].iloc[0] if "TITLE_COMPL" in g else ""
+                  print(f"  {k} | {len(g)} obs | {g['TIME_PERIOD'].iloc[0]}..{g['TIME_PERIOD'].iloc[-1]} | últimos: {list(zip(g['TIME_PERIOD'].tail(3), g['OBS_VALUE'].tail(3)))} | {str(t)[:90]} | {str(tc)[:160]}")
+              return df
+          ver("es_inflacion", "M.ES.ALL.T.C1020+C1120+C1150_EXP+C1150.NUM_VAR.WM+WP25+WP75")
+          ver("areas", "M.ES+DE+FR+IT+Z17+Z18+U2.ALL.T.C1120.NUM_VAR.WM")
+          ver("todas_variables_es", "M.ES.ALL.T..NUM_VAR.WM", start="2025-06-01")
+          EOF
+      - name: Guardar las respuestas como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: expectativas-sonda
+          path: salida
+          retention-days: 14
