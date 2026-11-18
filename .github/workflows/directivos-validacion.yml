@@ -70,16 +70,20 @@ jobs:
           print("== búsqueda 7 días:", r.status_code, len(r.text))
           open("salida/respuestas/directivos_resultado.html", "w", encoding="utf-8").write(r.text)
           h = r.text
-          k = h.find("btnLimpiar")
-          cuerpo = h[k:]
-          cuerpo = re.sub(r"(?is)<(script|style).*?</\1>", " ", cuerpo)
+          ids = sorted(set(re.findall(r'id="(ctl00_ContentPrincipal_[^"]+)"', h)))
+          print("IDS ContentPrincipal:", ids[:80])
+          clases = sorted(set(re.findall(r'class="([^"]*(?:result|lista|tabla|grid|item|fila|card)[^"]*)"', h, re.I)))
+          print("CLASES:", clases[:60])
+          tt = texto(h)
+          j = tt.find("Declarante")
+          print("TEXTO alrededor de Declarante (6000):", tt[max(0, j - 1500): j + 4500])
+          i = h.find("ctl00_ContentPrincipal_")
+          cuerpo = re.sub(r"(?is)<(script|style).*?</\1>", " ", h[i:])
           cuerpo = re.sub(r"\s+", " ", cuerpo)
-          print("HTML tras el formulario (8000):", cuerpo[:8000])
-          tt = texto(h[k:])
-          print("TEXTO tras el formulario (3000):", tt[:3000])
-          for m in re.finditer(r'href="([^"]+)"', h[k:]):
+          print("HTML desde ContentPrincipal (7000):", cuerpo[:7000])
+          for m in re.finditer(r'href="([^"]+)"', h):
               u = m.group(1)
-              if "ContentPrincipal" in u or "verdocumento" in u or "directivos" in u.lower() or "Excel" in u or "xls" in u.lower():
+              if "verdocumento" in u or "Directivos" in u or "directivos-" in u.lower():
                   print("ENLACE:", u[:200])
           EOF
       - name: Guardar las respuestas como artefacto
