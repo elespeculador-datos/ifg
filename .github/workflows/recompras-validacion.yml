@@ -40,31 +40,36 @@ jobs:
               vistas.add(r["empresa"]); n += 1
               print(f"\n===== {r['empresa']} nreg {r['nreg']} {r['fecha']} | {r['texto'][:120]}")
               p = s.get(r["enlace"], timeout=60)
-              docs = re.findall(r'href="([^"]*(?:verdocumento|VerDocumento|\.pdf|\.xls[x]?)[^"]*)"', p.text, re.I)
-              docs = [d.replace("&amp;", "&") for d in dict.fromkeys(docs)]
-              print("   página OIR:", p.status_code, len(p.text), "| documentos:", docs[:5])
-              for d in docs[:2]:
-                  u = d if d.startswith("http") else "https://www.cnmv.es" + (d if d.startswith("/") else "/" + d)
+              h = p.text
+              enlaces = [(a, re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", t)).strip()) for a, t in re.findall(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', h, re.S)]
+              cand = [(a.replace("&amp;", "&"), t) for a, t in enlaces if "DocPortal" not in a and re.search(r"(?i)verdocumento|documento|ver\?|\.pdf|\.xls|descarg|adjunto|anexo", a + " " + t)]
+              print("   página OIR:", p.status_code, len(h), "| enlaces candidatos:", cand[:8])
+              i = h.find("ContentPrincipal")
+              cuerpo_html = re.sub(r"\s+", " ", re.sub(r"(?is)<(script|style).*?</\1>", " ", h[i:]))
+              j = cuerpo_html.lower().find("documento")
+              print("   HTML cerca de «documento»:", cuerpo_html[max(0, j - 1200): j + 800])
+              for a, t in cand[:2]:
+                  u = a if a.startswith("http") else "https://www.cnmv.es" + (a if a.startswith("/") else "/" + a)
                   g = s.get(u, timeout=90)
                   ct = g.headers.get("content-type", "")
-                  print(f"   -> {g.status_code} {ct} {len(g.content)} bytes {u[:120]}")
+                  print(f"   -> {g.status_code} {ct} {len(g.content)} bytes {u[:140]}")
                   cuerpo = g.content
-                  nombre = f"salida/docs/{r['nreg']}_{len(docs)}"
+                  nombre = f"salida/docs/{r['nreg']}_{abs(hash(u)) % 1000}"
                   if "pdf" in ct or cuerpo[:4] == b"%PDF":
                       open(nombre + ".pdf", "wb").write(cuerpo)
-                      t = subprocess.run(["pdftotext", "-layout", nombre + ".pdf", "-"], capture_output=True, text=True).stdout
-                      print("   PDF texto (primeras 60 líneas):"); print("\n".join(t.splitlines()[:60]))
+                      t2 = subprocess.run(["pdftotext", "-layout", nombre + ".pdf", "-"], capture_output=True, text=True).stdout
+                      print("   PDF texto (primeras 80 líneas no vacías):"); print("\n".join([l for l in t2.splitlines() if l.strip()][:80]))
                   elif "spreadsheet" in ct or "excel" in ct or cuerpo[:2] == b"PK" or cuerpo[:8] == b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1":
                       ext = ".xlsx" if cuerpo[:2] == b"PK" else ".xls"
                       open(nombre + ext, "wb").write(cuerpo)
                       try:
                           x = pd.read_excel(nombre + ext, sheet_name=None, header=None)
-                          for hoja, t in x.items():
-                              print(f"   hoja {hoja}: {t.shape}"); print(t.head(25).to_string()[:3000])
+                          for hoja, t3 in x.items():
+                              print(f"   hoja {hoja}: {t3.shape}"); print(t3.head(25).to_string()[:3000])
                       except Exception as e:
                           print("   no se pudo leer el Excel:", e)
                   else:
-                      print("   otro contenido:", g.text[:500])
+                      print("   otro contenido:", re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", g.text))[:800])
           EOF
       - uses: actions/upload-artifact@v4
         if: always()
