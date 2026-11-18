@@ -1,0 +1,57 @@
+name: Posicionamiento especulativo, COT de la CFTC (validación a mano)
+
+# Indicador 20a del catálogo de Datos. Flujo sin horario: se lanza a mano para sondear la API de la CFTC
+# (Socrata) y validar la rama con datos reales (el entorno de Datos no llega a la CFTC).
+on:
+  workflow_dispatch:
+  push:
+    branches: [cot]   # solo mientras la rama está en desarrollo: se quita al fusionar
+    paths: ["cot/**", ".github/workflows/cot-validacion.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install requests pandas scipy
+      - name: Comprobaciones sin red
+        run: test -f cot/pruebas_cot.py && python cot/pruebas_cot.py || echo "sin pruebas todavía"
+      - name: Sonda de la API de la CFTC (mercados, columnas, últimas filas)
+        run: |
+          mkdir -p salida/respuestas
+          python - <<'EOF'
+          import json, requests
+          H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)"}
+          base = "https://publicreporting.cftc.gov/resource/6dca-aqww.json"
+          # 1) mercados cuyo nombre contiene lo que buscamos, con su código (últimas fechas)
+          patrones = ["EURO FX", "GOLD", "SILVER", "CRUDE OIL", "NATURAL GAS", "COPPER", "E-MINI S&P 500", "NASDAQ", "10-YEAR", "U.S. DOLLAR INDEX", "VIX", "BRITISH POUND", "JAPANESE YEN", "BITCOIN", "PLATINUM", "WHEAT", "CORN", "SOYBEAN"]
+          for p in patrones:
+              q = {"$select": "market_and_exchange_names, cftc_contract_market_code, max(report_date_as_yyyy_mm_dd) as ultima, count(*) as n",
+                   "$where": f"upper(market_and_exchange_names) like '%{p}%'", "$group": "market_and_exchange_names, cftc_contract_market_code", "$order": "ultima DESC", "$limit": 12}
+              r = requests.get(base, params=q, headers=H, timeout=60)
+              print(f"\n== {p}: {r.status_code}")
+              for fila in (r.json() if r.status_code == 200 else []):
+                  print("   ", fila)
+          # 2) columnas y dos últimas filas del euro
+          r = requests.get(base, params={"$where": "cftc_contract_market_code='099741'", "$order": "report_date_as_yyyy_mm_dd DESC", "$limit": 2}, headers=H, timeout=60)
+          print("\n== euro, últimas 2 filas:", r.status_code)
+          for fila in r.json():
+              print(json.dumps(fila, ensure_ascii=False)[:3000])
+          open("salida/respuestas/euro.json", "w").write(r.text)
+          EOF
+      - name: Guardar las respuestas como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cot-sonda
+          path: salida
+          retention-days: 14
