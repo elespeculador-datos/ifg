@@ -6,9 +6,6 @@ name: Accionistas del IBEX 35 (validación a mano)
 # servidor (datos.elespeculador.com) sin volver a consultar a la CNMV.
 on:
   workflow_dispatch:
-  push:
-    branches: [accionistas-juridicas]   # solo mientras la rama está en desarrollo: se quita al fusionar
-    paths: ["accionistas/**", ".github/workflows/accionistas-validacion.yml"]
 
 permissions:
   contents: read

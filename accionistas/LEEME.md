@@ -1,24 +1,15 @@
-# Accionistas del IBEX 35
+# Accionistas del IBEX 35 (indicador 13): solo personas jurídicas
 
-Los accionistas significativos de cada empresa del IBEX 35, tal y como figuran en el
-registro de participaciones significativas de la CNMV (última notificación de cada
-accionista, Real Decreto 1362/2007). La lista de las 35 sale de la lista de cotizadas de BME.
+Los accionistas significativos de cada empresa del IBEX 35, tal y como figuran en el registro de participaciones significativas de la CNMV (última notificación de cada accionista, Real Decreto 1362/2007), **limitados a las personas jurídicas**: empresas, fondos, bancos, fundaciones, administraciones y acciones concertadas. Las participaciones de personas físicas se cuentan por empresa y no se publican ni se guardan (decisión de Federico del 18/11/2026; regla 2 del catálogo: datos de personas físicas pasan por Cumplimiento, y aquí la solución es no publicarlos).
 
-- Script: `accionistas/duenos.py --salida docs/accionistas`
-- Flujo: `.github/workflows/accionistas-diario.yml` (05:45 UTC, martes a sábado)
-- Salida (GitHub Pages): `docs/accionistas/` → `fragmento-wp.html` (entre las marcas
-  `<!-- accionistas:inicio HUELLA -->` y `<!-- accionistas:fin -->`, con el marcado Dataset),
-  `index.html`, `datos/accionistas.csv`, `datos/ultima.json`.
-- La huella de la primera línea solo cambia si cambian los datos: el escenario de Make que
-  actualiza la página de WordPress solo escribe cuando hay datos nuevos.
-- Página de WordPress: /accionistas-ibex-35/ (borrador).
+- Script: `accionistas/duenos.py --salida $ESPEC_DATOS_DIR/accionistas` (servidor smpro-datos-1, `servidor/ejecutar.sh accionistas`, 06:45 de martes a sábado; ver `DESPLIEGUE.md`).
+- Salida (https://datos.elespeculador.com/accionistas/): `fragmento-wp.html` (entre `<!-- accionistas:inicio HUELLA -->` y `<!-- accionistas:fin -->`, con el marcado Dataset), `index.html`, `datos/accionistas.csv`, `datos/ultima.json`. La huella de la primera línea solo cambia si cambian los datos (incluida la cuenta de participaciones excluidas): el escenario de Make solo escribe cuando hay datos nuevos.
+- Página de WordPress: /accionistas-ibex-35/ (8632, borrador; retirada el 21/10/2026 por los datos de personas físicas; vuelve a ser publicable con esta versión por la regla de 48 horas).
+- Comprobaciones sin red: `python accionistas/pruebas_accionistas.py` (64: clasificador con nombres reales de entidades y de personas, filtro, frase por empresa, huella y escritura sin personas físicas en ningún fichero). Flujo `accionistas-validacion` (a mano): pasa el filtro sobre la última consulta real del servidor sin volver a consultar a la CNMV.
+
+Cómo se decide qué es una persona jurídica (`persona_juridica`): el nombre, sin tildes ni puntos y por palabras enteras, lleva alguna palabra propia de entidades (S.A., S.L., B.V., LTD, INC, LLC, PLC, GMBH, FUND, BANK, CAPITAL, PARTNERS, FUNDACIÓN, SOCIEDAD, ESTATAL, AUTHORITY, CONCERTADA… lista `PALABRAS_JURIDICAS`); si no la lleva y tiene la forma «APELLIDOS , NOMBRE» con la que la CNMV escribe a las personas, es persona física; si no la lleva ni tiene esa forma, solo cuenta como entidad si está en la lista corta `CONOCIDAS` (BlackRock, Vanguard, Norges, FROB, Sonatrach…). En caso de duda se excluye: mejor perder cobertura que publicar a una persona. Validado el 19/11/2026 sobre la consulta real del 18/11: 157 participaciones, 130 de personas jurídicas publicadas y 27 excluidas, sin ningún falso positivo (las dos entidades que fallaban, FROB y Sonatrach, se añadieron a `CONOCIDAS`).
 
 Notas:
-- La CNMV no tiene enlaces fijos por NIF: cada vez se busca la entidad por nombre
-  (formulario ASP.NET), se elige si hay varias y se sigue el enlace de un solo uso de la ficha.
-  Si cambia el nombre de una empresa en la CNMV, hay que tocar `EMPRESAS`.
-- Ferrovial (Países Bajos) y ArcelorMittal (Luxemburgo) no se toman de la CNMV: sus
-  accionistas comunican al supervisor de su país.
-- Condiciones de la CNMV: reproducción fiel, sin alterar; se permiten cálculos. Los nombres
-  de los accionistas se reproducen como los publica la CNMV. Los enlaces a la CNMV abren en
-  ventana nueva.
+- La CNMV no tiene enlaces fijos por NIF: cada vez se busca la entidad por nombre (formulario ASP.NET), se elige si hay varias y se sigue el enlace de un solo uso de la ficha. Si cambia el nombre de una empresa en la CNMV, hay que tocar `EMPRESAS`.
+- Ferrovial (Países Bajos) y ArcelorMittal (Luxemburgo) no se toman de la CNMV: sus accionistas comunican al supervisor de su país.
+- Condiciones de la CNMV (nota legal verificada el 02/11/2026): reproducción fiel, sin alterar; se permiten cálculos; si entra en un producto de pago, decir al comprador que es gratis en cnmv.es. Los nombres de las entidades se reproducen como los publica la CNMV.

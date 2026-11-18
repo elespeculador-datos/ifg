@@ -93,10 +93,10 @@ CONOCIDAS = {"BLACKROCK", "VANGUARD", "NORGES", "BARCLAYS", "UBS", "HSBC", "CITA
              "BANKINTER", "UNICAJA", "MAPFRE", "IBERDROLA", "REPSOL", "TELEFONICA", "NATURGY", "ENDESA", "ENEL", "ENGIE", "EDP",
              "ACCIONA", "FERROVIAL", "SACYR", "OHLA", "FCC", "ACERINOX", "ARCELORMITTAL", "AMADEUS", "CELLNEX", "INDITEX", "ROVI",
              "FLUIDRA", "COLONIAL", "MERLIN", "LOGISTA", "IMPERIAL BRANDS", "SOLARIA", "INDRA", "REDEIA", "ENAGAS", "AENA",
-             "MUTUALIDAD", "SINGAPORE", "ABU DHABI", "GPIF"}
+             "MUTUALIDAD", "SINGAPORE", "ABU DHABI", "GPIF", "FROB", "SONATRACH", "ENAIRE", "SEPI", "ICO", "COFIDES"}
 # Los apellidos que coinciden con marcas (Santander, Sabadell, Grifols, Puig, Meliá...) no van en CONOCIDAS: esas
 # entidades llevan S.A. en la CNMV y la persona física se reconoce por la forma «APELLIDOS , NOMBRE».
-FORMA_PERSONA = re.compile(r"^[A-Z' -]+ ?, ?[A-Z' -]+$")
+FORMA_PERSONA = re.compile(r"^[A-Z'. -]+ ?, ?[A-Z'. -]+$")
 
 
 def _normal(nombre: str) -> str:
