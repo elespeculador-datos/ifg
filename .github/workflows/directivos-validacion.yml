@@ -1,11 +1,16 @@
 name: Directivos, operaciones comunicadas a la CNMV (validación a mano)
 
-# Indicador 10 del catálogo de Datos: operaciones de administradores y directivos comunicadas a la
-# CNMV (art. 19 del Reglamento de abuso de mercado). Este flujo NO tiene horario ni guarda nada en
-# el repositorio: se lanza a mano para sondear el registro de la CNMV y validar la rama con datos
-# reales (el entorno de Datos no llega a cnmv.es).
+# Indicador 10 del catálogo de Datos: compras y ventas de administradores y directivos comunicadas a la
+# CNMV (art. 19 del Reglamento de abuso de mercado). En producción corre en el servidor smpro-datos-1
+# (servidor/ejecutar.sh directivos; ver DESPLIEGUE.md). Este flujo NO tiene horario ni guarda nada en el
+# repositorio: se lanza a mano para validar la rama con datos reales (el entorno de Datos no llega a cnmv.es)
+# y deja la salida como artefacto.
 on:
   workflow_dispatch:
+    inputs:
+      max_documentos:
+        description: "PDF que se descargan como máximo"
+        default: "80"
   push:
     branches: [directivos]   # solo mientras la rama está en desarrollo: se quita al fusionar
     paths: ["directivos/**", ".github/workflows/directivos-validacion.yml"]
@@ -16,7 +21,7 @@ permissions:
 jobs:
   validar:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,67 +29,33 @@ jobs:
           python-version: "3.12"
           cache: pip
       - name: Instalar dependencias
-        run: pip install requests
-      - name: Sonda 3, resultados por GET y documentos de las notificaciones
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils >/dev/null && pip install requests scipy
+      - name: Comprobaciones sin red
+        run: python directivos/pruebas_directivos.py
+      - name: Pasada con datos reales
+        env:
+          ESPEC_DATOS_BASE: https://datos.elespeculador.com/
         run: |
-          mkdir -p salida/respuestas
-          python - <<'EOF'
-          import re, requests
-          from datetime import date, timedelta
-          H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos; +https://elespeculador.com)", "Accept-Language": "es-ES,es;q=0.9"}
-          s = requests.Session()
-          s.headers.update(H)
-          def texto(html):
-              html = re.sub(r"(?is)<(script|style).*?</\1>", " ", html)
-              return re.sub(r"\s+", " ", re.sub(r"(?s)<[^>]+>", " ", html))
-          hoy = date.today()
-          base = "https://www.cnmv.es/portal/consultas/directivos-resultado.aspx"
-          # 1) GET sin cookies ni viewstate, 30 días, página 0 y última
-          params = {"fechad": (hoy - timedelta(days=30)).strftime("%d/%m/%Y"), "fechah": hoy.strftime("%d/%m/%Y"), "page": 0}
-          r = s.get(base, params=params, timeout=90)
-          print("== GET 30 días página 0:", r.status_code, len(r.text), r.url)
-          open("salida/respuestas/directivos_get_p0.html", "w", encoding="utf-8").write(r.text)
-          m = re.search(r"Página (\d+) de (\d+)", r.text)
-          print("paginación:", m.group(0) if m else "no encontrada")
-          items = re.findall(r'(?s)<li id="ctl00_ContentPrincipal_wucRegistros_repListaPrincipal_ctl\d+_elementoPrimerNivel".*?Número de registro:\s*(\d+)', r.text)
-          print("registros en la página:", len(items), items[:3])
-          bloques = re.findall(r'(?s)<li id="ctl00_ContentPrincipal_wucRegistros_repListaPrincipal_ctl\d+_elementoPrimerNivel"(.*?)Número de registro:\s*(\d+)', r.text)
-          docs = []
-          for b, num in bloques:
-              fecha = re.search(r"fecha-no-icon\">\s*([\d/]+)", b)
-              emisor = re.search(r'class="tit-small">([^<]+)<', b)
-              nif = re.search(r'datosentidad\.aspx\?nif=([^"]+)"', b)
-              motivo = re.search(r'href="(https://www\.cnmv\.es/webservices/verdocumento/ver\?e=[^"]+)"[^>]*>Motivo de la notificaci\S+n:\s*([^<]+)<', b)
-              print("   ", num, fecha.group(1) if fecha else None, emisor.group(1).strip() if emisor else None, nif.group(1) if nif else None, motivo.group(2).strip() if motivo else None)
-              if motivo:
-                  docs.append((num, motivo.group(1).replace("&amp;", "&")))
-          # 2) los documentos de las tres primeras notificaciones
-          for num, u in docs[:3]:
-              d = s.get(u, timeout=90)
-              ct = d.headers.get("content-type", "")
-              print(f"== documento {num}: {d.status_code} {ct} {len(d.content)} bytes")
-              nombre = f"salida/respuestas/doc_{num}." + ("pdf" if "pdf" in ct else "html")
-              open(nombre, "wb").write(d.content)
-              if "pdf" in ct:
-                  print("   PDF: primeros bytes", d.content[:40])
-              else:
-                  print("   TEXTO:", texto(d.text)[:3500])
-                  print("   HTML tablas:", len(re.findall(r"<table", d.text)), "formularios:", len(re.findall(r"<form", d.text)))
-          # 3) página última del rango
-          if m:
-              params["page"] = int(m.group(2)) - 1
-              r2 = s.get(base, params=params, timeout=90)
-              n2 = len(re.findall(r"Número de registro:", r2.text))
-              print("== última página:", r2.status_code, "registros:", n2)
+          set -o pipefail
+          python directivos/directivos.py --salida salida/directivos --max-documentos "${{ github.event.inputs.max_documentos || '60' }}" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Fragmento, resumen y muestra de datos al registro
+        run: |
+          echo "===== fragmento-wp.html"; cat salida/directivos/fragmento-wp.html; echo
+          echo "===== resumen-mensual.html"; cat salida/directivos/resumen-mensual.html; echo
+          echo "===== cobertura.json"; cat salida/directivos/datos/cobertura.json; echo
+          echo "===== pendientes.csv"; cat salida/directivos/datos/pendientes.csv; echo
+          echo "===== operaciones.csv (sin la columna documento)"; python - <<'EOF'
+          import csv
+          with open("salida/directivos/datos/operaciones.csv", encoding="utf-8", newline="") as fh:
+              filas = list(csv.DictReader(fh))
+          print(len(filas), "líneas")
+          for f in filas:
+              print(" | ".join(str(f[k]) for k in ("registro", "fecha_registro", "fecha_operacion", "emisor", "isin", "motivo", "cargo_tipo", "instrumento", "operacion", "sentido", "tipo", "lugar", "volumen", "precio", "divisa", "importe_eur", "modificacion")))
           EOF
-      - name: Extraer texto de los PDF si los hay
-        run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils >/dev/null
-          for f in salida/respuestas/doc_*.pdf; do [ -f "$f" ] && { echo "===== $f"; pdftotext -layout "$f" - | head -120; }; done; true
-      - name: Guardar las respuestas como artefacto
+      - name: Guardar la salida como artefacto
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: directivos-sonda
+          name: directivos-salida
           path: salida
           retention-days: 14
