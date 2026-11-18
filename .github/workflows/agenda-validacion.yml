@@ -1,10 +1,10 @@
 name: Agenda semanal (validación a mano)
 
 # Indicador 15 del catálogo de Datos: agenda semanal de catalizadores (subastas del Tesoro,
-# publicaciones del INE, reuniones del BCE y de la Fed, calendario del BLS, Eurostat).
+# publicaciones del INE, decisiones del BCE y de la Fed, euroindicadores de Eurostat).
 # En producción corre en el servidor smpro-datos-1 (servidor/ejecutar.sh agenda; ver DESPLIEGUE.md).
-# Este flujo NO tiene horario ni guarda nada en el repositorio: se lanza a mano para sondear las
-# fuentes y validar una rama con datos reales (el entorno de Datos no llega a ninguna de ellas).
+# Este flujo NO tiene horario ni guarda nada en el repositorio: se lanza a mano para validar una
+# rama con datos reales (el entorno de Datos no llega a las fuentes) y deja la salida como artefacto.
 on:
   workflow_dispatch:
   push:
@@ -25,94 +25,33 @@ jobs:
           python-version: "3.12"
           cache: pip
       - name: Instalar dependencias
-        run: pip install requests pandas
+        run: pip install requests
       - name: Comprobaciones sin red
-        run: test -f agenda/pruebas_agenda.py && python agenda/pruebas_agenda.py || echo "sin pruebas todavía"
-      - name: Sonda de las fuentes (qué devuelve cada una)
+        run: python agenda/pruebas_agenda.py
+      - name: Pasada con datos reales (el calendario del Tesoro sale de docs/letras y docs/bonos)
+        env:
+          ESPEC_DATOS_BASE: https://datos.elespeculador.com/
         run: |
-          mkdir -p salida/respuestas
+          python agenda/agenda.py --salida salida/agenda --tesoro docs --forzar | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "## Fragmento" >> "$GITHUB_STEP_SUMMARY"
+          echo '```html' >> "$GITHUB_STEP_SUMMARY"
+          cat salida/agenda/fragmento-wp.html >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - name: Fragmento, boletín y resumen del JSON al registro
+        run: |
+          echo "===== fragmento-wp.html"; cat salida/agenda/fragmento-wp.html; echo
+          echo "===== boletin.html"; cat salida/agenda/boletin.html; echo
+          echo "===== eventos.csv"; cat salida/agenda/datos/eventos.csv; echo
           python - <<'EOF'
-          import json, re, requests
-          from datetime import datetime, timezone
-          H = {"User-Agent": "ElEspeculadorAgenda/0.1 (+https://elespeculador.com; +https://github.com/elespeculador-datos/ifg)"}
-          def texto(html):
-              html = re.sub(r"(?is)<(script|style).*?</\1>", " ", html)
-              t = re.sub(r"(?s)<[^>]+>", " ", html)
-              return re.sub(r"\s+", " ", t)
-          def ver(nombre, url, params=None, extracto=None, guardar=None, aceptar="*/*", cab=None):
-              try:
-                  r = requests.get(url, params=params, headers={**(cab or H), "Accept": aceptar}, timeout=60)
-                  print(f"\n== {nombre}: {r.status_code} {r.headers.get('content-type')} {len(r.text)} caracteres · {r.url[:140]}")
-                  if guardar:
-                      open(f"salida/respuestas/{guardar}", "w", encoding="utf-8").write(r.text)
-                  if extracto:
-                      extracto(r)
-                  else:
-                      print(r.text[:1500])
-              except Exception as e:
-                  print(f"\n== {nombre}: EXCEPCION {e}")
-          # INE: fechas de las publicaciones que interesan, próximos 70 días (con hora)
-          ahora = datetime.now(timezone.utc)
-          def ine_fechas(r):
-              fs = r.json()
-              prox = []
-              for f in fs:
-                  t = datetime.fromtimestamp(f["Fecha"] / 1000, tz=timezone.utc)
-                  if 0 <= (t - ahora).days <= 70:
-                      prox.append((t.isoformat(), f.get("Nombre"), f.get("FK_Periodo"), f.get("Anyo"), f.get("Id")))
-              print(len(fs), "fechas;", len(prox), "en 70 días:")
-              for p in sorted(prox):
-                  print("   ", *p)
-          for pid in (8, 9, 10, 14, 15, 25, 3, 5, 24, 21, 4, 11, 1, 26):
-              ver(f"INE fechas de la publicación {pid}", f"https://servicios.ine.es/wstempus/js/ES/PUBLICACIONFECHA_PUBLICACION/{pid}", extracto=ine_fechas)
-          # BCE: reuniones del Consejo de Gobierno (estructura del HTML)
-          def bce(r):
-              h = r.text
-              for m in list(re.finditer(r"(?i)monetary policy meeting", h))[:4]:
-                  print("--- HTML:", h[max(0, m.start() - 700): m.end() + 300].replace("\n", " "))
-              t = texto(h)
-              for m in list(re.finditer(r"(?i)monetary policy meeting", t))[:3]:
-                  print("--- TEXTO:", t[max(0, m.start() - 250): m.end() + 250])
-              print("--- sin coincidencias" if "monetary policy meeting" not in t.lower() else "")
-              i = t.find("2027")
-              print("--- 2027:", t[max(0, i - 400): i + 800])
-          ver("BCE calendario del Consejo", "https://www.ecb.europa.eu/press/calendars/mgcgc/html/index.en.html", extracto=bce, guardar="bce_consejo.html")
-          # Fed: calendario del FOMC (estructura del HTML)
-          def fed(r):
-              h = r.text
-              i = h.find("fomc-meeting")
-              print(h[max(0, i - 1500): i + 3500])
-          ver("Fed FOMC", "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm", extracto=fed, guardar="fed_fomc.html")
-          # BLS: con identificación del robot (política de BLS: el robot debe llevar contacto)
-          def bls(r):
-              h = r.text
-              t = texto(h)
-              i = t.find("Employment Situation")
-              print(t[max(0, i - 800): i + 1200])
-              j = h.find("Employment Situation")
-              print("--- HTML:", h[max(0, j - 1200): j + 600].replace("\n", " "))
-          ver("BLS schedule 2026", "https://www.bls.gov/schedule/2026/home.htm", extracto=bls, guardar="bls_2026.html")
-          ver("BLS schedule (news release)", "https://www.bls.gov/schedule/news_release/", extracto=bls)
-          # BEA: calendario de publicaciones
-          def bea(r):
-              h = r.text
-              t = texto(h)
-              i = t.find("Gross Domestic Product")
-              print(t[max(0, i - 800): i + 1200])
-              j = h.find("Gross Domestic Product")
-              print("--- HTML:", h[max(0, j - 1500): j + 600].replace("\n", " "))
-          ver("BEA schedule", "https://www.bea.gov/news/schedule", extracto=bea, guardar="bea_schedule.html")
-          # Eurostat: buscar en el HTML cómo se construye la URL del iCal
-          def eurostat(r):
-              h = r.text
-              for m in list(re.finditer(r"(?i)(webcal|\.ics|ics[A-Za-z_]*url|subscribe)", h))[:25]:
-                  print("---", h[max(0, m.start() - 200): m.end() + 250].replace("\n", " "))
-          ver("Eurostat release calendar", "https://ec.europa.eu/eurostat/web/main/news/release-calendar", extracto=eurostat, guardar="eurostat_calendar.html")
+          import json
+          j = json.load(open("salida/agenda/datos/eventos.json", encoding="utf-8"))
+          print("===== fuentes:", json.dumps(j["fuentes"], ensure_ascii=False, indent=1))
+          print("semana", j["semana_inicio"], "a", j["siguiente_fin"], "| huella", j["huella"], "| citas", len(j["eventos"]))
           EOF
-      - name: Guardar las respuestas como artefacto
+      - name: Guardar la salida como artefacto
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: agenda-sonda
+          name: agenda-salida
           path: salida
           retention-days: 14
