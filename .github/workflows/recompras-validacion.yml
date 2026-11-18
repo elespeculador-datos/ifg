@@ -42,13 +42,9 @@ jobs:
               p = s.get(r["enlace"], timeout=60)
               h = p.text
               enlaces = [(a, re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", t)).strip()) for a, t in re.findall(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', h, re.S)]
-              cand = [(a.replace("&amp;", "&"), t) for a, t in enlaces if "DocPortal" not in a and re.search(r"(?i)verdocumento|documento|ver\?|\.pdf|\.xls|descarg|adjunto|anexo", a + " " + t)]
-              print("   página OIR:", p.status_code, len(h), "| enlaces candidatos:", cand[:8])
-              i = h.find("ContentPrincipal")
-              cuerpo_html = re.sub(r"\s+", " ", re.sub(r"(?is)<(script|style).*?</\1>", " ", h[i:]))
-              j = cuerpo_html.lower().find("documento")
-              print("   HTML cerca de «documento»:", cuerpo_html[max(0, j - 1200): j + 800])
-              for a, t in cand[:2]:
+              cand = [(a.replace("&amp;", "&"), t) for a, t in enlaces if "verdocumento" in a.lower()]
+              print("   página OIR:", p.status_code, len(h), "| documentos del comunicado:", cand[:6])
+              for a, t in cand[:3]:
                   u = a if a.startswith("http") else "https://www.cnmv.es" + (a if a.startswith("/") else "/" + a)
                   g = s.get(u, timeout=90)
                   ct = g.headers.get("content-type", "")
