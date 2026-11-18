@@ -92,8 +92,11 @@ EUROSTAT_DESTACADOS = [
     ("retail trade", "comercio al por menor de la zona euro", 2),
 ]
 # Horas habituales (hora de Madrid) que no vienen en el calendario de la fuente: se publican como
-# «hora habitual», nunca como dato de la cita. INE y Eurostat las fijan en sus calendarios; el BCE
-# publica sus decisiones a las 14:15 CET con rueda de prensa a las 14:45; la Fed, a las 14:00 de Washington.
+# «hora habitual», nunca como dato de la cita. Comprobadas el 18/11/2026: el BCE publica las decisiones
+# a las 14:15 CET y empieza la rueda de prensa a las 14:45 (nota de prensa del 27/06/2022); Eurostat
+# difunde sus primeras publicaciones a las 11:00 CET (protocolo de imparcialidad); la Fed publica el
+# comunicado del FOMC «for release at 2:00 p.m.» hora de Washington (cabecera de cada comunicado).
+# La hora del INE la da la propia API (época en milisegundos) y se convierte a Madrid.
 HORA_HABITUAL = {"bce": "14:15", "eurostat": "11:00"}
 HORA_FED_LOCAL = (14, 0)
 AVISOS: list[str] = []
