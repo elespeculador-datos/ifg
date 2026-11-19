@@ -43,6 +43,18 @@ if __name__ == "__main__":
     ok(h1 == letras.huella(d, "2026-11-19"), "la huella no cambia entre dos días sin subasta")
     ok(h1 != letras.huella(d, "2026-11-21"), "la huella cambia cuando pasa una subasta del calendario")
     ok(h1 != letras.huella(d, ""), "la huella con fecha no es la antigua (todas desde enero)")
+    # Llamadas a nota «[1]» en las celdas del Tesoro (19/11/2026: 2.ª vuelta pendiente de anunciar).
+    ok(letras._dec("2,345[1]") == 2.345 and letras._dec("[1] 1.886,84") == 1886.84, "_dec quita la llamada a nota y lee la cifra")
+    ok(letras._dec("[1]") is None and letras._dec("-") is None, "_dec: la nota sola vale None, como el guion")
+    try:
+        letras._dec("abc[1]")
+        ok(False, "_dec sigue parando con un texto que no es número")
+    except letras.DatosRaros:
+        ok(True, "_dec sigue parando con un texto que no es número")
+    r = letras.leer_ultimas((Path(__file__).resolve().parent / "prueba_ultimas_nota.html").read_text(encoding="utf-8"))
+    ok([x["segunda_vuelta"] for x in r] == [None, None, 10.0, 25.0], "tabla del Tesoro con «[1]» en la 2.ª vuelta: pendiente -> None, las demás cifras intactas")
+    ok([x["plazo"] for x in r] == [3, 6, 9, 12] and r[3]["adjudicado"] == 1800.0 and r[0]["medio"] == 2.04, "el resto de la tabla se lee igual que antes")
+
     if FALLOS:
         print(f"{len(FALLOS)} de {N} comprobaciones fallan.")
         sys.exit(1)

@@ -47,6 +47,18 @@ if __name__ == "__main__":
     ok(h1 == bonos.huella(d, "2026-11-19"), "la huella no cambia entre dos días sin subasta")
     ok(h1 != bonos.huella(d, "2026-11-21"), "la huella cambia cuando pasa una subasta del calendario")
     ok(h1 != bonos.huella(d, ""), "la huella con fecha no es la antigua (todas desde enero)")
+    # Llamadas a nota «[1]» en las celdas del Tesoro (19/11/2026: 2.ª vuelta pendiente de anunciar).
+    ok(bonos._dec("2,345[1]") == 2.345 and bonos._dec("[1] 1.886,84") == 1886.84, "_dec quita la llamada a nota y lee la cifra")
+    ok(bonos._dec("[1]") is None and bonos._dec("-") is None, "_dec: la nota sola vale None, como el guion")
+    try:
+        bonos._dec("abc[1]")
+        ok(False, "_dec sigue parando con un texto que no es número")
+    except bonos.DatosRaros:
+        ok(True, "_dec sigue parando con un texto que no es número")
+    ok(bonos._cupon("3,45[1] v") == (3.45, True), "_cupon quita la llamada a nota")
+    r = bonos.leer_resultados("bonos", (Path(__file__).resolve().parent / "prueba_ultimas_nota.html").read_text(encoding="utf-8"))
+    ok([x["segunda_vuelta"] for x in r] == [None, 0.0, 309.13], "tabla del Tesoro con «[1]» en la 2.ª vuelta: pendiente -> None, las demás cifras intactas")
+    ok(r[0]["adjudicado"] == 1589.84 and r[0]["marginal"] == 3.85 and r[2]["plazo"] == 9 and r[2]["medio"] == 4.286, "el resto de la tabla se lee igual que antes")
     if FALLOS:
         print(f"{len(FALLOS)} de {N} comprobaciones fallan.")
         sys.exit(1)
