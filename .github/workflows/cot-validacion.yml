@@ -1,0 +1,48 @@
+name: Posicionamiento especulativo, COT de la CFTC (validación a mano)
+
+# Indicador 20a del catálogo de Datos. En producción corre en el servidor smpro-datos-1 (servidor/ejecutar.sh cot;
+# ver DESPLIEGUE.md). Este flujo NO tiene horario ni guarda nada en el repositorio: se lanza a mano para validar
+# la rama con datos reales (el entorno de Datos no llega a la CFTC).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install requests pandas scipy
+      - name: Comprobaciones sin red
+        run: test -f cot/pruebas_cot.py && python cot/pruebas_cot.py || echo "sin pruebas todavía"
+      - name: Pasada con datos reales
+        env:
+          ESPEC_DATOS_BASE: https://datos.elespeculador.com/
+        run: |
+          set -o pipefail
+          python cot/cot.py --salida salida/cot | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Fragmento y resumen al registro
+        run: |
+          echo "===== fragmento-wp.html"; sed 's/<svg.*<\/svg>/[SVG]/' salida/cot/fragmento-wp.html; echo
+          python - <<'EOF'
+          import json
+          j = json.load(open("salida/cot/datos/ultima.json", encoding="utf-8"))
+          print("===== informe", j["fecha"], "desfase", j["desfase_dias"], "| primera fecha", j["primera_fecha"], "| obs", j["observaciones"])
+          for c, m in j["mercados"].items():
+              print(f"{c} {m['nombre']:28s} {m['mercado_cftc'][:45]:45s} {m['fecha']} neto {m['neto_especuladores']:>9} ix {m['indice_cot_3a']} pct {m['percentil_3a']} {m['tramo']} semanas3a {m['semanas_3a']}")
+          EOF
+      - name: Guardar las respuestas como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cot-salida
+          path: salida
+          retention-days: 14
