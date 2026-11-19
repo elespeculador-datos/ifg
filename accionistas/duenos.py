@@ -18,7 +18,10 @@ Comprobaciones antes de publicar:
   CNMV: sus participaciones se comunican al supervisor de su país y la tabla de la CNMV
   estaría incompleta.
 
-Los nombres de los accionistas se reproducen tal y como los publica la CNMV.
+Los nombres de los accionistas se reproducen tal y como los publica la CNMV, pero **solo los de personas jurídicas**
+(empresas, fondos, bancos, fundaciones, administraciones y acciones concertadas). Las participaciones de personas
+físicas se cuentan y no se muestran ni se guardan (decisión de Federico del 18/11/2026: indicador 13, solo
+personas jurídicas; regla 2 del catálogo). La clasificación es por la forma del nombre (ver persona_juridica).
 
 Uso:
   python accionistas/duenos.py --salida docs/accionistas
@@ -58,6 +61,70 @@ MAX_FALLOS = 5
 PAUSA = 2.0  # segundos entre consultas a la CNMV
 DIAS_RECIENTES = 30  # ventana de la tabla de notificaciones recientes
 MOSTRAR_RECIENTES = False  # tabla de notificaciones recientes: apagada hasta que se decida si se publica
+SOLO_JURIDICAS = True  # las personas físicas se cuentan, no se publican ni se guardan
+
+# Palabras (o siglas) que solo aparecen en nombres de personas jurídicas. Se comparan sin tildes, sin puntos y
+# por palabra entera. Si un nombre no lleva ninguna y tiene la forma «APELLIDOS , NOMBRE» de la CNMV, o no
+# lleva ninguna y no está en CONOCIDAS, se trata como persona física (se excluye): mejor perder cobertura que
+# publicar a una persona.
+PALABRAS_JURIDICAS = {
+    "SA", "SAU", "SL", "SLU", "SRL", "SAS", "SARL", "SPA", "SRO", "BV", "NV", "CV", "LTD", "LIMITED", "INC", "LLC", "LP", "LLP",
+    "PLC", "GMBH", "AG", "KG", "SE", "OY", "AB", "AS", "ASA", "APS", "CORP", "CORPORATION", "CORPORACION", "COMPANY", "COMPAÑIA",
+    "CO", "GROUP", "GRUPO", "HOLDING", "HOLDINGS", "FUND", "FUNDS", "FONDS", "FONDO", "FONDOS", "SICAV", "SICAF", "FCP", "TRUST",
+    "BANK", "BANCO", "BANQUE", "BANCA", "CAPITAL", "PARTNERS", "INVESTMENT", "INVESTMENTS", "INVESTERING", "INVERSIONES",
+    "INVERSORA", "FUNDACION", "FUNDACIO", "FOUNDATION", "STICHTING", "SOCIEDAD", "SOCIETE", "SOCIETA", "ESTATAL", "GOVERNMENT",
+    "AUTHORITY", "MANAGEMENT", "ASSET", "ASSETS", "ADVISORS", "ADVISERS", "ASSOCIATES", "INTERNATIONAL", "GLOBAL", "EUROPE",
+    "EUROPEAN", "EUROPESE", "CAJA", "CAIXA", "KUTXA", "MUTUA", "MUTUAL", "COOPERATIVA", "SOCIMI", "PENSIONES", "PENSIONS",
+    "SEGUROS", "INSURANCE", "ASSURANCE", "ASSICURAZIONI", "INDUSTRIAL", "INDUSTRIES", "FINANCIERA", "FINANCIAL", "FINANCE",
+    "ENTERPRISES", "VENTURES", "EQUITY", "PARTNERSHIP", "ASOCIACION", "ASSOCIATION", "INSTITUTE", "INSTITUTO", "UNIVERSITY",
+    "ENAIRE", "SEPI", "CONCERTADA", "KINGDOM", "REPUBLIC", "ESTADO", "STATE", "TESORO", "TREASURY", "INVESTORS", "SECURITIES",
+    "TRUSTEES", "PATRIMONIO", "PARTICIPACIONES", "GESTION", "GESTORA", "ENERGIA", "ENERGY", "TELECOM", "AIRLINES", "PROPERTIES",
+    "INMOBILIARIA", "REAL", "ESTATE", "SERVICIOS", "SERVICES", "SYSTEMS", "TECHNOLOGIES", "RENOVABLES", "RENEWABLES",
+    "CONSTRUCCION", "ACTIVIDADES", "PRIVADA", "BANCARIA", "ESTALVIS", "CORPORATIVA", "EMPRESARIAL", "MASTER", "PORTFOLIO",
+    "STRATEGIES", "OPPORTUNITIES", "FFI", "ETF", "UCITS", "PENSION", "RETIREMENT", "SOVEREIGN", "WEALTH", "AUTONOMA",
+    "GOBIERNO", "MINISTERIO", "REINO", "GENERALITAT", "COMUNIDAD", "AYUNTAMIENTO", "DIPUTACION", "CONSORCIO", "AGENCIA",
+}
+# Entidades conocidas cuyo nombre en la CNMV no lleva ninguna de las palabras anteriores.
+CONOCIDAS = {"BLACKROCK", "VANGUARD", "NORGES", "BARCLAYS", "UBS", "HSBC", "CITADEL", "AMUNDI", "JPMORGAN", "MORGAN STANLEY",
+             "GOLDMAN SACHS", "CREDIT AGRICOLE", "BNP PARIBAS", "DEUTSCHE", "SOCIETE GENERALE", "ALLIANZ", "AXA", "FIDELITY",
+             "INVESCO", "DODGE & COX", "WELLINGTON", "STATE STREET", "MFS", "T. ROWE PRICE", "FRANKLIN", "SCHRODERS", "ABERDEEN",
+             "LAZARD", "PICTET", "LYXOR", "DWS", "NORDEA", "ING", "KUTXABANK", "CRITERIA", "PONTEGADEA", "TCI", "ELLIOTT",
+             "MILLENNIUM", "CAPITAL RESEARCH", "QATAR", "TEMASEK", "GIC", "ADIA", "MUBADALA", "PIF", "BBVA", "CAIXABANK",
+             "BANKINTER", "UNICAJA", "MAPFRE", "IBERDROLA", "REPSOL", "TELEFONICA", "NATURGY", "ENDESA", "ENEL", "ENGIE", "EDP",
+             "ACCIONA", "FERROVIAL", "SACYR", "OHLA", "FCC", "ACERINOX", "ARCELORMITTAL", "AMADEUS", "CELLNEX", "INDITEX", "ROVI",
+             "FLUIDRA", "COLONIAL", "MERLIN", "LOGISTA", "IMPERIAL BRANDS", "SOLARIA", "INDRA", "REDEIA", "ENAGAS", "AENA",
+             "MUTUALIDAD", "SINGAPORE", "ABU DHABI", "GPIF", "FROB", "SONATRACH", "ENAIRE", "SEPI", "ICO", "COFIDES"}
+# Los apellidos que coinciden con marcas (Santander, Sabadell, Grifols, Puig, Meliá...) no van en CONOCIDAS: esas
+# entidades llevan S.A. en la CNMV y la persona física se reconoce por la forma «APELLIDOS , NOMBRE».
+FORMA_PERSONA = re.compile(r"^[A-Z'. -]+ ?, ?[A-Z'. -]+$")
+
+
+def _normal(nombre: str) -> str:
+    """Mayúsculas sin tildes, sin puntos (S.A. -> SA) y solo letras, cifras y &, separado por espacios simples."""
+    return re.sub(r"\s+", " ", re.sub(r"[^A-Z0-9& ]", " ", _sin_tildes(nombre).replace("&AMP;", "&").replace(".", ""))).strip()
+
+
+def persona_juridica(nombre: str) -> bool:
+    """True si el nombre tiene la forma de una entidad (y no de una persona física). Compara palabras enteras."""
+    n = _normal(nombre)
+    palabras = set(n.split())
+    if palabras & PALABRAS_JURIDICAS:
+        return True
+    if FORMA_PERSONA.match(_sin_tildes(nombre).strip()):
+        return False
+    return any(re.search(r"(?<![A-Z0-9])" + re.escape(_normal(c)) + r"(?![A-Z0-9])", n) for c in CONOCIDAS)
+
+
+def solo_juridicas(datos: dict) -> dict:
+    """Deja en cada empresa solo las participaciones de personas jurídicas y cuenta las excluidas (sin guardarlas)."""
+    for e in datos.get("empresas", []):
+        if e.get("fuera"):
+            continue
+        filas = e.get("accionistas", [])
+        juridicas = [f for f in filas if persona_juridica(f["accionista"])]
+        e["fisicas_excluidas"] = len(filas) - len(juridicas)
+        e["accionistas"] = juridicas
+    return datos
 
 # ISIN -> (nombre corto, texto que se busca en la CNMV, comienzo del nombre en la CNMV)
 EMPRESAS = {
@@ -302,8 +369,12 @@ def frase_empresa(e: dict) -> str:
     p = principal(e)
     n = len(e["accionistas"])
     if not p:
-        return (f"<p>La CNMV recoge {n} {'participación' if n == 1 else 'participaciones'}, solo a través de instrumentos "
-                f"financieros.</p>")
+        x = e.get("fisicas_excluidas", 0)
+        if n == 0:
+            return ("<p>La CNMV no recoge participaciones significativas de personas jurídicas"
+                    + (f"; las {x} que recoge son de personas físicas y no se muestran aquí" if x else "") + ".</p>")
+        return (f"<p>La CNMV recoge {n} {'participación' if n == 1 else 'participaciones'} de personas jurídicas, solo a través de "
+                "instrumentos financieros" + (f"; además, {x} de personas físicas, que no se muestran" if x else "") + ".</p>")
     nom = lambda f: html.escape(f["accionista"])  # noqa: E731
     # Sin deducir relaciones de control: dos filas con el mismo porcentaje pueden ser dos accionistas distintos
     # (SEPI y Amancio Ortega en Enagás) o la misma participación, directa e indirecta (Criteria y la Fundación).
@@ -315,7 +386,11 @@ def frase_empresa(e: dict) -> str:
              "a nombre de " + ", ".join(nom(f) for f in p[:-1]) + f" y de {nom(p[-1])}.")
     resto = n - len(p)
     if resto:
-        t += f" En total, la CNMV recoge {n} participaciones significativas."
+        t += f" En total, la CNMV recoge {n} participaciones significativas de personas jurídicas."
+    x = e.get("fisicas_excluidas", 0)
+    if x:
+        t += (f" Además recoge {x} participación de una persona física, que no se muestra aquí." if x == 1
+              else f" Además recoge {x} participaciones de personas físicas, que no se muestran aquí.")
     return f"<p>{t}</p>"
 
 
@@ -382,8 +457,8 @@ def recientes(datos: dict, hoy: str) -> list[tuple[dict, dict]]:
 def huella(datos: dict, hoy: str) -> str:
     """Resumen de los datos (sin fechas de consulta), para saber si algo ha cambiado. Incluye qué filas entran en
     la tabla de las notificaciones recientes, que cambia aunque no lleguen datos nuevos."""
-    base = [[e["isin"], e.get("fuera"), [[f["accionista"], f["acciones"], f["instrumentos"], f["total"], f["fecha"]]
-                                         for f in e.get("accionistas", [])]] for e in datos["empresas"]]
+    base = [[e["isin"], e.get("fuera"), e.get("fisicas_excluidas", 0), [[f["accionista"], f["acciones"], f["instrumentos"], f["total"], f["fecha"]]
+                                                                      for f in e.get("accionistas", [])]] for e in datos["empresas"]]
     if MOSTRAR_RECIENTES:
         base.append([[e["isin"], f["accionista"], f["fecha"]] for e, f in recientes(datos, hoy)])
     return hashlib.sha256(json.dumps(base, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:12]
@@ -407,7 +482,9 @@ def fragmento(datos: dict, fecha: str, hoy: str) -> str:
     ultima = max((f["fecha"] for e in con for f in e["accionistas"] if f["fecha"]), default="")
     partes = [f"<!-- accionistas:inicio {huella(datos, hoy)} -->",
               f'<p class="has-small-font-size">Actualizado el {_f(fecha)} con el registro de participaciones significativas '
-              f"de la CNMV. La notificación más reciente es del {_f(ultima)}.</p>",
+              f"de la CNMV. La notificación más reciente es del {_f(ultima)}. Solo personas jurídicas (empresas, fondos, bancos, "
+              f"fundaciones, administraciones y acciones concertadas): las {sum(e.get('fisicas_excluidas', 0) for e in con)} "
+              "participaciones de personas físicas del registro se cuentan en cada empresa y no se muestran.</p>",
               resumen(datos),
               "<h2>Los accionistas que están en más empresas del IBEX 35</h2>",
               "<p>Accionistas con participación significativa en tres empresas o más del índice. Entre paréntesis, el total de "
@@ -432,7 +509,8 @@ def fragmento(datos: dict, fecha: str, hoy: str) -> str:
             " Por eso no aparecen en las tablas.</p>")
     partes.append(f'<p class="has-small-font-size">Fuente: CNMV, registro de participaciones significativas de cada emisor, '
                   f'tal y como lo publica. Cada porcentaje es el de la última notificación del accionista y puede no coincidir con su '
-                  f'participación de hoy. Los nombres se reproducen como figuran en la CNMV. '
+                  f'participación de hoy. Los nombres de las personas jurídicas se reproducen como figuran en la CNMV; las personas '
+                  f'físicas no se publican, por decisión editorial, aunque el registro de la CNMV es público. '
                   f'<a href="{METODOLOGIA}">Cómo se hace y cómo leer las tablas</a>.</p>')
     partes.append("<!-- accionistas:fin -->")
     return "\n".join(partes)
@@ -442,9 +520,10 @@ def ld_wp(fecha: str) -> str:
     return '<script type="application/ld+json">' + json.dumps({
         "@context": "https://schema.org", "@type": "Dataset",
         "name": "Accionistas significativos de las empresas del IBEX 35 (El Especulador, con datos de la CNMV)",
-        "description": "Los accionistas que han comunicado a la CNMV una participación significativa en cada empresa del IBEX 35, "
-                       "con el porcentaje de derechos de voto por acciones y por instrumentos financieros y la fecha de cada "
-                       "notificación, y los accionistas presentes en más empresas del índice.",
+        "description": "Las personas jurídicas (empresas, fondos, bancos, fundaciones, administraciones) que han comunicado a la CNMV "
+                       "una participación significativa en cada empresa del IBEX 35, con el porcentaje de derechos de voto por acciones "
+                       "y por instrumentos financieros y la fecha de cada notificación, y las presentes en más empresas del índice. "
+                       "Las personas físicas no se publican.",
         "url": PAGINA_WP, "inLanguage": "es", "spatialCoverage": "España",
         "creator": {"@type": "Organization", "name": "El Especulador", "url": "https://elespeculador.com/"},
         "creditText": "El Especulador, a partir del registro de participaciones significativas de la CNMV",
@@ -512,6 +591,8 @@ def main() -> int:
     previo = salida / "datos" / "ultima.json"
     anterior = json.loads(previo.read_text(encoding="utf-8")) if previo.exists() else {}
     datos = json.loads(Path(a.local).read_text(encoding="utf-8")) if a.local else consultar(anterior)
+    if SOLO_JURIDICAS:
+        datos = solo_juridicas(datos)
     for e in datos["empresas"]:
         if not e.get("fuera"):
             revisar_filas(e["accionistas"], e["empresa"])
@@ -520,8 +601,8 @@ def main() -> int:
     for av in AVISOS:
         print(f"::warning::{av}")
     con = [e for e in datos["empresas"] if not e.get("fuera")]
-    print(f"{len(con)} empresas con datos de la CNMV, {sum(len(e['accionistas']) for e in con)} participaciones. "
-          f"{'Datos nuevos.' if cambia else 'Sin cambios.'}")
+    print(f"{len(con)} empresas con datos de la CNMV, {sum(len(e['accionistas']) for e in con)} participaciones de personas jurídicas "
+          f"({sum(e.get('fisicas_excluidas', 0) for e in con)} de personas físicas excluidas). {'Datos nuevos.' if cambia else 'Sin cambios.'}")
     return 0
 
 
