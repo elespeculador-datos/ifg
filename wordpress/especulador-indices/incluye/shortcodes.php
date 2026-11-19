@@ -82,6 +82,31 @@ function esp_indices_escala_html( $valor, $tramo_actual ) {
 	return $salida;
 }
 
+if ( ! function_exists( 'esp_indices_articulo_componente' ) ) {
+	/**
+	 * Artículo de cada componente para la frase de los motores
+	 * («los fletes marítimos», «la energía»). Clave desconocida: «el».
+	 * Arreglo del 19/11/2026 (errata «el fletes marítimos»).
+	 */
+	function esp_indices_articulo_componente( $clave ) {
+		$articulos = array(
+			'energia'     => 'la',
+			'vol_energia' => 'la',
+			'refugios'    => 'los',
+			'defensa'     => 'la',
+			'prima'       => 'la',
+			'transporte'  => 'el',
+			'fletes'      => 'los',
+			'grano'       => 'el',
+			'gas'         => 'el',
+			'gdelt'       => 'el',
+			'gpr'         => 'el',
+		);
+
+		return isset( $articulos[ $clave ] ) ? $articulos[ $clave ] : 'el';
+	}
+}
+
 /**
  * La frase de "qué lo mueve hoy", construida con los dos motores del JSON.
  * Devuelve cadena vacía si no hay motores, en vez de una frase a medias.
@@ -98,7 +123,7 @@ function esp_indices_frase_motores( $dia ) {
 		}
 		$sentido  = ( isset( $m['aporte_cambio'] ) && (float) $m['aporte_cambio'] < 0 )
 			? 'a la baja' : 'al alza';
-		$trozos[] = '<strong>' . esc_html( esp_indices_nombre_componente( $m['componente'] ) )
+		$trozos[] = esc_html( esp_indices_articulo_componente( $m['componente'] ) ) . ' <strong>' . esc_html( esp_indices_nombre_componente( $m['componente'] ) )
 			. '</strong>, ' . $sentido;
 	}
 
@@ -106,7 +131,7 @@ function esp_indices_frase_motores( $dia ) {
 		return '';
 	}
 
-	return '<p class="esp-ifg__motores">Hoy lo mueven el ' . implode( ', y el ', $trozos ) . '.</p>';
+	return '<p class="esp-ifg__motores">Hoy lo mueven ' . implode( ', y ', $trozos ) . '.</p>';
 }
 
 /**
