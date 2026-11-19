@@ -167,5 +167,181 @@ ok(filas.totales_declarados("Total…        3.305.308\n") == [3305308], "Total 
 ok(filas.totales_declarados("TOTAL:   492.309 acciones Precio Medio 26,70\n") == [492309], "TOTAL: con dos puntos (Cellnex)")
 ok(filas.totales_declarados("sin totales\n") == [], "Sin línea Total")
 
+# =========================================================================== Colector (fase 1): recompras.py
+import json
+import tempfile
+from datetime import date
+from pathlib import Path
+
+import recompras  # noqa: E402
+
+HOY = date(2026, 11, 19)
+
+# --- Acumulado del programa según el texto ----------------------------------------------------------------
+SABADELL_TXT = """El importe monetario total de las acciones compradas bajo el Programa de Recompra asciende a 313.703.878,75 euros, lo que representa
+aproximadamente, el 94,77% del importe monetario máximo del Programa de Recompra, quedando por tanto pendiente de ejecución aproximadamente el 5,23%.
+El número total de acciones compradas bajo el actual Programa de Recompra asciende
+a 87.683.998 acciones (que representan el 1,84% del capital social actual)."""
+pr = recompras.resumen_programa(SABADELL_TXT)
+ok(pr["pct_programa"] == 94.77 and pr["importe_programa_eur"] == 313703878.75, "Programa: porcentaje e importe (Sabadell)")
+ok(pr["acciones_programa"] == 87683998 and pr["pct_capital"] == 1.84 and pr["finalizado"] is False, "Programa: acciones acumuladas y % del capital (Sabadell)")
+
+BBVA_TXT = "El importe monetario de las acciones compradas hasta la fecha como consecuencia de la\nejecución del Segundo Tramo asciende a 336.983.018,88 euros, que representa,\naproximadamente, el 33,70% del importe monetario máximo del Segundo Tramo."
+pr = recompras.resumen_programa(BBVA_TXT)
+ok(pr["pct_programa"] == 33.7 and pr["importe_programa_eur"] == 336983018.88 and pr["acciones_programa"] is None, "Programa: BBVA (sin acciones acumuladas)")
+
+CAIXA_TXT = "el número total de acciones adquiridas en el marco del programa de recompras asciende a 29.476.674 que representan un importe de 358.741.361 euros equivalente\n al 71,75 % del importe monetario máximo."
+pr = recompras.resumen_programa(CAIXA_TXT)
+ok(pr["pct_programa"] == 71.75 and pr["importe_programa_eur"] == 358741361.0 and pr["acciones_programa"] == 29476674, "Programa: CaixaBank (asciende a N que representan un importe de X euros)")
+
+CELLNEX_TXT = "el Programa de Recompra\nha finalizado al haberse alcanzado el importe máximo de 200 millones de euros.\nEn el marco de la ejecución del Programa de Recompra se han adquirido un total de 7.861.372\nacciones propias, que representan el 1,18% del capital social de Cellnex."
+pr = recompras.resumen_programa(CELLNEX_TXT)
+ok(pr["finalizado"] is True and pr["pct_programa"] == 100.0 and pr["acciones_programa"] == 7861372 and pr["pct_capital"] == 1.18, "Programa: Cellnex terminado al alcanzar el importe máximo")
+ok(pr["importe_programa_eur"] is None, "Programa: «200 millones de euros» no se toma como importe (va en millones, no en cifra)")
+pr = recompras.resumen_programa("Texto sin cifras del programa.")
+ok(all(v is None for k, v in pr.items() if k != "finalizado") and pr["finalizado"] is False, "Programa: sin datos -> None")
+
+# --- Documentos de la página del comunicado -----------------------------------------------------------------
+PAGINA = """<a href="/portal/home.aspx">Inicio</a> <a href="https://www.cnmv.es/webservices/verdocumento/ver?t=%7baaa%7d">Informe</a>
+<a href="/webservices/verdocumento/ver?t=%7bbbb%7d&amp;x=1">Anexo</a> <a href="/DocPortal/Aviso.pdf">Aviso legal</a>
+<a href="https://www.cnmv.es/webservices/verdocumento/ver?t=%7baaa%7d">Informe otra vez</a>"""
+docs = recompras.enlaces_documentos(PAGINA)
+ok(docs == ["https://www.cnmv.es/webservices/verdocumento/ver?t=%7baaa%7d", "https://www.cnmv.es/webservices/verdocumento/ver?t=%7bbbb%7d&x=1"],
+   "Documentos: solo verdocumento, absolutos, sin repetir, entidades HTML deshechas")
+ok(recompras.texto_pdf(b"no es un pdf") == "", "texto_pdf: lo que no es PDF devuelve cadena vacía")
+
+# --- Análisis de un informe y registro ----------------------------------------------------------------------
+a = recompras.analizar(CAIXABANK)
+ok(a["coincide"] is True and a["resumen"]["acciones"] == 167253 and a["programa"]["pct_programa"] is None, "analizar: filas, coincidencia y programa")
+a = recompras.analizar(CAIXABANK.replace("TOTAL         167.253", "TOTAL         167.999"))
+ok(a["coincide"] is False, "analizar: la suma no coincide con un total declarado distinto")
+ok(recompras.analizar(REPSOL)["coincide"] is None, "analizar: sin total declarado, coincide es None")
+
+listado_fila = {"nreg": "43525", "fecha": "2026-11-06T08:59:25", "isin": "ES0140609019", "empresa": "CaixaBank", "texto": "La Sociedad remite información",
+                "enlace": "https://www.cnmv.es/portal/otra-informacion-relevante/Resultado-OIR.aspx?nreg=43525", "caja": "recompras"}
+recompras.AVISOS.clear()
+inf, ops = recompras.informe_desde_textos(listado_fila, [("u1", "sin nada"), ("u2", CAIXABANK + SABADELL_TXT)], HOY)
+ok(inf["estado"] == "leido" and inf["documento"] == "u2" and inf["filas"] == 3 and inf["acciones"] == 167253, "Informe: se elige el documento con filas")
+ok(abs(float(inf["importe_estimado_eur"]) - (102099 * 11.2048 + 55190 * 11.2040 + 9964 * 11.1971)) < 0.01, "Informe: importe estimado = suma de acciones × precio")
+ok(inf["coincide"] == 1 and inf["total_declarado"] == 167253 and inf["pct_programa"] == 94.77 and inf["leido"] == "2026-11-19", "Informe: total declarado, coincidencia, programa y fecha de lectura")
+ok(len(ops) == 3 and ops[0]["nreg"] == "43525" and ops[0]["centro"] == "XMAD" and ops[0]["acciones"] == 102099, "Informe: operaciones diarias con nreg y centro")
+inf, ops = recompras.informe_desde_textos(listado_fila, [("u1", BBVA_TXT)], HOY)
+ok(inf["estado"] == "sin_filas" and inf["pct_programa"] == 33.7 and ops == [], "Informe sin tabla legible: estado sin_filas con el acumulado del texto (BBVA)")
+inf, ops = recompras.informe_desde_textos(listado_fila, [], HOY)
+ok(inf["estado"] == "sin_texto" and ops == [], "Informe sin documentos: sin_texto")
+inf, _ = recompras.informe_desde_textos(listado_fila, [("u", CAIXABANK.replace("TOTAL         167.253", "TOTAL         167.999"))], HOY)
+ok(inf["coincide"] == 0 and any("no coincide" in x for x in recompras.AVISOS), "Informe que no coincide: marcado y aviso")
+
+# --- Pendientes y reintentos --------------------------------------------------------------------------------
+listado = [{"nreg": "3", "fecha": "2026-11-18"}, {"nreg": "2", "fecha": "2026-11-17"}, {"nreg": "1", "fecha": "2026-11-16"}]
+informes = [{"nreg": "1", "estado": "leido", "intentos": "1"}, {"nreg": "2", "estado": "error", "intentos": "1"}]
+ok([r["nreg"] for r in recompras.pendientes(listado, informes)] == ["3", "2"], "Pendientes: los nuevos y los errores con intentos por debajo del máximo")
+informes[1]["intentos"] = str(recompras.INTENTOS_MAX)
+ok([r["nreg"] for r in recompras.pendientes(listado, informes)] == ["3"], "Pendientes: un error agotado no se reintenta")
+
+# --- Serie semanal y cálculo --------------------------------------------------------------------------------
+ops = [{"isin": "A", "empresa": "A", "fecha": "2026-11-09", "centro": "XMAD", "operacion": "compra", "acciones": "100", "precio": "10", "moneda": "EUR"},
+       {"isin": "A", "empresa": "A", "fecha": "2026-11-13", "centro": "CEUX", "operacion": "compra", "acciones": "50", "precio": "12", "moneda": "EUR"},
+       {"isin": "B", "empresa": "B", "fecha": "2026-11-10", "centro": "XLON", "operacion": "compra", "acciones": "70", "precio": "4", "moneda": "GBP"},
+       {"isin": "B", "empresa": "B", "fecha": "2026-11-17", "centro": "XMAD", "operacion": "compra", "acciones": "10", "precio": "5", "moneda": "EUR"},
+       {"isin": "C", "empresa": "C", "fecha": "2026-11-12", "centro": "XMAD", "operacion": "venta", "acciones": "999", "precio": "5", "moneda": "EUR"}]
+serie = recompras.serie_semanal(ops)
+ok([s["semana"] for s in serie] == ["2026-11-09", "2026-11-16"], "Serie: semanas ISO por su lunes")
+ok(serie[0] == {"semana": "2026-11-09", "empresas": 2, "acciones": 220, "importe_estimado_eur": 1600.0}, "Serie: acciones de todas las monedas, importe solo de las filas en euros, ventas fuera")
+ok(recompras.percentil(5, [1, 2, 3]) is None, "Percentil: None con menos de 52 semanas")
+ok(recompras.percentil(3, list(range(1, 53))) == round(100 * 3 / 52, 1), "Percentil débil con 52 observaciones")
+
+base = {"nreg": "1", "isin": "A", "empresa": "Alfa", "fecha_comunicado": "2026-11-17", "titulo": "t", "enlace": "e", "documento": "d", "estado": "leido", "intentos": "1",
+        "filas": "2", "acciones": "150", "precio_medio": "10.6667", "moneda": "EUR", "importe_estimado_eur": "1600.0", "desde": "2026-11-09", "hasta": "2026-11-13", "dias": "2",
+        "centros": "CEUX+XMAD", "total_declarado": "150", "coincide": "1", "acciones_programa": "", "importe_programa_eur": "", "pct_programa": "40.5", "pct_capital": "", "finalizado": "0", "leido": "2026-11-18"}
+viejo = dict(base, nreg="0", fecha_comunicado="2026-11-01", pct_programa="20")
+otro = dict(base, nreg="2", isin="B", empresa="Beta", fecha_comunicado="2026-11-10", acciones="80", importe_estimado_eur="280.0", finalizado="1", pct_programa="100")
+antiguo = dict(base, nreg="9", isin="C", empresa="Gamma", fecha_comunicado="2026-09-01")
+roto = dict(base, nreg="7", isin="D", empresa="Delta", fecha_comunicado="2026-11-18", estado="error", acciones="0", importe_estimado_eur="")
+d = recompras.calcular([base, viejo, otro, antiguo, roto], ops, HOY)
+ok([x["empresa"] for x in d["semana"]["informes"]] == ["Alfa"] and d["semana"]["acciones"] == 150 and d["semana"]["importe_estimado_eur"] == 1600.0, "Calcular: la semana toma el último informe de cada empresa en siete días; los errores no cuentan")
+ok([x["empresa"] for x in d["en_curso"]["programas"]] == ["Alfa"] and [x["empresa"] for x in d["en_curso"]["terminados"]] == ["Beta"], "Calcular: en curso a 45 días, con los terminados aparte y los de hace meses fuera")
+ok(d["en_curso"]["programas"][0]["pct_programa"] == 40.5 and d["en_curso"]["programas"][0]["coincide"] is True and d["en_curso"]["programas"][0]["centros"] == ["CEUX", "XMAD"], "Calcular: tipos convertidos en la ficha de cada informe")
+ok(d["serie"]["n_semanas"] == 1 and d["serie"]["ultima_completa"]["semana"] == "2026-11-09" and d["serie"]["percentil_ultima"] is None, "Calcular: solo las semanas completas cuentan; sin percentil todavía")
+ok(d["cobertura"] == {"informes_leidos": 4, "informes_sin_filas": 0, "informes_error": 1, "coinciden": 4, "no_coinciden": 0, "primer_comunicado": "2026-09-01"}, "Calcular: cobertura")
+h1 = recompras.huella(d)
+d2 = recompras.calcular([base, viejo, otro, antiguo, roto], ops, date(2026, 11, 20))
+ok(recompras.huella(d2) == h1, "Huella: no cambia con la fecha de la pasada si las ventanas no cambian")
+d3 = recompras.calcular([base, viejo, otro, antiguo, roto], ops + [dict(ops[0], fecha="2026-11-18")], HOY)
+ok(recompras.huella(d3) != h1, "Huella: cambia con una operación nueva")
+
+# --- Fragmento ---------------------------------------------------------------------------------------------
+frag = recompras.fragmento(dict(d, huella=h1))
+ok(frag.startswith(f"<!-- recompras:inicio {h1} -->") and frag.rstrip().endswith("<!-- recompras:fin -->"), "Fragmento: marcas con la huella")
+ok("Alfa" in frag and "40,50 %" in frag and "1.600 €" in frag and "Programas terminados en el periodo: Beta" in frag, "Fragmento: tabla de la semana, programas y terminados")
+ok("$" not in frag and "application/ld+json" in frag and "recomendación" in frag and "Históricamente" in frag, "Fragmento: sin dólar, con JSON-LD y marco educativo")
+ok("percentil histórico se publicará cuando haya 52 semanas" in frag, "Fragmento: aviso de serie corta")
+ok(recompras.frase_semana(recompras.calcular([antiguo], [], HOY)).startswith("Ninguna empresa"), "Frase: sin comunicados en la semana")
+tres = recompras.calcular([base, dict(base, nreg="5", isin="E", empresa="Eps", fecha_comunicado="2026-11-16"), dict(base, nreg="6", isin="F", empresa="Fi", fecha_comunicado="2026-11-15"), dict(base, nreg="8", isin="G", empresa="Ge", fecha_comunicado="2026-11-14")], ops, HOY)
+ok("y otras 1)" in recompras.frase_semana(tres), "Frase: con más de tres empresas, «y otras N»")
+mixto = dict(base, moneda="EUR+GBP")
+ok("(solo euros)" in recompras.fragmento(recompras.calcular([mixto], ops, HOY)), "Fragmento: importe parcial marcado cuando hay varias monedas")
+
+# --- Pasada completa sin red (--local) y escritura ------------------------------------------------------------
+with tempfile.TemporaryDirectory() as tmp:
+    local = Path(tmp) / "local"
+    local.mkdir()
+    cab = "canal,nreg,fecha,emisor,categoria,texto,enlace,isin,empresa,ficha,caja,etiqueta,periodo,grupo\n"
+    filas_l = [
+        "OIR,43525,2026-11-06T08:59:25,CAIXABANK,Programas de recompra,Informe,https://cnmv/oir/43525,ES0140609019,CaixaBank,caixabank,recompras,Programa de recompra,,",
+        "OIR,43664,2026-11-16T10:55:16,BBVA,Programas de recompra,Informe,https://cnmv/oir/43664,ES0113211835,BBVA,bbva,recompras,Programa de recompra,,",
+        "OIR,43719,2026-11-18T15:59:48,REPSOL,Programas de recompra,Informe,https://cnmv/oir/43719,ES0173516115,Repsol,repsol,recompras,Programa de recompra,,",
+        "OIR,43700,2026-11-18T09:00:00,REPSOL,Programas de recompra,Sin documento,https://cnmv/oir/43700,ES0173516115,Repsol,repsol,recompras,Programa de recompra,,",
+        "OIR,43600,2026-11-02T08:00:00,SANTANDER,Dividendos,Dividendo,https://cnmv/oir/43600,ES0113900J37,Santander,santander,dividendos,Dividendo,,",
+    ]
+    (local / "ibex35.csv").write_text(cab + "\n".join(filas_l) + "\n", encoding="utf-8")
+    (local / "43525.txt").write_text(CAIXABANK + "\n" + CAIXA_TXT, encoding="utf-8")
+    (local / "43664.txt").write_text(BBVA_TXT, encoding="utf-8")
+    (local / "43719.txt").write_text(REPSOL, encoding="utf-8")
+    listado = recompras.leer_listado(str(local / "ibex35.csv"))
+    ok([r["nreg"] for r in listado] == ["43719", "43700", "43664", "43525"], "Listado: solo caja recompras, del más reciente al más antiguo")
+    recompras.AVISOS.clear()
+    informes, operaciones, hechos = recompras.recoger(listado, [], [], HOY, local=local)
+    est = {i["nreg"]: i["estado"] for i in informes}
+    ok(hechos == 4 and est == {"43719": "leido", "43700": "sin_texto", "43664": "sin_filas", "43525": "leido"}, "Recoger: estados por comunicado (leído, sin texto, sin filas)")
+    ok(len(operaciones) == 6 and operaciones[0]["fecha"] >= operaciones[-1]["fecha"], "Recoger: operaciones de los informes leídos, de la más reciente a la más antigua")
+    informes2, operaciones2, hechos2 = recompras.recoger(listado, informes, operaciones, HOY, local=local)
+    ok(hechos2 == 0 and informes2 == informes and operaciones2 == operaciones, "Recoger: segunda pasada sin pendientes no cambia nada")
+    d = recompras.calcular(informes, operaciones, HOY)
+    ok([x["empresa"] for x in d["semana"]["informes"]] == ["Repsol", "BBVA"] and d["semana"]["informes"][1]["estado"] == "sin_filas", "Pasada local: semana con Repsol y BBVA (sin tabla legible)")
+    ok([x["empresa"] for x in d["en_curso"]["programas"]] == ["Repsol", "CaixaBank", "BBVA"], "Pasada local: programas en curso ordenados por importe estimado")
+    salida = Path(tmp) / "salida"
+    ok(recompras.escribir(salida, d, informes, operaciones) is True, "Escribir: primera pasada escribe")
+    ok(all((salida / x).exists() for x in ("fragmento-wp.html", "index.html", "datos/ultima.json", "datos/informes.csv", "datos/operaciones.csv", "datos/semanal.csv")), "Escribir: seis ficheros")
+    j = json.loads((salida / "datos/ultima.json").read_text(encoding="utf-8"))
+    ok(j["huella"] == (salida / "fragmento-wp.html").read_text(encoding="utf-8").split()[2] and j["version"] == recompras.VERSION, "Escribir: la huella del JSON es la del fragmento")
+    ok(recompras.escribir(salida, d, informes, operaciones) is False, "Escribir: sin cambios no reescribe")
+    ok(recompras.escribir(salida, d, informes, operaciones, forzar=True) is True, "Escribir: --forzar reescribe")
+    inf2, ops2 = recompras.cargar_estado(salida / "datos")
+    ok(len(inf2) == 4 and len(ops2) == 6 and inf2[0]["nreg"] == "43719" and ops2[0]["fecha"] == "2026-11-12" and ops2[0]["acciones"] == "766917", "Estado: se recarga del CSV")
+    try:
+        recompras.leer_listado(str(local / "no_existe.csv"))
+        ok(False, "Listado inexistente debe parar")
+    except recompras.DatosRaros:
+        ok(True, "Listado inexistente: DatosRaros")
+    (local / "vacio.csv").write_text(cab + filas_l[-1] + "\n", encoding="utf-8")
+    try:
+        recompras.leer_listado(str(local / "vacio.csv"))
+        ok(False, "Listado sin recompras debe parar")
+    except recompras.DatosRaros:
+        ok(True, "Listado sin comunicados de recompra: DatosRaros")
+
+# Caso de control de la serie semanal frente a pandas.
+try:
+    import pandas as pd
+    df = pd.DataFrame(ops)
+    df = df[df["operacion"] == "compra"].copy()
+    df["acciones"] = df["acciones"].astype(int)
+    df["lunes"] = pd.to_datetime(df["fecha"]).dt.to_period("W-SUN").dt.start_time.dt.strftime("%Y-%m-%d")
+    ref = df.groupby("lunes")["acciones"].sum().to_dict()
+    ok({s["semana"]: s["acciones"] for s in recompras.serie_semanal(ops)} == ref, "Control: acciones por semana igual que pandas (periodos W-SUN)")
+except ImportError:
+    print("aviso: pandas no disponible, control de referencia omitido")
+
 print(f"{TOTAL - len(FALLOS)}/{TOTAL} comprobaciones superadas")
 sys.exit(1 if FALLOS else 0)
