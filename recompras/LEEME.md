@@ -27,7 +27,7 @@ Reglas: sin listado o sin comunicados de recompra en él, `DatosRaros` y el scri
 
 Pasada local sin red: `python recompras/recompras.py --salida /tmp/recompras --local CARPETA --fecha AAAA-MM-DD`, con `ibex35.csv` y un `<nreg>.txt` (salida de `pdftotext -layout`) por comunicado en CARPETA. Con los ocho textos de la sonda del 18/11: 7 leídos, 1 sin filas (BBVA), 5 de 5 coinciden con el total declarado, semana de 13.809.506 acciones y 198,7 M€ estimados; la segunda pasada no reescribe nada.
 
-El flujo `recompras-validacion` (solo a mano, sin horario ni escritura en el repositorio) hace una pasada completa con el listado real servido por `datos.elespeculador.com` y los PDF reales de la CNMV, y deja el fragmento en el registro y la salida como artefacto.
+El flujo `recompras-validacion` (solo a mano, sin horario ni escritura en el repositorio) hace una pasada completa con el listado real servido por `datos.elespeculador.com` y los PDF reales de la CNMV, y deja el fragmento en el registro y la salida como artefacto. **Pasada real del 19/11/2026 (ejecución 44473143317)**: 40 comunicados de 12 empresas (19/10-18/11); 33 leídos con tabla, 7 sin tabla (los tres de BBVA, con la tabla como imagen; la ampliación de plazo de CaixaBank, la reducción de capital de Repsol y las dos extensiones de Fluidra, que no son informes semanales); 26 de los 27 totales declarados coinciden con la suma de filas; el único que no (IAG, 19/10: 6.672.812 leídas frente a 6.476.752 declaradas) sale marcado «a verificar» con aviso. Semana del 12 al 19/11: 7 empresas, 13.809.506 acciones, 198,7 M€ estimados; programas en curso: 10; terminados en el periodo: Santander (28/10) y Cellnex (16/11).
 
 ## Despliegue y entrega a Tecnología
 
