@@ -49,7 +49,7 @@ from pathlib import Path
 
 import requests
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 PAGINA_WP = "https://elespeculador.com/compras-y-ventas-de-directivos/"
 PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/directivos/"
 URL_LISTADO = "https://www.cnmv.es/portal/consultas/directivos-resultado.aspx"
@@ -61,6 +61,14 @@ MAX_DOCUMENTOS = 300                 # PDF por pasada (relleno gradual hacia atr
 TRAMO_DIAS = 45                      # tamaño de cada tramo del relleno
 PAUSA = 0.7                          # segundos entre peticiones a la CNMV
 SEMANAS = 13
+
+# Clasificación sectorial propia de El Especulador (cortos/sectores.csv); si no está, el agregado por sector no se publica.
+try:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "cortos"))
+    import sectores as _sectores
+    SECTORES = _sectores.cargar()
+except Exception:  # noqa: BLE001
+    _sectores, SECTORES = None, None
 SEMANAS_MINIMAS = 52                 # el percentil solo se publica con un año de serie
 AVISOS: list[str] = []
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
@@ -550,6 +558,36 @@ def calcular(operaciones: list[dict], hoy: date, cobertura: dict) -> dict:
                 "compras_eur": round(sum(o["importe_eur"] or 0 for o in c), 2), "ventas_eur": round(sum(o["importe_eur"] or 0 for o in v), 2),
                 "empresas_compra": len({o["nif"] or o["emisor"] for o in c}), "empresas_venta": len({o["nif"] or o["emisor"] for o in v}),
                 "proporcion_compras": round(100 * len(c) / (len(c) + len(v)), 1) if c or v else None}
+    def por_sector(desde_: date, hasta_: date) -> dict | None:
+        """Compras y ventas discrecionales por sector propio entre dos fechas; None sin tabla sectorial."""
+        if not SECTORES:
+            return None
+        ops = [o for o in operaciones if desde_.isoformat() <= o["fecha_operacion"] <= hasta_.isoformat() and o["tipo"] == "discrecional"]
+        grupos: dict[str, dict] = {}
+        sin = set()
+        for o in ops:
+            clave = _sectores.sector_de(o.get("isin"), SECTORES)
+            if clave == _sectores.SIN_SECTOR:
+                sin.add(o.get("isin") or o["emisor"])
+            g = grupos.setdefault(clave, {"sector": clave, "nombre": _sectores.nombre_sector(clave), "compras_n": 0, "ventas_n": 0, "compras_eur": 0.0, "ventas_eur": 0.0, "empresas": set()})
+            g["empresas"].add(o["nif"] or o["emisor"])
+            if o["sentido"] == "compra":
+                g["compras_n"] += 1
+                g["compras_eur"] += o["importe_eur"] or 0.0
+            elif o["sentido"] == "venta":
+                g["ventas_n"] += 1
+                g["ventas_eur"] += o["importe_eur"] or 0.0
+        filas = []
+        for g in grupos.values():
+            g["empresas"] = len(g["empresas"])
+            g["compras_eur"], g["ventas_eur"] = round(g["compras_eur"], 2), round(g["ventas_eur"], 2)
+            g["neto_eur"] = round(g["compras_eur"] - g["ventas_eur"], 2)
+            g["proporcion_compras"] = round(100 * g["compras_n"] / (g["compras_n"] + g["ventas_n"]), 1) if g["compras_n"] + g["ventas_n"] else None
+            filas.append(g)
+        filas.sort(key=lambda g: (-g["neto_eur"], g["nombre"]))
+        if sin:
+            AVISOS.append(f"{len(sin)} emisores sin sector en cortos/sectores.csv (se agregan como «sin sector»): {', '.join(sorted(sin)[:8])}")
+        return {"desde": desde_.isoformat(), "hasta": hasta_.isoformat(), "sectores": filas, "sin_sector": sorted(sin)}
     recientes_lista = sorted([o for o in operaciones if o["fecha_registro"] >= (hoy - timedelta(days=30)).isoformat()],
                              key=lambda o: (o["fecha_registro"], o["registro"], o["linea"]), reverse=True)
     totales = {"operaciones": len(operaciones), "sustituidas": len(sustituidas), "discrecionales": sum(1 for o in operaciones if o["tipo"] == "discrecional"),
@@ -558,7 +596,8 @@ def calcular(operaciones: list[dict], hoy: date, cobertura: dict) -> dict:
                "ultimo_registro": max((o["fecha_registro"] for o in operaciones), default=None)}
     res = {"fecha": hoy.isoformat(), "semanas": SEMANAS, "ventana_desde": desde.isoformat(), "actual": actual, "percentil_proporcion": pct,
            "semanas_de_historia": len(historia), "empresas_13_semanas": empresas, "mes_en_curso": agregado(mes_ini, hoy), "mes_anterior": agregado(mes_ant_ini, mes_ant_fin),
-           "recientes": recientes_lista[:60], "serie": serie, "totales": totales, "cobertura": cobertura}
+           "recientes": recientes_lista[:60], "serie": serie, "totales": totales, "cobertura": cobertura,
+           "sectores_13_semanas": por_sector(desde, hoy), "sectores_mes_anterior": por_sector(mes_ant_ini, mes_ant_fin)}
     base = {"version": VERSION, "ultimo_registro": totales["ultimo_registro"], "n": totales["operaciones"], "semana": _lunes(hoy).isoformat(),
             "empresas": [[e["nif"], e["compras_n"], e["ventas_n"], e["neto_eur"]] for e in empresas], "actual": actual}
     res["huella"] = hashlib.sha256(json.dumps(base, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:12]
@@ -632,6 +671,15 @@ def fragmento(res: dict, fecha_pub: str) -> str:
                       + "</tbody></table></figure>")
     else:
         partes.append("<p>Ninguna empresa con venta neta en la ventana.</p>")
+    sec = res.get("sectores_13_semanas")
+    if sec and sec["sectores"]:
+        partes.append(f"<h2>Por sector ({SEMANAS} semanas)</h2>"
+                      '<figure class="wp-block-table"><table><thead><tr><th>Sector</th><th>Empresas</th><th>Compras</th><th>Ventas</th><th>Neto</th><th>Compras sobre el total</th></tr></thead><tbody>'
+                      + "".join(f"<tr><td>{_html(g['nombre'])}</td><td>{g['empresas']}</td><td>{g['compras_n']}</td><td>{g['ventas_n']}</td><td>{_eur(g['neto_eur'])}</td>"
+                                f"<td>{(str(round(g['proporcion_compras'])) + ' %') if g['proporcion_compras'] is not None else '—'}</td></tr>" for g in sec["sectores"])
+                      + "</tbody></table></figure>"
+                      '<p class="has-small-font-size">Sectores según la clasificación propia de El Especulador (ocho sectores, asignados por la actividad declarada por cada empresa); '
+                      "las empresas que no están clasificadas se agrupan como «sin sector».</p>")
     partes.append("<h2>Las últimas notificaciones</h2><p>Registradas en la CNMV en los últimos 30 días, sin nombres: cada línea enlaza con la notificación pública. "
                   "Las que no son discrecionales (planes de acciones, derivados, fuera de mercado) se marcan.</p>")
     rec = res["recientes"][:40]
@@ -669,12 +717,30 @@ def fragmento(res: dict, fecha_pub: str) -> str:
     return "\n".join(partes)
 
 
+def _frase_sectores(sec: dict | None) -> str:
+    """Sector con más compra neta y con más venta neta del mes (anzuelo gratuito del agregado sectorial)."""
+    if not sec or not sec["sectores"]:
+        return ""
+    con_datos = [g for g in sec["sectores"] if g["sector"] != "sin-sector"]
+    if not con_datos:
+        return ""
+    mas = max(con_datos, key=lambda g: g["neto_eur"])
+    menos = min(con_datos, key=lambda g: g["neto_eur"])
+    partes = []
+    if mas["neto_eur"] > 0:
+        partes.append(f"más compra neta en {mas['nombre'].lower()} ({_eur(mas['neto_eur'])})")
+    if menos["neto_eur"] < 0 and menos is not mas:
+        partes.append(f"más venta neta en {menos['nombre'].lower()} ({_eur(menos['neto_eur'])})")
+    return (" Por sectores: " + " y ".join(partes) + ".") if partes else ""
+
+
 def resumen_mensual(res: dict) -> str:
     m = res["mes_anterior"]
     mes = f"{MESES[int(m['desde'][5:7]) - 1]} de {m['desde'][:4]}"
     return (f"<p><strong>Directivos del mercado español, {mes}</strong>: {m['compras_n']} compras discrecionales de acciones propias en {m['empresas_compra']} empresas "
             f"({_eur(m['compras_eur'])}) y {m['ventas_n']} ventas en {m['empresas_venta']} empresas ({_eur(m['ventas_eur'])})"
             + (f"; las compras fueron el {m['proporcion_compras']:.0f} % de las operaciones." if m["proporcion_compras"] is not None else ".")
+            + _frase_sectores(res.get("sectores_mes_anterior"))
             + f' Fuente: registro público de la CNMV, sin nombres; detalle por empresa en <a href="{PAGINA_WP}">la página de directivos</a>. '
             "Contenido informativo; no es asesoramiento financiero.</p>\n")
 

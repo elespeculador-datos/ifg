@@ -22,6 +22,7 @@ CNMV, «Notificaciones de los directivos y personas vinculadas» (https://www.cn
 - **Importes**: volumen por precio, solo en euros; las operaciones en otra divisa cuentan en número pero no en euros.
 - **Ventana**: 13 semanas por empresa (compras, ventas, neto, tipos de cargo, última operación). **Serie semanal** (semanas de lunes) con compras, ventas, euros, neto y proporción de compras (compras sobre compras más ventas, en número). **Percentil** de la proporción a 13 semanas frente a todas las ventanas anteriores, «débil» (porcentaje de ventanas con valor igual o inferior), solo con 52 semanas de serie; caso de control contra `scipy.stats.percentileofscore(kind="weak")`.
 - **Relleno del histórico**: cada pasada relee los últimos 21 días (las notificaciones se registran con retraso) y, si queda registro por leer hacia atrás hasta el 1 de mayo de 2018, sigue en tramos de 45 días hasta 300 PDF por pasada (unos 0,7 s entre peticiones). El registro completo, unas 8.000 notificaciones, se termina en un mes de pasadas sin tocar nada.
+- **Por sector** (versión 1.1.0): compras, ventas, euros, neto, empresas y proporción de compras de las 13 semanas y del mes anterior por sector, con la clasificación propia de El Especulador (`cortos/sectores.csv`, ocho sectores por la actividad declarada de cada empresa; `cortos/sectores.py`). Los emisores que no están en la tabla se agregan como «sin sector» y abren aviso (`::warning::`), no incidencia. Si la tabla no está, el agregado no se publica y lo demás no cambia. El resumen mensual (anzuelo gratuito) añade el sector con más compra neta y el de más venta neta del mes.
 - Sin predicción ni recomendación: «describe lo que han hecho, no lo que hará la acción».
 
 ## Reglas
@@ -30,7 +31,7 @@ Si la CNMV no responde en el tramo reciente, el script se para sin publicar y `s
 
 ## Comprobaciones sin red
 
-`python directivos/pruebas_directivos.py`: 81 comprobaciones con el formato real del listado y del PDF (lector del listado sin nombres, lector del PDF con una y varias filas y con el recurso al total agregado, números con punto de miles, clasificación de 16 casos, recogida con estado en tres pasadas, tope de documentos y cobertura, modificaciones que sustituyen, tramos del relleno, serie semanal, ventana de 13 semanas, percentil contra scipy, huella, fragmento, resumen mensual, JSON, CSV).
+`python directivos/pruebas_directivos.py`: 92 comprobaciones con el formato real del listado y del PDF (lector del listado sin nombres, lector del PDF con una y varias filas y con el recurso al total agregado, números con punto de miles, clasificación de 16 casos, recogida con estado en tres pasadas, tope de documentos y cobertura, modificaciones que sustituyen, tramos del relleno, serie semanal, ventana de 13 semanas, percentil contra scipy, huella, fragmento, resumen mensual, JSON, CSV).
 
 Validado con datos reales el 18/11/2026 (flujo `directivos-validacion`, ejecución 44387103652, 60 PDF de los últimos 21 días): 102 líneas, 82 discrecionales, 0 PDF fallidos, 1 notificación sin filas legibles; las trece semanas dieron 55 compras y 26 ventas discrecionales (68 % compras), 3,70 millones comprados y 4,96 vendidos; detectada y corregida la doble cuenta de una modificación (Puig). Verificado sobre el dato, no estimado.
 

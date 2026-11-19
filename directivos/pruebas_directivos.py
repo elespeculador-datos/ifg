@@ -314,6 +314,31 @@ def prueba_calculo():
     ok(h1 == d.calcular(ops, HOY, {"desde": "2024-11-01"})["huella"], "huella: estable")
     ok(h1 != d.calcular(ops + [op("2026-11-17", "compra", 10.0, nif="Z9")], HOY, {})["huella"], "huella: cambia con una operación nueva")
     ok(h1 != d.calcular(ops, HOY + timedelta(days=7), {})["huella"], "huella: cambia al cambiar de semana")
+    # agregado por sector propio (cortos/sectores.csv): Repsol y Santander clasificados, el ISIN de relleno queda «sin sector»
+    ok(d.SECTORES is not None and len(d.SECTORES) >= 59, "sectores: la tabla sectorial se carga")
+    def con_isin(o, isin):
+        return dict(o, isin=isin)
+    ops_s = ops + [con_isin(op("2026-11-10", "compra", 5000.0, nif="REP", registro="s1"), "ES0173516115"),
+                   con_isin(op("2026-11-11", "compra", 3000.0, nif="IBE", registro="s2"), "ES0144580Y14"),
+                   con_isin(op("2026-11-12", "venta", 7000.0, nif="SAN", registro="s3"), "ES0113900J37"),
+                   con_isin(op("2026-10-20", "compra", 800.0, nif="REP", registro="s4"), "ES0173516115")]
+    res_s = d.calcular(ops_s, HOY, {})
+    sec = {g["sector"]: g for g in res_s["sectores_13_semanas"]["sectores"]}
+    ok(sec["energia-utilities"]["compras_n"] == 3 and sec["energia-utilities"]["empresas"] == 2 and sec["energia-utilities"]["neto_eur"] == 8800.0, f"sectores: energía agrega Repsol e Iberdrola: {sec.get('energia-utilities')}")
+    ok(sec["financiero-seguros"]["ventas_n"] == 1 and sec["financiero-seguros"]["neto_eur"] == -7000.0 and sec["financiero-seguros"]["proporcion_compras"] == 0.0, "sectores: financiero con una venta")
+    ok("sin-sector" in sec and sec["sin-sector"]["compras_n"] == 13 and res_s["sectores_13_semanas"]["sin_sector"] == ["ES0000000000"], "sectores: el ISIN de relleno va a «sin sector» y se lista")
+    ok(res_s["sectores_13_semanas"]["sectores"][0]["sector"] == "energia-utilities", "sectores: ordenados por neto")
+    ok(any("sin sector" in a for a in d.AVISOS), "sectores: aviso por emisores sin clasificar")
+    ok(res_s["sectores_mes_anterior"]["desde"] == "2026-10-01" and {g["sector"] for g in res_s["sectores_mes_anterior"]["sectores"]} >= {"energia-utilities", "sin-sector"}, "sectores: agregado del mes anterior")
+    frag_s = d.fragmento(res_s, HOY.isoformat())
+    ok("<h2>Por sector (13 semanas)</h2>" in frag_s and "Energía y utilities" in frag_s and "clasificación propia" in frag_s, "fragmento: tabla por sector")
+    rm_s = d.resumen_mensual(res_s)
+    ok("Por sectores:" in rm_s and "energía y utilities" in rm_s, f"resumen mensual: frase sectorial: {rm_s[-400:]}")
+    ok("Por sectores" not in d.resumen_mensual(d.calcular(ops, HOY, {})) or "sin sector" not in d.resumen_mensual(d.calcular(ops, HOY, {})), "resumen mensual: «sin sector» no protagoniza la frase")
+    guardado = d.SECTORES
+    d.SECTORES = None
+    ok(d.calcular(ops, HOY, {})["sectores_13_semanas"] is None and "Por sector" not in d.fragmento(d.calcular(ops, HOY, {}), HOY.isoformat()), "sectores: sin tabla sectorial no se publica el agregado")
+    d.SECTORES = guardado
     # caso de control del percentil contra scipy
     try:
         from scipy import stats
