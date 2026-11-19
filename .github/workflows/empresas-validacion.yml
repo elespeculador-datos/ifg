@@ -1,0 +1,66 @@
+name: Ficha integrada por empresa (validación a mano)
+
+# Indicador 16. En producción corre en el servidor smpro-datos-1 (servidor/ejecutar.sh empresas; ver DESPLIEGUE.md)
+# leyendo las salidas de los demás colectores en $ESPEC_DATOS_DIR. Este flujo NO tiene horario ni guarda nada en el
+# repositorio: descarga las salidas públicas de datos.elespeculador.com que existan, genera las fichas y las deja
+# como artefacto, con un resumen en el registro.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Comprobaciones sin red
+        run: python empresas/pruebas_empresas.py
+      - name: Descargar las salidas públicas que existan
+        run: |
+          set -u
+          B=https://datos.elespeculador.com
+          mkdir -p raiz
+          for ruta in cortos/datos/vigentes.csv cortos/datos/historial_cambios.csv cortos/datos/ultima.json \
+                      directivos/datos/operaciones.csv directivos/datos/ultima.json \
+                      accionistas/datos/ultima.json \
+                      dividendos/datos/proximos.csv dividendos/datos/ultimos_12m.csv dividendos/datos/ultima.json \
+                      cnmv/datos/ibex35.csv cnmv/datos/ultima.json; do
+            mkdir -p "raiz/$(dirname "$ruta")"
+            if curl -fsSL --retry 2 -A "El Especulador, datos abiertos (+https://elespeculador.com)" -o "raiz/$ruta" "$B/$ruta"; then
+              echo "ok      $ruta ($(wc -c <"raiz/$ruta") bytes)"
+            else
+              echo "ausente $ruta"; rm -f "raiz/$ruta"
+            fi
+          done
+      - name: Generar las fichas con datos reales
+        env:
+          ESPEC_DATOS_BASE: https://datos.elespeculador.com/
+        run: |
+          set -o pipefail
+          python empresas/empresas.py --salida raiz/empresas --datos raiz | tee -a "$GITHUB_STEP_SUMMARY"
+          python - <<'EOF2' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          ev = json.load(open("raiz/empresas/eventos.json", encoding="utf-8"))
+          print(f"eventos: {ev['n']} entre {ev['desde']} y {ev['hasta']}")
+          tipos = {}
+          for e in ev["eventos"]:
+              tipos[e["tipo"]] = tipos.get(e["tipo"], 0) + 1
+          print("por tipo:", dict(sorted(tipos.items())))
+          for isin in ("ES0173516115", "ES0113900J37", "ES0105066007"):
+              f = json.load(open(f"raiz/empresas/{isin}.json", encoding="utf-8"))
+              print(f"== {f['empresa']}: fuentes {{" + ", ".join(f"{k}: {v['estado']}" for k, v in f["fuentes"].items()) + "}")
+              print("   cortos:", f["cortos"] and {k: f["cortos"][k] for k in ("suma_pct", "tenedores")}, "| directivos:", f["directivos"] and {k: f["directivos"][k] for k in ("compras_n", "ventas_n", "neto_eur")},
+                    "| accionistas:", f["accionistas"] and f["accionistas"]["n"], "| recompra en curso:", f["recompra"] and f["recompra"]["en_curso"], "| eventos:", len(f["eventos"]))
+          EOF2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: empresas-salida
+          path: raiz/empresas
+          retention-days: 14
