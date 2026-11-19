@@ -8,7 +8,8 @@
 #      y, si el servidor usa un entorno virtual, SMPRO_PYTHON (el intérprete de ese entorno);
 #   2. trae main de GitHub con avance rápido (si el servidor tuviera commits propios, avisa y sigue con lo que hay);
 #   3. ejecuta el colector escribiendo en $ESPEC_DATOS_DIR/<colector>, fuera del git;
-#   4. si falla, abre o comenta la incidencia <colector>-fallido en GitHub (servidor/avisar.sh); si va bien, la cierra.
+#   4. deja el estado de la pasada en $ESPEC_DATOS_DIR/estado/<colector>.json (público, para el Mapa de sistemas);
+#   5. si falla, abre o comenta la incidencia <colector>-fallido en GitHub (servidor/avisar.sh); si va bien, la cierra.
 # El registro de cada pasada queda en $ESPEC_DATOS_DIR/registro/<colector>-AAAA-MM-DD.log.
 set -u
 COLECTOR="${1:?Uso: servidor/ejecutar.sh <colector>}"
@@ -19,10 +20,19 @@ if [ -f "$ENTORNO" ]; then set -a; . "$ENTORNO"; set +a; fi
 : "${ESPEC_DATOS_BASE:?Falta ESPEC_DATOS_BASE en $ENTORNO}"
 export ESPEC_DATOS_DIR ESPEC_DATOS_BASE
 PYTHON="${SMPRO_PYTHON:-python3}"
-mkdir -p "$ESPEC_DATOS_DIR/registro"
+mkdir -p "$ESPEC_DATOS_DIR/registro" "$ESPEC_DATOS_DIR/estado"
 REGISTRO="$ESPEC_DATOS_DIR/registro/$COLECTOR-$(date -u +%F).log"
 exec >>"$REGISTRO" 2>&1
 echo "== $(date -u +'%F %T') UTC · $COLECTOR · inicio"
+INICIO_ISO="$(date -u +'%FT%TZ')"
+
+# estado <resultado> <codigo>: escribe $ESPEC_DATOS_DIR/estado/<colector>.json de forma atómica (sin rutas ni texto del registro).
+estado() {
+  local tmp="$ESPEC_DATOS_DIR/estado/.$COLECTOR.json.tmp"
+  printf '{"colector":"%s","inicio":"%s","fin":"%s","resultado":"%s","codigo":%s,"commit":"%s"}\n' \
+    "$COLECTOR" "$INICIO_ISO" "$(date -u +'%FT%TZ')" "$1" "$2" "$(git -C "$REPO" rev-parse --short HEAD 2>/dev/null || echo desconocido)" >"$tmp" \
+    && mv -f "$tmp" "$ESPEC_DATOS_DIR/estado/$COLECTOR.json"
+}
 
 cd "$REPO" || exit 2
 if ! git pull --ff-only --quiet origin main; then
@@ -37,22 +47,24 @@ case "$COLECTOR" in
   cortos)      ORDEN=("$PYTHON" cortos/rastreador.py) ;;
   cnmv)        ORDEN=("$PYTHON" cnmv/comunicados.py) ;;
   accionistas) ORDEN=("$PYTHON" accionistas/duenos.py --salida "$ESPEC_DATOS_DIR/accionistas") ;;
-  opas|dividendos|ibex) echo "ERROR  $COLECTOR lee la API de BME sin licencia: no se ejecuta (P3 del catálogo)."; exit 3 ;;
+  opas|dividendos|ibex) echo "ERROR  $COLECTOR lee la API de BME sin licencia: no se ejecuta (P3 del catálogo)."; estado rechazado 3; exit 3 ;;
   *)
     if [ -f "$COLECTOR/$COLECTOR.py" ]; then
       ORDEN=("$PYTHON" "$COLECTOR/$COLECTOR.py" --salida "$ESPEC_DATOS_DIR/$COLECTOR")
     else
-      echo "ERROR  colector desconocido: $COLECTOR (no existe $COLECTOR/$COLECTOR.py)"; exit 2
+      echo "ERROR  colector desconocido: $COLECTOR (no existe $COLECTOR/$COLECTOR.py)"; estado desconocido 2; exit 2
     fi ;;
 esac
 
 if "${ORDEN[@]}"; then
   echo "== $(date -u +'%F %T') UTC · $COLECTOR · correcto"
+  estado correcto 0
   "$REPO/servidor/avisar.sh" "$COLECTOR" cerrar "Pasada correcta el $(date -u +%F) a las $(date -u +%H:%M) UTC." || true
   exit 0
 else
   CODIGO=$?
   echo "== $(date -u +'%F %T') UTC · $COLECTOR · FALLO (código $CODIGO)"
+  estado fallo "$CODIGO"
   "$REPO/servidor/avisar.sh" "$COLECTOR" abrir "La pasada del $(date -u +%F) a las $(date -u +%H:%M) UTC ha fallado (código $CODIGO). Últimas líneas del registro $REGISTRO:
 $(tail -n 15 "$REGISTRO" | sed 's/^/    /')" || true
   exit "$CODIGO"

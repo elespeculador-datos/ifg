@@ -303,9 +303,14 @@ def ultima_por_plazo(filas: list[dict]) -> dict[int, dict]:
     return out
 
 
-def huella(datos: dict) -> str:
+def proximas_desde(datos: dict, fecha: str) -> list[dict]:
+    """Las subastas del calendario a partir del día dado (todas si no se da fecha), en orden."""
+    return [c for c in datos["proximas"] if not fecha or c["subasta"] >= fecha]
+
+
+def huella(datos: dict, fecha: str = "") -> str:
     base = [[f["fecha"], f["plazo"], f.get("marginal"), f.get("medio")] for f in datos["subastas"][-60:]]
-    base.append([[c["subasta"], c["peticiones"]] for c in datos["proximas"][:4]])
+    base.append([[c["subasta"], c["peticiones"]] for c in proximas_desde(datos, fecha)[:4]])
     base.append(datos["tenedores"]["ultimo"])
     base.append(TEXTOS)
     return hashlib.sha256(json.dumps(base, sort_keys=True).encode()).hexdigest()[:12]
@@ -419,7 +424,7 @@ def escribir(datos: dict, fecha: str, salida: Path) -> bool:
     dd.mkdir(parents=True, exist_ok=True)
     previo = dd / "ultima.json"
     antes = json.loads(previo.read_text(encoding="utf-8")) if previo.exists() else {}
-    nueva = huella(datos)
+    nueva = huella(datos, fecha)
     cambia = antes.get("huella") != nueva
     fecha_pub = fecha if cambia else antes.get("fecha", fecha)
     campos = ["fecha", "plazo", "tipo_medio", "tipo_marginal", "precio_medio", "precio_minimo", "solicitado_mill",
@@ -439,7 +444,7 @@ def escribir(datos: dict, fecha: str, salida: Path) -> bool:
     previo.write_text(json.dumps({
         "fecha": fecha_pub, "comprobado": datetime.now(timezone.utc).isoformat(timespec="seconds"), "huella": nueva,
         "ultimas": {str(k): v for k, v in ultima_por_plazo(datos["subastas"]).items()},
-        "proximas": datos["proximas"][:8], "tenedores": datos["tenedores"]["ultimo"],
+        "proximas": proximas_desde(datos, fecha)[:8], "tenedores": datos["tenedores"]["ultimo"],
         "fuente_tenedores": "Tesoro Público, Letras del Tesoro: distribución por tenedores (estadísticas mensuales); según su nota, "
                             "2002-2015 Banco de España (Iberclear) y 2016-2023 Banco de España (Securities Holdings Statistics)",
         "fuente": "D. G. del Tesoro y Política Financiera (www.tesoro.es)",

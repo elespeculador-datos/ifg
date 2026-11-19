@@ -594,7 +594,7 @@ a{{color:#1f4e8c}} .pie{{color:#5b6675;font-size:.85rem;margin-top:2em}}
 <p><strong>Actualizado el {_e(sello.replace('T', ' a las '))}.</strong> Los comunicados de una misma operación (por ejemplo, los informes semanales de un programa de recompra) se agrupan en una sola fila, con el último comunicado y, entre paréntesis, cuántos hay.</p>
 {"".join(secciones)}
 <h2>Datos abiertos</h2>
-<p>CSV: <a href="datos/ibex35.csv">comunicados del IBEX 35 clasificados</a> · <a href="datos/comunicados.csv">todos los comunicados leídos</a> · <a href="datos/ultima.json">JSON</a>. Licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>, citando «El Especulador, a partir de datos de la CNMV».</p>
+<p>CSV: <a href="datos/ibex35.csv">comunicados del IBEX 35 clasificados</a> · <a href="datos/comunicados.csv">todos los comunicados leídos</a> · <a href="datos/ultima.json">JSON</a>. Fuente: CNMV, comunicados de información privilegiada y otra información relevante, reproducidos fielmente (gratuitos en cnmv.es). La clasificación y el resumen de El Especulador se publican con licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>, citando «El Especulador, a partir de datos de la CNMV».</p>
 <p class="pie">Fuente: CNMV, canales de información privilegiada y de otra información relevante. La clasificación es automática; el texto oficial de cada comunicado es el de la CNMV. Contenido informativo; no constituye asesoramiento financiero.</p>
 </body></html>
 """
@@ -636,7 +636,7 @@ def escribir(h: pd.DataFrame, c: pd.DataFrame, e: pd.DataFrame, nuevos: int, for
         "actualizado": sello, "generado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "comunicados_leidos": int(len(h)), "comunicados_ibex35_clasificados": int(len(c)),
         "por_recuadro": {k: len(entradas(c, k, hoy)) for k, _, _ in CAJAS},
-        "fuente": "CNMV, RSS de información privilegiada y otra información relevante", "licencia": "CC BY 4.0 · El Especulador",
+        "fuente": "CNMV, RSS de información privilegiada y otra información relevante", "licencia": "Comunicados de la CNMV reproducidos fielmente (gratuitos en cnmv.es); clasificación y resumen de El Especulador con licencia CC BY 4.0",
         "bme": huella,
     }, ensure_ascii=False, indent=1), encoding="utf-8")
     return True

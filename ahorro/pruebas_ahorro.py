@@ -15,7 +15,7 @@ import os
 import re
 import sys
 import tempfile
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import numpy as np
@@ -179,7 +179,9 @@ def prueba_boe():
 
         def sum_todo(d):
             llamadas.append(d)
-            return sumario(d, f"BOE-A-{d.year}-{d.month}") if d.day == 2 else sumario(d, None)
+            # La resolución sale el día 2 o, si el 2 es domingo, el 3 (el BOE no sale los domingos).
+            sale = d.day == 2 or (d.day == 3 and (d - timedelta(days=1)).weekday() == 6)
+            return sumario(d, f"BOE-A-{d.year}-{d.month}") if sale else sumario(d, None)
 
         def xml_todo(ident):
             a, m = ident.split("-")[2:]
@@ -189,13 +191,36 @@ def prueba_boe():
         llamadas.clear()
         ahorro.AVISOS.clear()
         df = ahorro.actualizar_euribor(ruta, date(2026, 11, 17), meses_atras=2, descargar_sumario=sum_todo, descargar_xml=xml_todo)
-        ok(df["mes"].tolist() == ["2026-08", "2026-09", "2026-10"] and (df["euribor_12m"] == 3.1).all(), f"BOE: acumula el mes anterior y dos hacia atrás ({df['mes'].tolist()})")
-        ok(ruta.exists() and not ahorro.AVISOS, "BOE: guarda el CSV y no avisa cuando el mes coincide")
+        ok(df["mes"].tolist()[-3:] == ["2026-08", "2026-09", "2026-10"] and len(df) == 12 and (df["euribor_12m"] == 3.1).all(),
+           f"BOE: acumula el mes anterior, los pedidos y hasta 12 huecos por pasada ({len(df)} filas)")
+        ok(all(r.mes == ahorro.mes_de_publicacion(r.fecha_boe) for r in df.itertuples()), "BOE: cada fila lleva el mes anterior a su publicación")
+        ok(ruta.exists() and not ahorro.AVISOS, "BOE: guarda el CSV y no avisa cuando el mes del texto coincide")
+        df2 = ahorro.actualizar_euribor(ruta, date(2026, 11, 17), descargar_sumario=sum_todo, descargar_xml=xml_todo)
+        df3 = ahorro.actualizar_euribor(ruta, date(2026, 11, 17), descargar_sumario=sum_todo, descargar_xml=xml_todo)
+        ok(len(df2) == 24 and len(df3) == 36, f"BOE: rellena los huecos de los últimos 36 meses en pasadas de 12 ({len(df2)}, {len(df3)})")
         n = len(llamadas)
-        df2 = ahorro.actualizar_euribor(ruta, date(2026, 11, 17), meses_atras=2, descargar_sumario=sum_todo, descargar_xml=xml_todo)
-        ok(len(llamadas) == n and df2.equals(df), "BOE: con todo acumulado no vuelve a llamar")
-        df3 = ahorro.actualizar_euribor(ruta, date(2026, 12, 3), descargar_sumario=sum_todo, descargar_xml=xml_todo)
-        ok(df3["mes"].tolist()[-1] == "2026-11" and len(df3) == 4, "BOE: en diciembre añade noviembre")
+        df4 = ahorro.actualizar_euribor(ruta, date(2026, 11, 17), descargar_sumario=sum_todo, descargar_xml=xml_todo)
+        ok(len(llamadas) == n and df4.equals(df3), "BOE: con los 36 meses acumulados no vuelve a llamar")
+        df5 = ahorro.actualizar_euribor(ruta, date(2026, 12, 3), descargar_sumario=sum_todo, descargar_xml=xml_todo)
+        ok(df5["mes"].tolist()[-1] == "2026-11" and len(df5) == 37, "BOE: en diciembre añade noviembre")
+        # Reparación de un fichero de la versión 1.0.0 (meses fechados por el texto, mezclados y con huecos).
+        roto = pd.DataFrame({"mes": ["2000-01", "2026-07", "2026-06", "2026-09"], "euribor_12m": [2.081, 2.798, 2.804, 3.247],
+                             "boe": ["BOE-A-2025-13550", "BOE-A-2026-14420", "BOE-A-2026-11844", "BOE-A-2026-20519"],
+                             "fecha_boe": ["2025-07-02", "2026-07-02", "2026-06-02", "2026-10-02"]})
+        roto.to_csv(ruta, index=False)
+        ahorro.AVISOS.clear()
+        llamadas.clear()
+        df6 = ahorro.actualizar_euribor(ruta, date(2026, 11, 17), descargar_sumario=lambda d: sumario(d, None), descargar_xml=xml_todo)
+        por_mes = dict(zip(df6["mes"], df6["euribor_12m"]))
+        ok(por_mes.get("2025-06") == 2.081 and por_mes.get("2026-06") == 2.798 and por_mes.get("2026-05") == 2.804 and por_mes.get("2026-09") == 3.247
+           and "2000-01" not in por_mes and "2026-07" not in por_mes, f"BOE: repara los meses por la fecha de publicación ({por_mes})")
+        ok(any("mal fechado" in a for a in ahorro.AVISOS), "BOE: avisa de la reparación")
+        # Texto que menciona otro mes antes del dato: se guarda el mes pedido y se avisa.
+        ahorro.AVISOS.clear()
+        xml_raro = XML_RESOLUCION.replace("Septiembre de 2026", "enero de 2000")
+        r = ahorro.euribor_del_mes("2026-09", lambda d: sumario(d, "BOE-A-2026-20519" if d == date(2026, 10, 2) else None), lambda i: xml_raro, hoy=date(2026, 11, 17))
+        ok(r["mes"] == "2026-09" and r["euribor_12m"] == 3.247 and any("menciona 2000-01" in a for a in ahorro.AVISOS), "BOE: el mes es el anterior a la publicación aunque el texto diga otro")
+        ahorro.AVISOS.clear()
 
 
 # --------------------------------------------------------------------------- cálculos y salida
@@ -253,7 +278,8 @@ def prueba_salida():
     ok(h == ahorro.huella(res) and h != ahorro.huella(calcular_sim()), "huella: estable y sensible a las letras")
     frag = ahorro.fragmento(res, "2026-11-17")
     ok(frag.startswith(f"<!-- ahorro:inicio {h} -->") and frag.rstrip().endswith("<!-- ahorro:fin -->"), "fragmento: marcas con huella")
-    ok("rentabilidad real fue del" in frag and "Letras del Tesoro a 12 meses" in frag and "octubre de 2026" in frag, "fragmento: lectura, letras y último IPC")
+    ok("rentabilidad real fue del" in frag and "La referencia del Tesoro: Letras a 12 meses" in frag and "octubre de 2026" in frag, "fragmento: lectura, letras y último IPC")
+    ok("sin riesgo" not in frag and "alternativa" not in frag, "fragmento: sin «alternativa sin riesgo» (Cumplimiento, 17/11)")
     ok("$" not in frag and not re.search(r"\bnan\b", frag, re.I) and "None" not in frag, "fragmento: sin $, nan ni None")
     svg = ahorro.grafico_svg(res["grafico"])
     puntos = re.findall(r'points="([^"]+)"', svg)
