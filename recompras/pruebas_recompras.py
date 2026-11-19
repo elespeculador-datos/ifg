@@ -331,6 +331,62 @@ with tempfile.TemporaryDirectory() as tmp:
     except recompras.DatosRaros:
         ok(True, "Listado sin comunicados de recompra: DatosRaros")
 
+# --- Maquetas vistas en la pasada real del 19/11/2026 (ejecución 44466038203) -------------------------------
+# IAG del 02/11: fecha inglesa pero cifras en español (miles con punto, decimales con coma).
+IAG_ES = """
+    26-Oct-26            LON                 807.864                   £ 4,091
+    26-Oct-26           MAD                  540.592                   € 4,868
+    27-Oct-26            LON                 806.172                   £ 4,102
+Se acompaña a este anuncio un desglose completo de las operaciones individuales
+"""
+f = filas.leer_filas(IAG_ES)
+ok(len(f) == 3 and f[0]["acciones"] == 807864 and abs(f[0]["precio"] - 4.091) < 1e-9 and f[0]["moneda"] == "GBP", "IAG (02/11): fecha inglesa con cifras españolas: las cifras mandan")
+ok(f[1]["acciones"] == 540592 and abs(f[1]["precio"] - 4.868) < 1e-9 and f[1]["moneda"] == "EUR", "IAG (02/11): fila en euros")
+
+# Endesa: mes abreviado en español con punto (28-oct.-26) y total de la semana en una frase.
+ENDESA = """
+                  28-oct.-26            ELE.MC              Compra               AQEU                2.080              42,9351
+                  28-oct.-26            ELE.MC              Compra               CEUX                6.158              42,9456
+                  28-oct.-26            ELE.MC              Compra               TQEX                1.095              42,9516
+                  28-oct.-26            ELE.MC              Compra               XMAD                10.510             42,9379
+ El número total de acciones compradas asciende a 19.843 acciones a un precio medio de
+ 42,94€/acción.
+ Se acompaña como anexo información detallada sobre cada una de las operaciones realizadas durante
+                                                                     ANEXO
+                  28-oct.-26            ELE.MC              Compra               XMAD                500             42,9000
+"""
+f = filas.leer_filas(ENDESA)
+ok(len(f) == 4 and f[0]["fecha"] == "2026-10-28" and f[0]["acciones"] == 2080 and abs(f[0]["precio"] - 42.9351) < 1e-9, "Endesa: fecha 28-oct.-26 y cifras españolas")
+ok(filas.resumen(f)["acciones"] == 19843 == filas.totales_declarados(ENDESA)[0], "Endesa: la frase «el número total de acciones compradas asciende a 19.843 acciones» vale como total declarado")
+pr = recompras.resumen_programa(ENDESA)
+ok(pr["acciones_programa"] is None, "Endesa: el total de la semana no se confunde con el acumulado del programa")
+
+# ArcelorMittal: inglés, sin centro de negociación, miles con espacio, detalle con hora.
+ARCELOR = """
+Purchases of own shares on 26th October 2026
+Aggregate presentation by day and market
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        26/10/2026              LU1598757687                      17 271                  53.1968
+Rounded to two digits after the decimal point                                                            TOTAL                         17 271                    53.20
+Detail transaction by transaction
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165          Natixis         KX1WK48MPD4Y2NCUIZ63             26/10/2026 09:00:39         LU1598757687        XPAR     300     53.10
+Purchases of own shares on 27th October 2026
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        27/10/2026              LU1598757687                      16 500                  52.9000
+"""
+f = filas.leer_filas(ARCELOR)
+ok(len(f) == 2 and f[0]["centro"] == "n/d" and f[0]["acciones"] == 17271 and abs(f[0]["precio"] - 53.1968) < 1e-9, "ArcelorMittal: fila con ISIN y sin centro; miles con espacio; precio con punto")
+ok(f[1]["acciones"] == 16500 and f[1]["fecha"] == "2026-10-27", "ArcelorMittal: segundo día")
+ok(filas.totales_declarados(ARCELOR) == [17271], "ArcelorMittal: TOTAL con miles por espacio")
+ok(all(not x["detalle"] for x in f) and len(filas.leer_filas(ARCELOR, solo_primera_tabla=False)) == 3, "ArcelorMittal: la fila con hora es detalle y queda fuera del resumen")
+
+# Fluidra: comunicado de extensión, sin tabla; acumulado del programa en el texto.
+FLUIDRA = ("Conforme al Plan Global, el número máximo de acciones a adquirir al amparo del Programa de Recompra continúa fijado en 500.000 acciones de Fluidra, "
+           "representativas de aproximadamente el 0,26% del capital social de la Sociedad, de las que ya se han adquirido 222.878 acciones hasta el día 15 de octubre de 2026 (incluido), "
+           "y el importe monetario máximo asignado al Programa de Recompra continúa siendo de 12,5 millones de euros, habiéndose alcanzado un importe de 4.812.981 euros hasta el día 15 de octubre de 2026 (incluido).")
+pr = recompras.resumen_programa(FLUIDRA)
+ok(pr["importe_programa_eur"] == 4812981.0 and pr["acciones_programa"] == 222878 and pr["pct_programa"] is None, "Fluidra: acumulado del programa en un comunicado de extensión")
+ok(filas.leer_filas(FLUIDRA) == [], "Fluidra: sin filas")
+ok(abs(filas._numero("54.61", "es") - 54.61) < 1e-9 and abs(filas._numero("42,9351", "en") - 42.9351) < 1e-9 and filas._numero("17 271") == 17271 and filas._numero("1,143,996.50", "es") == 1143996.5, "Números: decimal evidente, miles con espacio, dos separadores")
+
 # Caso de control de la serie semanal frente a pandas.
 try:
     import pandas as pd

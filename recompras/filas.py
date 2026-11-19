@@ -27,33 +27,56 @@ CENTRO_TEXTO = [
     (re.compile(r"centros? de negociaci[oó]n estadounidenses?", re.I), "EEUU"),
     (re.compile(r"\bUS trading venues?\b", re.I), "EEUU"),
 ]
-MESES_EN = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6, "jul": 7, "aug": 8,
-            "sep": 9, "oct": 10, "nov": 11, "dec": 12}
+MESES = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6, "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+         "ene": 1, "abr": 4, "ago": 8, "sept": 9, "dic": 12}
 
 FECHA_ES = re.compile(r"\b(\d{2})/(\d{2})/(\d{4})\b")
-FECHA_EN = re.compile(r"\b(\d{2})-([A-Za-z]{3})-(\d{2,4})\b")
+FECHA_ISO = re.compile(r"\b(\d{4})-(\d{2})-(\d{2})\b")
+FECHA_MES = re.compile(r"\b(\d{2})-([A-Za-z]{3,4})\.?-(\d{2,4})\b")  # 09-Nov-26 (inglés) o 28-oct.-26 (español)
 HORA = re.compile(r"\b\d{1,2}:\d{2}(?::\d{2})?\b")
-CIFRA = re.compile(r"(?<![\w/,.:-])([£$€]\s*)?(\d[\d.,]*\d|\d)(?![\w/:-])")
+ISIN = re.compile(r"\b[A-Z]{2}[A-Z0-9]{9}\d\b")
+# Una cifra: con separadores de miles por punto o coma, por espacio entre grupos de tres ('17 271') o sin ellos.
+CIFRA = re.compile(r"(?<![\w/,.:-])([£$€]\s*)?(\d{1,3}(?: \d{3})+(?:[.,]\d+)?|\d[\d.,]*\d|\d)(?![\w/:-])")
 OPERACION = re.compile(r"\b(compra|comprar|purchase|buy|venta|vender|sale|sell)\b", re.I)
 MONEDA = {"£": "GBP", "$": "USD", "€": "EUR"}
 
 
 def _fecha(linea):
-    """(fecha ISO, tramo, estilo numérico de la línea) o (None, None, None)."""
+    """(fecha ISO, tramo, estilo numérico que sugiere la fecha) o (None, None, None). El estilo de la fecha solo se
+    usa cuando las propias cifras de la fila no lo delatan (ver _estilo)."""
     m = FECHA_ES.search(linea)
     if m:
         d, mes, a = int(m.group(1)), int(m.group(2)), int(m.group(3))
         if 1 <= mes <= 12 and 1 <= d <= 31:
             return f"{a:04d}-{mes:02d}-{d:02d}", m.span(), "es"
         return None, None, None
-    m = FECHA_EN.search(linea)
-    if m and m.group(2).lower() in MESES_EN:
-        d, mes, a = int(m.group(1)), MESES_EN[m.group(2).lower()], int(m.group(3))
+    m = FECHA_ISO.search(linea)
+    if m:
+        a, mes, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        if 1 <= mes <= 12 and 1 <= d <= 31 and 2000 <= a <= 2100:
+            return f"{a:04d}-{mes:02d}-{d:02d}", m.span(), "es"
+    m = FECHA_MES.search(linea)
+    if m and m.group(2).lower() in MESES:
+        d, mes, a = int(m.group(1)), MESES[m.group(2).lower()], int(m.group(3))
         if a < 100:
             a += 2000
         if 1 <= d <= 31:
-            return f"{a:04d}-{mes:02d}-{d:02d}", m.span(), "en"
+            estilo = "es" if m.group(2).lower() in ("ene", "abr", "ago", "sept", "dic") or "." in m.group(0) else "en"
+            return f"{a:04d}-{mes:02d}-{d:02d}", m.span(), estilo
     return None, None, None
+
+
+def _estilo(acciones_txt, estilo_fecha):
+    """Estilo numérico de la fila según la cifra de acciones (entera): '763.405' -> español; '391,656' -> inglés;
+    sin separador o con espacios -> el que sugiere la fecha."""
+    t = acciones_txt.strip()
+    if "." in t and "," not in t:
+        return "es"
+    if "," in t and "." not in t:
+        return "en"
+    if "." in t and "," in t:
+        return "es" if t.rfind(",") > t.rfind(".") else "en"
+    return estilo_fecha
 
 
 def _centro(linea):
@@ -68,13 +91,24 @@ def _centro(linea):
 
 
 def _numero(texto, estilo="es"):
-    """Convierte una cifra según el estilo de la línea. Español: el punto separa miles y la coma decimales
-    ('763.405' -> 763405, '29,3857' -> 29.3857, '89,648' -> 89.648). Inglés (la fecha va como 09-Nov-26):
-    la coma separa miles y el punto decimales ('391,656' -> 391656, '4.448' -> 4.448)."""
-    t = texto.strip()
-    if estilo == "en":
-        return float(t.replace(",", ""))
-    return float(t.replace(".", "").replace(",", "."))
+    """Convierte una cifra según el estilo de la fila. Español: el punto separa miles y la coma decimales
+    ('763.405' -> 763405, '29,3857' -> 29.3857, '89,648' -> 89.648). Inglés: la coma separa miles y el punto
+    decimales ('391,656' -> 391656, '4.448' -> 4.448). Los espacios entre grupos de tres son miles ('17 271').
+    Un único separador seguido de un grupo que no es de tres cifras es decimal sea cual sea el estilo ('54.61',
+    '42,9351'); dos separadores distintos: el último es el decimal ('1.143.996,50', '1,143,996.50')."""
+    t = texto.strip().replace(" ", "")
+    puntos, comas = t.count("."), t.count(",")
+    if puntos and comas:
+        return float(t.replace(".", "").replace(",", ".")) if t.rfind(",") > t.rfind(".") else float(t.replace(",", ""))
+    sep = "." if puntos else ("," if comas else None)
+    if sep is None:
+        return float(t)
+    grupos = t.split(sep)
+    if len(grupos) == 2 and len(grupos[1]) != 3:
+        return float(t.replace(",", "."))  # decimal evidente
+    if len(grupos) > 2 or (estilo == "es" and sep == ".") or (estilo == "en" and sep == ","):
+        return float(t.replace(sep, ""))  # miles
+    return float(t.replace(",", "."))  # decimal con tres cifras ('4.448' en inglés, '89,648' en español)
 
 
 MARCA_ANEXO = re.compile(r"^\s*(anexo|annex|appendix|se acompaña|detalle (de|sobre) (las|cada)|"
@@ -97,7 +131,7 @@ def leer_filas(texto, solo_primera_tabla=True):
     resumen diario), linea (texto original, para auditar). Por defecto solo la primera tabla (el
     resumen diario); si esa parte no tiene filas, se lee el texto entero y se descartan las de detalle."""
     if solo_primera_tabla:
-        filas = _filas(primera_tabla(texto))
+        filas = [f for f in _filas(primera_tabla(texto)) if not f["detalle"]]
         if filas:
             return filas
         return [f for f in _filas(texto) if not f["detalle"]]
@@ -110,13 +144,16 @@ def _filas(texto):
         linea = cruda.strip()
         if not linea:
             continue
-        fecha, tramo_fecha, estilo = _fecha(linea)
+        fecha, tramo_fecha, estilo_fecha = _fecha(linea)
         if not fecha:
             continue
         centro, tramo_centro = _centro(linea)
         if not centro:
-            continue
+            if not ISIN.search(linea):
+                continue
+            centro = "n/d"  # fila con ISIN pero sin centro (ArcelorMittal agrega por día y mercado sin código)
         resto = linea[:tramo_fecha[0]] + " " + linea[tramo_fecha[1]:]
+        resto = ISIN.sub(" ", resto)
         hora = HORA.search(resto)
         detalle = bool(hora)
         if hora:
@@ -124,16 +161,18 @@ def _filas(texto):
         # Quitar el centro en forma de texto largo para que no aporte cifras.
         for patron, _ in CENTRO_TEXTO:
             resto = patron.sub(" ", resto)
-        cifras, moneda = [], "EUR"
+        crudas, moneda = [], "EUR"
         for m in CIFRA.finditer(resto):
             simbolo = (m.group(1) or "").strip()
             if simbolo:
                 moneda = MONEDA.get(simbolo, moneda)
-            try:
-                cifras.append(_numero(m.group(2), estilo))
-            except ValueError:
-                continue
-        if len(cifras) < 2:
+            crudas.append(m.group(2))
+        if len(crudas) < 2:
+            continue
+        estilo = _estilo(crudas[0], estilo_fecha)
+        try:
+            cifras = [_numero(c, estilo) for c in crudas]
+        except ValueError:
             continue
         acciones, precio = cifras[0], cifras[1]
         if acciones != int(acciones) or acciones <= 0 or precio <= 0:
@@ -164,15 +203,33 @@ def resumen(filas, solo_resumen_diario=True):
             "centros": sorted({f["centro"] for f in base}), "dias": len(fechas)}
 
 
-TOTAL = re.compile(r"^\s*total\b.*?(\d[\d.,]*\d)", re.I | re.M)
+TOTAL = re.compile(r"(?:^\s*[Tt]otal\b|\bTOTAL\b)[^\n]{0,80}?(\d{1,3}(?: \d{3})+|\d[\d.,]*\d)", re.M)
+TOTAL_FRASE = re.compile(r"n[úu]mero total de acciones (?:compradas|adquiridas)[^.]{0,60}?asciende a\s+([\d.,]+)\s+acciones", re.I)
+CONTEXTO_PROGRAMA = re.compile(r"programa|hasta la fecha|desde el inicio|acumulad|tramo", re.I)
+
+
+def _entero(texto):
+    t = texto.strip()
+    estilo = "en" if re.search(r"^\d{1,3}(,\d{3})+$", t) else "es"
+    return int(_numero(t, estilo))
 
 
 def totales_declarados(texto):
-    """Primera cifra de cada línea que empieza por «Total» (número de acciones del propio documento)."""
+    """Totales de acciones que declara el propio documento: la primera cifra de cada línea que empieza por «Total»
+    y las frases «el número total de acciones compradas asciende a N acciones» que no hablan del programa entero."""
     salida = []
     for m in TOTAL.finditer(texto):
         try:
-            salida.append(int(_numero(m.group(1), "en" if re.search(r"\d,\d{3}\b", m.group(1)) else "es")))
+            salida.append(_entero(m.group(1)))
+        except ValueError:
+            continue
+    plano = re.sub(r"\s+", " ", texto)
+    for m in TOTAL_FRASE.finditer(plano):
+        frase = plano[max(0, m.start() - 80):m.end() + 40]
+        if CONTEXTO_PROGRAMA.search(frase):
+            continue
+        try:
+            salida.append(_entero(m.group(1)))
         except ValueError:
             continue
     return salida

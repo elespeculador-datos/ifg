@@ -121,8 +121,17 @@ def texto_pdf(contenido: bytes) -> str:
 
 # --------------------------------------------------------------------------- lectura del texto
 PCT_PROGRAMA = re.compile(r"(\d{1,3}(?:[.,]\d{1,2})?)\s*%\s*(?:del|sobre el)\s+importe\s+(?:monetario\s+)?m[áa]ximo", re.I)
-IMPORTE_EUR = re.compile(r"(?:asciende a|importe(?: total)? de|por (?:un )?importe(?: total)? de)\s+([\d.]{4,}(?:,\d{1,2})?)\s*(?:euros|€|EUR)\b", re.I)
-ACCIONES_PROGRAMA = re.compile(r"(?:asciende a|un total de|total de)\s+([\d.]{5,})\s+(?:acciones|que representan|t[íi]tulos)", re.I)
+IMPORTE_EUR = re.compile(r"(?:asciende a|alcanzado un importe de|importe(?: total)? de|por (?:un )?importe(?: total)? de)\s+([\d.]{4,}(?:,\d{1,2})?)\s*(?:euros|€|EUR)\b", re.I)
+ACCIONES_PROGRAMA = re.compile(r"(?:asciende a|un total de|total de|ya se han adquirido)\s+([\d.]{5,})\s+(?:acciones|que representan|t[íi]tulos)", re.I)
+CONTEXTO_PROGRAMA = re.compile(r"programa|hasta la fecha|hasta el d[íi]a|desde el inicio|acumulad|tramo", re.I)
+
+
+def _con_contexto(plano: str, m: re.Match) -> bool:
+    """La frase que rodea la coincidencia habla del programa entero (y no del total de la semana)."""
+    ini = max(plano.rfind(". ", 0, m.start()), plano.rfind(": ", 0, m.start()), 0)
+    fin = plano.find(". ", m.end())
+    frase = plano[ini:fin if fin != -1 else m.end() + 120]
+    return bool(CONTEXTO_PROGRAMA.search(frase))
 PCT_CAPITAL = re.compile(r"representan?\s+(?:aproximadamente\s+)?el\s+(\d{1,2}(?:[.,]\d{1,2})?)\s*%\s+del\s+capital\s+social", re.I)
 FINALIZADO = re.compile(r"(?:ha finalizado|finalizaci[óo]n del programa|programa\s+de\s+recompra\s+ha\s+(?:concluido|terminado))", re.I)
 
@@ -139,13 +148,14 @@ def resumen_programa(texto: str) -> dict:
     m = PCT_PROGRAMA.search(plano)
     if m:
         out["pct_programa"] = round(float(m.group(1).replace(",", ".")), 2)
-    importes = [_num_es(x) for x in IMPORTE_EUR.findall(plano)]
+    importes = [_num_es(m.group(1)) for m in IMPORTE_EUR.finditer(plano) if _con_contexto(plano, m)]
     importes = [x for x in importes if x >= 100_000]
     if importes:
         out["importe_programa_eur"] = max(importes)
-    m = ACCIONES_PROGRAMA.search(plano)
-    if m:
-        out["acciones_programa"] = int(_num_es(m.group(1)))
+    for m in ACCIONES_PROGRAMA.finditer(plano):
+        if _con_contexto(plano, m):
+            out["acciones_programa"] = int(_num_es(m.group(1)))
+            break
     m = PCT_CAPITAL.search(plano)
     if m:
         out["pct_capital"] = round(float(m.group(1).replace(",", ".")), 2)
