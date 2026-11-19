@@ -1,0 +1,48 @@
+name: Divisas de exposición (validación a mano)
+
+# Indicador 14 del catálogo de Datos: real, peso mexicano, lira, dólar y libra frente al euro, con los
+# tipos de referencia del BCE. En producción corre en el servidor smpro-datos-1 (servidor/ejecutar.sh
+# divisas; ver DESPLIEGUE.md). Este flujo NO tiene horario ni guarda nada en el repositorio: se lanza a
+# mano para validar la rama con datos reales (el entorno de Datos no llega al portal del BCE).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install requests pandas scipy
+      - name: Comprobaciones sin red
+        run: python divisas/pruebas_divisas.py
+      - name: Pasada con datos reales
+        env:
+          ESPEC_DATOS_BASE: https://datos.elespeculador.com/
+        run: |
+          set -o pipefail
+          python divisas/divisas.py --salida salida/divisas | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Fragmento y resumen al registro
+        run: |
+          echo "===== fragmento-wp.html"; sed 's/<svg.*<\/svg>/[SVG]/' salida/divisas/fragmento-wp.html; echo
+          python - <<'EOF'
+          import json
+          j = json.load(open("salida/divisas/datos/ultima.json", encoding="utf-8"))
+          print("===== divisas:", json.dumps({d: {k: v for k, v in x.items() if k != "nombre"} for d, x in j["divisas"].items()}, ensure_ascii=False, indent=1))
+          print("cesta:", json.dumps(j["cesta"], ensure_ascii=False), "| primera fecha", j["primera_fecha"], "| observaciones", j["observaciones"])
+          EOF
+      - name: Guardar la salida como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: divisas-salida
+          path: salida
+          retention-days: 14
