@@ -33,7 +33,7 @@ jobs:
           ESPEC_DATOS_BASE: https://datos.elespeculador.com/
         run: |
           set -o pipefail
-          python recompras/recompras.py --salida salida/recompras --datos salida --cnmv https://datos.elespeculador.com/cnmv/datos/ibex35.csv --max "${{ inputs.max_informes || 40 }}" | tee -a "$GITHUB_STEP_SUMMARY"
+          python recompras/recompras.py --salida salida/recompras --datos salida --cnmv https://datos.elespeculador.com/cnmv/datos/ibex35.csv --max "${{ inputs.max_informes || 40 }}" --guardar-textos salida/textos | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Resumen de la pasada
         run: |
           python - <<'EOF2' | tee -a "$GITHUB_STEP_SUMMARY"
@@ -44,6 +44,15 @@ jobs:
               print(f"  {i['fecha_comunicado']} {i['empresa']:<14} {i['estado']:<9} filas={i['filas']:>3} acciones={i['acciones']:>10} medio={i['precio_medio']:<8} {i['moneda']:<7} total={i['total_declarado']:<9} coincide={i['coincide']:<2} pct={i['pct_programa']:<6} fin={i['finalizado']}")
           print("\n===== fragmento-wp.html =====")
           print(open("salida/recompras/fragmento-wp.html", encoding="utf-8").read())
+          print("\n===== textos de los informes sin filas o con pocas (para revisar la maqueta) =====")
+          import pathlib
+          for i in csv.DictReader(open("salida/recompras/datos/informes.csv", encoding="utf-8")):
+              if i["estado"] in ("sin_filas", "sin_texto") or int(i["filas"] or 0) <= 2:
+                  ruta = pathlib.Path("salida/textos") / f"{i['nreg']}.txt"
+                  print(f"\n----- {i['empresa']} nreg {i['nreg']} {i['fecha_comunicado']} estado {i['estado']} filas {i['filas']} | {i['titulo'][:100]}")
+                  if ruta.exists():
+                      lineas = [l[:170] for l in ruta.read_text(encoding="utf-8").splitlines() if l.strip()]
+                      print("\n".join(lineas[:45]) if lineas else "(texto vacío: PDF sin capa de texto)")
           EOF2
       - uses: actions/upload-artifact@v4
         if: always()

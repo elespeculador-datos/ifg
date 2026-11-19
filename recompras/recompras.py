@@ -264,9 +264,10 @@ def descargar_textos(sesion, enlace: str) -> list[tuple[str, str]]:
 
 
 def recoger(listado: list[dict], informes: list[dict], operaciones: list[dict], hoy: date, local: Path | None = None,
-            maximo: int = MAX_INFORMES) -> tuple[list[dict], list[dict], int]:
+            maximo: int = MAX_INFORMES, guardar_textos: Path | None = None) -> tuple[list[dict], list[dict], int]:
     """Lee los comunicados pendientes (red, o `<nreg>.txt` de `local`) y actualiza informes y operaciones. Devuelve
-    las listas nuevas y cuántos comunicados se han procesado."""
+    las listas nuevas y cuántos comunicados se han procesado. `guardar_textos` guarda el texto de cada documento
+    descargado como `<nreg>[_n].txt` (para depurar maquetas nuevas y construir pruebas)."""
     por_nreg = {i["nreg"]: dict(i) for i in informes}
     ops = [dict(o) for o in operaciones]
     sesion = None
@@ -285,6 +286,10 @@ def recoger(listado: list[dict], informes: list[dict], operaciones: list[dict], 
             else:
                 textos = descargar_textos(sesion, r["enlace"])
                 time.sleep(PAUSA)
+            if guardar_textos is not None:
+                guardar_textos.mkdir(parents=True, exist_ok=True)
+                for n, (_, t) in enumerate(textos):
+                    (guardar_textos / (f"{r['nreg']}.txt" if n == 0 else f"{r['nreg']}_{n}.txt")).write_text(t, encoding="utf-8")
             inf, nuevas = informe_desde_textos(r, textos, hoy)
         except Exception as e:  # red o lectura: se reintenta en la siguiente pasada
             inf = _informe_base(r)
@@ -571,6 +576,7 @@ def main() -> int:
     p.add_argument("--fecha", default=None)
     p.add_argument("--max", type=int, default=MAX_INFORMES, help="comunicados nuevos por pasada")
     p.add_argument("--forzar", action="store_true")
+    p.add_argument("--guardar-textos", default=None, help="carpeta donde guardar el texto de cada documento leído (depuración)")
     a = p.parse_args()
     salida = Path(a.salida)
     raiz = Path(a.datos) if a.datos else salida.resolve().parent
@@ -580,7 +586,8 @@ def main() -> int:
     try:
         listado = leer_listado(origen)
         informes, operaciones = cargar_estado(salida / "datos")
-        informes, operaciones, hechos = recoger(listado, informes, operaciones, hoy, local=local, maximo=a.max)
+        informes, operaciones, hechos = recoger(listado, informes, operaciones, hoy, local=local, maximo=a.max,
+                                                guardar_textos=Path(a.guardar_textos) if a.guardar_textos else None)
         if not any(i.get("estado") in ("leido", "sin_filas") for i in informes):
             raise DatosRaros("ningún comunicado de recompra se ha podido leer")
         d = calcular(informes, operaciones, hoy)
