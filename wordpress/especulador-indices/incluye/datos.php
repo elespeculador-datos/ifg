@@ -30,9 +30,12 @@ const ESP_OPCION_SERIE = 'esp_indices_ifg_serie';
  */
 function esp_indices_opciones_por_defecto() {
 	return array(
-		'url_dia'        => 'https://elespeculador-datos.github.io/ifg/ifg.json',
-		'url_serie'      => 'https://elespeculador-datos.github.io/ifg/ifg_serie_12m.json',
-		'url_indice'     => '/indices/friccion-global/',
+		// 2.0.0: el índice se llama Oscilador Geopolítico y se publica en el
+		// servidor propio. Las direcciones antiguas (/ifg/) quedan para el
+		// futuro Índice de Fricción Global, que es otro índice.
+		'url_dia'        => 'https://datos.elespeculador.com/oscilador-geo/oscilador-geo.json',
+		'url_serie'      => 'https://datos.elespeculador.com/oscilador-geo/oscilador-geo_serie_12m.json',
+		'url_indice'     => '/indices/oscilador-geopolitico/',
 		// El PDF de metodología, con nombre ESTABLE y no versionado: así el
 		// enlace nunca apunta a un documento viejo cuando el índice cambia de
 		// versión. El repositorio conserva además una copia con el número de
@@ -43,9 +46,14 @@ function esp_indices_opciones_por_defecto() {
 		// una página que NO existe y devolvía 404 desde la web publicada.
 		// Cambiar este valor por defecto NO arregla una instalación que ya
 		// guardó el valor viejo: hay que corregirlo en los ajustes del plugin.
-		'url_metodo'     => 'https://elespeculador-datos.github.io/ifg/metodologia.pdf',
+		'url_metodo'     => '/indices/oscilador-geopolitico/#metodologia',
 		'url_seccion'    => '/geopolitica/',
-		'url_csv'        => 'https://elespeculador-datos.github.io/ifg/ifg_serie.csv',
+		// Vacío: la licencia vigente es «consulta y cita», sin redistribución.
+		// Con el campo vacío el panel no ofrece la descarga.
+		'url_csv'        => '',
+		// 2.0.0: con 1, los shortcodes antiguos [esp_friccion*] dejan de pintar
+		// el Oscilador (fase F5 de la migración).
+		'friccion_retirado' => 0,
 		'aviso'          => 'Contenido informativo y educativo. No constituye asesoramiento financiero ni recomendación de inversión.',
 		'mostrar_estado' => 1,
 	);
@@ -192,11 +200,13 @@ function esp_indices_serie() {
  */
 function esp_indices_tramos() {
 	return array(
-		array( 'nombre' => 'Calma',   'hasta' => 20,  'peso' => 20, 'color' => '#5BB8A8' ),
-		array( 'nombre' => 'Normal',  'hasta' => 50,  'peso' => 30, 'color' => '#9AA8BC' ),
-		array( 'nombre' => 'Tensión', 'hasta' => 75,  'peso' => 25, 'color' => '#E0A944' ),
-		array( 'nombre' => 'Alta',    'hasta' => 90,  'peso' => 15, 'color' => '#F08A4B' ),
-		array( 'nombre' => 'Extrema', 'hasta' => 101, 'peso' => 10, 'color' => '#F06A6A' ),
+		// 2.0.0 (Oscilador Geopolítico 0.11.0): tramos por dirección. El 50 es
+		// «sin cambios»; por debajo, alivio; por encima, presión.
+		array( 'nombre' => 'Alivio fuerte',  'hasta' => 20,  'peso' => 20, 'color' => '#2E8B7A' ),
+		array( 'nombre' => 'Alivio',         'hasta' => 40,  'peso' => 20, 'color' => '#7FC4B6' ),
+		array( 'nombre' => 'Estable',        'hasta' => 60,  'peso' => 20, 'color' => '#9AA8BC' ),
+		array( 'nombre' => 'Presión',        'hasta' => 80,  'peso' => 20, 'color' => '#E0A944' ),
+		array( 'nombre' => 'Presión fuerte', 'hasta' => 101, 'peso' => 20, 'color' => '#F06A6A' ),
 	);
 }
 
@@ -214,6 +224,60 @@ function esp_indices_tramo_de( $valor ) {
 
 	return end( $tramos );
 }
+
+/**
+ * 2.0.0: el tramo del día. Desde la 0.11.0 el tramo lleva histéresis (solo
+ * cambia si el valor supera el corte en más de 2 puntos), así que el JSON
+ * manda: si trae un tramo de la tabla, se usa ese, con su color. Si no lo
+ * trae o no es de la tabla, se calcula por el valor, como antes.
+ */
+function esp_indices_tramo_del_dia( $dia ) {
+	if ( ! empty( $dia['tramo'] ) ) {
+		foreach ( esp_indices_tramos() as $tramo ) {
+			if ( $tramo['nombre'] === $dia['tramo'] ) {
+				return $tramo;
+			}
+		}
+	}
+	return esp_indices_tramo_de( $dia['valor'] );
+}
+
+/**
+ * 2.0.0: el nombre del índice. El JSON lo trae desde la 0.11.0 ('indice').
+ */
+function esp_indices_nombre( $dia = null ) {
+	if ( is_array( $dia ) && ! empty( $dia['indice'] ) ) {
+		return (string) $dia['indice'];
+	}
+	return ESP_INDICES_NOMBRE;
+}
+
+/**
+ * 2.0.0: migración de los ajustes guardados. Las direcciones que apuntaban al
+ * IFG antiguo (/ifg/ en GitHub Pages o en datos.elespeculador.com) pasan a las
+ * del Oscilador. Se hace una sola vez. Requisito: que el servidor ya publique
+ * /oscilador-geo/ antes de actualizar el plugin (fase F3 de la migración).
+ */
+function esp_indices_migrar_ajustes() {
+	if ( '2.0.0' === get_option( 'esp_indices_version_ajustes' ) ) {
+		return;
+	}
+	$guardadas = get_option( 'esp_indices_opciones', array() );
+	if ( is_array( $guardadas ) && $guardadas ) {
+		$defecto = esp_indices_opciones_por_defecto();
+		foreach ( array( 'url_dia', 'url_serie', 'url_indice', 'url_metodo', 'url_csv' ) as $clave ) {
+			if ( isset( $guardadas[ $clave ] ) && ( false !== strpos( $guardadas[ $clave ], '/ifg/' )
+				|| false !== strpos( $guardadas[ $clave ], 'friccion-global' )
+				|| false !== strpos( $guardadas[ $clave ], 'github.io' ) ) ) {
+				$guardadas[ $clave ] = $defecto[ $clave ];
+			}
+		}
+		update_option( 'esp_indices_opciones', $guardadas );
+	}
+	update_option( 'esp_indices_version_ajustes', '2.0.0' );
+	esp_indices_refrescar_datos();
+}
+add_action( 'plugins_loaded', 'esp_indices_migrar_ajustes' );
 
 /**
  * Número con coma decimal, que es como se escribe en español.

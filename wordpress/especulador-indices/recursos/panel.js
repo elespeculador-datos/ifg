@@ -101,12 +101,12 @@
 			height: ALTO,
 			viewBox: '0 0 ' + ( ancho + MARGEN_DER ) + ' ' + ALTO,
 			role: 'img',
-			'aria-label': 'Serie del Índice de Fricción Global en los últimos doce meses, de '
+			'aria-label': 'Serie del ' + ( datos.nombre || 'Oscilador Geopolítico' ) + ' en los últimos doce meses, de '
 				+ fechas[ 0 ] + ' a ' + fechas[ fechas.length - 1 ] + '. Último valor, '
 				+ valores[ valores.length - 1 ].toFixed( 1 ).replace( '.', ',' ) + '.'
 		} );
 
-		// Bandas de tramo, de arriba abajo: Extrema, Alta, Tensión, Normal, Calma.
+		// Bandas de tramo, de arriba abajo (las da la tabla de tramos del PHP).
 		var techo = 100;
 		( datos.tramos || [] ).slice().reverse().forEach( function ( t ) {
 			raiz.appendChild( svg( 'rect', {

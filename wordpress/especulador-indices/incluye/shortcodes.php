@@ -181,7 +181,7 @@ function esp_indices_cifra_html( $dia, $tramo, $tamano = 'portada' ) {
 function esp_indices_sc_portada( $atributos ) {
 	$dia = esp_indices_dia();
 	if ( null === $dia ) {
-		return esp_indices_sin_datos( 'el Índice de Fricción Global' );
+		return esp_indices_sin_datos( 'el ' . ESP_INDICES_NOMBRE );
 	}
 
 	$a = shortcode_atts(
@@ -240,7 +240,7 @@ function esp_indices_sc_portada( $atributos ) {
 	// altura fija: la columna de portada puede estirarse por su vecina.
 	wp_enqueue_script( 'esp-indices-panel' );
 
-	$tramo = esp_indices_tramo_de( $dia['valor'] );
+	$tramo = esp_indices_tramo_del_dia( $dia );
 
 	ob_start();
 	?>
@@ -290,7 +290,7 @@ function esp_indices_sc_portada( $atributos ) {
 		?>
 		<a class="esp-ifg__indice" href="<?php echo esc_url( esp_indices_opcion( 'url_indice' ) ); ?>">
 			<span class="esp-ifg__rotulo">
-				<span class="esp-ifg__nombre">Índice de Fricción Global</span>
+				<span class="esp-ifg__nombre"><?php echo esc_html( esp_indices_nombre( $dia ) ); ?></span>
 				<span class="esp-ifg__ficha">Ver la ficha →</span>
 			</span>
 
@@ -358,7 +358,21 @@ function esp_indices_sc_portada( $atributos ) {
 	<?php
 	return ob_get_clean();
 }
-add_shortcode( 'esp_friccion', 'esp_indices_sc_portada' );
+add_shortcode( 'esp_oscilador_geo', 'esp_indices_sc_portada' );
+
+/*
+ * 2.0.0: los shortcodes antiguos siguen pintando el Oscilador (con su nombre
+ * nuevo) mientras dura la migración, para que ninguna página se quede en
+ * blanco. Con el ajuste friccion_retirado = 1 dejan de pintar nada (fase F5):
+ * el nombre «Índice de Fricción Global» queda para otro índice.
+ */
+function esp_indices_sc_antiguo( $funcion, $atributos ) {
+	if ( esp_indices_opcion( 'friccion_retirado' ) ) {
+		return '';
+	}
+	return call_user_func( $funcion, $atributos );
+}
+add_shortcode( 'esp_friccion', function ( $a ) { return esp_indices_sc_antiguo( 'esp_indices_sc_portada', $a ); } );
 
 /* -------------------------------------------------------------------------
  * [esp_friccion_valor] — la cifra dentro de un párrafo
@@ -379,7 +393,7 @@ function esp_indices_sc_valor( $atributos ) {
 		'esp_friccion_valor'
 	);
 
-	$tramo = esp_indices_tramo_de( $dia['valor'] );
+	$tramo = esp_indices_tramo_del_dia( $dia );
 	$texto = esp_indices_coma( $dia['valor'] );
 
 	if ( 'si' === $a['tramo'] ) {
@@ -392,13 +406,14 @@ function esp_indices_sc_valor( $atributos ) {
 	if ( 'si' === $a['enlace'] ) {
 		$html = '<a class="esp-ifg-valor-enlace" href="'
 			. esc_url( esp_indices_opcion( 'url_indice' ) ) . '" title="'
-			. esc_attr( 'Índice de Fricción Global, ' . esp_indices_fecha_larga( $dia['fecha'] ) )
+			. esc_attr( esp_indices_nombre( $dia ) . ', ' . esp_indices_fecha_larga( $dia['fecha'] ) )
 			. '">' . $html . '</a>';
 	}
 
 	return $html;
 }
-add_shortcode( 'esp_friccion_valor', 'esp_indices_sc_valor' );
+add_shortcode( 'esp_oscilador_geo_valor', 'esp_indices_sc_valor' );
+add_shortcode( 'esp_friccion_valor', function ( $a ) { return esp_indices_sc_antiguo( 'esp_indices_sc_valor', $a ); } );
 
 /* -------------------------------------------------------------------------
  * [esp_friccion_panel] — la ficha completa
@@ -407,11 +422,11 @@ add_shortcode( 'esp_friccion_valor', 'esp_indices_sc_valor' );
 function esp_indices_sc_panel( $atributos ) {
 	$dia = esp_indices_dia();
 	if ( null === $dia ) {
-		return esp_indices_sin_datos( 'el Índice de Fricción Global' );
+		return esp_indices_sin_datos( 'el ' . ESP_INDICES_NOMBRE );
 	}
 
 	$serie = esp_indices_serie();
-	$tramo = esp_indices_tramo_de( $dia['valor'] );
+	$tramo = esp_indices_tramo_del_dia( $dia );
 
 	/*
 	 * titulo="no" quita el encabezado interno. Hace falta porque la página de
@@ -436,6 +451,7 @@ function esp_indices_sc_panel( $atributos ) {
 					'valores' => $serie['valores'],
 					'maximo'  => isset( $serie['maximo'] ) ? $serie['maximo'] : null,
 					'tramos'  => esp_indices_tramos(),
+					'nombre'  => esp_indices_nombre( $dia ),
 				)
 			) . ';',
 			'before'
@@ -452,9 +468,9 @@ function esp_indices_sc_panel( $atributos ) {
 			<div>
 				<p class="esp-ifg__antetitulo">Índice propio · el especulador</p>
 				<?php if ( 'no' !== $a['titulo'] ) : ?>
-					<h2 class="esp-ifg__titulo esp-ifg__titulo--grande">Índice de Fricción Global</h2>
+					<h2 class="esp-ifg__titulo esp-ifg__titulo--grande"><?php echo esc_html( esp_indices_nombre( $dia ) ); ?></h2>
 				<?php endif; ?>
-				<p class="esp-ifg__entrada">Mide la tensión geopolítica que llega a los precios, no el miedo bursátil. Se calcula cada día hábil de madrugada con reglas públicas y congeladas.</p>
+				<p class="esp-ifg__entrada">Mide cuánto ha cambiado, en las últimas cinco sesiones, la tensión geopolítica que el mercado pone en los precios. No es un indicador del miedo bursátil. Se calcula cada día hábil de madrugada con reglas públicas y congeladas.</p>
 			</div>
 			<div class="esp-ifg__sello">
 				<?php if ( esp_indices_opcion( 'mostrar_estado' ) ) : ?>
@@ -477,13 +493,17 @@ function esp_indices_sc_panel( $atributos ) {
 
 				<?php if ( $serie && isset( $serie['sesiones_por_tramo'] ) ) : ?>
 					<?php
-					$altas = (int) ( $serie['sesiones_por_tramo']['Alta'] ?? 0 )
-						+ (int) ( $serie['sesiones_por_tramo']['Extrema'] ?? 0 );
+					// 2.0.0: tramos por dirección. Se cuentan las sesiones en los dos
+					// extremos («Presión fuerte» y «Alivio fuerte»).
+					$presion = (int) ( $serie['sesiones_por_tramo']['Presión fuerte'] ?? 0 );
+					$alivio  = (int) ( $serie['sesiones_por_tramo']['Alivio fuerte'] ?? 0 );
 					?>
 					<p class="esp-ifg__nota">
 						En los últimos doce meses el índice ha pasado
-						<strong><?php echo esc_html( (string) $altas ); ?> sesiones</strong>
-						en Alta o Extrema<?php if ( isset( $serie['maximo']['valor'] ) ) : ?>,
+						<strong><?php echo esc_html( (string) $presion ); ?> sesiones</strong>
+						en Presión fuerte y
+						<strong><?php echo esc_html( (string) $alivio ); ?></strong>
+						en Alivio fuerte<?php if ( isset( $serie['maximo']['valor'] ) ) : ?>,
 						y marcó su máximo del año,
 						<strong><?php echo esc_html( esp_indices_coma( $serie['maximo']['valor'] ) ); ?></strong>,
 						el <?php echo esc_html( esp_indices_fecha_larga( $serie['maximo']['fecha'] ) ); ?><?php endif; ?>.
@@ -505,7 +525,7 @@ function esp_indices_sc_panel( $atributos ) {
 			<div class="esp-ifg__desglose">
 				<p class="esp-ifg__seccion">
 					Qué lo mueve hoy
-					<span class="esp-ifg__leyenda">Aportación de cada componente al nivel. A la derecha, más fricción; a la izquierda, menos.</span>
+					<span class="esp-ifg__leyenda">Aportación de cada componente al cambio de las últimas cinco sesiones. A la derecha, más presión; a la izquierda, más alivio.</span>
 				</p>
 				<?php
 				$desglose = $serie['desglose_nivel'];
@@ -550,10 +570,12 @@ function esp_indices_sc_panel( $atributos ) {
 		<footer class="esp-ifg__pie esp-ifg__pie--panel">
 			<span class="esp-ifg__enlaces">
 				<a class="esp-ifg__enlace" href="<?php echo esc_url( esp_indices_opcion( 'url_metodo' ) ); ?>">Metodología completa →</a>
-				<a class="esp-ifg__enlace" href="<?php echo esc_url( esp_indices_opcion( 'url_csv' ) ); ?>">Descargar la serie en CSV →</a>
+				<?php if ( esp_indices_opcion( 'url_csv' ) ) : ?>
+					<a class="esp-ifg__enlace" href="<?php echo esc_url( esp_indices_opcion( 'url_csv' ) ); ?>">Descargar la serie en CSV →</a>
+				<?php endif; ?>
 			</span>
 			<span class="esp-ifg__legal">
-				<?php echo esc_html( isset( $dia['licencia'] ) ? $dia['licencia'] : 'CC BY 4.0' ); ?><br>
+				<?php echo esc_html( isset( $dia['licencia'] ) ? $dia['licencia'] : 'Consulta y cita.' ); ?><br>
 				<?php echo esc_html( esp_indices_opcion( 'aviso' ) ); ?>
 			</span>
 		</footer>
@@ -562,4 +584,5 @@ function esp_indices_sc_panel( $atributos ) {
 	<?php
 	return ob_get_clean();
 }
-add_shortcode( 'esp_friccion_panel', 'esp_indices_sc_panel' );
+add_shortcode( 'esp_oscilador_geo_panel', 'esp_indices_sc_panel' );
+add_shortcode( 'esp_friccion_panel', function ( $a ) { return esp_indices_sc_antiguo( 'esp_indices_sc_panel', $a ); } );

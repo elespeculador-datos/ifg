@@ -1,5 +1,15 @@
 # Especulador Índices — instalación
 
+> **2.0.0 (20/11/2026).** El índice pasa a llamarse **Oscilador Geopolítico** (versión 0.11.0 del cálculo).
+> Shortcodes nuevos: `[esp_oscilador_geo]`, `[esp_oscilador_geo_panel]` y `[esp_oscilador_geo_valor]`.
+> Los antiguos `[esp_friccion*]` siguen pintando el Oscilador durante la migración y dejan de pintar nada
+> con el ajuste `friccion_retirado = 1` (el nombre «Índice de Fricción Global» queda para otro índice).
+> Tramos: Alivio fuerte 0–20 · Alivio 20–40 · Estable 40–60 · Presión 60–80 · Presión fuerte 80–100; el tramo
+> se lee del JSON (lleva histéresis) y solo si falta se calcula por el valor.
+> **Orden de instalación:** primero el servidor publica `/oscilador-geo/`; después se actualiza el plugin, que
+> migra solo las direcciones guardadas que apuntaban a `/ifg/` o a GitHub Pages.
+
+
 Plugin de WordPress que pinta el Índice de Fricción Global en elespeculador.com.
 No calcula nada: lee los JSON que publica GitHub Actions cada madrugada.
 

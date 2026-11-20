@@ -217,8 +217,8 @@ function esp_indices_pagina() {
 
 		<h2>Lo que no se toca desde aquí</h2>
 		<p style="max-width:760px">
-			Los umbrales de los tramos (0-20 Calma, 20-50 Normal, 50-75 Tensión,
-			75-90 Alta, 90-100 Extrema), los componentes y sus pesos no son
+			Los umbrales de los tramos (0-20 Alivio fuerte, 20-40 Alivio, 40-60
+			Estable, 60-80 Presión, 80-100 Presión fuerte), los componentes y sus pesos no son
 			configurables a propósito: son la definición del índice y están
 			publicados en la metodología. Cambiarlos obliga a numerar una versión
 			nueva y a recalcular la serie entera desde el script de Python.

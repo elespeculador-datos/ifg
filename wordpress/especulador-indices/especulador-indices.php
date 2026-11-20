@@ -2,8 +2,8 @@
 /**
  * Plugin Name:  Especulador Índices
  * Plugin URI:   https://elespeculador.com/indices/
- * Description:  Publica los índices propios de el especulador.com. De momento el Índice de Fricción Global, con tres shortcodes: [esp_friccion] para el bloque de portada, [esp_friccion_panel] para la ficha completa y [esp_friccion_valor] para citar la cifra dentro de un artículo.
- * Version:      1.1.0
+ * Description:  Publica los índices propios de el especulador.com. De momento el Oscilador Geopolítico (hasta su versión 0.10.0, Índice de Fricción Global), con tres shortcodes: [esp_oscilador_geo] para el bloque de portada, [esp_oscilador_geo_panel] para la ficha completa y [esp_oscilador_geo_valor] para citar la cifra dentro de un artículo. Los antiguos [esp_friccion*] siguen funcionando durante la transición.
+ * Version:      2.0.0
  * Author:       el especulador.com
  * License:      GPL-2.0-or-later
  * Text Domain:  especulador-indices
@@ -45,7 +45,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * efecto, aunque los archivos del servidor sean los nuevos. Pasó entre la
  * 1.0.0 y la 1.0.1.
  */
-define( 'ESP_INDICES_VERSION', '1.1.0' );
+define( 'ESP_INDICES_VERSION', '2.0.0' );
+
+// 2.0.0: nombre del índice que se pinta si el JSON no trae el suyo.
+define( 'ESP_INDICES_NOMBRE', 'Oscilador Geopolítico' );
 define( 'ESP_INDICES_RUTA', plugin_dir_path( __FILE__ ) );
 define( 'ESP_INDICES_URL', plugin_dir_url( __FILE__ ) );
 
