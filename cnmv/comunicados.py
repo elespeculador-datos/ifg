@@ -212,6 +212,11 @@ def _hay(texto: str, *frases: str) -> bool:
     return any(f in texto for f in frases)
 
 
+# «resultados de los nueve primeros meses», «primeros seis meses»: el colector de WordPress (fragmento 64) ya los
+# reconocía y este no (Aena, Cellnex y Ferrovial del 27/10 al 05/11 quedaban sin clasificar; comparación del 21/11/2026).
+MESES_ACUMULADOS = r"(nueve|seis|tres) primeros meses|primeros (nueve|seis|tres) meses"
+
+
 def clasificar(categoria: str, texto: str) -> tuple[str, str] | None:
     """(caja, etiqueta) o None si no es de ninguno de los cuatro recuadros."""
     c, t = _t(categoria), _t(texto)
@@ -248,19 +253,19 @@ def clasificar(categoria: str, texto: str) -> tuple[str, str] | None:
             and _hay(t, " publicacion ", " presentacion ", " calendario ", " presentara ", " publicara "):
         return "resultados", "Fecha de resultados"
     # «Aena anuncia la celebración de la presentación de resultados…», «Anuncio webcast seguimiento de la actividad 9M»
-    trimestral = r"\b(trimestre|trimestral|semestre|semestral|nueve meses|9m|[1-4]t(\d\d)?|q[1-4]|[12]s(\d\d)?|h[12])\b"
+    trimestral = rf"\b(trimestre|trimestral|semestre|semestral|nueve meses|{MESES_ACUMULADOS}|9m|[1-4]t(\d\d)?|q[1-4]|[12]s(\d\d)?|h[12])\b"
     if re.search(r"\b(anuncia|anuncio|convoca|convocatoria|celebracion|webcast)\b", t) and \
             (_hay(t, " resultados ") or re.search(trimestral, t)):
         return "resultados", "Fecha de resultados"
     if _hay(todo, " resultados ", " cuentas ", " informe financiero ", " informacion financiera ", " beneficio ") and re.search(
-            r"\b(trimestre|trimestral|semestre|semestral|ejercicio|anual|anuales|nueve meses|9m|[1-4]t(\d\d)?|q[1-4]|[12]s(\d\d)?|h[12]|situacion financiera)\b", t):
+            rf"\b(trimestre|trimestral|semestre|semestral|ejercicio|anual|anuales|nueve meses|{MESES_ACUMULADOS}|9m|[1-4]t(\d\d)?|q[1-4]|[12]s(\d\d)?|h[12]|situacion financiera)\b", t):
         return "resultados", "Resultados"
     return None
 
 
-PERIODOS = [(r"\b(primer|1er) trimestre\b|\b1t(\d\d)?\b|\bq1\b", "1T"), (r"\bsegundo trimestre\b|\b2t(\d\d)?\b|\bq2\b", "2T"),
-            (r"\b(tercer|3er) trimestre\b|\b3t(\d\d)?\b|\bq3\b|\bnueve meses\b|\b9m\b", "3T"), (r"\bcuarto trimestre\b|\b4t(\d\d)?\b|\bq4\b", "4T"),
-            (r"\b(primer )?semestre\b|\b1s(\d\d)?\b|\bh1\b", "1S"), (r"\b(ejercicio|anuales?|anual)\b", "año")]
+PERIODOS = [(r"\b(primer|1er) trimestre\b|\b1t(\d\d)?\b|\bq1\b|\btres primeros meses\b|\bprimeros tres meses\b", "1T"), (r"\bsegundo trimestre\b|\b2t(\d\d)?\b|\bq2\b", "2T"),
+            (r"\b(tercer|3er) trimestre\b|\b3t(\d\d)?\b|\bq3\b|\bnueve meses\b|\bnueve primeros meses\b|\bprimeros nueve meses\b|\b9m\b", "3T"), (r"\bcuarto trimestre\b|\b4t(\d\d)?\b|\bq4\b", "4T"),
+            (r"\b(primer )?semestre\b|\b1s(\d\d)?\b|\bh1\b|\bseis primeros meses\b|\bprimeros seis meses\b", "1S"), (r"\b(ejercicio|anuales?|anual)\b", "año")]
 
 
 def periodo(texto: str, fecha: str) -> str:
