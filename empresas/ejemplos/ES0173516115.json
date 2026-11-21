@@ -1,0 +1,280 @@
+{
+ "contrato": "1.0",
+ "empresa": "Repsol",
+ "isin": "ES0173516115",
+ "ficha": "https://elespeculador.com/ibex35/repsol/",
+ "registro_oficial": [
+  {
+   "fecha": "2026-11-18",
+   "tipo": "Programa de recompra",
+   "titulo": "Operaciones realizadas por Repsol, S.A. al amparo de su Programa de Recompra de acciones entre el 11 y el 17 de noviembre de 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43719",
+   "nreg": "43719",
+   "grupo": "recompras-ES0173516115-43255"
+  },
+  {
+   "fecha": "2026-11-11",
+   "tipo": "Programa de recompra",
+   "titulo": "Operaciones realizadas por Repsol, S.A. al amparo de su Programa de Recompra de acciones entre el 5 y el 10 de noviembre de 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43612",
+   "nreg": "43612",
+   "grupo": "recompras-ES0173516115-43255"
+  },
+  {
+   "fecha": "2026-11-05",
+   "tipo": "Programa de recompra",
+   "titulo": "Operaciones realizadas por Repsol, S.A. al amparo de su Programa de Recompra de acciones entre el 30 de octubre y el 4 de noviembre de 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43505",
+   "nreg": "43505",
+   "grupo": "recompras-ES0173516115-43255"
+  },
+  {
+   "fecha": "2026-10-29",
+   "tipo": "Resultados 3T 2026",
+   "titulo": "La Sociedad remite presentación sobre los resultados del tercer trimestre de 2026.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43384",
+   "nreg": "43384",
+   "grupo": "resultados-ES0173516115-43379"
+  },
+  {
+   "fecha": "2026-10-29",
+   "tipo": "Resultados 3T 2026",
+   "titulo": "La Sociedad remite información sobre los resultados del tercer trimestre del ejercicio 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43379",
+   "nreg": "43379",
+   "grupo": "resultados-ES0173516115-43379"
+  },
+  {
+   "fecha": "2026-10-29",
+   "tipo": "Dividendo",
+   "titulo": "Información sobre la retribución al accionista en enero de 2027",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3391",
+   "nreg": "3391",
+   "grupo": "dividendos-ES0173516115-3391"
+  },
+  {
+   "fecha": "2026-10-29",
+   "tipo": "Programa de recompra",
+   "titulo": "Información sobre una reducción de capital social mediante la amortización de acciones propias, así como sobre el inicio de un programa de recompra de acciones de Repsol, S.A.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3390",
+   "nreg": "3390",
+   "grupo": "recompras-ES0173516115-43255"
+  },
+  {
+   "fecha": "2026-10-26",
+   "tipo": "Programa de recompra",
+   "titulo": "Finalización del Programa de Recompra de acciones de Repsol, S.A. y ejecución de una reducción de capital mediante la amortización de 17.375.862 acciones propias",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43308",
+   "nreg": "43308",
+   "grupo": "recompras-ES0173516115-43255"
+  },
+  {
+   "fecha": "2026-10-21",
+   "tipo": "Programa de recompra",
+   "titulo": "Operaciones realizadas por Repsol, S.A. al amparo de su Programa de Recompra de acciones entre el 14 y el 20 de octubre de 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43255",
+   "nreg": "43255",
+   "grupo": "recompras-ES0173516115-43255"
+  }
+ ],
+ "dividendos": [
+  {
+   "fecha_comunicado": "2026-10-29",
+   "tipo": "Dividendo",
+   "titulo": "Información sobre la retribución al accionista en enero de 2027",
+   "importe": null,
+   "moneda": null,
+   "fecha_ex": null,
+   "fecha_pago": null,
+   "lectura": "sin leer: ver el comunicado",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3391",
+   "nreg": "3391"
+  }
+ ],
+ "cortos": {
+  "total_publicado": 1.17,
+  "fecha_dato": "2026-11-20",
+  "tenedores": 1,
+  "posiciones": [
+   {
+    "tenedor": "Elliott Investment Management LP",
+    "pct": 1.17,
+    "fecha": "2026-10-14"
+   }
+  ],
+  "ultima_posicion": "2026-10-14",
+  "cambios_30d": [],
+  "fuente": "CNMV, registro de posiciones cortas netas"
+ },
+ "directivos": null,
+ "accionistas": {
+  "fecha": "2026-08-03",
+  "derechos_voto": 1089606334,
+  "n": 1,
+  "principales": [
+   {
+    "accionista": "BLACKROCK INC.",
+    "total_pct": 7.176,
+    "fecha": "2025-07-04"
+   }
+  ],
+  "nota": "Solo personas jurídicas.",
+  "fuente": "CNMV, participaciones significativas"
+ },
+ "recompra": {
+  "ultimo_comunicado": {
+   "fecha": "2026-11-18",
+   "tipo": "Programa de recompra",
+   "caja": "recompras",
+   "titulo": "Operaciones realizadas por Repsol, S.A. al amparo de su Programa de Recompra de acciones entre el 11 y el 17 de noviembre de 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43719",
+   "nreg": "43719",
+   "canal": "OIR",
+   "grupo": "recompras-ES0173516115-43255"
+  },
+  "en_curso": true,
+  "fuente": "CNMV, comunicados de las empresas"
+ },
+ "cuatro_fuerzas": [],
+ "perfil": null,
+ "eventos": [
+  {
+   "fecha": "2026-11-18",
+   "tipo": "comunicado_recompras",
+   "isin": "ES0173516115",
+   "empresa": "Repsol",
+   "ficha": "https://elespeculador.com/ibex35/repsol/",
+   "titulo": "Comunicado de recompra: Repsol",
+   "detalle": "Operaciones realizadas por Repsol, S.A. al amparo de su Programa de Recompra de acciones entre el 11 y el 17 de noviembre de 2026",
+   "url": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43719",
+   "fuente": "CNMV"
+  },
+  {
+   "fecha": "2026-11-11",
+   "tipo": "comunicado_recompras",
+   "isin": "ES0173516115",
+   "empresa": "Repsol",
+   "ficha": "https://elespeculador.com/ibex35/repsol/",
+   "titulo": "Comunicado de recompra: Repsol",
+   "detalle": "Operaciones realizadas por Repsol, S.A. al amparo de su Programa de Recompra de acciones entre el 5 y el 10 de noviembre de 2026",
+   "url": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43612",
+   "fuente": "CNMV"
+  },
+  {
+   "fecha": "2026-11-05",
+   "tipo": "comunicado_recompras",
+   "isin": "ES0173516115",
+   "empresa": "Repsol",
+   "ficha": "https://elespeculador.com/ibex35/repsol/",
+   "titulo": "Comunicado de recompra: Repsol",
+   "detalle": "Operaciones realizadas por Repsol, S.A. al amparo de su Programa de Recompra de acciones entre el 30 de octubre y el 4 de noviembre de 2026",
+   "url": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43505",
+   "fuente": "CNMV"
+  },
+  {
+   "fecha": "2026-10-29",
+   "tipo": "comunicado_resultados",
+   "isin": "ES0173516115",
+   "empresa": "Repsol",
+   "ficha": "https://elespeculador.com/ibex35/repsol/",
+   "titulo": "Resultados: Repsol",
+   "detalle": "La Sociedad remite presentación sobre los resultados del tercer trimestre de 2026.",
+   "url": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43384",
+   "fuente": "CNMV"
+  },
+  {
+   "fecha": "2026-10-29",
+   "tipo": "comunicado_resultados",
+   "isin": "ES0173516115",
+   "empresa": "Repsol",
+   "ficha": "https://elespeculador.com/ibex35/repsol/",
+   "titulo": "Resultados: Repsol",
+   "detalle": "La Sociedad remite información sobre los resultados del tercer trimestre del ejercicio 2026",
+   "url": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43379",
+   "fuente": "CNMV"
+  },
+  {
+   "fecha": "2026-10-29",
+   "tipo": "comunicado_recompras",
+   "isin": "ES0173516115",
+   "empresa": "Repsol",
+   "ficha": "https://elespeculador.com/ibex35/repsol/",
+   "titulo": "Comunicado de recompra: Repsol",
+   "detalle": "Información sobre una reducción de capital social mediante la amortización de acciones propias, así como sobre el inicio de un programa de recompra de acciones de Repsol, S.A.",
+   "url": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3390",
+   "fuente": "CNMV"
+  },
+  {
+   "fecha": "2026-10-29",
+   "tipo": "comunicado_dividendos",
+   "isin": "ES0173516115",
+   "empresa": "Repsol",
+   "ficha": "https://elespeculador.com/ibex35/repsol/",
+   "titulo": "Comunicado de dividendo: Repsol",
+   "detalle": "Información sobre la retribución al accionista en enero de 2027",
+   "url": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3391",
+   "fuente": "CNMV"
+  },
+  {
+   "fecha": "2026-10-26",
+   "tipo": "comunicado_recompras",
+   "isin": "ES0173516115",
+   "empresa": "Repsol",
+   "ficha": "https://elespeculador.com/ibex35/repsol/",
+   "titulo": "Comunicado de recompra: Repsol",
+   "detalle": "Finalización del Programa de Recompra de acciones de Repsol, S.A. y ejecución de una reducción de capital mediante la amortización de 17.375.862 acciones propias",
+   "url": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43308",
+   "fuente": "CNMV"
+  }
+ ],
+ "huella": "8e6227f3bad9",
+ "version": "1.0.0",
+ "actualizado": "2026-11-21",
+ "fuentes": {
+  "registro_oficial": {
+   "estado": "ok",
+   "fecha": "2026-11-21T22:27"
+  },
+  "dividendos": {
+   "estado": "ok",
+   "fecha": "2026-11-21T22:27"
+  },
+  "recompra": {
+   "estado": "ok",
+   "fecha": "2026-11-21T22:27"
+  },
+  "cortos": {
+   "estado": "ok",
+   "fecha": "2026-11-20"
+  },
+  "directivos": {
+   "estado": "vacio",
+   "fecha": null
+  },
+  "accionistas": {
+   "estado": "ok",
+   "fecha": "2026-11-21"
+  },
+  "cuatro_fuerzas": {
+   "estado": "pendiente",
+   "fecha": null
+  },
+  "perfil": {
+   "estado": "pendiente",
+   "fecha": null
+  }
+ },
+ "licencia": "El Especulador, a partir de datos de la CNMV (comunicados, posiciones cortas, notificaciones de directivos y participaciones significativas), reproducidos fielmente; gratuitos en cnmv.es. Cuatro fuerzas y perfil: cada cifra con su documento y página.",
+ "aviso": "Datos con fin informativo y educativo; no son una recomendación de inversión."
+}

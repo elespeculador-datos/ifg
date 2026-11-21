@@ -1,0 +1,126 @@
+{
+ "contrato": "1.0",
+ "empresa": "Iberdrola",
+ "isin": "ES0144580Y14",
+ "ficha": "https://elespeculador.com/ibex35/iberdrola/",
+ "registro_oficial": [
+  {
+   "fecha": "2026-10-21",
+   "tipo": "Dividendo flexible",
+   "titulo": "Términos y condiciones de la segunda edición del sistema de dividendo opcional \"Iberdrola Retribución Flexible\" del ejercicio 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43244",
+   "nreg": "43244",
+   "grupo": "dividendos-ES0144580Y14-43244"
+  },
+  {
+   "fecha": "2026-10-21",
+   "tipo": "Resultados 3T 2026",
+   "titulo": "Presentación de Resultados correspondiente a los nueve meses del ejercicio 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43243",
+   "nreg": "43243",
+   "grupo": "resultados-ES0144580Y14-43241"
+  },
+  {
+   "fecha": "2026-10-21",
+   "tipo": "Resultados 3T 2026",
+   "titulo": "Resultados correspondiente a los nueve meses del ejercicio 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43241",
+   "nreg": "43241",
+   "grupo": "resultados-ES0144580Y14-43241"
+  }
+ ],
+ "dividendos": [
+  {
+   "fecha_comunicado": "2026-10-21",
+   "tipo": "Dividendo flexible",
+   "titulo": "Términos y condiciones de la segunda edición del sistema de dividendo opcional \"Iberdrola Retribución Flexible\" del ejercicio 2026",
+   "importe": null,
+   "moneda": null,
+   "fecha_ex": null,
+   "fecha_pago": null,
+   "lectura": "sin leer: ver el comunicado",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43244",
+   "nreg": "43244"
+  }
+ ],
+ "cortos": {
+  "total_publicado": 0.0,
+  "fecha_dato": "2026-11-20",
+  "tenedores": 0,
+  "posiciones": [],
+  "ultima_posicion": null,
+  "cambios_30d": [],
+  "fuente": "CNMV, registro de posiciones cortas netas"
+ },
+ "directivos": null,
+ "accionistas": {
+  "fecha": "2026-07-29",
+  "derechos_voto": 6673141516,
+  "n": 2,
+  "principales": [
+   {
+    "accionista": "QATAR INVESTMENT AUTHORITY",
+    "total_pct": 8.694,
+    "fecha": "2020-01-07"
+   },
+   {
+    "accionista": "BLACKROCK INC.",
+    "total_pct": 6.254,
+    "fecha": "2025-07-04"
+   }
+  ],
+  "nota": "Solo personas jurídicas.",
+  "fuente": "CNMV, participaciones significativas"
+ },
+ "recompra": {
+  "ultimo_comunicado": null,
+  "en_curso": false,
+  "fuente": "CNMV, comunicados de las empresas"
+ },
+ "cuatro_fuerzas": [],
+ "perfil": null,
+ "eventos": [],
+ "huella": "b2bc863caadd",
+ "version": "1.0.0",
+ "actualizado": "2026-11-21",
+ "fuentes": {
+  "registro_oficial": {
+   "estado": "ok",
+   "fecha": "2026-11-21T22:27"
+  },
+  "dividendos": {
+   "estado": "ok",
+   "fecha": "2026-11-21T22:27"
+  },
+  "recompra": {
+   "estado": "ok",
+   "fecha": "2026-11-21T22:27"
+  },
+  "cortos": {
+   "estado": "ok",
+   "fecha": "2026-11-20"
+  },
+  "directivos": {
+   "estado": "vacio",
+   "fecha": null
+  },
+  "accionistas": {
+   "estado": "ok",
+   "fecha": "2026-11-21"
+  },
+  "cuatro_fuerzas": {
+   "estado": "pendiente",
+   "fecha": null
+  },
+  "perfil": {
+   "estado": "pendiente",
+   "fecha": null
+  }
+ },
+ "licencia": "El Especulador, a partir de datos de la CNMV (comunicados, posiciones cortas, notificaciones de directivos y participaciones significativas), reproducidos fielmente; gratuitos en cnmv.es. Cuatro fuerzas y perfil: cada cifra con su documento y página.",
+ "aviso": "Datos con fin informativo y educativo; no son una recomendación de inversión."
+}

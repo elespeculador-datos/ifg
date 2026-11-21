@@ -1,57 +1,65 @@
 # Ficha integrada por empresa (indicador 16)
 
-Pregunta del lector (en la ficha de cada empresa del IBEX 35): ¿qué está pasando con esta empresa que no sale en la cotización: quién apuesta en contra, si compran o venden sus directivos, quién manda en el capital, cuándo paga el dividendo, si está recomprando y qué ha comunicado a la CNMV?
+Pregunta del lector (en la ficha de cada empresa del IBEX 35): ¿qué está pasando con esta empresa que no sale en la cotización: qué ha comunicado a la CNMV, qué dividendos ha anunciado, quién apuesta en contra, si compran o venden sus directivos, quién manda en el capital y si está recomprando?
 
-Estado: **esqueleto completo en rama `ficha-integrada`** (versión 0.1.0). Funciona ya con las fuentes que existen (cortos, cnmv) y se completa solo cuando el servidor sirva `directivos/` y `accionistas/` (con el filtro de personas jurídicas de la PR #97). El bloque `dividendo` queda en null en el servidor mientras el colector de dividendos siga parado por la licencia de la API de BME (P3 del catálogo; `servidor/ejecutar.sh` lo rechaza): la ficha no publica nada de BME hasta que esa licencia se resuelva. Pasa a 1.0.0 cuando las fuentes disponibles estén en el servidor y una pasada real se haya revisado.
+Estado: **contrato 1.0 con el chat de fichas de Tecnología (21/11/2026), versión 1.0.0, en rama `empresas-contrato`**. Funciona con las fuentes que ya sirve el servidor (cnmv, cortos, accionistas filtrado) y completa `directivos` cuando se despliegue su colector. Sin nada de BME (ni dividendos, ni rentabilidades, ni precios).
 
-## Contrato (catálogo, 18/11/2026)
+## Contrato 1.0 (Datos ↔ chat «Fichas de valores», 21/11/2026)
 
-Datos **no toca las páginas** `/ibex-35/<empresa>/` (las hace otro chat; Tecnología las pinta con un snippet PHP como el de los comunicados de la CNMV). Datos publica en el servidor:
+Datos **no toca las páginas** `/ibex35/<empresa>/` (hijas de la 8258) ni los fragmentos del chat de fichas: el chat de fichas pinta los datos al mostrar la página, leyendo de `datos.elespeculador.com`, con caché y la fecha del dato. Datos publica en el servidor:
 
-- `empresas/<ISIN>.json`: una ficha por empresa del IBEX 35 (35 archivos; `cnmv/empresas.csv` fija el universo y la dirección de la ficha de la web).
-- `empresas/eventos.json`: todos los eventos con fecha entre hoy−30 y hoy+30 días, del más reciente al más antiguo, con su tipo, para avisos y listados.
-- `empresas/indice.json`: lista de empresas con huella, fecha y dirección de cada JSON.
-- `empresas/index.html`: página propia con el resumen (sin fragmento de WordPress: la ficha la pinta el chat de fichas desde el JSON).
+- `empresas/<ISIN>.json`: una ficha por empresa del IBEX 35 (35 archivos; `cnmv/empresas.csv` fija el universo y la dirección de la ficha). Para un ISIN sin archivo (hoy, DAX y EE. UU.) la respuesta es 404: la ficha oculta los bloques.
+- `empresas/indice.json`: `comprobado` (fecha de la última pasada, se escribe en cada una), `fuentes` y, por empresa, la huella y la dirección del JSON. Comparando huellas basta con releer lo que cambia.
+- `empresas/eventos.json`: todos los eventos con fecha entre hoy−30 y hoy+30 días, del más reciente al más antiguo, con su tipo.
+- `empresas/cambios.csv`: registro de cambios de cada cifra (fecha, ISIN, empresa, campo, antes, después, fuente), solo con datos; se añade al final.
+- `empresas/index.html`: página propia con el resumen.
 
-## Qué lleva cada `<ISIN>.json`
+Campos de cada `<ISIN>.json`:
 
-| Bloque | Contenido | Fuente leída |
+| Campo | Contenido | Fuente |
 |---|---|---|
-| `cortos` | suma publicada (posiciones ≥ 0,5 %), tenedores, lista de posiciones con fecha, cambios de los últimos 30 días (nueva, sube, baja, deja de publicarse) | `cortos/datos/vigentes.csv`, `historial_cambios.csv`, `ultima.json` |
-| `directivos` | 13 semanas: compras y ventas discrecionales (número e importe), neto, última operación, operaciones registradas en 30 días. Sin nombres (el colector no los guarda); las sustituidas por una modificación no cuentan | `directivos/datos/operaciones.csv`, `ultima.json` |
-| `accionistas` | hasta 8 participaciones principales (solo personas jurídicas), derechos de voto y su fecha, nota con cuántas personas físicas no se publican. **Solo se copia si la salida del colector lleva ya el campo `fisicas_excluidas`** (PR #97); si no, la sección va en null y el flujo avisa | `accionistas/datos/ultima.json` |
-| `dividendo` | próximo (fecha ex, pago, bruto, moneda, concepto, extraordinario, flexible) y lo pagado en doce meses | `dividendos/datos/proximos.csv`, `ultimos_12m.csv` |
-| `recompra` | último comunicado de recompra y si está «en curso» (comunicado en los últimos 45 días) | `cnmv/datos/ibex35.csv` (caja `recompras`) |
-| `resultados`, `comunicados_30d` | último comunicado de resultados; todos los comunicados de 30 días | `cnmv/datos/ibex35.csv` |
-| `eventos` | la lista de la empresa (ver tipos) | las cinco |
-| `fuentes` | estado (`ok`, `parcial`, `ausente`) y fecha de cada fuente | — |
+| `contrato`, `version` | `"1.0"` (cambia solo si cambian los campos) y versión del colector | — |
+| `empresa`, `isin`, `ficha` | nombre corto, ISIN (la clave común con el registro de valores de Tecnología) y dirección de la ficha | `cnmv/empresas.csv` |
+| `actualizado` | fecha de la pasada en que cambió algún dato de esta ficha | — |
+| `registro_oficial` | comunicados a la CNMV de doce meses (resultados, dividendos, recompras, ampliaciones y OPVs, OPAs): `fecha`, `tipo`, `titulo` (tal como lo publica la CNMV), `fuente`, `enlace`, `nreg`, `grupo` (los de una misma operación comparten grupo) | colector `cnmv` |
+| `dividendos` | anuncios de dividendo comunicados a la CNMV en doce meses: `fecha_comunicado`, `tipo`, `titulo`, `importe`, `moneda`, `fecha_ex`, `fecha_pago`, `lectura`, `fuente`, `enlace`, `nreg`. **Sin rentabilidad.** Importe y fechas van vacíos hasta que se lean con seguridad del propio comunicado (`cnmv/dividendos_cnmv.py`, prototipo; versión 1.1): la ficha enlaza el comunicado | colector `cnmv` |
+| `cortos` | `total_publicado` (suma de posiciones ≥ 0,5 %), `fecha_dato` (publicación de la CNMV), `tenedores`, `posiciones` (tenedor, %, fecha), `ultima_posicion`, `cambios_30d`, `fuente` | colector `cortos` |
+| `directivos` | 13 semanas: compras y ventas discrecionales (número e importe), neto, última operación, operaciones registradas en 30 días. Sin nombres | colector `directivos` |
+| `accionistas` | hasta 8 participaciones principales, solo personas jurídicas, derechos de voto y su fecha, nota con cuántas de personas físicas no se publican | colector `accionistas` |
+| `recompra` | último comunicado de recompra y si está «en curso» (comunicado en los últimos 45 días) | colector `cnmv` |
+| `cuatro_fuerzas` | lista de cifras: `fuerza`, `indicador`, `cifra`, `unidad`, `texto`, `ejercicio`, `documento`, `pagina`, `enlace`, `fecha`, `verificado_por`, `verificado_el` | `empresas/cuatro_fuerzas.csv` (tabla de Datos; vacía hasta que la Redacción cierre la lista de cifras) |
+| `perfil` | `sede`, `cierre_ejercicio`, `web_ri`, `fuente`, `fecha` | `empresas/perfil.csv` (tabla de Datos; vacía) |
+| `eventos` | eventos de la empresa (tipos abajo) | las anteriores |
+| `fuentes` | por bloque: `estado` y `fecha` del dato | — |
+| `licencia`, `aviso` | cita de la CNMV y aviso de fin informativo y educativo | — |
 
-Tipos de evento (`TIPOS_EVENTO`): `corto_nueva`, `corto_sube`, `corto_baja`, `corto_sale`, `insider_compra`, `insider_venta`, `dividendo_ex`, `dividendo_pago`, `comunicado_recompras`, `comunicado_resultados`, `comunicado_dividendos`, `comunicado_opvs`, `comunicado_otro`. Cada evento: `fecha`, `tipo`, `isin`, `empresa`, `ficha` (dirección de la página), `titulo`, `detalle`, `url` (documento o página de datos de El Especulador), `fuente`.
+Estados de `fuentes`: `ok`; `parcial` (accionistas: alguna empresa sin el filtro de personas jurídicas); `anterior` (el colector falló hoy y se conserva **el último dato bueno**, con su fecha); `vacio` (no hay dato: la ficha oculta el bloque); `pendiente` (cuatro fuerzas y perfil sin filas).
 
-La huella (SHA-256, 12 caracteres) se calcula sobre el contenido de la ficha sin la fecha de la pasada: un archivo solo se reescribe si cambian sus datos, así el chat de fichas puede comparar huellas. `eventos.json` lleva su propia huella.
+Tipos de evento (`TIPOS_EVENTO`): `corto_nueva`, `corto_sube`, `corto_baja`, `corto_sale`, `insider_compra`, `insider_venta`, `comunicado_recompras`, `comunicado_resultados`, `comunicado_dividendos`, `comunicado_opvs-ampliaciones`, `comunicado_opas`, `comunicado_otro`. Cada evento: `fecha`, `tipo`, `isin`, `empresa`, `ficha`, `titulo`, `detalle`, `url` (documento de la CNMV o página publicada de El Especulador; vacía si no hay), `fuente`. Los eventos de dividendo con fecha ex y pago (`dividendo_ex`, `dividendo_pago`) vuelven en la versión 1.1, con datos de la CNMV.
+
+La huella (SHA-256, 12 caracteres) se calcula sobre el contenido de la ficha sin `actualizado`, `version`, `fuentes` ni `licencia`: un archivo solo se reescribe si cambian sus datos.
+
+Ejemplos reales en `ejemplos/` (21/11/2026: cortos y accionistas del servidor; cnmv con el relleno de la PR #111; directivos aún sin desplegar): Iberdrola (`ES0144580Y14`, dividendo flexible), Repsol (`ES0173516115`, recompra y cortos), Solaria (`ES0165386014`, diez posiciones cortas) e `indice.json`.
 
 ## Licencias y cumplimiento
 
-Todo son datos ya publicados por otros colectores con licencia verificada: CNMV (nota legal, reproducción fiel; gratis en cnmv.es) y BME (dividendos, condiciones de BME: citar «El Especulador, a partir de datos de BME»). El JSON lleva el campo `licencia` con la cita y el aviso de fin informativo y educativo. Personas físicas: no entran (cortos: gestoras; directivos: sin nombre desde su colector; accionistas: filtro de personas jurídicas obligatorio). Sin predicción ni recomendación en los textos de los eventos.
+Todo son datos de la CNMV ya publicados por otros colectores con licencia verificada (nota legal de la CNMV, 02/11/2026: reproducción fiel, cálculos permitidos; gratuitos en cnmv.es). Cuatro fuerzas: cifras del informe financiero anual depositado en la CNMV, con documento y página, dos extracciones independientes coincidentes. Personas físicas: no entran. Accionistas, solo con el filtro de personas jurídicas; cortos, un tenedor que no se reconozca como persona jurídica (regla de `accionistas/duenos.py` más `TENEDORES_ENTIDAD`) sale como «Tenedor no identificado como persona jurídica (nombre no publicado)» y con aviso, para revisarlo; directivos, sin nombre desde su colector. Sin predicción ni recomendación en los textos de los eventos.
 
 ## Reglas de ejecución
 
-- Fuente ausente: su sección va en null, `fuentes.<x>.estado = "ausente"` y `::warning::`. Ninguna fuente: `DatosRaros` y el script se para sin escribir (`servidor/ejecutar.sh` abre la incidencia `empresas-fallido`).
-- Universo vacío (ni `cnmv/empresas.csv` ni `dividendos/ibex35.csv`): `DatosRaros`.
-- Horario propuesto en el servidor: dos pasadas diarias, 07:40 (tras directivos, 07:10) y 21:10 (tras cortos, 20:40 en invierno) de Madrid: `servidor/ejecutar.sh empresas` (convención genérica: `empresas/empresas.py --salida $ESPEC_DATOS_DIR/empresas`; `--datos` toma por defecto la carpeta madre de la salida, es decir, `$ESPEC_DATOS_DIR`). Carpeta `empresas` en la lista blanca de nginx. Ver `DESPLIEGUE.md`.
+- Colector ausente: su bloque conserva el de la ficha anterior (`anterior`, con su fecha), y también sus eventos dentro de la ventana; si nunca hubo dato, el bloque va vacío. Un `::warning::` por colector ausente.
+- Ningún colector disponible: `DatosRaros` y el script se para sin escribir (`servidor/ejecutar.sh` abre la incidencia `empresas-fallido`). Tabla de cuatro fuerzas o de perfil sin sus columnas: `DatosRaros`.
+- Horario en el servidor: 07:40 L-S y 21:10 L-V de Madrid (`servidor/ejecutar.sh empresas`; ver `DESPLIEGUE.md`). Carpeta `empresas` en la lista blanca de nginx.
 
 ## Pruebas
 
-`python empresas/pruebas_empresas.py`: 56 comprobaciones con salidas simuladas de los cinco colectores en su formato real (cabeceras y claves copiadas de las salidas publicadas): ventanas de 13 semanas y 30 días, filtros (≥ 0,5 %, discrecional, sustituidas, personas jurídicas), próximo dividendo, recompra en curso, eventos y su orden, huella estable, escritura solo con cambios, fuentes ausentes y DatosRaros.
-
-Pasada local con las salidas guardadas en el repositorio (cortos hasta el 28/10 y cnmv hasta el 06/11): `python empresas/empresas.py --salida /tmp/empresas --datos docs --fecha 2026-11-06` → 35 fichas, 133 eventos, tres avisos (directivos, accionistas y dividendos ausentes); la segunda pasada no reescribe nada.
-
-El flujo `empresas-validacion` (solo a mano) descarga las salidas públicas de `datos.elespeculador.com` que existan y genera las fichas en el ejecutor para revisarlas antes de desplegar. Ejecución 44424375107 (19/11/2026): cortos, accionistas y cnmv presentes; 35 fichas y 181 eventos (40 comunicados de recompra, 50 de resultados, 12 de dividendos, 79 cambios de cortos); la sección de accionistas quedó en null en las 33 empresas porque el servidor aún no aplica el filtro de personas jurídicas (PR #97), que es justo lo que debe pasar.
+`python empresas/pruebas_empresas.py`: 61 comprobaciones con salidas simuladas de los colectores en su formato real: campos del contrato, direcciones `/ibex35/`, ninguna huella de BME aunque estén sus ficheros antiguos, cortos (persona física sin nombre, entidad sin forma societaria con nombre), directivos, accionistas, registro oficial de doce meses, dividendos de la CNMV sin rentabilidad, recompra, eventos, huella estable, escritura solo con cambios, `indice.json` con la fecha de comprobación, `cambios.csv`, último dato bueno, fuentes ausentes, cuatro fuerzas y perfil. Cinco mutaciones del código hacen fallar alguna.
 
 ## Pendiente
 
-- Desplegar en el servidor cuando `directivos/` y `accionistas/` (filtrado) estén servidos; primera pasada a mano y revisión de tres fichas (una con cortos, una con insiders, una con recompra).
-- Avisar al chat de fichas de las rutas y de los tipos de evento (deber de Federico anotado en el catálogo).
-- Versión 1.1: añadir el bloque `recompra.ejecutado` (acciones y precio medio de la semana) cuando exista el colector de recompras (fase 1 del indicador 17).
+- Desplegar con los siete colectores pendientes (mensaje 1 de `Mensajes-para-pegar-2026-11-19`); primera pasada a mano y revisión de tres fichas.
+- Versión 1.1: importe, fecha ex y fecha de pago de cada dividendo leídos del comunicado de la CNMV (solo cuando se lean con seguridad; si no, enlace); `recompra.ejecutado` con el colector de recompras.
+- Cuatro fuerzas: cuando la Redacción cierre la lista de cifras por fuerza (contrato del 21/11). Perfil: tabla a mano con fuente por dato.
+- SEC (empresas de EE. UU.) cuando el colector de la SEC llegue a Datos.
 
-Horas de Federico: 0 (más el aviso al chat de fichas).
+Horas de Federico: 0 (más fusionar).
