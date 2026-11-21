@@ -17,10 +17,16 @@ programa de recompra, los dos comunicados de una misma ampliación, el anuncio d
 resultados) se muestran como una sola entrada con el último comunicado y el número de comunicados. Una ampliación
 y un dividendo de la misma empresa son dos entradas distintas, cada una en su recuadro.
 
+Relleno por número de registro (21/11/2026): el RSS no deja recuperar lo pasado ni trae los comunicados de los fondos
+de titulización. En cada pasada, los números de registro que faltan entre los comunicados de los últimos 45 días se
+piden uno a uno a la ficha pública de la CNMV (como ya hacía el colector de WordPress, fragmento 64). Así se recupera
+cualquier hueco: el del 07/11 al 15/11/2026, cuando no corría ningún colector, y los que vengan.
+
 Uso:
-  python cnmv/comunicados.py                         descarga y publica si hay novedades
-  python cnmv/comunicados.py --local IP.xml OIR.xml  usa canales ya descargados (pruebas)
+  python cnmv/comunicados.py                         descarga, rellena huecos y publica si hay novedades
+  python cnmv/comunicados.py --local IP.xml OIR.xml  usa canales ya descargados (pruebas; sin relleno)
   python cnmv/comunicados.py --forzar                reescribe aunque no haya comunicados nuevos
+  python cnmv/comunicados.py --sin-relleno           solo el RSS
 """
 from __future__ import annotations
 
@@ -32,7 +38,7 @@ import re
 import sys
 import time
 import unicodedata
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -64,6 +70,15 @@ PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.i
 DIAS_CAJA = 60          # antigüedad máxima de lo que sale en los recuadros
 POR_CAJA = 6            # entradas por recuadro
 COLUMNAS = ["canal", "nreg", "fecha", "emisor", "categoria", "texto", "enlace"]
+# Ficha pública de cada comunicado por número de registro (relleno de huecos) y forma del enlace que guarda el RSS.
+FICHA_CNMV = {"IP": "https://www.cnmv.es/portal/Informacion-Privilegiada/Resultado-IP?nreg={}",
+              "OIR": "https://www.cnmv.es/portal/Otra-Informacion-Relevante/Resultado-OIR?nreg={}"}
+ENLACE_CNMV = {"IP": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg={}",
+               "OIR": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg={}"}
+SIN_REGISTRO = DATOS / "numeros_sin_registro.csv"   # números que la CNMV no enseña: dos consultas en días distintos y no más
+DIAS_HUECOS = 45        # se buscan huecos de numeración desde el primer comunicado de los últimos 45 días
+MAX_RELLENO = 200       # fichas como máximo por pasada (el primer relleno del 07/11-15/11 son unas 200)
+PAUSA_RELLENO = 0.5     # segundos entre dos fichas, por cortesía con la CNMV
 
 CAJAS = [  # clave (igual que el id del panel en la plantilla de la web), título, descripción del recuadro
     ("resultados", "Resultados", "Cuentas y fechas de publicación comunicadas a la CNMV."),
@@ -170,8 +185,145 @@ def descargar() -> list[dict]:
     return filas
 
 
+# --------------------------------------------------------------------------- relleno por número de registro
+def _campo(bloque: str, patron: str) -> str:
+    m = re.search(patron, bloque, flags=re.S)
+    return re.sub(r"\s+", " ", _plano(m.group(1))).strip() if m else ""
+
+
+def leer_ficha(pagina: str, canal: str, nreg: int) -> dict | None:
+    """La fila del histórico (mismos campos que el RSS) a partir de la ficha pública de un comunicado, o None si la
+    página no muestra ese número de registro. La hora de la ficha no trae segundos."""
+    art = re.search(r'<article class="block-content-pdf block-content">(.*?)</article>', pagina, flags=re.S)
+    if not art:
+        return None
+    for li in re.findall(r'<li id="[^"]*_elementoPrimerNivel"[^>]*>(.*?)</ul>\s*</li>', art.group(1), flags=re.S):
+        m = re.search(r"N[úu]mero de registro:\s*(\d+)", _plano(li))
+        if not m or int(m.group(1)) != nreg:
+            continue
+        dia = _campo(li, r'class="fecha-con-hora"[^>]*>(.*?)</li>')
+        hora = _campo(li, r'class="time"[^>]*>(.*?)</li>')
+        emisor = _campo(li, r'class="tit-small"[^>]*>(.*?)</span>')
+        try:
+            fecha = datetime.strptime(f"{dia} {hora}", "%d/%m/%Y %H:%M")
+        except ValueError:
+            raise DatosRaros(f"Ficha {canal} {nreg} de la CNMV con fecha inesperada: {dia!r} {hora!r}")
+        if not emisor:
+            raise DatosRaros(f"Ficha {canal} {nreg} de la CNMV sin emisor")
+        return {"canal": canal, "nreg": nreg, "fecha": fecha.strftime("%Y-%m-%dT%H:%M:00"), "emisor": emisor,
+                "categoria": _campo(li, r'class="negrita"[^>]*>(.*?)</span>'),
+                "texto": _campo(li, r'_subtituloRegistroEnlace"[^>]*>(.*?)</a>'),
+                "enlace": ENLACE_CNMV[canal].format(nreg)}
+    return None
+
+
+def pagina_sin_registro(pagina: str) -> bool:
+    """Página normal de la CNMV que dice que ese número no existe (y no una página de error o de mantenimiento)."""
+    return 'id="ctl00_H1"' in pagina and "block-content-pdf" not in pagina and "No se han encontrado datos disponibles" in pagina
+
+
+def leer_sin_registro() -> dict[tuple[str, int], dict]:
+    if not SIN_REGISTRO.exists():
+        return {}
+    d = pd.read_csv(SIN_REGISTRO, dtype=str, keep_default_na=False)
+    return {(r.canal, int(r.nreg)): {"consultado": r.consultado, "intentos": int(r.intentos)} for r in d.itertuples()}
+
+
+def guardar_sin_registro(sin: dict[tuple[str, int], dict]) -> None:
+    DATOS.mkdir(parents=True, exist_ok=True)
+    filas = [{"canal": c, "nreg": n, **v} for (c, n), v in sorted(sin.items())]
+    tmp = SIN_REGISTRO.with_suffix(".tmp")
+    pd.DataFrame(filas, columns=["canal", "nreg", "consultado", "intentos"]).to_csv(tmp, index=False)
+    os.replace(tmp, SIN_REGISTRO)
+
+
+def huecos(h: pd.DataFrame, nuevas: list[dict], hoy: datetime, saltar: set) -> dict[str, list[int]]:
+    """Números de registro que faltan en cada canal, de los más recientes a los más antiguos: entre el primero de los
+    comunicados de los últimos DIAS_HUECOS días y el último conocido (histórico más lo que acaba de traer el RSS)."""
+    desde = (hoy - timedelta(days=DIAS_HUECOS)).strftime("%Y-%m-%d")
+    out = {}
+    for canal in CANALES:
+        conocidos = {int(n) for n in h.loc[h["canal"] == canal, "nreg"]} | {int(f["nreg"]) for f in nuevas if f["canal"] == canal}
+        recientes = [int(n) for n, f in zip(h.loc[h["canal"] == canal, "nreg"], h.loc[h["canal"] == canal, "fecha"]) if str(f)[:10] >= desde]
+        recientes += [int(f["nreg"]) for f in nuevas if f["canal"] == canal and str(f["fecha"])[:10] >= desde]
+        if not recientes:
+            out[canal] = []
+            continue
+        out[canal] = [n for n in range(max(conocidos), min(recientes) - 1, -1) if n not in conocidos and (canal, n) not in saltar]
+    return out
+
+
+def _bajar_ficha(sesion: requests.Session, canal: str, nreg: int) -> str:
+    r = sesion.get(FICHA_CNMV[canal].format(nreg), headers={**CABECERAS, "Accept": "text/html,application/xhtml+xml"}, timeout=(10, 30))
+    if r.status_code != 200:
+        raise requests.RequestException(f"HTTP {r.status_code}")
+    r.encoding = "utf-8"
+    return r.text
+
+
+def rellenar(h: pd.DataFrame, nuevas: list[dict], hoy: datetime, bajar=None, limite: int = MAX_RELLENO,
+             pausa: float = PAUSA_RELLENO) -> tuple[list[dict], dict[str, int], str | None]:
+    """Pide a la CNMV la ficha de cada número que falta (los más recientes primero, hasta `limite`). Devuelve las filas
+    recuperadas, los huecos que quedan por canal y, si la CNMV ha cambiado la forma de sus fichas, el motivo (el colector
+    publica igual y después sale con error para que se abra la incidencia). Un fallo de red no para nada: el número se
+    vuelve a pedir en la pasada siguiente."""
+    sin = leer_sin_registro()
+    hoy_txt = hoy.strftime("%Y-%m-%d")
+    saltar = {k for k, v in sin.items() if v["intentos"] >= 2 or v["consultado"] == hoy_txt}
+    pend = huecos(h, nuevas, hoy, saltar)
+    cola = [(c, n) for c in CANALES for n in pend[c]][:limite]
+    if bajar is None:
+        sesion = requests.Session()
+        bajar = lambda c, n: _bajar_ficha(sesion, c, n)  # noqa: E731
+    filas, raras, seguidos, problema, pedidos = [], [], 0, None, 0
+    for i, (canal, n) in enumerate(cola):
+        if i and pausa:
+            time.sleep(pausa)
+        pedidos += 1
+        try:
+            pagina = bajar(canal, n)
+        except Exception as e:  # red, tiempo agotado, HTTP 5xx: se reintenta en la pasada siguiente
+            seguidos += 1
+            print(f"::warning::Ficha {canal} {n} de la CNMV no disponible ({type(e).__name__}: {e})")
+            if seguidos >= 5:
+                print("::warning::Cinco fichas seguidas sin respuesta de la CNMV: el relleno sigue en la pasada siguiente")
+                break
+            continue
+        seguidos = 0
+        try:
+            fila = leer_ficha(pagina, canal, n)
+        except DatosRaros as e:
+            raras.append(str(e))
+            continue
+        if fila:
+            filas.append(fila)
+        elif pagina_sin_registro(pagina):
+            previo = sin.get((canal, n), {"intentos": 0})
+            sin[(canal, n)] = {"consultado": hoy_txt, "intentos": previo["intentos"] + 1}
+        else:
+            raras.append(f"Ficha {canal} {n}: página de la CNMV con una forma que el colector no reconoce")
+    if cola:
+        guardar_sin_registro(sin)
+    leidas = len(filas) + len(raras)
+    if raras and len(raras) >= max(3, leidas // 2):
+        problema = f"{len(raras)} de {leidas} fichas de la CNMV no se pueden leer (¿ha cambiado la página?): {raras[0]}"
+    for r in raras[:5]:
+        print(f"::warning::{r}")
+    quedan = {c: len(pend[c]) for c in CANALES}
+    for f in filas:
+        quedan[f["canal"]] -= 1
+    if cola:
+        print(f"Relleno por número de registro: {len(filas)} comunicados recuperados de {pedidos} números pedidos; "
+              f"quedan {quedan['IP']} en IP y {quedan['OIR']} en OIR.")
+    return filas, quedan, problema
+
+
+def leer_historico() -> pd.DataFrame:
+    return pd.read_csv(HISTORICO, dtype=str, keep_default_na=False) if HISTORICO.exists() else pd.DataFrame(columns=COLUMNAS)
+
+
 def acumular(nuevas: list[dict]) -> tuple[pd.DataFrame, int]:
-    previo = pd.read_csv(HISTORICO, dtype=str, keep_default_na=False) if HISTORICO.exists() else pd.DataFrame(columns=COLUMNAS)
+    previo = leer_historico()
     n = pd.DataFrame(nuevas, columns=COLUMNAS).astype(str)
     d = pd.concat([previo, n], ignore_index=True).drop_duplicates(["canal", "nreg"], keep="first")
     d = d.sort_values(["fecha", "canal", "nreg"], ascending=False).reset_index(drop=True)
@@ -511,7 +663,7 @@ a{{color:#1f4e8c}} .pie{{color:#5b6675;font-size:.85rem;margin-top:2em}}
 """
 
 
-def escribir(h: pd.DataFrame, c: pd.DataFrame, e: pd.DataFrame, nuevos: int, forzar: bool) -> bool:
+def escribir(h: pd.DataFrame, c: pd.DataFrame, e: pd.DataFrame, nuevos: int, forzar: bool, extra: dict | None = None) -> bool:
     """Reescribe si hay comunicados nuevos o si ha cambiado el día (los recuadros dependen de la fecha)."""
     ahora = ahora_madrid()
     hoy = pd.Timestamp(ahora.date())
@@ -537,7 +689,8 @@ def escribir(h: pd.DataFrame, c: pd.DataFrame, e: pd.DataFrame, nuevos: int, for
         "actualizado": sello, "generado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "comunicados_leidos": int(len(h)), "comunicados_ibex35_clasificados": int(len(c)),
         "por_recuadro": {k: len(entradas(c, k, hoy)) for k, _, _ in CAJAS},
-        "fuente": "CNMV, RSS de información privilegiada y otra información relevante", "licencia": "Comunicados de la CNMV reproducidos fielmente (gratuitos en cnmv.es); clasificación y resumen de El Especulador con licencia CC BY 4.0",
+        "fuente": "CNMV, RSS de información privilegiada y otra información relevante, y ficha pública de cada comunicado por número de registro", "licencia": "Comunicados de la CNMV reproducidos fielmente (gratuitos en cnmv.es); clasificación y resumen de El Especulador con licencia CC BY 4.0",
+        **(extra or {}),
     }, ensure_ascii=False, indent=1), encoding="utf-8")
     return True
 
@@ -546,6 +699,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--local", nargs="+", help="ficheros RSS ya descargados (el nombre debe contener IP u OIR)")
     ap.add_argument("--forzar", action="store_true", help="reescribir aunque no haya comunicados nuevos")
+    ap.add_argument("--sin-relleno", action="store_true", help="no pedir a la CNMV los números de registro que faltan")
+    ap.add_argument("--relleno-max", type=int, default=MAX_RELLENO, help="fichas como máximo por pasada")
     args = ap.parse_args()
     if args.local:
         filas = []
@@ -554,13 +709,20 @@ def main() -> int:
             filas += leer_canal(Path(f).read_text(encoding="utf-8"), canal)
     else:
         filas = descargar()
+    extra, problema = None, None
+    if not args.local and not args.sin_relleno:
+        recuperadas, quedan, problema = rellenar(leer_historico(), filas, ahora_madrid(), limite=args.relleno_max)
+        filas += recuperadas
+        extra = {"huecos_pendientes": quedan}
     h, nuevos = acumular(filas)
     e = empresas_ibex(pd.Timestamp(ahora_madrid().date()))
     c = clasificados(h, e)
-    if escribir(h, c, e, nuevos, args.forzar):
+    if escribir(h, c, e, nuevos, args.forzar, extra):
         print(f"{nuevos} comunicados nuevos; {len(c)} del IBEX 35 clasificados en el histórico.")
     else:
         print(f"Sin comunicados nuevos en la CNMV ({len(h)} en el histórico): no se toca nada.")
+    if problema:  # lo leído se publica igual; el error abre la incidencia cnmv-fallido
+        raise DatosRaros(problema)
     return 0
 
 
