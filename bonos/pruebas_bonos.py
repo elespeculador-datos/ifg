@@ -59,6 +59,17 @@ if __name__ == "__main__":
     r = bonos.leer_resultados("bonos", (Path(__file__).resolve().parent / "prueba_ultimas_nota.html").read_text(encoding="utf-8"))
     ok([x["segunda_vuelta"] for x in r] == [None, 0.0, 309.13], "tabla del Tesoro con «[1]» en la 2.ª vuelta: pendiente -> None, las demás cifras intactas")
     ok(r[0]["adjudicado"] == 1589.84 and r[0]["marginal"] == 3.85 and r[2]["plazo"] == 9 and r[2]["medio"] == 4.286, "el resto de la tabla se lee igual que antes")
+    # Páginas reales del Tesoro del 21/11/2026 (pruebas_tesoro/): el colector de main fallaba con «número con formato
+    # inesperado: '[1]'» en obligaciones y bonos; con el arreglo, las tres tablas de resultados y la de valores en emisión se leen.
+    reales = Path(__file__).resolve().parent / "pruebas_tesoro"
+    lect = {g: bonos.leer_resultados(g, (reales / f"{g}-2026-11-21.html").read_text(encoding="utf-8")) for g in ("obligaciones", "bonos", "indexados")}
+    ob, bo, ix = lect["obligaciones"], lect["bonos"], lect["indexados"]
+    ok([x["columna"] for x in ob] == [10, 15, 30, 50] and [x["segunda_vuelta"] for x in ob] == [None, 0.0, 322.68, 232.97], "real 21/11, obligaciones: cuatro plazos y la 2.ª vuelta del 19/11 pendiente (None)")
+    ok(ob[0]["denominacion"] == "O 3,20% (VR 8a 11m)" and ob[0]["plazo"] == 8 and ob[0]["fecha"] == "2026-11-19" and ob[0]["marginal"] == 3.85 and ob[0]["cobertura"] == 1.84, "real 21/11, obligaciones: la subasta del 19/11 completa")
+    ok([x["segunda_vuelta"] for x in bo] == [0.0, None, None] and bo[2]["denominacion"] == "O 3,75% (7A)" and bo[1]["medio"] == 3.475, "real 21/11, bonos: dos 2.ª vueltas pendientes y una obligación en la página de bonos")
+    ok([x["plazo"] for x in ix] == [7, 10, 15] and ix[0]["indexado"] and ix[2]["segunda_vuelta"] == 133.24, "real 21/11, indexados: €i, vida residual y 2.ª vuelta ya anunciada")
+    em = bonos.leer_en_emision((reales / "en-emision-2026-11-21.html").read_text(encoding="utf-8"))
+    ok(len(em) == 10 and em[0] == {"valor": "Bono a 3 años", "cupon": 2.35, "vencimiento": "2029-03-31"} and em[-1]["vencimiento"] == "2071-10-31", "real 21/11, valores en emisión: diez valores, cupón y vencimiento")
     if FALLOS:
         print(f"{len(FALLOS)} de {N} comprobaciones fallan.")
         sys.exit(1)
