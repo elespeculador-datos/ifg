@@ -105,9 +105,14 @@ def _limpiar(x: str) -> str:
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", x))).strip()
 
 
+NOTA = re.compile(r"\[\d+\]")  # llamada a nota a pie de tabla, como «[1]» en la 2.ª vuelta pendiente de anunciar
+
+
 def _dec(x: str) -> float | None:
-    """Número con formato español de la web del Tesoro: 1.886,84 -> 1886.84."""
-    x = (x or "").strip()
+    """Número con formato español de la web del Tesoro: 1.886,84 -> 1886.84. Las llamadas a nota («[1]») se quitan: desde el
+    19/11/2026 el Tesoro pone «[1]» solo, en vez de la cifra, cuando los resultados de la 2.ª vuelta aún no se han anunciado
+    (la nota dice cuándo); una celda que solo tiene la nota vale None, como un guion."""
+    x = NOTA.sub("", x or "").strip()
     if not x or x in ("-", "—"):
         return None
     if not re.fullmatch(r"-?[\d.]+(,\d+)?", x):
@@ -233,7 +238,7 @@ def _cupon(v) -> tuple[float | None, bool]:
         return None, False
     if isinstance(v, (int, float)):
         return float(v), False
-    m = re.match(r"^\s*(-?[\d]+(?:[.,]\d+)?)\s*(v)?\s*$", str(v))
+    m = re.match(r"^\s*(-?[\d]+(?:[.,]\d+)?)\s*(v)?\s*$", NOTA.sub("", str(v)))
     if not m:
         raise DatosRaros(f"cupón con formato inesperado: {v!r}")
     return float(m.group(1).replace(",", ".")), bool(m.group(2))

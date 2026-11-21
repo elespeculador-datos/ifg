@@ -95,9 +95,14 @@ def _limpiar(x: str) -> str:
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", x))).strip()
 
 
+NOTA = re.compile(r"\[\d+\]")  # llamada a nota a pie de tabla, como «[1]» en la 2.ª vuelta pendiente de anunciar
+
+
 def _dec(x: str) -> float | None:
-    """Número con formato español de la web del Tesoro: 1.886,84 -> 1886.84."""
-    x = (x or "").strip()
+    """Número con formato español de la web del Tesoro: 1.886,84 -> 1886.84. Las llamadas a nota («[1]») se quitan: desde el
+    19/11/2026 el Tesoro pone «[1]» solo, en vez de la cifra, cuando los resultados de la 2.ª vuelta aún no se han anunciado
+    (la nota dice cuándo); una celda que solo tiene la nota vale None, como un guion."""
+    x = NOTA.sub("", x or "").strip()
     if not x or x in ("-", "—"):
         return None
     if not re.fullmatch(r"-?[\d.]+(,\d+)?", x):
@@ -149,7 +154,11 @@ def _get(s: requests.Session, url: str) -> requests.Response:
 # --------------------------------------------------------------------------- lectura
 def ultimas(s: requests.Session) -> list[dict]:
     """La tabla de la última subasta de cada plazo."""
-    t = _get(s, URL_ULTIMAS).text
+    return leer_ultimas(_get(s, URL_ULTIMAS).text)
+
+
+def leer_ultimas(t: str) -> list[dict]:
+    """La tabla de la última subasta de cada plazo, a partir del HTML de la página (sin red; para las pruebas)."""
     tabla = next((x for x in re.findall(r"<table.*?</table>", t, re.S) if "Tipo de inter" in x and "MESES" in x.upper()), None)
     if not tabla:
         raise DatosRaros("la página de últimas subastas no trae la tabla de Letras")
