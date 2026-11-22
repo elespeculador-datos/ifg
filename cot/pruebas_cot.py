@@ -122,6 +122,7 @@ def prueba_escribir(df, res):
     ok("<strong>Euro (EUR/USD)</strong></td><td>299.500</td><td>+500</td><td>+2.000</td><td>+37,4 %</td><td>100</td><td>100</td><td>largo extremo</td><td>−200</td>" in frag, "fragmento: fila del euro")
     ok(frag.count("<svg") == 4 and "miles de contratos netos" in frag, "fragmento: cuatro gráficos")
     ok("no es una señal de compra ni de venta" in frag and "no es asesoramiento" in frag and '<script type="application/ld+json">' in frag, "fragmento: avisos y JSON-LD")
+    ok("combustible" not in frag and "históricamente" not in frag.lower(), "fragmento: sin relacionar los extremos con lo que hará el precio")
     j = json.loads((salida / "datos" / "ultima.json").read_text(encoding="utf-8"))
     ok(j["version"] == cot.VERSION and j["huella"] == res["huella"] and len(j["mercados"]) == len(cot.MERCADOS), "JSON")
     serie = pd.read_csv(salida / "datos" / "serie.csv")

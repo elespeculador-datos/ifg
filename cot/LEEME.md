@@ -4,7 +4,7 @@ Los sábados y los lunes a las 07:00 (hora de Madrid), el servidor smpro-datos-1
 
 - `fragmento-wp.html`: lectura de la semana (mercados más largos y más cortos en términos de tres años, extremos), tabla mercado por mercado (neto de los especuladores, variación semanal y a cuatro semanas, neto sobre interés abierto, índice COT de tres años, percentil de tres años, lectura, neto de los comerciales), cuatro gráficos SVG de tres años (euro, oro, WTI, S&P 500) y método, entre `<!-- cot:inicio HUELLA -->` y `<!-- cot:fin -->`;
 - `index.html`: página propia de la salida;
-- `datos/ultima.json` (versión 1.0.0) y `datos/serie.csv` (netos semanales de todos los mercados desde 2015).
+- `datos/ultima.json` (versión 1.0.1) y `datos/serie.csv` (netos semanales de todos los mercados desde 2015).
 
 Pregunta del lector (trader de tntbolsa; contenido premium según la decisión de Federico del 18/11/2026): ¿cómo están colocados los grandes especuladores en los futuros que mueven a los mercados y dónde hay un extremo?
 
