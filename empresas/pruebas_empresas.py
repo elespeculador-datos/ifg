@@ -96,7 +96,13 @@ def fuentes(raiz: Path, cortos=True, directivos=True, accionistas=True, cnmv=Tru
             f"OIR,43244,2026-10-21T08:29:27,IBERDROLA S.A.,Sobre instrumentos financieros,Iberdrola Retribución Flexible,https://cnmv/oir/43244,{IBE},Iberdrola,iberdrola,dividendos,Dividendo flexible,,g9",
         ]
         escribe(raiz, "cnmv/datos/ibex35.csv", cab + "\n".join(filas) + "\n")
-        escribe(raiz, "cnmv/datos/ultima.json", json.dumps({"actualizado": "2026-11-18T19:07"}))
+        escribe(raiz, "cnmv/datos/ultima.json", json.dumps({"actualizado": "2026-11-18T19:07", "historico": {
+            "IP": {"desde": "2025-10-10", "completo": True}, "OIR": {"desde": "2025-10-08", "completo": True}}}))
+        escribe(raiz, "cnmv/datos/dividendos.csv",
+                "canal,nreg,fecha_comunicado,isin,empresa,tipo,importe_bruto,moneda,fecha_ex,fecha_registro,fecha_pago,extraccion,intentos,enlace\n"
+                f"OIR,43650,2026-11-12,{REP},Repsol,Dividendo,0.5,EUR,2026-12-15,2026-12-16,2026-12-17,completa,1,https://cnmv/oir/43650\n"
+                f"OIR,43600,2026-11-02,{SAN},Santander,Dividendo,,,,,2026-11-04,parcial,1,https://cnmv/oir/43600\n"
+                f"OIR,43244,2026-10-21,{IBE},Iberdrola,Dividendo flexible,,,,,,flexible: ver comunicado,1,https://cnmv/oir/43244\n")
 
 
 def todas_las_claves(x):
@@ -168,8 +174,23 @@ with tempfile.TemporaryDirectory() as d:
        "Registro oficial: campos del contrato y tipo con periodo")
     dv = f["dividendos"]
     ok(len(dv) == 1 and dv[0]["nreg"] == "43650" and dv[0]["fecha_comunicado"] == "2026-11-12" and dv[0]["fuente"] == "CNMV"
-       and dv[0]["importe"] is None and dv[0]["enlace"] == "https://cnmv/oir/43650", "Dividendos: anuncios de la CNMV de doce meses; importe vacío hasta leerlo del comunicado")
+       and dv[0]["importe"] == 0.5 and dv[0]["moneda"] == "EUR" and dv[0]["fecha_ex"] == "2026-12-15" and dv[0]["fecha_pago"] == "2026-12-17"
+       and dv[0]["lectura"] == "leído del comunicado" and dv[0]["enlace"] == "https://cnmv/oir/43650",
+       "Dividendos: anuncio de la CNMV con importe, moneda y fechas leídos del propio comunicado")
+    ds = por[SAN]["dividendos"][0]
+    ok(ds["importe"] is None and ds["moneda"] is None and ds["fecha_pago"] == "2026-11-04" and ds["lectura"].startswith("parcial"),
+       "Dividendos: lectura parcial, solo lo que se leyó con seguridad")
+    di = por[IBE]["dividendos"][0]
+    ok(di["importe"] is None and "flexible" in di["lectura"], "Dividendos: flexible sin importe y con su explicación")
     ok(por[IBE]["dividendos"][0]["tipo"] == "Dividendo flexible" and por[SAN]["dividendos"][0]["nreg"] == "43600", "Dividendos: flexible y de otra empresa")
+    fr = f["fuentes"]["registro_oficial"]
+    ok(fr["desde"] == "2025-11-19" and fr["alcance"].startswith("Comunicados a la CNMV") and fr["estado"] == "ok",
+       "Registro oficial: con el histórico completo, desde hace doce meses, y con su alcance")
+    ok(f["directivos"]["fecha_dato"] == "2026-11-18" and f["accionistas"]["fecha_dato"] == "2026-11-18" and f["recompra"]["fecha_dato"] == "2026-11-18"
+       and f["cortos"]["fecha_dato"] == "2026-11-18", "Cada bloque con la fecha de su dato")
+    ok(all(b is None or "fuente" in b for b in (f["cortos"], f["directivos"], f["accionistas"], f["recompra"]))
+       and all("fuente" in x and "fecha" in x for x in f["registro_oficial"]) and all("fuente" in x and "fecha_comunicado" in x for x in f["dividendos"]),
+       "Cada dato con su fuente y su fecha")
     ok(f["recompra"]["en_curso"] is True and f["recompra"]["ultimo_comunicado"]["nreg"] == "43719", "Recompra: el último comunicado de recompra, reciente -> en curso")
     ok(por[SAN]["recompra"]["en_curso"] is False and por[SAN]["recompra"]["ultimo_comunicado"]["nreg"] == "41000", "Recompra: comunicado de hace más de 45 días -> no en curso")
     ok(f["cuatro_fuerzas"] == [] and f["perfil"] is None and f["fuentes"]["cuatro_fuerzas"]["estado"] == "pendiente"
@@ -181,7 +202,12 @@ with tempfile.TemporaryDirectory() as d:
     ok(("2026-11-18", "corto_nueva") in tipos and ("2026-11-04", "corto_sale") in tipos, "Eventos: cambios de cortos")
     ok(("2026-11-18", "comunicado_recompras") in tipos and ("2026-10-30", "comunicado_resultados") in tipos and ("2026-11-12", "comunicado_dividendos") in tipos
        and ("2026-11-07", "comunicado_opas") in tipos, "Eventos: comunicados con su tipo (también OPA)")
-    ok(not any(t.startswith("dividendo_") for _, t in tipos), "Eventos: ninguno de BME")
+    ok(("2026-12-15", "dividendo_ex") in tipos and ("2026-12-17", "dividendo_pago") in tipos, "Eventos: fecha ex y pago del dividendo leído de la CNMV")
+    evd = [e for e in f["eventos"] if e["tipo"] == "dividendo_ex"][0]
+    ok(evd["detalle"] == "Dividendo de 0,5 € brutos por acción; pago el 17/12/2026." and evd["url"] == "https://cnmv/oir/43650" and evd["fuente"] == "CNMV",
+       f"Eventos: detalle del dividendo con importe y la otra fecha ({evd['detalle']})")
+    ok([e["tipo"] for e in por[SAN]["eventos"]].count("dividendo_pago") == 1 and not any(e["tipo"] == "dividendo_ex" for e in por[SAN]["eventos"]),
+       "Eventos: dividendo parcial, solo la fecha que se leyó")
     ok(tipos == sorted(tipos, reverse=True), "Eventos: del más reciente al más antiguo")
     ev = [e for e in f["eventos"] if e["tipo"] == "insider_compra"][0]
     ok("un consejero" in ev["detalle"] and "30.100 €" in ev["detalle"] and ev["url"] == "https://cnmv/doc1" and ev["ficha"].endswith("/ibex35/repsol/"),
@@ -230,6 +256,15 @@ with tempfile.TemporaryDirectory() as d:
     f5 = {x["isin"]: x for x in empresas.generar(raiz, date(2026, 11, 22))}[REP]
     ok(f5["cortos"] is None and f5["fuentes"]["cortos"]["estado"] == "vacio", "Sin ficha anterior, el bloque va vacío y la web lo oculta")
 
+# Registro oficial con el histórico aún incompleto: desde la fecha más reciente de los dos canales
+with tempfile.TemporaryDirectory() as d:
+    raiz = Path(d)
+    fuentes(raiz)
+    escribe(raiz, "cnmv/datos/ultima.json", json.dumps({"actualizado": "2026-11-18T19:07", "historico": {
+        "IP": {"desde": "2026-03-02", "completo": False}, "OIR": {"desde": "2026-05-11", "completo": False}}}))
+    f = {x["isin"]: x for x in empresas.generar(raiz, HOY)}[REP]
+    ok(f["fuentes"]["registro_oficial"]["desde"] == "2026-05-11", "Registro oficial incompleto: «desde» es la fecha más reciente de los dos canales")
+
 # Fuentes ausentes
 with tempfile.TemporaryDirectory() as d:
     raiz = Path(d)
@@ -239,7 +274,7 @@ with tempfile.TemporaryDirectory() as d:
     f = {x["isin"]: x for x in fichas}[REP]
     ok(f["directivos"] is None and f["accionistas"] is None and f["cortos"] is not None, "Fuentes ausentes: secciones en null, las presentes se rellenan")
     ok(f["fuentes"]["directivos"]["estado"] == "vacio" and len([a for a in empresas.AVISOS if "ausente" in a]) == 2, "Fuentes ausentes: estado y un aviso por fuente")
-    ok(all(e["tipo"].startswith(("corto_", "comunicado_")) for e in f["eventos"]), "Fuentes ausentes: solo eventos de las fuentes presentes")
+    ok(all(e["tipo"].startswith(("corto_", "comunicado_", "dividendo_")) for e in f["eventos"]), "Fuentes ausentes: solo eventos de las fuentes presentes")
 
 with tempfile.TemporaryDirectory() as d:
     try:

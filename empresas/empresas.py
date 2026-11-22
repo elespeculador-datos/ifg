@@ -18,7 +18,7 @@ carpeta madre de `--salida`; en el servidor, $ESPEC_DATOS_DIR), más dos tablas 
   cortos/datos/vigentes.csv, historial_cambios.csv, ultima.json      posiciones cortas (CNMV)
   directivos/datos/operaciones.csv, ultima.json                        compras y ventas de directivos (CNMV)
   accionistas/datos/ultima.json                                        participaciones significativas (CNMV)
-  cnmv/datos/ibex35.csv, ultima.json                                   comunicados del IBEX 35 (CNMV)
+  cnmv/datos/ibex35.csv, dividendos.csv, ultima.json                   comunicados del IBEX 35 y sus dividendos (CNMV)
   empresas/cuatro_fuerzas.csv, empresas/perfil.csv                     tablas de Datos con la fuente de cada cifra
 
 Nada de BME: ni dividendos, ni rentabilidades, ni precios (21/11/2026).
@@ -47,7 +47,7 @@ import unicodedata
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 CONTRATO = "1.0"          # cambia solo si cambian los campos que lee la ficha de la web
 PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/empresas/"
 WEB = "https://elespeculador.com"
@@ -58,6 +58,11 @@ CUATRO_FUERZAS = AQUI / "cuatro_fuerzas.csv"
 PERFIL = AQUI / "perfil.csv"
 DIAS_EVENTOS = 30
 DIAS_REGISTRO = 365
+ALCANCE_REGISTRO = ("Comunicados a la CNMV de resultados, dividendos, recompras, ampliaciones y OPV, y OPA "
+                    "(información privilegiada y otra información relevante), de los últimos doce meses")
+LECTURA = {"completa": "leído del comunicado", "parcial": "parcial: el resto, en el comunicado",
+           "flexible: ver comunicado": "dividendo flexible: el importe depende de la opción del accionista; ver el comunicado",
+           "sin documento": "sin leer: ver el comunicado", "sin datos": "sin leer: ver el comunicado"}
 SEMANAS_INSIDERS = 13
 MAX_ACCIONISTAS = 8
 FUENTE = {"registro_oficial": "CNMV, comunicados de información privilegiada y otra información relevante",
@@ -67,7 +72,7 @@ FUENTE = {"registro_oficial": "CNMV, comunicados de información privilegiada y 
 # Qué bloques de la ficha salen de cada colector (para conservar el último dato bueno si ese colector falla)
 BLOQUES = {"cnmv": ("registro_oficial", "dividendos", "recompra"), "cortos": ("cortos",), "directivos": ("directivos",),
            "accionistas": ("accionistas",)}
-EVENTOS_DE = {"cnmv": "comunicado_", "cortos": "corto_", "directivos": "insider_", "accionistas": "-"}
+EVENTOS_DE = {"cnmv": ("comunicado_", "dividendo_"), "cortos": ("corto_",), "directivos": ("insider_",), "accionistas": ("-",)}
 # Tenedores de cortos que son entidades aunque su nombre no lleve forma societaria
 TENEDORES_ENTIDAD = ("CAISSE DE DEPOT ET PLACEMENT DU QUEBEC",)
 SIN_NOMBRE = "Tenedor no identificado como persona jurídica (nombre no publicado)"
@@ -265,8 +270,18 @@ def leer_cnmv(raiz: Path, hoy: date) -> tuple[dict, dict]:
     carpeta = raiz / "cnmv" / "datos"
     if not (carpeta / "ibex35.csv").exists():
         return {}, {"estado": "ausente", "fecha": None}
-    fecha = _json(carpeta / "ultima.json").get("actualizado") if (carpeta / "ultima.json").exists() else None
+    ultima = _json(carpeta / "ultima.json") if (carpeta / "ultima.json").exists() else {}
+    fecha = ultima.get("actualizado")
     desde = (hoy - timedelta(days=DIAS_REGISTRO)).isoformat()
+    # El registro es completo desde la fecha más reciente de las dos «desde» del histórico (IP y OIR); con el
+    # relleno hacia atrás terminado, desde hace doce meses.
+    hist = ultima.get("historico") or {}
+    desde_hist = max((v.get("desde") or "" for v in hist.values()), default="") if hist else ""
+    if hist and all(v.get("completo") for v in hist.values()):
+        desde_hist = desde
+    leidos = {}
+    if (carpeta / "dividendos.csv").exists():
+        leidos = {(r["canal"], r["nreg"]): r for r in _csv(carpeta / "dividendos.csv")}
     por_isin: dict[str, dict] = {}
     for r in _csv(carpeta / "ibex35.csv"):
         if not r.get("isin"):
@@ -281,15 +296,19 @@ def leer_cnmv(raiz: Path, hoy: date) -> tuple[dict, dict]:
             continue
         e["registro"].append(c)
         if c["caja"] == "dividendos":
-            # Importe y fechas solo cuando se lean con seguridad del propio comunicado (cnmv/dividendos_cnmv.py, pendiente);
-            # mientras, el anuncio con su enlace. Nunca rentabilidad.
+            # Importe, moneda y fechas solo si cnmv/dividendos_cnmv.py los ha leído con seguridad del propio comunicado;
+            # si no, el anuncio con su enlace. Nunca rentabilidad.
+            d = leidos.get((c["canal"], c["nreg"]), {})
             e["dividendos"].append({"fecha_comunicado": c["fecha"], "tipo": r.get("etiqueta", ""), "titulo": c["titulo"],
-                                    "importe": None, "moneda": None, "fecha_ex": None, "fecha_pago": None,
-                                    "lectura": "sin leer: ver el comunicado", "fuente": "CNMV", "enlace": c["enlace"], "nreg": c["nreg"]})
+                                    "importe": _num(d.get("importe_bruto")), "moneda": d.get("moneda") or None,
+                                    "fecha_ex": d.get("fecha_ex") or None, "fecha_registro": d.get("fecha_registro") or None,
+                                    "fecha_pago": d.get("fecha_pago") or None,
+                                    "lectura": LECTURA.get(d.get("extraccion", ""), "sin leer: ver el comunicado"),
+                                    "fuente": "CNMV", "enlace": c["enlace"], "nreg": c["nreg"]})
     for e in por_isin.values():
         e["registro"].sort(key=lambda c: (c["fecha"], c["canal"], int(c["nreg"] or 0)), reverse=True)
         e["dividendos"].sort(key=lambda d: (d["fecha_comunicado"], int(d["nreg"] or 0)), reverse=True)
-    return por_isin, {"estado": "ok", "fecha": fecha}
+    return por_isin, {"estado": "ok", "fecha": fecha, "desde": desde_hist or None}
 
 
 def leer_tabla(ruta: Path, columnas: tuple[str, ...]) -> tuple[dict[str, list[dict]], dict]:
@@ -308,7 +327,7 @@ def leer_tabla(ruta: Path, columnas: tuple[str, ...]) -> tuple[dict[str, list[di
     return por_isin, {"estado": "ok" if por_isin else "pendiente", "fecha": max(fechas) if fechas else None}
 
 
-COLUMNAS_FUERZAS = ("isin", "fuerza", "indicador", "cifra", "unidad", "texto", "ejercicio", "documento", "pagina", "enlace",
+COLUMNAS_FUERZAS = ("isin", "fuerza", "indicador", "cifra", "unidad", "texto", "ejercicio", "fuente", "pagina", "enlace",
                     "fecha", "verificado_por", "verificado_el")
 COLUMNAS_PERFIL = ("isin", "sede", "cierre_ejercicio", "web_ri", "fuente", "fecha")
 
@@ -318,6 +337,7 @@ TIPOS_EVENTO = {
     "corto_nueva": "Nueva posición corta publicada", "corto_sube": "Sube una posición corta", "corto_baja": "Baja una posición corta",
     "corto_sale": "Una posición corta deja de publicarse", "insider_compra": "Compra de un directivo o consejero",
     "insider_venta": "Venta de un directivo o consejero",
+    "dividendo_ex": "Fecha ex-dividendo", "dividendo_pago": "Pago de dividendo",
     "comunicado_recompras": "Comunicado de recompra", "comunicado_resultados": "Resultados", "comunicado_dividendos": "Comunicado de dividendo",
     "comunicado_opvs-ampliaciones": "Comunicado de OPV o ampliación", "comunicado_opas": "Comunicado sobre una OPA",
     "comunicado_otro": "Comunicado a la CNMV",
@@ -356,6 +376,16 @@ def eventos_de(isin: str, empresa: str, ficha: str, c: dict | None, d: dict | No
     for x in (cn or {}).get("registro", []):
         tipo = f"comunicado_{x['caja']}" if f"comunicado_{x['caja']}" in TIPOS_EVENTO else "comunicado_otro"
         add(x["fecha"], tipo, f"{TIPOS_EVENTO[tipo]}: {empresa}", x["titulo"], x["enlace"], "CNMV")
+    vistos = set()   # un mismo dividendo puede anunciarse dos veces (anuncio y recordatorio): un evento
+    for x in sorted((cn or {}).get("dividendos", []), key=lambda d: (d["fecha_comunicado"], d["nreg"])):
+        importe = (f"{x['importe']:.6g}".replace(".", ",") + f" {'€' if x['moneda'] == 'EUR' else x['moneda']} brutos por acción") if x.get("importe") and x.get("moneda") else "importe en el comunicado"
+        for campo, tipo in (("fecha_ex", "dividendo_ex"), ("fecha_pago", "dividendo_pago")):
+            if not x.get(campo) or (tipo, x[campo], x.get("importe")) in vistos:
+                continue
+            vistos.add((tipo, x[campo], x.get("importe")))
+            otra = x.get("fecha_pago") if tipo == "dividendo_ex" else x.get("fecha_ex")
+            detalle = f"Dividendo de {importe}" + (f"; {'pago' if tipo == 'dividendo_ex' else 'ex-dividendo'} el {_fecha_es(otra)}" if otra else "") + "."
+            add(x[campo], tipo, f"{TIPOS_EVENTO[tipo]}: {empresa}", detalle, x["enlace"], "CNMV")
     ev.sort(key=lambda e: (e["fecha"], e["tipo"], e["titulo"]), reverse=True)
     return ev
 
@@ -384,21 +414,22 @@ def ficha(emp: dict, fuentes: dict, estados: dict, hoy: date, previa: dict | Non
         "directivos": None if estados["directivos"]["estado"] == "ausente" else {
             "semanas": SEMANAS_INSIDERS, **{k: (d or {}).get(k, 0 if k.endswith(("_n", "_eur")) else None)
                                            for k in ("compras_n", "ventas_n", "compras_eur", "ventas_eur", "neto_eur", "ultima_operacion")},
-            "operaciones_30d": len((d or {}).get("recientes", [])), "fuente": FUENTE["directivos"]},
+            "operaciones_30d": len((d or {}).get("recientes", [])), "fecha_dato": estados["directivos"]["fecha"], "fuente": FUENTE["directivos"]},
         "accionistas": None if a is None else {
-            "fecha": a["fecha"], "derechos_voto": a["derechos_voto"], "n": a["n"], "principales": a["principales"],
+            "fecha_derechos_voto": a["fecha"], "derechos_voto": a["derechos_voto"], "n": a["n"], "principales": a["principales"],
+            "fecha_dato": estados["accionistas"]["fecha"],
             "nota": f"Solo personas jurídicas; {a['fisicas_excluidas']} participaciones de personas físicas no se publican." if a["fisicas_excluidas"] else "Solo personas jurídicas.",
             "fuente": FUENTE["accionistas"]},
         "recompra": None if estados["cnmv"]["estado"] == "ausente" else {
             "ultimo_comunicado": (cn or {}).get("recompra"),
             "en_curso": bool((cn or {}).get("recompra") and (cn or {})["recompra"]["fecha"] >= (hoy - timedelta(days=45)).isoformat()),
-            "fuente": FUENTE["recompra"]},
+            "fecha_dato": _dia(estados["cnmv"]["fecha"]) or None, "fuente": FUENTE["recompra"]},
         "cuatro_fuerzas": fz,
         "perfil": pf,
         "eventos": eventos_de(isin, empresa, slug, c, d, cn, hoy),
     }
     por_bloque = {
-        "registro_oficial": dict(estados["cnmv"]), "dividendos": dict(estados["cnmv"]), "recompra": dict(estados["cnmv"]),
+        "registro_oficial": {**estados["cnmv"], "alcance": ALCANCE_REGISTRO}, "dividendos": dict(estados["cnmv"]), "recompra": dict(estados["cnmv"]),
         "cortos": dict(estados["cortos"]), "directivos": dict(estados["directivos"]),
         "accionistas": dict(estados["accionistas"]) if a is not None or estados["accionistas"]["estado"] == "ausente"
         else {"estado": "vacio", "fecha": estados["accionistas"]["fecha"]},
@@ -414,7 +445,7 @@ def ficha(emp: dict, fuentes: dict, estados: dict, hoy: date, previa: dict | Non
             continue
         for b in bloques:
             cuerpo[b] = previa.get(b)
-            por_bloque[b] = {"estado": "anterior", "fecha": antes[b].get("fecha")}
+            por_bloque[b] = {**antes[b], "estado": "anterior"}
         desde, hasta = (hoy - timedelta(days=DIAS_EVENTOS)).isoformat(), (hoy + timedelta(days=DIAS_EVENTOS)).isoformat()
         cuerpo["eventos"] += [e for e in previa.get("eventos", []) if e["tipo"].startswith(EVENTOS_DE[fuente]) and desde <= e["fecha"] <= hasta]
         cuerpo["eventos"].sort(key=lambda e: (e["fecha"], e["tipo"], e["titulo"]), reverse=True)

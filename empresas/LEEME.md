@@ -2,7 +2,7 @@
 
 Pregunta del lector (en la ficha de cada empresa del IBEX 35): ¿qué está pasando con esta empresa que no sale en la cotización: qué ha comunicado a la CNMV, qué dividendos ha anunciado, quién apuesta en contra, si compran o venden sus directivos, quién manda en el capital y si está recomprando?
 
-Estado: **contrato 1.0 con el chat de fichas de Tecnología (21/11/2026), versión 1.0.0, en rama `empresas-contrato`**. Funciona con las fuentes que ya sirve el servidor (cnmv, cortos, accionistas filtrado) y completa `directivos` cuando se despliegue su colector. Sin nada de BME (ni dividendos, ni rentabilidades, ni precios).
+Estado: **contrato 1.0 con el chat de fichas de Tecnología (21/11/2026; encargo formal del 22/11), versión 1.1.0, en rama `empresas-contrato`**. Funciona con las fuentes que ya sirve el servidor (cnmv, cortos, accionistas filtrado) y completa `directivos` cuando se despliegue su colector. Sin nada de BME (ni dividendos, ni rentabilidades, ni precios).
 
 ## Contrato 1.0 (Datos ↔ chat «Fichas de valores», 21/11/2026)
 
@@ -21,21 +21,21 @@ Campos de cada `<ISIN>.json`:
 | `contrato`, `version` | `"1.0"` (cambia solo si cambian los campos) y versión del colector | — |
 | `empresa`, `isin`, `ficha` | nombre corto, ISIN (la clave común con el registro de valores de Tecnología) y dirección de la ficha | `cnmv/empresas.csv` |
 | `actualizado` | fecha de la pasada en que cambió algún dato de esta ficha | — |
-| `registro_oficial` | comunicados a la CNMV de doce meses (resultados, dividendos, recompras, ampliaciones y OPVs, OPAs): `fecha`, `tipo`, `titulo` (tal como lo publica la CNMV), `fuente`, `enlace`, `nreg`, `grupo` (los de una misma operación comparten grupo) | colector `cnmv` |
-| `dividendos` | anuncios de dividendo comunicados a la CNMV en doce meses: `fecha_comunicado`, `tipo`, `titulo`, `importe`, `moneda`, `fecha_ex`, `fecha_pago`, `lectura`, `fuente`, `enlace`, `nreg`. **Sin rentabilidad.** Importe y fechas van vacíos hasta que se lean con seguridad del propio comunicado (`cnmv/dividendos_cnmv.py`, prototipo; versión 1.1): la ficha enlaza el comunicado | colector `cnmv` |
+| `registro_oficial` | comunicados a la CNMV de doce meses (resultados, dividendos, recompras, ampliaciones y OPVs, OPAs): `fecha`, `tipo`, `titulo` (tal como lo publica la CNMV), `fuente`, `enlace`, `nreg`, `grupo` (los de una misma operación comparten grupo). En `fuentes.registro_oficial`: `alcance` (qué comunicados entran) y `desde` (desde qué fecha está completo: doce meses cuando el colector `cnmv` termina su relleno hacia atrás) | colector `cnmv` |
+| `dividendos` | anuncios de dividendo comunicados a la CNMV en doce meses: `fecha_comunicado`, `tipo`, `titulo`, `importe` (bruto por acción), `moneda`, `fecha_ex`, `fecha_registro`, `fecha_pago`, `lectura`, `fuente`, `enlace`, `nreg`. **Sin rentabilidad.** Importe, moneda y fechas leídos del PDF del propio comunicado por `cnmv/dividendos_cnmv.py` solo cuando se leen con seguridad (`lectura`: «leído del comunicado», «parcial: el resto, en el comunicado», «dividendo flexible…», «sin leer: ver el comunicado»); lo que no se lee va vacío y la ficha enlaza el comunicado | colector `cnmv` (`datos/dividendos.csv`) |
 | `cortos` | `total_publicado` (suma de posiciones ≥ 0,5 %), `fecha_dato` (publicación de la CNMV), `tenedores`, `posiciones` (tenedor, %, fecha), `ultima_posicion`, `cambios_30d`, `fuente` | colector `cortos` |
-| `directivos` | 13 semanas: compras y ventas discrecionales (número e importe), neto, última operación, operaciones registradas en 30 días. Sin nombres | colector `directivos` |
-| `accionistas` | hasta 8 participaciones principales, solo personas jurídicas, derechos de voto y su fecha, nota con cuántas de personas físicas no se publican | colector `accionistas` |
-| `recompra` | último comunicado de recompra y si está «en curso» (comunicado en los últimos 45 días) | colector `cnmv` |
-| `cuatro_fuerzas` | lista de cifras: `fuerza`, `indicador`, `cifra`, `unidad`, `texto`, `ejercicio`, `documento`, `pagina`, `enlace`, `fecha`, `verificado_por`, `verificado_el` | `empresas/cuatro_fuerzas.csv` (tabla de Datos; vacía hasta que la Redacción cierre la lista de cifras) |
-| `perfil` | `sede`, `cierre_ejercicio`, `web_ri`, `fuente`, `fecha` | `empresas/perfil.csv` (tabla de Datos; vacía) |
+| `directivos` | 13 semanas: compras y ventas discrecionales (número e importe), neto, última operación, operaciones registradas en 30 días, `fecha_dato`, `fuente`. Sin nombres | colector `directivos` |
+| `accionistas` | hasta 8 participaciones principales (cada una con su fecha), solo personas jurídicas, derechos de voto y `fecha_derechos_voto`, `fecha_dato`, nota con cuántas de personas físicas no se publican, `fuente` | colector `accionistas` |
+| `recompra` | último comunicado de recompra (con su fecha) y si está «en curso» (comunicado en los últimos 45 días), `fecha_dato`, `fuente` | colector `cnmv` |
+| `cuatro_fuerzas` | lista de cifras: `fuerza`, `indicador`, `cifra`, `unidad`, `texto`, `ejercicio`, `fuente`, `pagina`, `enlace`, `fecha`, `verificado_por`, `verificado_el` (método en `CUATRO_FUERZAS.md`) | `empresas/cuatro_fuerzas.csv` (tabla de Datos; vacía hasta que la Redacción cierre la lista de cifras) |
+| `perfil` | `sede` (domicilio social), `cierre_ejercicio` (DD/MM), `web_ri`, `fuente`, `fecha` (de la comprobación) | `empresas/perfil.csv` (tabla de Datos con fuente por fila; el 22/11, Iberdrola, Banco Santander e Inditex, con lo que se ha podido comprobar en fuente oficial; lo demás, vacío) |
 | `eventos` | eventos de la empresa (tipos abajo) | las anteriores |
 | `fuentes` | por bloque: `estado` y `fecha` del dato | — |
 | `licencia`, `aviso` | cita de la CNMV y aviso de fin informativo y educativo | — |
 
 Estados de `fuentes`: `ok`; `parcial` (accionistas: alguna empresa sin el filtro de personas jurídicas); `anterior` (el colector falló hoy y se conserva **el último dato bueno**, con su fecha); `vacio` (no hay dato: la ficha oculta el bloque); `pendiente` (cuatro fuerzas y perfil sin filas).
 
-Tipos de evento (`TIPOS_EVENTO`): `corto_nueva`, `corto_sube`, `corto_baja`, `corto_sale`, `insider_compra`, `insider_venta`, `comunicado_recompras`, `comunicado_resultados`, `comunicado_dividendos`, `comunicado_opvs-ampliaciones`, `comunicado_opas`, `comunicado_otro`. Cada evento: `fecha`, `tipo`, `isin`, `empresa`, `ficha`, `titulo`, `detalle`, `url` (documento de la CNMV o página publicada de El Especulador; vacía si no hay), `fuente`. Los eventos de dividendo con fecha ex y pago (`dividendo_ex`, `dividendo_pago`) vuelven en la versión 1.1, con datos de la CNMV.
+Tipos de evento (`TIPOS_EVENTO`): `corto_nueva`, `corto_sube`, `corto_baja`, `corto_sale`, `insider_compra`, `insider_venta`, `dividendo_ex`, `dividendo_pago`, `comunicado_recompras`, `comunicado_resultados`, `comunicado_dividendos`, `comunicado_opvs-ampliaciones`, `comunicado_opas`, `comunicado_otro`. Cada evento: `fecha`, `tipo`, `isin`, `empresa`, `ficha`, `titulo`, `detalle`, `url` (documento de la CNMV o página publicada de El Especulador; vacía si no hay), `fuente`. Los de dividendo (desde la 1.1.0) salen de las fechas leídas del comunicado de la CNMV; un dividendo anunciado dos veces da un solo evento.
 
 La huella (SHA-256, 12 caracteres) se calcula sobre el contenido de la ficha sin `actualizado`, `version`, `fuentes` ni `licencia`: un archivo solo se reescribe si cambian sus datos.
 
@@ -58,8 +58,9 @@ Todo son datos de la CNMV ya publicados por otros colectores con licencia verifi
 ## Pendiente
 
 - Desplegar con los siete colectores pendientes (mensaje 1 de `Mensajes-para-pegar-2026-11-19`); primera pasada a mano y revisión de tres fichas.
-- Versión 1.1: importe, fecha ex y fecha de pago de cada dividendo leídos del comunicado de la CNMV (solo cuando se lean con seguridad; si no, enlace); `recompra.ejecutado` con el colector de recompras.
-- Cuatro fuerzas: cuando la Redacción cierre la lista de cifras por fuerza (contrato del 21/11). Perfil: tabla a mano con fuente por dato.
+- Hecho en la 1.1.0 (22/11): importe, moneda y fechas de cada dividendo leídos del comunicado de la CNMV (`cnmv/dividendos_cnmv.py`, PR #111), eventos de fecha ex y pago, fecha del dato en cada bloque, alcance y «desde» del registro oficial.
+- Siguiente: `recompra.ejecutado` con el colector de recompras; perfil de las 32 empresas restantes (tabla a mano con fuente oficial por fila; ~1 h de Datos).
+- Cuatro fuerzas: cuando la Redacción cierre la lista de cifras por fuerza (método en `CUATRO_FUERZAS.md`).
 - SEC (empresas de EE. UU.) cuando el colector de la SEC llegue a Datos.
 
 Horas de Federico: 0 (más fusionar).
