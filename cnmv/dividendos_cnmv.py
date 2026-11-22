@@ -42,7 +42,7 @@ PAUSA = 2.0
 LIMITE = 20          # comunicados nuevos por pasada
 MAX_INTENTOS = 3     # un comunicado sin documento legible se vuelve a pedir hasta tres veces
 # Versión del lector. Si cambia, las filas leídas con otra se vuelven a leer (desde la caché, sin volver a descargar).
-LECTOR = "2026-11-22"
+LECTOR = "2026-11-22b"
 COLUMNAS = ["canal", "nreg", "fecha_comunicado", "isin", "empresa", "tipo", "importe_bruto", "moneda", "fecha_ex",
             "fecha_registro", "fecha_pago", "extraccion", "intentos", "enlace", "lector"]
 
@@ -117,8 +117,8 @@ ETIQUETAS = {
 }
 # Entre la etiqueta y la fecha solo puede haber signos y estas palabras de enlace (sin espacios). Así no se
 # toma una fecha que solo está cerca («en la fecha ex-dividendo, y se prevé anunciarlo el 3 de noviembre»).
-ENLACE_OK = re.compile(r"(?:\(?[a-z-]*date\)?)?(?:sera|seran|seria|serian|es|sea)?"
-                       r"(?:el|del|eldia|apartirdel|elproximo|delproximo|proximo|on)?")
+ENLACE_OK = re.compile(r"(?:deldividendo)?(?:\(?[a-z-]*date\)?)?(?:sera|seran|seria|serian|es|sea)?"
+                       r"(?:el|del|eldia|apartirdel|elproximo|delproximo|proximo|on)?")   # «Fecha de pago del dividendo: 17 de junio» (Puig)
 
 
 def _fecha_tras(t: str, fechas: list[tuple[int, int, date]], etiquetas: list[str]) -> tuple[int, date] | None:
@@ -202,6 +202,7 @@ USD = r"(?:usd|us\$|dolares|dollars?|\$)"
 RE_IMPORTE = [
     (re.compile(r"importebruto(?:poraccion)?[^0-9]{0,30}?(\d+[.,]\d+)"), 1, None),
     (re.compile(r"(?:dividendo|importe|retribucion)?brutoporaccion[^0-9]{0,25}?(\d+[.,]\d+)"), 1, None),
+    (re.compile(r"dividendo(?:total)?bruto[:]?(\d+[.,]\d+)" + EUR), 1, "EUR"),   # «Dividendo total bruto 0,05 €» (IAG, tabla)
     (re.compile(r"(\d+[.,]\d+)" + EUR + r"(?:brutos?|gross)"), 1, "EUR"),
     # «X euros por acción», «X € (brutos) por cada acción», «(0,20€) brutos por acción» (Merlin), «5,74867096 euros
     # por acción» (Acciona, importe ajustado por la autocartera)
@@ -219,7 +220,7 @@ RE_IMPORTE = [
 # objetivo de la política («hasta alcanzar los 0,87 euros por acción en 2029», Redeia). Se busca en la misma frase,
 # antes de la cifra (ANTES_NO) o justo después (DESPUES_NO).
 ANTES_NO = ("yarealizad", "yapagad", "yaabonad", "distribuyo", "percibirian", "retribuciontotal", "importetotal",
-            "remuneraciontotal", "dividendototal", "entotal", "ascendera", "ascendio", "sesuma", "elpasado",
+            "remuneraciontotal", "entotal", "ascendera", "ascendio", "sesuma", "elpasado",
             "esperadistribuir", "prevedistribuir", "alcanzar")
 DESPUES_NO = ("yapagad", "yaabonad", "pagadaen", "pagadoen", "pagadosen", "pagadasen", "abonadaen", "abonadoen",
               "abonadosen", "abonadasen", "endospagos", "entrespagos", "endosplazos")

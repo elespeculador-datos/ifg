@@ -326,6 +326,11 @@ MAS_DIVIDENDOS_REALES = {
     "OIR-43553": (0.33, "EUR", "2026-12-08", "2026-12-09", "2026-12-10", "completa"),   # Fluidra: segundo pago; el primero ya pasó
     "OIR-43636": (0.2, "EUR", "2026-11-20", "2026-11-23", "2026-12-10", "completa"),    # Merlin: «(0,20€) brutos por acción»
     "OIR-43701": (0.080248, "EUR", "2026-11-24", "2026-11-25", "2026-11-26", "completa"),  # Mapfre: importe ajustado
+    "OIR-40942": (0.110372, "EUR", "2026-05-26", "2026-05-27", "2026-05-28", "completa"),  # Mapfre: «0, 11» y ajustado
+    "OIR-41151": (0.42159, "EUR", "2026-06-15", "2026-06-16", "2026-06-17", "completa"),   # Puig: «Fecha de pago del dividendo:»
+    "OIR-41312": (0.03001963, "EUR", "2026-06-16", "2026-06-17", "2026-06-18", "completa"),  # Acciona Energía: ajustado
+    "OIR-41438": (0.05, "EUR", "2026-06-25", "2026-06-26", "2026-06-29", "completa"),      # IAG: «Dividendo total bruto 0,05 €»
+    "OIR-41502": (None, None, "2026-07-10", "2026-07-13", "2026-07-14", "parcial"),        # Fluidra: dos pagos futuros, sin elegir
 }
 
 
