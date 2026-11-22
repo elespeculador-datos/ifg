@@ -460,6 +460,10 @@ def clasificar(categoria: str, texto: str) -> tuple[str, str] | None:
     if _hay(todo, " ampliacion de capital liberada ", " aumento de capital liberado ", " dividendo flexible ",
             " retribucion flexible ", " scrip ", " derechos de asignacion gratuita "):
         return "dividendos", "Dividendo flexible"
+    # «planes estratégicos … y política de retribución al accionista» (Santander, 25/02/2026): es la política, no un pago
+    if _hay(t, " politica de retribucion ", " politica de dividendos ", " politica de remuneracion ") and \
+            not _hay(t, " a cuenta ", " complementario ", " pago ", " abono ", " importe ", " euros "):
+        return "dividendos", "Política de dividendos"
     if _hay(todo, " dividendo ", " dividendos ", " retribucion al accionista ", " pago a cuenta ",
             " devolucion de prima ", " distribucion de prima "):
         return "dividendos", "Dividendo"

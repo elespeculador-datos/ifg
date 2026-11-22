@@ -152,8 +152,10 @@ def _importe(t: str) -> tuple[float | None, str | None]:
 def extraer(texto_pdf: str, fecha_com: date, tipo: str = "Dividendo") -> dict:
     """Campos leídos del texto del comunicado. Valida coherencia; lo dudoso se deja vacío."""
     vacio = {"importe_bruto": None, "moneda": None, "fecha_ex": None, "fecha_registro": None, "fecha_pago": None}
-    if tipo != "Dividendo":
+    if tipo == "Dividendo flexible":
         return {**vacio, "extraccion": "flexible: ver comunicado"}
+    if tipo != "Dividendo":   # política de dividendos y otros anuncios sin un pago concreto: no se lee importe
+        return {**vacio, "extraccion": "sin pago: ver comunicado"}
     t = re.sub(r"\s+", "", _norm(texto_pdf))
     fechas = _fechas(t)
     r = dict(vacio)
@@ -240,7 +242,7 @@ def actualizar(datos: Path = DATOS, limite: int = LIMITE, todos: bool = False, t
             pendientes += 1
             continue
         fecha_com = date.fromisoformat(c["fecha"][:10])
-        if c["etiqueta"] != "Dividendo":  # flexibles: no se descarga nada, el importe depende de la opción elegida
+        if c["etiqueta"] != "Dividendo":  # flexibles y política de dividendos: no se descarga nada
             r = extraer("", fecha_com, c["etiqueta"])
         else:
             texto = texto_de(c["canal"], c["nreg"], c["enlace"])

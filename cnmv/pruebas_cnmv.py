@@ -240,6 +240,13 @@ def pruebas_clasificacion() -> None:
     ok(cn.clasificar("Contratos de liquidez y contrapartida", "Información trimestral del contrato de liquidez") is None,
        "los contratos de liquidez siguen fuera")
     ok(cn.clasificar("Otra información relevante", "MERLIN - Dividendo a cuenta 2026") == ("dividendos", "Dividendo"), "los dividendos no cambian")
+    ok(cn.clasificar("Sobre planes estratégicos y previsiones", "Nota de prensa relativa a la presentación de planes estratégicos y objetivos "
+                     "en el Investor Day, y a la política de retribución al accionista") == ("dividendos", "Política de dividendos"),
+       "anuncio de la política de retribución: «Política de dividendos», no un pago")
+    ok(cn.clasificar("Sobre negocio y situación financiera", "Aprobación por el consejo de administración de un dividendo complementario "
+                     "en efectivo conforme a la política de retribución") == ("dividendos", "Dividendo"), "un pago concreto sigue siendo «Dividendo»")
+    ok(dv.extraer("dividendo de 0,30 euros brutos por acción", __import__("datetime").date(2026, 2, 25), "Política de dividendos")["extraccion"]
+       == "sin pago: ver comunicado", "política de dividendos: no se lee importe")
     # Recompras de deuda (vistas al rellenar doce meses, 22/11/2026): no son programas de recompra de acciones
     for texto in ("Unicaja informa de una oferta de recompra de las Obligaciones Verdes Ordinarias No Preferentes ISIN: ES0380907065",
                   "Mapfre, S.A. informa de una oferta de recompra en efectivo dirigida a todos los titulares de obligaciones subordinadas de la emisión",
