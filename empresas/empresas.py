@@ -102,9 +102,10 @@ def _num(v) -> float | None:
     if v is None or v == "" or v == "None":
         return None
     try:
-        return float(v)
+        x = float(v)
     except (TypeError, ValueError):
         return None
+    return x if x == x and x not in (float("inf"), float("-inf")) else None   # sin NaN ni infinitos: JSON válido
 
 
 def _dia(v: str | None) -> str:
@@ -547,7 +548,7 @@ th{{background:#f6f8fb}} td.n,th.n{{text-align:right}} .isin{{color:#5b6675;font
 
 def _escribir_json(ruta: Path, obj: dict) -> None:
     tmp = ruta.with_suffix(".tmp")
-    tmp.write_text(json.dumps(obj, ensure_ascii=False, indent=1), encoding="utf-8")
+    tmp.write_text(json.dumps(obj, ensure_ascii=False, indent=1, allow_nan=False), encoding="utf-8")   # JSON estricto
     os.replace(tmp, ruta)
 
 

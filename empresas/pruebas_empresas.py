@@ -313,6 +313,7 @@ with tempfile.TemporaryDirectory() as d:
 # Utilidades
 ok(empresas._eur(30100) == "30.100 €" and empresas._eur(None) == "—" and empresas._pct(0.5) == "0,50 %" and empresas._fecha_es("2026-11-06T08:59") == "06/11/2026", "Formatos de euros, porcentajes y fechas")
 ok(empresas._dia("2026-11-06T08:59:25") == "2026-11-06" and empresas._dia(None) == "" and empresas._num("") is None and empresas._num("1.5") == 1.5, "Utilidades de fecha y número")
+ok(empresas._num("nan") is None and empresas._num("inf") is None, "Sin NaN ni infinitos: el JSON es siempre válido")
 ok(len(empresas.universo()) == 35, "El universo del repositorio tiene 35 empresas")
 ok(empresas.es_entidad("Marshall Wace LLP") and empresas.es_entidad("Caisse de dépôt et placement du Québec") and not empresas.es_entidad("GARCIA PEREZ, JUAN"),
    "Regla de persona jurídica para tenedores de cortos")
