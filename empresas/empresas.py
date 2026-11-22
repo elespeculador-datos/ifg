@@ -62,6 +62,7 @@ ALCANCE_REGISTRO = ("Comunicados a la CNMV de resultados, dividendos, recompras,
                     "(información privilegiada y otra información relevante), de los últimos doce meses")
 LECTURA = {"completa": "leído del comunicado", "parcial": "parcial: el resto, en el comunicado",
            "flexible: ver comunicado": "dividendo flexible: el importe depende de la opción del accionista; ver el comunicado",
+           "sin pago: ver comunicado": "anuncio de política de dividendos, sin un pago concreto: ver el comunicado",
            "sin documento": "sin leer: ver el comunicado", "sin datos": "sin leer: ver el comunicado"}
 SEMANAS_INSIDERS = 13
 MAX_ACCIONISTAS = 8
