@@ -240,6 +240,18 @@ def pruebas_clasificacion() -> None:
     ok(cn.clasificar("Contratos de liquidez y contrapartida", "Información trimestral del contrato de liquidez") is None,
        "los contratos de liquidez siguen fuera")
     ok(cn.clasificar("Otra información relevante", "MERLIN - Dividendo a cuenta 2026") == ("dividendos", "Dividendo"), "los dividendos no cambian")
+    # Recompras de deuda (vistas al rellenar doce meses, 22/11/2026): no son programas de recompra de acciones
+    for texto in ("Unicaja informa de una oferta de recompra de las Obligaciones Verdes Ordinarias No Preferentes ISIN: ES0380907065",
+                  "Mapfre, S.A. informa de una oferta de recompra en efectivo dirigida a todos los titulares de obligaciones subordinadas de la emisión",
+                  "Santander anuncia el lanzamiento de una oferta de recompra con contraprestación en efectivo de hasta 850.000.000 USD de la emisión en circulación",
+                  "Oferta de recompra de bonos convertibles senior no garantizados de importe nominal 825.000.000 € con vencimiento en 2028",
+                  "Unicaja informa de una oferta de recompra de las Participaciones Preferentes perpetuas no acumulativas de nivel adicional 1"):
+        ok(cn.clasificar("Sobre instrumentos financieros", texto) is None, f"recompra de deuda fuera de «recompras»: «{texto[:50]}…»")
+    for cat, texto in (("Programas de recompra de acciones, estabilización y autocartera", "Compras del 20 al 26 de octubre de 2026"),
+                       ("Otra información relevante", "Finalización del Programa de Recompra y próxima reducción de capital social"),
+                       ("Otra información relevante", "Programa de recompra de acciones para amortizar y atender obligaciones de planes de retribución"),
+                       ("Otra información relevante", "Banco Sabadell comunica información sobre programa de recompra.")):
+        ok(cn.clasificar(cat, texto) == ("recompras", "Programa de recompra"), f"recompra de acciones sigue dentro: «{texto[:50]}…»")
     # Con el histórico real del servidor: la clasificación del IBEX 35 es la misma que publicaba el servidor
     # (ibex35-servidor-2026-11-21.csv, código anterior) más las cuatro de «nueve primeros meses».
     e = cn.empresas_ibex(pd.Timestamp("2026-11-21"))

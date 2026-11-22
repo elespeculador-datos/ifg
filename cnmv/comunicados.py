@@ -466,6 +466,11 @@ def clasificar(categoria: str, texto: str) -> tuple[str, str] | None:
     if _hay(todo, " estabilizacion ") and _hay(todo, " oferta ", " colocacion ", " opv "):
         return "opvs-ampliaciones", "Colocación"
     if _hay(todo, " recompra ", " autocartera ") or (_hay(t, " acciones propias ") and _hay(t, " adquisicion ", " compra ", " bloque ")):
+        # Una oferta de recompra de bonos, obligaciones o preferentes no es un programa de recompra de acciones
+        # (Unicaja, Mapfre, Santander e IAG en 2026, vistos al rellenar doce meses el 22/11/2026): queda fuera.
+        if (deuda or _hay(todo, " preferentes ", " convertibles ", " emision en circulacion ", " emisiones en circulacion ")) \
+                and not _hay(t, " acciones ", " autocartera "):
+            return None
         return "recompras", "Programa de recompra"
     valores_deuda = _hay(todo, " bonos ", " obligaciones ", " pagares ", " notas ", " warrants ", " turbos ",
                          " certificados ", " renta fija ", " cedulas ")
