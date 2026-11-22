@@ -41,8 +41,10 @@ CAB = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)"}
 PAUSA = 2.0
 LIMITE = 20          # comunicados nuevos por pasada
 MAX_INTENTOS = 3     # un comunicado sin documento legible se vuelve a pedir hasta tres veces
+# Versión del lector. Si cambia, las filas leídas con otra se vuelven a leer (desde la caché, sin volver a descargar).
+LECTOR = "2026-11-22"
 COLUMNAS = ["canal", "nreg", "fecha_comunicado", "isin", "empresa", "tipo", "importe_bruto", "moneda", "fecha_ex",
-            "fecha_registro", "fecha_pago", "extraccion", "intentos", "enlace"]
+            "fecha_registro", "fecha_pago", "extraccion", "intentos", "enlace", "lector"]
 
 MESES = {m: i for i, m in enumerate(["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
                                      "septiembre", "octubre", "noviembre", "diciembre"], 1)}
@@ -53,20 +55,37 @@ MONTHS = {m: i for i, m in enumerate(["january", "february", "march", "april", "
 
 def _norm(x: str) -> str:
     x = unicodedata.normalize("NFKD", x)
-    return "".join(c for c in x if not unicodedata.combining(c)).lower()
+    x = "".join(c for c in x if not unicodedata.combining(c)).lower()
+    return re.sub("[‐-―−]", "-", x)   # guiones tipográficos: «ex–date», «− Fecha de abono»
 
 
 # --------------------------------------------------------------------------- lectura de fechas e importes
-# pdftotext devuelve muchos comunicados sin espacios («15dediciembrede2026», «Fechadepago»), así que todo
+# pdftotext devuelve muchos comunicados sin espacios («15dediciembrede2026», «Fechadepago»), así que casi todo
 # se busca sobre el texto compacto: minúsculas, sin acentos y sin espacios.
 _MES = "|".join(sorted(list(MESES) + list(MONTHS), key=len, reverse=True))
 RE_FECHA = re.compile(r"(?<!\d)(\d{1,2})(?:de)?(" + _MES + r")(?:de|,)?(20\d\d)"
                       r"|(?<!\d)(\d{1,2})[/.-](\d{1,2})[/.-](20\d\d)"
                       r"|(" + "|".join(MONTHS) + r")(\d{1,2}),?(20\d\d)")
+# «13 de julio», sin año (Rovi, Santander): el año se deduce de la fecha del comunicado (_ano_probable)
+RE_FECHA_SIN_ANO = re.compile(r"(?<!\d)(\d{1,2})de(" + "|".join(sorted(MESES, key=len, reverse=True)) + r")(?!(?:de|,)?20\d\d)")
 
 
-def _fechas(texto: str) -> list[tuple[int, int, date]]:
-    """Todas las fechas del texto compacto: (inicio, fin, fecha)."""
+def _ano_probable(dia: int, mes: int, fecha_com: date) -> date | None:
+    """Fecha sin año en el calendario de un dividendo: el año del comunicado si la fecha cae después de él; el
+    siguiente solo en el cambio de año (comunicado de octubre a diciembre, fecha de enero a marzo). Si no, nada."""
+    try:
+        d = date(fecha_com.year, mes, dia)
+        if d >= fecha_com:
+            return d
+        if fecha_com.month >= 10 and mes <= 3:
+            return date(fecha_com.year + 1, mes, dia)
+    except ValueError:
+        pass
+    return None
+
+
+def _fechas(texto: str, fecha_com: date | None = None) -> list[tuple[int, int, date]]:
+    """Todas las fechas del texto compacto: (inicio, fin, fecha). Con fecha_com, también las escritas sin año."""
     out = []
     for m in RE_FECHA.finditer(texto):
         try:
@@ -79,31 +98,102 @@ def _fechas(texto: str) -> list[tuple[int, int, date]]:
         except ValueError:
             continue
         out.append((m.start(), m.end(), d))
-    return out
+    if fecha_com:
+        for m in RE_FECHA_SIN_ANO.finditer(texto):
+            d = _ano_probable(int(m.group(1)), MESES[m.group(2)], fecha_com)
+            if d:
+                out.append((m.start(), m.end(), d))
+    return sorted(out)
 
 
 ETIQUETAS = {
     "fecha_ex": ["fechaex-dividendo", "fechaexdividendo", "ex-dividenddate", "exdividenddate", "ex-date", "exdate",
                  "sinderechoaldividendo", "sinderechoapercibireldividendo", "cotizaranex-dividendo",
-                 "cotizaranexdividendo", "fechadecotizacionexdividendo", "cotizacionexdividendo", "exdividendo"],
+                 "cotizaranexdividendo", "fechadecotizacionexdividendo", "cotizacionexdividendo", "exdividendo",
+                 "ex-dividendo"],   # «la acción cotizará ex-dividendo el 29 de octubre de 2026» (Santander)
     "fecha_registro": ["fechaderegistro", "recorddate"],
-    "fecha_pago": ["fechadepago", "paymentdate", "sepagarael", "seabonarael", "seabonaraapartirdel", "fechadeabono"],
+    "fecha_pago": ["fechadepago", "paymentdate", "sepagarael", "seabonarael", "seabonaraapartirdel", "fechadeabono",
+                   "pagadero", "aabonar", "pagoserealizara", "seharaefectivo"],
 }
 # Entre la etiqueta y la fecha solo puede haber signos y estas palabras de enlace (sin espacios). Así no se
 # toma una fecha que solo está cerca («en la fecha ex-dividendo, y se prevé anunciarlo el 3 de noviembre»).
-ENLACE_OK = re.compile(r"(?:\(?[a-z-]*date\)?)?(?:sera|es|seran)?(?:el|del|eldia|apartirdel|elproximo|on)?")
+ENLACE_OK = re.compile(r"(?:\(?[a-z-]*date\)?)?(?:sera|seran|seria|serian|es|sea)?"
+                       r"(?:el|del|eldia|apartirdel|elproximo|delproximo|proximo|on)?")
 
 
-def _fecha_tras(t: str, fechas: list[tuple[int, int, date]], etiquetas: list[str]) -> date | None:
+def _fecha_tras(t: str, fechas: list[tuple[int, int, date]], etiquetas: list[str]) -> tuple[int, date] | None:
+    """(posición, fecha) de la primera etiqueta del texto seguida de su fecha: «fecha de pago: 15 de diciembre»."""
+    mejor = None
     for e in etiquetas:
         for m in re.finditer(re.escape(e), t):
             for ini, _, d in fechas:
-                if m.end() <= ini <= m.end() + 40:
-                    letras = re.sub(r"[^a-z-]", "", t[m.end():ini].replace("(", "").replace(")", ""))
-                    if ENLACE_OK.fullmatch(letras.strip("-")):
-                        return d
-                    break   # la primera fecha tras la etiqueta no está pegada a ella: no vale
-    return None
+                if ini < m.end():
+                    continue
+                entre = t[m.end():ini]
+                # un punto, una viñeta o un punto y coma en medio: la fecha es de la línea siguiente
+                if ini <= m.end() + 40 and not re.search(r"[.;•]", entre) \
+                        and ENLACE_OK.fullmatch(re.sub(r"[^a-z-]", "", entre).strip("-")) \
+                        and (mejor is None or m.start() < mejor[0]):
+                    mejor = (m.start(), d)
+                break   # solo cuenta la primera fecha tras la etiqueta
+    return mejor
+
+
+# Calendario escrito al revés: la fecha abre la viñeta y la descripción va detrás («- 12 de enero de 2026. Fecha
+# desde la cual las acciones cotizan sin derecho a percibir el dividendo (ex-date).»: Repsol, Sacyr).
+TRAS_FECHA = {
+    "fecha_ex": ("ex-date", "exdate", "sinderecho"),
+    "fecha_registro": ("recorddate", "fechaderegistro"),
+    "fecha_pago": ("fechadepago", "fechadeabono", "paymentdate"),
+}
+_DIA_SEMANA = r"(?:lunes|martes|miercoles|jueves|viernes|sabado|domingo)?$"
+
+
+def _fechas_delante(t: str, fechas: list[tuple[int, int, date]]) -> dict[str, tuple[int, date]]:
+    out: dict[str, tuple[int, date]] = {}
+    for ini, fin, d in fechas:
+        antes = re.sub(_DIA_SEMANA, "", t[max(0, ini - 12):ini])
+        if not re.search(r"[-•)]$", antes) or fin >= len(t) or t[fin] not in ":.":
+            continue
+        tramo = re.split(r"\.(?!\d)|\(\*\)", t[fin + 1:fin + 301])[0]   # hasta el final de la viñeta
+        campos = [c for c, etq in TRAS_FECHA.items() if any(e in tramo for e in etq)]
+        if len(campos) == 1 and "lasttradingdate" not in tramo and campos[0] not in out:
+            out[campos[0]] = (ini, d)
+    return out
+
+
+# Tabla con la fila de cabeceras y debajo la de valores (Bankinter: «Euros por acción IMPORTE ÍNTEGRO IMPORTE NETO
+# EX-DATE RECORD DATE FECHA DE PAGO 0,16093183 0,13035478 22/06/2026 23/06/2026 24/06/2026»). Va sobre el texto
+# con espacios: en el compacto, «0,16093183 0,13035478» queda pegado y no se puede separar.
+_CABECERAS = {"importe integro": "importe", "importe bruto": "importe", "importe neto": None, "ex-date": "fecha_ex",
+              "ex date": "fecha_ex", "record date": "fecha_registro", "fecha de pago": "fecha_pago",
+              "payment date": "fecha_pago"}
+_RE_CAB = "|".join(re.escape(c) for c in _CABECERAS)
+_RE_VALOR = r"\d+,\d+|\d{1,2}/\d{1,2}/20\d\d"
+RE_TABLA = re.compile(rf"((?:(?:{_RE_CAB}) ){{3,8}})((?:(?:{_RE_VALOR}) ){{3,8}})")
+
+
+def _tabla(plano: str) -> dict:
+    for m in RE_TABLA.finditer(plano + " "):
+        cabs, vals = re.findall(_RE_CAB, m.group(1)), m.group(2).split()
+        if len(cabs) != len(vals):
+            continue
+        r: dict = {}
+        for c, v in zip(cabs, vals):
+            campo = _CABECERAS[c]
+            if campo == "importe" and re.fullmatch(r"\d+,\d+", v):
+                if re.search(EUR, plano[max(0, m.start() - 40):m.start()]):   # «euros por acción» encima
+                    r["importe"] = float(v.replace(",", "."))
+            elif campo and re.fullmatch(r"\d{1,2}/\d{1,2}/20\d\d", v):
+                dd, mm, aa = map(int, v.split("/"))
+                try:
+                    r[campo] = date(aa, mm, dd)
+                except ValueError:
+                    return {}
+            elif campo:
+                return {}
+        return r
+    return {}
 
 
 EUR = r"(?:euros?|eur|€)"
@@ -113,7 +203,11 @@ RE_IMPORTE = [
     (re.compile(r"importebruto(?:poraccion)?[^0-9]{0,30}?(\d+[.,]\d+)"), 1, None),
     (re.compile(r"(?:dividendo|importe|retribucion)?brutoporaccion[^0-9]{0,25}?(\d+[.,]\d+)"), 1, None),
     (re.compile(r"(\d+[.,]\d+)" + EUR + r"(?:brutos?|gross)"), 1, "EUR"),
-    (re.compile(r"(\d+[.,]\d+)centimosdeeurobrutos"), 100, "EUR"),
+    # «X euros por acción», «X € (brutos) por cada acción», «(0,20€) brutos por acción» (Merlin), «5,74867096 euros
+    # por acción» (Acciona, importe ajustado por la autocartera)
+    (re.compile(r"(\d+[.,]\d+)\)?" + EUR + r"\)?(?:brutos?)?\)?por(?:cada)?accion"), 1, "EUR"),
+    # céntimos: «12,7 céntimos de euro por acción» (Santander), «8,44 céntimos brutos por acción» (Unicaja)
+    (re.compile(r"(\d+[.,]\d+)centimos(?:deeuro)?(?:brutos)?(?:por(?:cada)?accion)?"), 100, "EUR"),
     (re.compile(r"dividendo(?:bruto)?(?:acuenta|complementario|extraordinario|ordinario)?(?:de|porimportede)(\d+[.,]\d+)" + EUR), 1, "EUR"),
     (re.compile(r"gross(?:amount|dividend)[^0-9]{0,30}?(\d+[.,]\d+)"), 1, None),
     (re.compile(r"(?:dividend|dividendo)(?:of|de)" + USD + r"(\d+[.,]\d+)"), 1, "USD"),
@@ -121,6 +215,15 @@ RE_IMPORTE = [
     # «dividendo bruto en efectivo a cuenta, con cargo a…, de 0,053 euros por acción» (IAG)
     (re.compile(r"dividendo[a-z0-9,()]{0,100}?de(\d+[.,]\d+)" + EUR + r"(?:brutos?)?(?:poraccion|porcada)"), 1, "EUR"),
 ]
+# Una cifra que no es la del pago que se anuncia: lo ya pagado, el total del año, lo que se espera repartir o el
+# objetivo de la política («hasta alcanzar los 0,87 euros por acción en 2029», Redeia). Se busca en la misma frase,
+# antes de la cifra (ANTES_NO) o justo después (DESPUES_NO).
+ANTES_NO = ("yarealizad", "yapagad", "yaabonad", "distribuyo", "percibirian", "retribuciontotal", "importetotal",
+            "remuneraciontotal", "dividendototal", "entotal", "ascendera", "ascendio", "sesuma", "elpasado",
+            "esperadistribuir", "prevedistribuir", "alcanzar")
+DESPUES_NO = ("yapagad", "yaabonad", "pagadaen", "pagadoen", "pagadosen", "pagadasen", "abonadaen", "abonadoen",
+              "abonadosen", "abonadasen", "endospagos", "entrespagos", "endosplazos")
+LARGO = 30_000   # caracteres del texto compacto: más es un informe de resultados o de estrategia, no un anuncio
 
 
 def _moneda_cerca(t: str, ini: int, fin: int) -> str | None:
@@ -134,18 +237,47 @@ def _moneda_cerca(t: str, ini: int, fin: int) -> str | None:
     return None
 
 
-def _importe(t: str) -> tuple[float | None, str | None]:
-    """Importe por acción y su moneda. Sin moneda explícita no hay importe."""
+def _importe(t: str, fecha_com: date, fechas: list[tuple[int, int, date]]) -> tuple[float | None, str | None]:
+    """Importe bruto por acción del pago que anuncia el comunicado, con su moneda. Sin moneda explícita no hay
+    importe. Se descartan las cifras de otros pagos (ANTES_NO, DESPUES_NO, o pegadas a una fecha ya pasada); si
+    quedan varias, solo se elige en dos casos seguros: el importe aprobado y el ajustado por la autocartera (vale
+    el ajustado, con más decimales) y el total de un pago compuesto de varias partes que suman ese total. Si no,
+    nada: la ficha remite al comunicado."""
+    valores: dict[float, tuple[str, int]] = {}
     for r, div, moneda in RE_IMPORTE:
-        m = r.search(t)
-        if not m:
-            continue
-        v = round(float(m.group(1).replace(",", ".")) / div, 6)
-        if not 0 < v < 50:          # por acción: nada razonable pasa de 50
-            continue
-        mon = moneda or _moneda_cerca(t, m.start(1), m.end(1))
-        if mon:
-            return v, mon
+        for m in r.finditer(t):
+            num, ini = m.group(1), m.start(1)
+            v = round(float(num.replace(",", ".")) / div, 8)
+            if not 0 < v < 50:          # por acción: nada razonable pasa de 50
+                continue
+            mon = moneda or _moneda_cerca(t, ini, m.end(1))
+            if not mon:
+                continue
+            frase = t[max(0, ini - 150):ini]
+            cortes = [x.end() for x in re.finditer(r"\.(?!\d)", frase)]
+            antes = frase[cortes[-1]:] if cortes else frase
+            despues = re.split(r"\.(?!\d)", t[m.end(1):m.end(1) + 80])[0]
+            if any(w in antes for w in ANTES_NO) or any(w in despues for w in DESPUES_NO):
+                continue
+            # «primer pago – 14 de julio de 2026: importe bruto por acción a distribuir de 0,32 euros» (Fluidra)
+            if any(f < fecha_com and ini - len(antes) <= a and fin_f <= ini and ini - fin_f <= 45 for a, fin_f, f in fechas):
+                continue
+            decimales = len(re.split(r"[.,]", num)[-1]) + (2 if div == 100 else 0)
+            if v not in valores or decimales > valores[v][1]:
+                valores[v] = (mon, decimales)
+    if not valores or len({mon for mon, _ in valores.values()}) > 1:
+        return None, None
+    vs = sorted(valores)
+    if len(vs) == 1:
+        return vs[0], valores[vs[0]][0]
+    # aprobado (hasta 3 decimales) y ajustado por la autocartera (4 o más), a menos de un 5 %: el ajustado
+    precisos = [v for v in vs if valores[v][1] >= 4]
+    if len(vs) == 2 and len(precisos) == 1 and vs[1] <= vs[0] * 1.05:
+        return precisos[0], valores[precisos[0]][0]
+    # «0,56 euros mediante el reparto de 0,53 con cargo a reservas y un dividendo a cuenta de 0,03» (Repsol)
+    if len(vs) >= 3 and abs(vs[-1] - sum(vs[:-1])) < 5e-4 and \
+            not any(w in t for w in ("dospagos", "dosplazos", "primerpago", "segundopago")):
+        return vs[-1], valores[vs[-1]][0]
     return None, None
 
 
@@ -156,12 +288,27 @@ def extraer(texto_pdf: str, fecha_com: date, tipo: str = "Dividendo") -> dict:
         return {**vacio, "extraccion": "flexible: ver comunicado"}
     if tipo != "Dividendo":   # política de dividendos y otros anuncios sin un pago concreto: no se lee importe
         return {**vacio, "extraccion": "sin pago: ver comunicado"}
-    t = re.sub(r"\s+", "", _norm(texto_pdf))
-    fechas = _fechas(t)
+    plano = re.sub(r"\s+", " ", _norm(texto_pdf))
+    t = plano.replace(" ", "")
+    if len(t) > LARGO:
+        return {**vacio, "extraccion": "sin datos"}
+    fechas = _fechas(t, fecha_com)
     r = dict(vacio)
-    r["importe_bruto"], r["moneda"] = _importe(t)
+    tabla = _tabla(plano)
+    if tabla.get("importe"):
+        r["importe_bruto"], r["moneda"] = tabla["importe"], "EUR"
+    else:
+        r["importe_bruto"], r["moneda"] = _importe(t, fecha_com, fechas)
+    # Un calendario en viñetas con la fecha delante (dos campos o más) manda sobre las etiquetas sueltas del texto:
+    # en Repsol, «fecha de pago a partir del 1 de enero» es el plazo de la junta y «el ex-date el 13 de enero», el
+    # de los ADR. Si no, la primera etiqueta seguida de su fecha; y si tampoco, la tabla.
+    delante = _fechas_delante(t, fechas)
     for campo, etq in ETIQUETAS.items():
-        r[campo] = _fecha_tras(t, fechas, etq)
+        if len(delante) >= 2 and campo in delante:
+            r[campo] = delante[campo][1]
+            continue
+        x = _fecha_tras(t, fechas, etq) or delante.get(campo)
+        r[campo] = x[1] if x else tabla.get(campo)
     # coherencia: fechas entre el comunicado y el 31/12 del año siguiente; ex <= registro <= pago
     for campo in ("fecha_ex", "fecha_registro", "fecha_pago"):
         d = r[campo]
@@ -219,8 +366,8 @@ def leer(ruta: Path) -> pd.DataFrame:
 
 
 def actualizar(datos: Path = DATOS, limite: int = LIMITE, todos: bool = False, texto_de=None) -> dict:
-    """Lee los comunicados de dividendo nuevos (o sin documento legible, hasta MAX_INTENTOS) y reescribe
-    datos/dividendos.csv. `texto_de(canal, nreg, enlace)` permite probar sin red."""
+    """Lee los comunicados de dividendo nuevos (o sin documento legible, hasta MAX_INTENTOS, o leídos con otra versión
+    del lector) y reescribe datos/dividendos.csv. `texto_de(canal, nreg, enlace)` permite probar sin red."""
     clasif = datos / "ibex35.csv"
     if not clasif.exists():
         return {"leidos": 0, "pendientes": 0, "total": 0}
@@ -236,7 +383,8 @@ def actualizar(datos: Path = DATOS, limite: int = LIMITE, todos: bool = False, t
     for _, c in com.iterrows():
         previa = hechas.get((c["canal"], c["nreg"]))
         intentos = int(previa.intentos or 0) if previa is not None else 0
-        if previa is not None and not todos and (previa.extraccion != "sin documento" or intentos >= MAX_INTENTOS):
+        if previa is not None and not todos and previa.lector == LECTOR \
+                and (previa.extraccion != "sin documento" or intentos >= MAX_INTENTOS):
             continue
         if len(nuevas) >= limite:
             pendientes += 1
@@ -252,7 +400,7 @@ def actualizar(datos: Path = DATOS, limite: int = LIMITE, todos: bool = False, t
         nuevas.append({"canal": c["canal"], "nreg": c["nreg"], "fecha_comunicado": c["fecha"][:10], "isin": c["isin"],
                        "empresa": c["empresa"], "tipo": c["etiqueta"],
                        **{k: ("" if r.get(k) is None else str(r.get(k))) for k in ("importe_bruto", "moneda", "fecha_ex", "fecha_registro", "fecha_pago")},
-                       "extraccion": r["extraccion"], "intentos": str(intentos + 1), "enlace": c["enlace"]})
+                       "extraccion": r["extraccion"], "intentos": str(intentos + 1), "enlace": c["enlace"], "lector": LECTOR})
     if nuevas:
         n = pd.DataFrame(nuevas, columns=COLUMNAS)
         clave = set(zip(n["canal"], n["nreg"]))

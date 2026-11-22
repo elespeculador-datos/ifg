@@ -282,7 +282,7 @@ def pruebas_clasificacion() -> None:
 DIVIDENDOS_REALES = {
     "OIR-43348": (0.08, "EUR", "2026-11-24", "2026-11-25", "2026-11-26", "completa"),    # Mapfre
     "OIR-43351": (0.204, "EUR", "2027-01-05", "2027-01-06", "2027-01-07", "completa"),   # Redeia
-    "IP-3391": (0.56, "EUR", None, None, None, "parcial"),                               # Repsol: fechas delante de su etiqueta
+    "IP-3391": (0.56, "EUR", "2027-01-12", "2027-01-13", "2027-01-14", "completa"),      # Repsol: 0,53 + 0,03; viñetas con la fecha delante
     "IP-3397": (0.0642, "EUR", "2026-12-15", "2026-12-16", "2026-12-17", "completa"),    # Unicaja: 6,42 céntimos
     "OIR-43416": (0.1844, "EUR", "2026-11-04", None, "2026-11-06", "completa"),          # CaixaBank
     "OIR-43452": (0.15, "EUR", None, None, "2026-12-04", "parcial"),                     # Grifols: sin fecha ex
@@ -291,10 +291,31 @@ DIVIDENDOS_REALES = {
 }
 
 
+# Lector del 22/11/2026, con la revisión de los 32 comunicados de dividendo de doce meses del IBEX 35 (comprobados
+# uno a uno contra su texto): cada caso fija una forma de escribir el calendario o una cifra que no es la del pago.
+MAS_DIVIDENDOS_REALES = {
+    "IP-2967": (0.5, "EUR", "2026-01-12", "2026-01-13", "2026-01-14", "completa"),       # Repsol: viñetas; el ex-date de los ADR no cuenta
+    "IP-3004": (0.30121021, "EUR", "2025-11-28", "2025-12-01", "2025-12-02", "completa"),  # Bankinter: tabla de cabeceras y valores
+    "IP-3064": (0.3321, "EUR", None, None, None, "parcial"),                            # CaixaBank: el total del año (0,50) no cuenta
+    "IP-3099": (0.551, "EUR", None, None, None, "parcial"),                             # Repsol: ni el total de 2026 ni lo pagado en enero
+    "IP-3115": (0.125, "EUR", "2026-04-30", "2026-05-04", "2026-05-05", "completa"),    # Santander: céntimos; fechas sin año
+    "IP-3150": (None, None, None, None, None, "sin datos"),                             # Repsol: dos repartos en la junta: ninguno
+    "IP-3249": (0.1, "EUR", "2026-06-29", "2026-06-30", "2026-07-01", "completa"),      # Sacyr: viñetas con el día de la semana
+    "IP-3327": (0.0844, "EUR", "2026-09-22", "2026-09-23", "2026-09-24", "completa"),   # Unicaja: «8,44 céntimos brutos»
+    "IP-3356": (0.127, "EUR", "2026-10-29", "2026-10-30", "2026-11-02", "completa"),    # Santander: «cotizará ex-dividendo el…»
+    "OIR-41518": (0.6, "EUR", "2026-06-30", "2026-07-01", "2026-07-02", "completa"),    # Enagás: el 0,4 ya pagado no cuenta
+    "OIR-41586": (0.9594, "EUR", "2026-07-13", "2026-07-14", "2026-07-15", "completa"),  # Rovi: fechas sin año
+    "OIR-41650": (5.74867096, "EUR", "2026-07-07", "2026-07-08", "2026-07-09", "completa"),  # Acciona: ajustado por la autocartera
+    "OIR-43553": (0.33, "EUR", "2026-12-08", "2026-12-09", "2026-12-10", "completa"),   # Fluidra: segundo pago; el primero ya pasó
+    "OIR-43636": (0.2, "EUR", "2026-11-20", "2026-11-23", "2026-12-10", "completa"),    # Merlin: «(0,20€) brutos por acción»
+    "OIR-43701": (0.080248, "EUR", "2026-11-24", "2026-11-25", "2026-11-26", "completa"),  # Mapfre: importe ajustado
+}
+
+
 def pruebas_dividendos() -> None:
     from datetime import date
     fuentes = {r["fichero"][:-4]: r for r in csv.DictReader((PRUEBAS / "dividendos" / "fuentes.csv").open(encoding="utf-8"))}
-    for nombre, (imp, mon, ex, reg, pago, ext) in DIVIDENDOS_REALES.items():
+    for nombre, (imp, mon, ex, reg, pago, ext) in {**DIVIDENDOS_REALES, **MAS_DIVIDENDOS_REALES}.items():
         f = fuentes[nombre]
         texto = f["titulo"] + "\n" + (PRUEBAS / "dividendos" / f"{nombre}.txt").read_text(encoding="utf-8")
         r = dv.extraer(texto, date.fromisoformat(f["fecha_comunicado"]), "Dividendo")
@@ -311,6 +332,26 @@ def pruebas_dividendos() -> None:
     ok(mal["fecha_ex"] is None and mal["fecha_pago"] is None and mal["importe_bruto"] == 0.3, "fecha ex posterior al pago: fuera las fechas, queda el importe")
     viejo = dv.extraer("dividendo de 0,30 euros brutos por acción. Fecha de pago: 10 de enero de 2025.", com)
     ok(viejo["fecha_pago"] is None, "fecha de pago anterior al comunicado: fuera")
+    largo = dv.extraer("Informe de resultados. " * 1500 + "Dividendo de 0,30 euros brutos por acción. Fecha de pago: 10 de diciembre de 2026.", com)
+    ok(largo["importe_bruto"] is None and largo["fecha_pago"] is None and largo["extraccion"] == "sin datos",
+       "documento largo (informe de resultados): no se lee nada")
+    dos = dv.extraer("Dividendo de 0,30 euros brutos por acción el 10 de diciembre de 2026 y otro de 0,40 euros brutos por acción en 2027.", com)
+    ok(dos["importe_bruto"] is None, "dos importes distintos sin regla segura: ninguno")
+    ajuste = dv.extraer("Dividendo de 0,25 euros brutos por acción, que tras la autocartera queda en 0,2531 euros brutos por acción.", com)
+    ok(ajuste["importe_bruto"] == 0.2531, "importe aprobado y ajustado por la autocartera: el ajustado")
+    lejos = dv.extraer("Dividendo de 0,25 euros brutos por acción, frente a 0,2531 euros brutos por acción el año pasado y 0,26 euros brutos por acción antes.", com)
+    ok(lejos["importe_bruto"] is None, "tres importes que no suman: ninguno")
+    sin_ano = dv.extraer("Dividendo de 0,25 euros brutos por acción. Fecha de pago: 15 de enero.", com)
+    ok(str(sin_ano["fecha_pago"]) == "2027-01-15", "fecha sin año en un comunicado de octubre: enero del año siguiente")
+    sin_ano = dv.extraer("Dividendo de 0,25 euros brutos por acción. Fecha de pago: 15 de junio.", com)
+    ok(sin_ano["fecha_pago"] is None, "fecha sin año que no puede ser posterior al comunicado: fuera")
+    suma = dv.extraer("El pago de 0,30 euros brutos por acción se suma al dividendo de 0,20 euros brutos por acción de junio.", com)
+    ok(suma["importe_bruto"] == 0.3, "«se suma al dividendo de…»: esa cifra es de otro pago")
+    frases = dv.extraer("El consejo se reunió el 27 de octubre de 2026. Se informará de la fecha de pago más adelante. "
+                        "El dividendo se aprobó el 28 de octubre de 2026. La record date se fijará en diciembre.", com)
+    ok(frases["fecha_pago"] is None and frases["fecha_registro"] is None, "fecha delante de una frase que no es una viñeta: no es del calendario")
+    vineta = dv.extraer("Las acciones cotizarán sin derecho al dividendo (ex-date).\n- 14 de diciembre de 2026: junta general.", com)
+    ok(vineta["fecha_ex"] is None, "la fecha de la viñeta siguiente no es la de la etiqueta anterior")
 
     # actualizar(): una fila por comunicado de dividendo (canal y número), sin repetir lecturas
     datos = TMP / "div" / "cnmv" / "datos"
@@ -344,6 +385,15 @@ def pruebas_dividendos() -> None:
     ok(tabla[("OIR", "43510")]["importe_bruto"] == "0.053" and tabla[("OIR", "43510")]["moneda"] == "EUR", "IAG: importe del título del registro")
     n_antes = len(pedidos)
     ok(dv.actualizar(datos, limite=20, texto_de=texto_de)["leidos"] == 0 and len(pedidos) == n_antes, "con todo leído, no se pide nada")
+    ok(all(r["lector"] == dv.LECTOR for r in tabla.values()), "cada fila guarda la versión del lector que la leyó")
+    # una fila leída con un lector anterior (sin columna «lector») se vuelve a leer
+    vieja = pd.read_csv(datos / "dividendos.csv", dtype=str, keep_default_na=False)
+    vieja.loc[vieja["nreg"] == "3391", ["importe_bruto", "extraccion"]] = ["9.99", "parcial"]
+    vieja.drop(columns=["lector"]).to_csv(datos / "dividendos.csv", index=False)
+    r3 = dv.actualizar(datos, limite=20, texto_de=texto_de)
+    tabla = {(r["canal"], r["nreg"]): r for r in csv.DictReader((datos / "dividendos.csv").open(encoding="utf-8"))}
+    ok(r3["leidos"] == 9 and tabla[("IP", "3391")]["importe_bruto"] == "0.56" and tabla[("IP", "3391")]["lector"] == dv.LECTOR,
+       f"lector nuevo: se vuelve a leer todo (desde la caché) y se corrige lo que leía mal el anterior ({r3['leidos']})")
 
 
 # --------------------------------------------------------------------------- 4. paridad con la web y BME
