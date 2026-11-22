@@ -38,11 +38,13 @@ Acordado entre Datos y el proyecto IFG el 17/11/2026 y autorizado por Federico e
 40 16 * * 1-5  /home/smpro/colectores-main/servidor/ejecutar.sh divisas
 30 11 * * 1-5  /home/smpro/colectores-main/servidor/ejecutar.sh expectativas
 0 7   * * 1,6  /home/smpro/colectores-main/servidor/ejecutar.sh cot
+50 8,19 * * 1-5 /home/smpro/colectores-main/servidor/ejecutar.sh ofertas
 40 7  * * 1-6  /home/smpro/colectores-main/servidor/ejecutar.sh empresas
 10 21 * * 1-5  /home/smpro/colectores-main/servidor/ejecutar.sh empresas
 30 8  * * 2,4  /home/smpro/colectores-main/servidor/ejecutar.sh recompras
 ```
 
 - Dependencias de Python en el entorno virtual: `pandas xlrd python-calamine requests openpyxl certifi numpy scipy` (con `constraints` del `pip freeze` del servidor) y el paquete del sistema `poppler-utils` (letras y bonos leen PDF). `prima` y `ahorro` solo necesitan `requests pandas numpy scipy`; `agenda`, solo `requests` (y `zoneinfo`, de la biblioteca estándar desde Python 3.9). `directivos` necesita `requests` y `poppler-utils` (`pdftotext`). `divisas`, `expectativas` y `cot`, `requests pandas`. `empresas` no necesita nada fuera de la biblioteca estándar. `recompras`, `requests` y `poppler-utils`.
+- `ofertas` (OPAs desde el registro oficial de la CNMV, indicador 11; PR de la rama `opas-cnmv`): 08:50 y 19:50 de lunes a viernes. La primera vez, una pasada a mano con `--max 300` carga el histórico entero (252 OPAs desde 1998, unos diez minutos); si no, se completa solo en cinco pasadas. Solo `requests`. Carpeta `ofertas` en la lista blanca de nginx. No confundir con `opas` (BME), que el script rechaza.
 - nginx sirve `$ESPEC_DATOS_DIR` con lista blanca de carpetas: al añadir un colector hay que añadir su carpeta (hecho para estres, prima y ahorro el 17/11; pendientes `agenda`, fusionada el 18/11, `directivos`, PR #94, `divisas`, PR #95, `expectativas`, PR #96, `cot`, PR #98, `empresas`, PR #101, y `recompras`, PR #99). `agenda` lee las salidas de `letras/` y `bonos/` de la misma carpeta (`datos/proximas_subastas.csv`).
 - Vuelta atrás: copias del traspaso en `/home/smpro/respaldo/*antes-traspaso-20261117-2054*` (crontab, tar de `/var/www/datos`, nginx, pip freeze); registro del traspaso en `/home/smpro/respaldo/traspaso-20261117.log`; la instalación anterior (`/home/smpro/apps/colectores`, `/home/smpro/bin/colector.sh`) se conserva sin uso.
