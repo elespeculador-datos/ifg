@@ -1,0 +1,409 @@
+{
+ "origen": "https://elespeculador.com/ibex35/<ficha>/, bloque ficha-cnmv pintado por el fragmento 50 con el colector de WordPress (fragmento 64), leído el 21/11/2026 a las 22:10",
+ "fichas": {
+  "acciona-energia": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [],
+   "etiquetas": []
+  },
+  "acciona": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [],
+   "etiquetas": []
+  },
+  "acerinox": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43422",
+    "43424",
+    "43426"
+   ],
+   "etiquetas": [
+    "Resultados 3T 2026"
+   ]
+  },
+  "acs": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "3413",
+    "43232",
+    "43291",
+    "43318",
+    "43465",
+    "43584",
+    "43613",
+    "43681"
+   ],
+   "etiquetas": [
+    "Recompra",
+    "Resultados 3T 2026",
+    "OPA"
+   ]
+  },
+  "aena": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43245",
+    "43357",
+    "43360",
+    "43367"
+   ],
+   "etiquetas": [
+    "Resultados 3T 2026"
+   ]
+  },
+  "amadeus": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43512",
+    "43513",
+    "43514"
+   ],
+   "etiquetas": [
+    "Resultados 3T 2026"
+   ]
+  },
+  "arcelormittal": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43330",
+    "43445",
+    "43492"
+   ],
+   "etiquetas": [
+    "Resultados 3T 2026",
+    "Recompra"
+   ]
+  },
+  "banco-sabadell": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "3384",
+    "3385",
+    "3386",
+    "43220",
+    "43303",
+    "43332",
+    "43455",
+    "43551",
+    "43675"
+   ],
+   "etiquetas": [
+    "Recompra",
+    "Resultados 3T 2026"
+   ]
+  },
+  "banco-santander": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "3373",
+    "3374",
+    "3375",
+    "43248",
+    "43266",
+    "43376"
+   ],
+   "etiquetas": [
+    "Recompra",
+    "Resultados 3T 2026"
+   ]
+  },
+  "bankinter": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "3367",
+    "3368"
+   ],
+   "etiquetas": [
+    "Resultados 3T 2026"
+   ]
+  },
+  "bbva": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "3387",
+    "3388",
+    "3389",
+    "43292",
+    "43462",
+    "43585",
+    "43664"
+   ],
+   "etiquetas": [
+    "Recompra",
+    "Resultados 3T 2026"
+   ]
+  },
+  "caixabank": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "3396",
+    "43278",
+    "43413",
+    "43414",
+    "43415",
+    "43416",
+    "43429",
+    "43525",
+    "43653",
+    "43759"
+   ],
+   "etiquetas": [
+    "Recompra",
+    "Dividendo",
+    "Resultados 3T 2026"
+   ]
+  },
+  "cellnex": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "3408",
+    "3409",
+    "43217",
+    "43305",
+    "43454",
+    "43550",
+    "43676"
+   ],
+   "etiquetas": [
+    "Recompra",
+    "Resultados 3T 2026"
+   ]
+  },
+  "colonial": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [],
+   "etiquetas": []
+  },
+  "enagas": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43221",
+    "43702"
+   ],
+   "etiquetas": [
+    "Dividendo",
+    "Resultados 3T 2026"
+   ]
+  },
+  "endesa": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43312",
+    "43354",
+    "43453",
+    "43552"
+   ],
+   "etiquetas": [
+    "Recompra",
+    "Resultados 3T 2026"
+   ]
+  },
+  "ferrovial": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "3372",
+    "43235",
+    "43326",
+    "43338",
+    "43340",
+    "43459",
+    "43473",
+    "43667"
+   ],
+   "etiquetas": [
+    "Recompra",
+    "Dividendo flexible",
+    "Resultados 3T 2026"
+   ]
+  },
+  "fluidra": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43224",
+    "43355",
+    "43377",
+    "43378",
+    "43553"
+   ],
+   "etiquetas": [
+    "Dividendo",
+    "Resultados 3T 2026",
+    "Recompra"
+   ]
+  },
+  "grifols": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43451",
+    "43452"
+   ],
+   "etiquetas": [
+    "Dividendo",
+    "Fecha de resultados 3T 2026"
+   ]
+  },
+  "iag": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43218",
+    "43302",
+    "43449",
+    "43510",
+    "43518",
+    "43549",
+    "43685"
+   ],
+   "etiquetas": [
+    "Recompra",
+    "Resultados 3T 2026",
+    "Dividendo"
+   ]
+  },
+  "iberdrola": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43241",
+    "43243",
+    "43244"
+   ],
+   "etiquetas": [
+    "Dividendo flexible",
+    "Resultados 3T 2026"
+   ]
+  },
+  "inditex": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [],
+   "etiquetas": []
+  },
+  "indra": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [],
+   "etiquetas": []
+  },
+  "logista": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [],
+   "etiquetas": []
+  },
+  "mapfre": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43252",
+    "43274",
+    "43348",
+    "43701"
+   ],
+   "etiquetas": [
+    "Dividendo",
+    "Dividendo",
+    "Fecha de resultados 3T 2026"
+   ]
+  },
+  "merlin-properties": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43636"
+   ],
+   "etiquetas": [
+    "Dividendo"
+   ]
+  },
+  "naturgy": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [],
+   "etiquetas": []
+  },
+  "puig": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43256",
+    "43257"
+   ],
+   "etiquetas": [
+    "Resultados 3T 2026"
+   ]
+  },
+  "redeia": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43351"
+   ],
+   "etiquetas": [
+    "Dividendo"
+   ]
+  },
+  "repsol": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "3390",
+    "3391",
+    "43255",
+    "43308",
+    "43379",
+    "43384",
+    "43505",
+    "43612",
+    "43719"
+   ],
+   "etiquetas": [
+    "Recompra",
+    "Resultados 3T 2026",
+    "Dividendo"
+   ]
+  },
+  "rovi": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "3404",
+    "3406"
+   ],
+   "etiquetas": [
+    "Resultados 3T 2026"
+   ]
+  },
+  "sacyr": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43250",
+    "43476",
+    "43477"
+   ],
+   "etiquetas": [
+    "Resultados 3T 2026"
+   ]
+  },
+  "solaria": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "43734"
+   ],
+   "etiquetas": [
+    "Resultados 3T 2026"
+   ]
+  },
+  "telefonica": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "3417"
+   ],
+   "etiquetas": [
+    "Resultados 3T 2026"
+   ]
+  },
+  "unicaja": {
+   "sello": "2026-11-21T00:46",
+   "nreg": [
+    "3397",
+    "3398",
+    "3399",
+    "3400"
+   ],
+   "etiquetas": [
+    "Resultados 3T 2026",
+    "Dividendo"
+   ]
+  }
+ }
+}
