@@ -31,6 +31,7 @@ TMP = Path(tempfile.mkdtemp(prefix="pruebas_cnmv_"))
 os.environ["ESPEC_DATOS_DIR"] = str(TMP)
 sys.path.insert(0, str(AQUI))
 import comunicados as cn  # noqa: E402
+import dividendos_cnmv as dv  # noqa: E402
 import pandas as pd  # noqa: E402
 
 FALLOS: list[str] = []
@@ -168,6 +169,62 @@ def pruebas_huecos() -> None:
        "si la CNMV cambia la forma de sus fichas: se avisa con error (incidencia) y no se anota nada como inexistente")
 
 
+def pruebas_atras() -> None:
+    """Relleno hacia atrás hasta doce meses (registro oficial de las fichas)."""
+    hoy = datetime(2026, 11, 21, 9, 0, tzinfo=MADRID)
+    base = pagina("oir-43552")
+
+    def ficha_con(n: int, dia: str) -> str:  # la ficha real de Endesa con otro número y otra fecha
+        return base.replace("43552", str(n)).replace("09/11/2026", dia)
+
+    h = _h([("OIR", n, "2026-11-10T10:00:00") for n in range(100, 106)] + [("IP", 50, "2026-11-12T10:00:00")])
+    paginas = {("OIR", 99): ficha_con(99, "01/11/2026"), ("OIR", 98): pagina("oir-99999"), ("OIR", 97): ficha_con(97, "20/10/2026"),
+               ("IP", 49): pagina("ip-3413").replace("3413", "49").replace("07/11/2026", "01/10/2026")}
+    pedidos: list = []
+
+    def bajar(canal, n):
+        pedidos.append((canal, n))
+        if (canal, n) not in paginas:
+            raise cn.requests.ConnectionError("sin respuesta")
+        return paginas[(canal, n)]
+
+    limpiar()
+    filas, estado, problema = cn.rellenar_atras(h, [], hoy, bajar=bajar, pausa=0, dias=30)
+    ok([(f["canal"], f["nreg"]) for f in filas] == [("IP", 49), ("OIR", 99), ("OIR", 97)] and estado == {"IP": "completo", "OIR": "completo"}
+       and problema is None, f"hacia atrás: primero IP, luego OIR, hasta el primer comunicado anterior al objetivo ({estado})")
+    ok(pedidos == [("IP", 49), ("OIR", 99), ("OIR", 98), ("OIR", 97)], f"hacia atrás: número a número, sin saltos ({pedidos})")
+    ok(cn.leer_sin_registro() == {("OIR", 98): {"consultado": "2026-11-21", "intentos": 2}}, "hacia atrás: el número inexistente se anota y no se repite")
+    h2 = pd.concat([h, pd.DataFrame(filas, columns=cn.COLUMNAS).astype(str)], ignore_index=True)
+    pedidos.clear()
+    filas2, estado2, _ = cn.rellenar_atras(h2, [], hoy, bajar=bajar, pausa=0, dias=30)
+    ok(filas2 == [] and pedidos == [] and estado2 == {"IP": "completo", "OIR": "completo"}, "con el histórico completo hacia atrás, no se pide nada")
+    ok(cn.resumen_historico(h2, hoy, dias=30) == {"IP": {"desde": "2026-10-01", "completo": True}, "OIR": {"desde": "2026-10-20", "completo": True}}
+       and cn.resumen_historico(h, hoy, dias=30)["OIR"] == {"desde": "2026-11-10", "completo": False}, "resumen del histórico: desde cuándo y si está completo")
+
+    limpiar()
+    pedidos.clear()
+    del paginas[("OIR", 98)]
+    filas, estado, problema = cn.rellenar_atras(h, [], hoy, bajar=bajar, pausa=0, dias=30)
+    ok([f["nreg"] for f in filas] == [49, 99] and estado["OIR"] == "parado" and problema is None and not cn.leer_sin_registro(),
+       "hacia atrás: si una ficha no responde, ese canal se para sin anotar nada (la pasada siguiente sigue por ella)")
+    h3 = pd.concat([h, pd.DataFrame(filas, columns=cn.COLUMNAS).astype(str)], ignore_index=True)
+    pedidos.clear()
+    cn.rellenar_atras(h3, [], hoy, bajar=bajar, pausa=0, dias=30)
+    ok(pedidos[:1] == [("OIR", 98)], f"la pasada siguiente empieza por el número que falló ({pedidos[:1]})")
+
+    limpiar()
+    pedidos.clear()
+    paginas[("OIR", 98)] = pagina("oir-99999")
+    filas, estado, _ = cn.rellenar_atras(h, [], hoy, bajar=bajar, limite=2, pausa=0, dias=30)
+    ok(len(pedidos) == 2 and estado == {"IP": "completo", "OIR": "en curso"}, f"hacia atrás: límite por pasada ({estado}, {pedidos})")
+
+    limpiar()
+    raras = lambda canal, n: '<html><div id="ctl00_H1">x</div><p>Otra cosa</p></html>'  # noqa: E731
+    filas, estado, problema = cn.rellenar_atras(h, [], hoy, bajar=raras, pausa=0, dias=30)
+    ok(problema is not None and filas == [] and estado["OIR"] == "parado" and not cn.leer_sin_registro(),
+       "hacia atrás: una ficha con forma desconocida para el relleno y da error, sin anotar nada")
+
+
 # --------------------------------------------------------------------------- 3. regla de resultados
 def pruebas_clasificacion() -> None:
     casos = [
@@ -195,6 +252,75 @@ def pruebas_clasificacion() -> None:
     ok(añadidas == {("OIR", "43360"): ("resultados", "Resultados", "3T 2026"), ("IP", "3408"): ("resultados", "Resultados", "3T 2026"),
                     ("IP", "3409"): ("resultados", "Resultados", "3T 2026"), ("IP", "3372"): ("resultados", "Resultados", "3T 2026")},
        f"histórico real: se añaden exactamente Aena 43360, Cellnex 3408 y 3409 y Ferrovial 3372 ({sorted(añadidas)})")
+
+
+# --------------------------------------------------------------------------- 3 bis. dividendos leídos del comunicado
+# Valores comprobados a mano en cada PDF el 22/11/2026 (segunda lectura independiente del analizador).
+DIVIDENDOS_REALES = {
+    "OIR-43348": (0.08, "EUR", "2026-11-24", "2026-11-25", "2026-11-26", "completa"),    # Mapfre
+    "OIR-43351": (0.204, "EUR", "2027-01-05", "2027-01-06", "2027-01-07", "completa"),   # Redeia
+    "IP-3391": (0.56, "EUR", None, None, None, "parcial"),                               # Repsol: fechas delante de su etiqueta
+    "IP-3397": (0.0642, "EUR", "2026-12-15", "2026-12-16", "2026-12-17", "completa"),    # Unicaja: 6,42 céntimos
+    "OIR-43416": (0.1844, "EUR", "2026-11-04", None, "2026-11-06", "completa"),          # CaixaBank
+    "OIR-43452": (0.15, "EUR", None, None, "2026-12-04", "parcial"),                     # Grifols: sin fecha ex
+    "OIR-43510": (0.053, "EUR", "2026-12-03", "2026-12-04", "2026-12-07", "completa"),   # IAG: importe del título
+    "OIR-43702": (0.4, "EUR", "2026-12-14", "2026-12-15", "2026-12-16", "completa"),     # Enagás
+}
+
+
+def pruebas_dividendos() -> None:
+    from datetime import date
+    fuentes = {r["fichero"][:-4]: r for r in csv.DictReader((PRUEBAS / "dividendos" / "fuentes.csv").open(encoding="utf-8"))}
+    for nombre, (imp, mon, ex, reg, pago, ext) in DIVIDENDOS_REALES.items():
+        f = fuentes[nombre]
+        texto = f["titulo"] + "\n" + (PRUEBAS / "dividendos" / f"{nombre}.txt").read_text(encoding="utf-8")
+        r = dv.extraer(texto, date.fromisoformat(f["fecha_comunicado"]), "Dividendo")
+        leido = (r["importe_bruto"], r["moneda"], *(str(r[k]) if r[k] else None for k in ("fecha_ex", "fecha_registro", "fecha_pago")), r["extraccion"])
+        ok(leido == (imp, mon, ex, reg, pago, ext), f"dividendo real {nombre} ({f['empresa']}): {leido}")
+    com = date(2026, 10, 20)
+    usd = dv.extraer("ArcelorMittal announces a quarterly dividend of US$0.125 per share. Ex-dividend date: November 18, 2026. "
+                     "Payment date: December 9, 2026.", com)
+    ok((usd["importe_bruto"], usd["moneda"], usd["extraccion"]) == (0.125, "USD", "completa"), "dividendo en dólares: moneda USD, no EUR")
+    sin = dv.extraer("Importe bruto por acción: 0,25. Fecha ex-dividendo 15/12/2026. Fecha de pago 17/12/2026", com)
+    ok(sin["importe_bruto"] is None and sin["moneda"] is None and sin["extraccion"] == "parcial", "importe sin moneda escrita: no se publica")
+    ok(dv.extraer("Iberdrola Retribución Flexible", com, "Dividendo flexible")["extraccion"] == "flexible: ver comunicado", "flexible: no se lee importe")
+    mal = dv.extraer("dividendo de 0,30 euros brutos por acción. Fecha ex-dividendo: 20 de diciembre de 2026. Fecha de pago: 10 de diciembre de 2026.", com)
+    ok(mal["fecha_ex"] is None and mal["fecha_pago"] is None and mal["importe_bruto"] == 0.3, "fecha ex posterior al pago: fuera las fechas, queda el importe")
+    viejo = dv.extraer("dividendo de 0,30 euros brutos por acción. Fecha de pago: 10 de enero de 2025.", com)
+    ok(viejo["fecha_pago"] is None, "fecha de pago anterior al comunicado: fuera")
+
+    # actualizar(): una fila por comunicado de dividendo (canal y número), sin repetir lecturas
+    datos = TMP / "div" / "cnmv" / "datos"
+    datos.mkdir(parents=True, exist_ok=True)
+    cab = "canal,nreg,fecha,emisor,categoria,texto,enlace,isin,empresa,ficha,caja,etiqueta,periodo,grupo\n"
+    filas = [f"{fuentes[n]['canal']},{fuentes[n]['nreg']},{fuentes[n]['fecha_comunicado']}T10:00:00,X,Dividendos,\"{fuentes[n]['titulo']}\",{fuentes[n]['enlace']},ES0,{fuentes[n]['empresa']},f,dividendos,Dividendo,,g{i}"
+             for i, n in enumerate(DIVIDENDOS_REALES)]
+    filas += ["OIR,43244,2026-10-21T08:29:27,IBERDROLA,Otros,Iberdrola Retribución Flexible,https://x,ES0144580Y14,Iberdrola,iberdrola,dividendos,Dividendo flexible,,gf",
+              "OIR,3391,2020-06-01T10:00:00,OTRA,Otros,Resultados,https://y,ES1,Otra,otra,resultados,Resultados,1T 2020,gr"]
+    (datos / "ibex35.csv").write_text(cab + "\n".join(filas) + "\n", encoding="utf-8")
+    pedidos: list = []
+
+    def texto_de(canal, nreg, enlace):
+        pedidos.append((canal, nreg))
+        nombre = f"{canal}-{nreg}"
+        if nombre == "OIR-43452" and pedidos.count((canal, nreg)) == 1:
+            return None   # la primera vez no hay documento
+        return (PRUEBAS / "dividendos" / f"{nombre}.txt").read_text(encoding="utf-8")
+
+    r1 = dv.actualizar(datos, limite=5, texto_de=texto_de)
+    tabla = {(r["canal"], r["nreg"]): r for r in csv.DictReader((datos / "dividendos.csv").open(encoding="utf-8"))}
+    ok(r1["leidos"] == 5 and r1["pendientes"] == 4 and tabla[("OIR", "43452")]["extraccion"] == "sin documento",
+       f"límite por pasada: 5 leídos y 4 pendientes; el que no tenía documento queda así ({r1})")
+    n_antes = len(pedidos)
+    r2 = dv.actualizar(datos, limite=20, texto_de=texto_de)
+    tabla = {(r["canal"], r["nreg"]): r for r in csv.DictReader((datos / "dividendos.csv").open(encoding="utf-8"))}
+    ok(r2["leidos"] == 5 and ("OIR", "43452") in pedidos[n_antes:] and tabla[("OIR", "43452")]["extraccion"] == "parcial"
+       and tabla[("OIR", "43452")]["intentos"] == "2", "pasada siguiente: los pendientes y otra vez el que no tenía documento, que ahora se lee")
+    ok(len(tabla) == 9 and ("OIR", "3391") not in tabla and ("IP", "3391") in tabla, "una fila por comunicado de dividendo; IP 3391 y OIR 3391 no se confunden")
+    ok(("OIR", "43244") not in pedidos and tabla[("OIR", "43244")]["extraccion"] == "flexible: ver comunicado", "el flexible no se descarga")
+    ok(tabla[("OIR", "43510")]["importe_bruto"] == "0.053" and tabla[("OIR", "43510")]["moneda"] == "EUR", "IAG: importe del título del registro")
+    n_antes = len(pedidos)
+    ok(dv.actualizar(datos, limite=20, texto_de=texto_de)["leidos"] == 0 and len(pedidos) == n_antes, "con todo leído, no se pide nada")
 
 
 # --------------------------------------------------------------------------- 4. paridad con la web y BME
@@ -245,7 +371,9 @@ if __name__ == "__main__":
     try:
         pruebas_ficha()
         pruebas_huecos()
+        pruebas_atras()
         pruebas_clasificacion()
+        pruebas_dividendos()
         pruebas_paridad_y_bme()
     finally:
         shutil.rmtree(TMP, ignore_errors=True)

@@ -79,6 +79,8 @@ SIN_REGISTRO = DATOS / "numeros_sin_registro.csv"   # números que la CNMV no en
 DIAS_HUECOS = 45        # se buscan huecos de numeración desde el primer comunicado de los últimos 45 días
 MAX_RELLENO = 200       # fichas como máximo por pasada (el primer relleno del 07/11-15/11 son unas 200)
 PAUSA_RELLENO = 0.5     # segundos entre dos fichas, por cortesía con la CNMV
+DIAS_HISTORICO = 400    # hacia atrás, el histórico se completa hasta el primer comunicado anterior a hoy − 400 días
+MAX_ATRAS = 300         # fichas como máximo por pasada en el relleno hacia atrás (unas 7.000 en total para un año)
 
 CAJAS = [  # clave (igual que el id del panel en la plantilla de la web), título, descripción del recuadro
     ("resultados", "Resultados", "Cuentas y fechas de publicación comunicadas a la CNMV."),
@@ -316,6 +318,81 @@ def rellenar(h: pd.DataFrame, nuevas: list[dict], hoy: datetime, bajar=None, lim
         print(f"Relleno por número de registro: {len(filas)} comunicados recuperados de {pedidos} números pedidos; "
               f"quedan {quedan['IP']} en IP y {quedan['OIR']} en OIR.")
     return filas, quedan, problema
+
+
+def rellenar_atras(h: pd.DataFrame, nuevas: list[dict], hoy: datetime, bajar=None, limite: int = MAX_ATRAS,
+                   pausa: float = PAUSA_RELLENO, dias: int = DIAS_HISTORICO) -> tuple[list[dict], dict[str, str], str | None]:
+    """Completa el histórico hacia atrás, número a número, desde el primer número conocido de cada canal hasta el
+    primer comunicado anterior a hoy − `dias` (el registro oficial de las fichas cubre doce meses). Primero IP, que
+    tiene pocos, luego OIR; hasta `limite` fichas por pasada. Si una ficha falla (red, CNMV), para ese canal: la
+    pasada siguiente sigue por el mismo número, así que nunca deja huecos. Devuelve las filas, el estado de cada
+    canal (completo, en curso, parado) y, si la CNMV ha cambiado la forma de sus fichas, el motivo."""
+    objetivo = (hoy - timedelta(days=dias)).strftime("%Y-%m-%d")
+    sin = leer_sin_registro()
+    hoy_txt = hoy.strftime("%Y-%m-%d")
+    if bajar is None:
+        sesion = requests.Session()
+        bajar = lambda c, n: _bajar_ficha(sesion, c, n)  # noqa: E731
+    filas, estado, problema, pedidos, cambia_sin = [], {}, None, 0, False
+    for canal in CANALES:
+        fechas = [str(f)[:10] for f in h.loc[h["canal"] == canal, "fecha"]] + [str(f["fecha"])[:10] for f in nuevas if f["canal"] == canal]
+        if not fechas:
+            estado[canal] = "sin datos"
+            continue
+        if min(fechas) < objetivo:
+            estado[canal] = "completo"
+            continue
+        conocidos = ({int(n) for n in h.loc[h["canal"] == canal, "nreg"]} | {int(f["nreg"]) for f in nuevas if f["canal"] == canal}
+                     | {n for (c, n) in sin if c == canal})
+        n = min(conocidos) - 1
+        estado[canal] = "en curso"
+        while n > 0:
+            if pedidos >= limite:
+                break
+            if pedidos and pausa:
+                time.sleep(pausa)
+            pedidos += 1
+            try:
+                pagina = bajar(canal, n)
+            except Exception as e:  # se para el canal y la pasada siguiente sigue por este mismo número
+                print(f"::warning::Relleno hacia atrás parado en la ficha {canal} {n} ({type(e).__name__}: {e})")
+                estado[canal] = "parado"
+                break
+            try:
+                fila = leer_ficha(pagina, canal, n)
+            except DatosRaros as e:
+                problema = str(e)
+                estado[canal] = "parado"
+                break
+            if fila:
+                filas.append(fila)
+                if fila["fecha"][:10] < objetivo:
+                    estado[canal] = "completo"
+                    break
+            elif pagina_sin_registro(pagina):
+                sin[(canal, n)] = {"consultado": hoy_txt, "intentos": 2}  # hacia atrás no se vuelve a preguntar
+                cambia_sin = True
+            else:
+                problema = f"Ficha {canal} {n}: página de la CNMV con una forma que el colector no reconoce (relleno hacia atrás)"
+                estado[canal] = "parado"
+                break
+            n -= 1
+    if cambia_sin:
+        guardar_sin_registro(sin)
+    if pedidos:
+        print(f"Relleno hacia atrás (hasta el {objetivo}): {len(filas)} comunicados de {pedidos} números pedidos; "
+              f"IP {estado.get('IP')}, OIR {estado.get('OIR')}.")
+    return filas, estado, problema
+
+
+def resumen_historico(h: pd.DataFrame, hoy: datetime, dias: int = DIAS_HISTORICO) -> dict:
+    """Desde qué fecha tiene el histórico cada canal y si ya cubre los `dias` hacia atrás."""
+    objetivo = (hoy - timedelta(days=dias)).strftime("%Y-%m-%d")
+    out = {}
+    for canal in CANALES:
+        f = [str(x)[:10] for x in h.loc[h["canal"] == canal, "fecha"]]
+        out[canal] = {"desde": min(f) if f else None, "completo": bool(f) and min(f) < objetivo}
+    return out
 
 
 def leer_historico() -> pd.DataFrame:
@@ -701,6 +778,8 @@ def main() -> int:
     ap.add_argument("--forzar", action="store_true", help="reescribir aunque no haya comunicados nuevos")
     ap.add_argument("--sin-relleno", action="store_true", help="no pedir a la CNMV los números de registro que faltan")
     ap.add_argument("--relleno-max", type=int, default=MAX_RELLENO, help="fichas como máximo por pasada")
+    ap.add_argument("--atras-max", type=int, default=MAX_ATRAS, help="fichas como máximo por pasada hacia atrás (0 = no)")
+    ap.add_argument("--dividendos-max", type=int, default=20, help="comunicados de dividendo que se leen por pasada (0 = no)")
     args = ap.parse_args()
     if args.local:
         filas = []
@@ -711,16 +790,28 @@ def main() -> int:
         filas = descargar()
     extra, problema = None, None
     if not args.local and not args.sin_relleno:
-        recuperadas, quedan, problema = rellenar(leer_historico(), filas, ahora_madrid(), limite=args.relleno_max)
+        previo = leer_historico()
+        recuperadas, quedan, problema = rellenar(previo, filas, ahora_madrid(), limite=args.relleno_max)
         filas += recuperadas
+        atras, _, problema_atras = rellenar_atras(previo, filas, ahora_madrid(), limite=args.atras_max) if args.atras_max else ([], {}, None)
+        filas += atras
+        problema = problema or problema_atras
         extra = {"huecos_pendientes": quedan}
     h, nuevos = acumular(filas)
+    if extra is not None:
+        extra["historico"] = resumen_historico(h, ahora_madrid())
     e = empresas_ibex(pd.Timestamp(ahora_madrid().date()))
     c = clasificados(h, e)
     if escribir(h, c, e, nuevos, args.forzar, extra):
         print(f"{nuevos} comunicados nuevos; {len(c)} del IBEX 35 clasificados en el histórico.")
     else:
         print(f"Sin comunicados nuevos en la CNMV ({len(h)} en el histórico): no se toca nada.")
+    if not args.local and not args.sin_relleno and args.dividendos_max:
+        try:  # importe y fechas de cada dividendo, leídos del propio comunicado (dividendos_cnmv.py)
+            import dividendos_cnmv
+            dividendos_cnmv.actualizar(DATOS, limite=args.dividendos_max)
+        except Exception as e:  # no frena lo ya publicado, pero abre la incidencia
+            problema = problema or f"dividendos de la CNMV: {type(e).__name__}: {e}"
     if problema:  # lo leído se publica igual; el error abre la incidencia cnmv-fallido
         raise DatosRaros(problema)
     return 0

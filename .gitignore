@@ -14,3 +14,6 @@ entrada/
 # Marcador interno que publicar_diario.py deja para el paso del flujo que
 # abre la incidencia por deriva. Es una señal de una ejecución, no un dato.
 aviso_deriva.json
+
+# Caché de documentos descargados por los colectores (PDF de la CNMV y su texto): no se publica ni se versiona.
+cache/
