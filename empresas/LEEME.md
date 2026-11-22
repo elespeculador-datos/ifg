@@ -26,7 +26,7 @@ Campos de cada `<ISIN>.json`:
 | `cortos` | `total_publicado` (suma de posiciones ≥ 0,5 %), `fecha_dato` (publicación de la CNMV), `tenedores`, `posiciones` (tenedor, %, fecha), `ultima_posicion`, `cambios_30d`, `fuente` | colector `cortos` |
 | `directivos` | 13 semanas: compras y ventas discrecionales (número e importe), neto, última operación, operaciones registradas en 30 días, `fecha_dato`, `fuente`. Sin nombres | colector `directivos` |
 | `accionistas` | hasta 8 participaciones principales (cada una con su fecha), solo personas jurídicas, derechos de voto y `fecha_derechos_voto`, `fecha_dato`, nota con cuántas de personas físicas no se publican, `fuente` | colector `accionistas` |
-| `recompra` | último comunicado de recompra (con su fecha) y si está «en curso» (comunicado en los últimos 45 días), `fecha_dato`, `fuente` | colector `cnmv` |
+| `recompra` | último comunicado de recompra (con su fecha) y si está «en curso» (comunicado en los últimos 45 días que no anuncia el final del programa), `fecha_dato`, `fuente` | colector `cnmv` |
 | `cuatro_fuerzas` | lista de cifras: `fuerza`, `indicador`, `cifra`, `unidad`, `texto`, `ejercicio`, `fuente`, `pagina`, `enlace`, `fecha`, `verificado_por`, `verificado_el` (método en `CUATRO_FUERZAS.md`) | `empresas/cuatro_fuerzas.csv` (tabla de Datos; vacía hasta que la Redacción cierre la lista de cifras) |
 | `perfil` | `sede` (domicilio social), `cierre_ejercicio` (DD/MM), `web_ri`, `fuente`, `fecha` (de la comprobación) | `empresas/perfil.csv` (tabla de Datos con fuente por fila; el 22/11, Iberdrola, Banco Santander e Inditex, con lo que se ha podido comprobar en fuente oficial; lo demás, vacío) |
 | `eventos` | eventos de la empresa (tipos abajo) | las anteriores |
@@ -39,7 +39,7 @@ Tipos de evento (`TIPOS_EVENTO`): `corto_nueva`, `corto_sube`, `corto_baja`, `co
 
 La huella (SHA-256, 12 caracteres) se calcula sobre el contenido de la ficha sin `actualizado`, `version`, `fuentes` ni `licencia`: un archivo solo se reescribe si cambian sus datos.
 
-Ejemplos reales en `ejemplos/` (21/11/2026: cortos y accionistas del servidor; cnmv con el relleno de la PR #111; directivos aún sin desplegar): Iberdrola (`ES0144580Y14`, dividendo flexible), Repsol (`ES0173516115`, recompra y cortos), Solaria (`ES0165386014`, diez posiciones cortas) e `indice.json`.
+Ejemplos reales en `ejemplos/` (22/11/2026; muestra del encargo de Tecnología): **Iberdrola** (`ES0144580Y14`: diez comunicados de dividendo flexible, OPA de exclusión de Neoenergia), **Banco Santander** (`ES0113900J37`: dos dividendos en efectivo leídos del comunicado, 0,125 € y 0,127 €, con sus fechas, y la política de dividendos) e **Inditex** (`ES0148396007`: sin comunicados de dividendo propios en doce meses: anunció el de 2025 dentro de sus resultados anuales, OIR 39667, que está en el registro oficial), más Repsol (`ES0173516115`, recompra en curso y una posición corta) y Solaria (`ES0165386014`, diez posiciones cortas) para la plantilla, `indice.json` y `eventos.json`. Datos: cortos y accionistas del servidor (20 y 21/11), `cnmv` con el relleno de doce meses de la PR #111 (17/10/2025 a 22/11/2026); `directivos`, sin desplegar (bloque vacío).
 
 ## Licencias y cumplimiento
 
@@ -53,7 +53,7 @@ Todo son datos de la CNMV ya publicados por otros colectores con licencia verifi
 
 ## Pruebas
 
-`python empresas/pruebas_empresas.py`: 71 comprobaciones con salidas simuladas de los colectores en su formato real: campos del contrato, direcciones `/ibex35/`, ninguna huella de BME aunque estén sus ficheros antiguos, cortos (persona física sin nombre, entidad sin forma societaria con nombre), directivos, accionistas, registro oficial de doce meses, dividendos de la CNMV sin rentabilidad, recompra, eventos, huella estable, escritura solo con cambios, `indice.json` con la fecha de comprobación, `cambios.csv`, último dato bueno, fuentes ausentes, cuatro fuerzas, perfil y un dividendo anunciado varias veces. Las mutaciones de cada regla hacen fallar alguna.
+`python empresas/pruebas_empresas.py`: 72 comprobaciones con salidas simuladas de los colectores en su formato real: campos del contrato, direcciones `/ibex35/`, ninguna huella de BME aunque estén sus ficheros antiguos, cortos (persona física sin nombre, entidad sin forma societaria con nombre), directivos, accionistas, registro oficial de doce meses, dividendos de la CNMV sin rentabilidad, recompra, eventos, huella estable, escritura solo con cambios, `indice.json` con la fecha de comprobación, `cambios.csv`, último dato bueno, fuentes ausentes, cuatro fuerzas, perfil, un dividendo anunciado varias veces y una recompra que ha terminado. Las mutaciones de cada regla hacen fallar alguna.
 
 ## Pendiente
 

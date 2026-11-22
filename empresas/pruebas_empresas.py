@@ -99,6 +99,7 @@ def fuentes(raiz: Path, cortos=True, directivos=True, accionistas=True, cnmv=Tru
             f"OIR,43002,2026-10-05T08:00:00,IBERDROLA S.A.,Otra información relevante,Importe ajustado del dividendo a cuenta,https://cnmv/oir/43002,{IBE},Iberdrola,iberdrola,dividendos,Dividendo,,g11",
             f"OIR,43003,2026-10-06T08:00:00,IBERDROLA S.A.,Otra información relevante,Dividendo extraordinario,https://cnmv/oir/43003,{IBE},Iberdrola,iberdrola,dividendos,Dividendo,,g12",
             f"OIR,43004,2026-10-07T08:00:00,IBERDROLA S.A.,Otra información relevante,Recordatorio del dividendo a cuenta,https://cnmv/oir/43004,{IBE},Iberdrola,iberdrola,dividendos,Dividendo,,g13",
+            f"OIR,43005,2026-11-10T08:00:00,IBERDROLA S.A.,Programas de recompra,Finalización del Programa de Recompra y próxima reducción de capital,https://cnmv/oir/43005,{IBE},Iberdrola,iberdrola,recompras,Programa de recompra,,g14",
         ]
         escribe(raiz, "cnmv/datos/ibex35.csv", cab + "\n".join(filas) + "\n")
         escribe(raiz, "cnmv/datos/ultima.json", json.dumps({"actualizado": "2026-11-18T19:07", "historico": {
@@ -202,6 +203,8 @@ with tempfile.TemporaryDirectory() as d:
        "Cada dato con su fuente y su fecha")
     ok(f["recompra"]["en_curso"] is True and f["recompra"]["ultimo_comunicado"]["nreg"] == "43719", "Recompra: el último comunicado de recompra, reciente -> en curso")
     ok(por[SAN]["recompra"]["en_curso"] is False and por[SAN]["recompra"]["ultimo_comunicado"]["nreg"] == "41000", "Recompra: comunicado de hace más de 45 días -> no en curso")
+    ok(por[IBE]["recompra"]["en_curso"] is False and por[IBE]["recompra"]["ultimo_comunicado"]["nreg"] == "43005",
+       "Recompra: comunicado reciente que anuncia el final del programa -> no en curso")
     ok(f["cuatro_fuerzas"] == [] and f["perfil"] is None and f["fuentes"]["cuatro_fuerzas"]["estado"] == "pendiente"
        and f["fuentes"]["perfil"]["estado"] == "pendiente", "Cuatro fuerzas y perfil: vacíos y «pendiente» mientras no haya filas")
 

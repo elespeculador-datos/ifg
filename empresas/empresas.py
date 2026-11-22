@@ -42,6 +42,7 @@ import html
 import importlib.util
 import json
 import os
+import re
 import sys
 import unicodedata
 from datetime import date, datetime, timedelta, timezone
@@ -400,6 +401,17 @@ def eventos_de(isin: str, empresa: str, ficha: str, c: dict | None, d: dict | No
     return ev
 
 
+FIN_RECOMPRA = (" finalizacion ", " finaliza ", " fin del programa ", " fin de programa ", " conclusion ", " concluido ",
+                " concluye ", " terminado ", " termina ", " completado ")
+
+
+def fin_de_programa(titulo: str) -> bool:
+    """«Finalización del Programa de Recompra y próxima reducción de capital» (Santander, 28/10/2026): ya no está en curso."""
+    t = "".join(c for c in unicodedata.normalize("NFKD", titulo or "") if not unicodedata.combining(c)).lower()
+    t = " " + re.sub(r"[^a-z0-9]+", " ", t) + " "
+    return any(w in t for w in FIN_RECOMPRA)
+
+
 def _mismo_importe(a, b) -> bool:
     return a is None or b is None or abs(a - b) <= 0.05 * max(a, b)
 
@@ -441,7 +453,9 @@ def ficha(emp: dict, fuentes: dict, estados: dict, hoy: date, previa: dict | Non
             "fuente": FUENTE["accionistas"]},
         "recompra": None if estados["cnmv"]["estado"] == "ausente" else {
             "ultimo_comunicado": (cn or {}).get("recompra"),
-            "en_curso": bool((cn or {}).get("recompra") and (cn or {})["recompra"]["fecha"] >= (hoy - timedelta(days=45)).isoformat()),
+            # en curso: comunicado de recompra de los últimos 45 días que no anuncia el final del programa
+            "en_curso": bool((cn or {}).get("recompra") and (cn or {})["recompra"]["fecha"] >= (hoy - timedelta(days=45)).isoformat()
+                             and not fin_de_programa((cn or {})["recompra"]["titulo"])),
             "fecha_dato": _dia(estados["cnmv"]["fecha"]) or None, "fuente": FUENTE["recompra"]},
         "cuatro_fuerzas": fz,
         "perfil": pf,

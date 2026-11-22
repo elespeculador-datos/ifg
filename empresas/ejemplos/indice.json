@@ -1,20 +1,24 @@
 {
- "version": "1.0.0",
+ "version": "1.1.0",
  "contrato": "1.0",
- "comprobado": "2026-11-21",
- "generado": "2026-11-21T21:37:19+00:00",
+ "comprobado": "2026-11-22",
+ "generado": "2026-11-22T07:04:18+00:00",
  "fuentes": {
   "registro_oficial": {
    "estado": "ok",
-   "fecha": "2026-11-21T22:27"
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22",
+   "alcance": "Comunicados a la CNMV de resultados, dividendos, recompras, ampliaciones y OPV, y OPA (información privilegiada y otra información relevante), de los últimos doce meses"
   },
   "dividendos": {
    "estado": "ok",
-   "fecha": "2026-11-21T22:27"
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22"
   },
   "recompra": {
    "estado": "ok",
-   "fecha": "2026-11-21T22:27"
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22"
   },
   "cortos": {
    "estado": "ok",
@@ -42,7 +46,7 @@
    "isin": "ES0125220311",
    "empresa": "Acciona",
    "ficha": "https://elespeculador.com/ibex35/acciona/",
-   "huella": "c94ed117a241",
+   "huella": "35203290fa0b",
    "eventos": 1,
    "json": "https://datos.elespeculador.com/empresas/ES0125220311.json"
   },
@@ -50,7 +54,7 @@
    "isin": "ES0105563003",
    "empresa": "Acciona Energía",
    "ficha": "https://elespeculador.com/ibex35/acciona-energia/",
-   "huella": "18b3b214e425",
+   "huella": "5a1051e2abeb",
    "eventos": 0,
    "json": "https://datos.elespeculador.com/empresas/ES0105563003.json"
   },
@@ -58,7 +62,7 @@
    "isin": "ES0132105018",
    "empresa": "Acerinox",
    "ficha": "https://elespeculador.com/ibex35/acerinox/",
-   "huella": "e10a6de9a7fa",
+   "huella": "fbbfa5871598",
    "eventos": 6,
    "json": "https://datos.elespeculador.com/empresas/ES0132105018.json"
   },
@@ -66,7 +70,7 @@
    "isin": "ES0167050915",
    "empresa": "ACS",
    "ficha": "https://elespeculador.com/ibex35/acs/",
-   "huella": "d9674e5b6ee8",
+   "huella": "42d90aad4d21",
    "eventos": 7,
    "json": "https://datos.elespeculador.com/empresas/ES0167050915.json"
   },
@@ -74,7 +78,7 @@
    "isin": "ES0105046017",
    "empresa": "Aena",
    "ficha": "https://elespeculador.com/ibex35/aena/",
-   "huella": "91b8a6621d01",
+   "huella": "7c89edfe63b1",
    "eventos": 4,
    "json": "https://datos.elespeculador.com/empresas/ES0105046017.json"
   },
@@ -82,7 +86,7 @@
    "isin": "ES0109067019",
    "empresa": "Amadeus",
    "ficha": "https://elespeculador.com/ibex35/amadeus/",
-   "huella": "651209de559d",
+   "huella": "a105a647f7c7",
    "eventos": 4,
    "json": "https://datos.elespeculador.com/empresas/ES0109067019.json"
   },
@@ -90,7 +94,7 @@
    "isin": "LU1598757687",
    "empresa": "ArcelorMittal",
    "ficha": "https://elespeculador.com/ibex35/arcelormittal/",
-   "huella": "c572ff56c749",
+   "huella": "9e141dd4c810",
    "eventos": 3,
    "json": "https://datos.elespeculador.com/empresas/LU1598757687.json"
   },
@@ -98,15 +102,15 @@
    "isin": "ES0113679I37",
    "empresa": "Bankinter",
    "ficha": "https://elespeculador.com/ibex35/bankinter/",
-   "huella": "18ebddae8c52",
-   "eventos": 5,
+   "huella": "f04a53ab18c5",
+   "eventos": 3,
    "json": "https://datos.elespeculador.com/empresas/ES0113679I37.json"
   },
   {
    "isin": "ES0113211835",
    "empresa": "BBVA",
    "ficha": "https://elespeculador.com/ibex35/bbva/",
-   "huella": "9bf5a6486359",
+   "huella": "cd60971020ca",
    "eventos": 7,
    "json": "https://datos.elespeculador.com/empresas/ES0113211835.json"
   },
@@ -114,15 +118,15 @@
    "isin": "ES0140609019",
    "empresa": "CaixaBank",
    "ficha": "https://elespeculador.com/ibex35/caixabank/",
-   "huella": "a8844441e086",
-   "eventos": 10,
+   "huella": "078ac4f17d35",
+   "eventos": 12,
    "json": "https://datos.elespeculador.com/empresas/ES0140609019.json"
   },
   {
    "isin": "ES0105066007",
    "empresa": "Cellnex",
    "ficha": "https://elespeculador.com/ibex35/cellnex/",
-   "huella": "ce533d5b848b",
+   "huella": "641fe73676d0",
    "eventos": 8,
    "json": "https://datos.elespeculador.com/empresas/ES0105066007.json"
   },
@@ -130,7 +134,7 @@
    "isin": "ES0139140174",
    "empresa": "Colonial",
    "ficha": "https://elespeculador.com/ibex35/colonial/",
-   "huella": "220803500b63",
+   "huella": "7fdec9219f66",
    "eventos": 2,
    "json": "https://datos.elespeculador.com/empresas/ES0139140174.json"
   },
@@ -138,7 +142,7 @@
    "isin": "ES0130960018",
    "empresa": "Enagás",
    "ficha": "https://elespeculador.com/ibex35/enagas/",
-   "huella": "86d5a13d7200",
+   "huella": "6c280663b19d",
    "eventos": 18,
    "json": "https://datos.elespeculador.com/empresas/ES0130960018.json"
   },
@@ -146,7 +150,7 @@
    "isin": "ES0130670112",
    "empresa": "Endesa",
    "ficha": "https://elespeculador.com/ibex35/endesa/",
-   "huella": "18a1d3d6e993",
+   "huella": "e4d13e685c79",
    "eventos": 4,
    "json": "https://datos.elespeculador.com/empresas/ES0130670112.json"
   },
@@ -154,7 +158,7 @@
    "isin": "NL0015001FS8",
    "empresa": "Ferrovial",
    "ficha": "https://elespeculador.com/ibex35/ferrovial/",
-   "huella": "7bbfdef72e2d",
+   "huella": "2c26f62a5009",
    "eventos": 8,
    "json": "https://datos.elespeculador.com/empresas/NL0015001FS8.json"
   },
@@ -162,31 +166,31 @@
    "isin": "ES0137650018",
    "empresa": "Fluidra",
    "ficha": "https://elespeculador.com/ibex35/fluidra/",
-   "huella": "a9d061bf67ba",
-   "eventos": 5,
+   "huella": "2e1b2b92ecc5",
+   "eventos": 7,
    "json": "https://datos.elespeculador.com/empresas/ES0137650018.json"
   },
   {
    "isin": "ES0171996087",
    "empresa": "Grifols",
    "ficha": "https://elespeculador.com/ibex35/grifols/",
-   "huella": "a016cb7e7e9c",
-   "eventos": 3,
+   "huella": "46f6b24f1d5b",
+   "eventos": 4,
    "json": "https://datos.elespeculador.com/empresas/ES0171996087.json"
   },
   {
    "isin": "ES0177542018",
    "empresa": "IAG",
    "ficha": "https://elespeculador.com/ibex35/iag/",
-   "huella": "a13769ed46a9",
-   "eventos": 6,
+   "huella": "b882f4be2621",
+   "eventos": 8,
    "json": "https://datos.elespeculador.com/empresas/ES0177542018.json"
   },
   {
    "isin": "ES0144580Y14",
    "empresa": "Iberdrola",
    "ficha": "https://elespeculador.com/ibex35/iberdrola/",
-   "huella": "b2bc863caadd",
+   "huella": "9975d6156ef5",
    "eventos": 0,
    "json": "https://datos.elespeculador.com/empresas/ES0144580Y14.json"
   },
@@ -194,7 +198,7 @@
    "isin": "ES0148396007",
    "empresa": "Inditex",
    "ficha": "https://elespeculador.com/ibex35/inditex/",
-   "huella": "23b8291aa796",
+   "huella": "3e02ae5dd2b7",
    "eventos": 0,
    "json": "https://datos.elespeculador.com/empresas/ES0148396007.json"
   },
@@ -202,7 +206,7 @@
    "isin": "ES0118594417",
    "empresa": "Indra",
    "ficha": "https://elespeculador.com/ibex35/indra/",
-   "huella": "d26ad026e8d9",
+   "huella": "c0796d9f17ad",
    "eventos": 3,
    "json": "https://datos.elespeculador.com/empresas/ES0118594417.json"
   },
@@ -210,7 +214,7 @@
    "isin": "ES0105027009",
    "empresa": "Logista",
    "ficha": "https://elespeculador.com/ibex35/logista/",
-   "huella": "451d4cbeba9c",
+   "huella": "6d1a45a44b8f",
    "eventos": 0,
    "json": "https://datos.elespeculador.com/empresas/ES0105027009.json"
   },
@@ -218,23 +222,23 @@
    "isin": "ES0124244E34",
    "empresa": "Mapfre",
    "ficha": "https://elespeculador.com/ibex35/mapfre/",
-   "huella": "253768de4f04",
-   "eventos": 3,
+   "huella": "18e7aba5cf19",
+   "eventos": 4,
    "json": "https://datos.elespeculador.com/empresas/ES0124244E34.json"
   },
   {
    "isin": "ES0105025003",
    "empresa": "Merlin Properties",
    "ficha": "https://elespeculador.com/ibex35/merlin-properties/",
-   "huella": "f6eb3b3149d7",
-   "eventos": 4,
+   "huella": "2cd81b13496d",
+   "eventos": 6,
    "json": "https://datos.elespeculador.com/empresas/ES0105025003.json"
   },
   {
    "isin": "ES0116870314",
    "empresa": "Naturgy",
    "ficha": "https://elespeculador.com/ibex35/naturgy/",
-   "huella": "5a22c2a78a51",
+   "huella": "314d2995f3b5",
    "eventos": 0,
    "json": "https://datos.elespeculador.com/empresas/ES0116870314.json"
   },
@@ -242,7 +246,7 @@
    "isin": "ES0105777017",
    "empresa": "Puig",
    "ficha": "https://elespeculador.com/ibex35/puig/",
-   "huella": "434e25758b45",
+   "huella": "b78b4df7df7d",
    "eventos": 1,
    "json": "https://datos.elespeculador.com/empresas/ES0105777017.json"
   },
@@ -250,7 +254,7 @@
    "isin": "ES0173093024",
    "empresa": "Redeia",
    "ficha": "https://elespeculador.com/ibex35/redeia/",
-   "huella": "3c26e3713bd1",
+   "huella": "1250e06ad48c",
    "eventos": 4,
    "json": "https://datos.elespeculador.com/empresas/ES0173093024.json"
   },
@@ -258,7 +262,7 @@
    "isin": "ES0173516115",
    "empresa": "Repsol",
    "ficha": "https://elespeculador.com/ibex35/repsol/",
-   "huella": "8e6227f3bad9",
+   "huella": "aadb524fc028",
    "eventos": 8,
    "json": "https://datos.elespeculador.com/empresas/ES0173516115.json"
   },
@@ -266,7 +270,7 @@
    "isin": "ES0157261019",
    "empresa": "Rovi",
    "ficha": "https://elespeculador.com/ibex35/rovi/",
-   "huella": "7b24777045db",
+   "huella": "6cbb3f0ba333",
    "eventos": 2,
    "json": "https://datos.elespeculador.com/empresas/ES0157261019.json"
   },
@@ -274,7 +278,7 @@
    "isin": "ES0113860A34",
    "empresa": "Sabadell",
    "ficha": "https://elespeculador.com/ibex35/banco-sabadell/",
-   "huella": "bced20bd1ef2",
+   "huella": "7b922b2d1dd9",
    "eventos": 8,
    "json": "https://datos.elespeculador.com/empresas/ES0113860A34.json"
   },
@@ -282,7 +286,7 @@
    "isin": "ES0182870214",
    "empresa": "Sacyr",
    "ficha": "https://elespeculador.com/ibex35/sacyr/",
-   "huella": "989aa55ef4b8",
+   "huella": "6a0103baa8ec",
    "eventos": 5,
    "json": "https://datos.elespeculador.com/empresas/ES0182870214.json"
   },
@@ -290,15 +294,15 @@
    "isin": "ES0113900J37",
    "empresa": "Santander",
    "ficha": "https://elespeculador.com/ibex35/banco-santander/",
-   "huella": "3450fd725ac9",
-   "eventos": 5,
+   "huella": "7ef3fa744ba1",
+   "eventos": 6,
    "json": "https://datos.elespeculador.com/empresas/ES0113900J37.json"
   },
   {
    "isin": "ES0165386014",
    "empresa": "Solaria",
    "ficha": "https://elespeculador.com/ibex35/solaria/",
-   "huella": "894fa74f5967",
+   "huella": "7b232f718f3e",
    "eventos": 37,
    "json": "https://datos.elespeculador.com/empresas/ES0165386014.json"
   },
@@ -306,7 +310,7 @@
    "isin": "ES0178430E18",
    "empresa": "Telefónica",
    "ficha": "https://elespeculador.com/ibex35/telefonica/",
-   "huella": "71c5e1484d96",
+   "huella": "3fff76d222b8",
    "eventos": 1,
    "json": "https://datos.elespeculador.com/empresas/ES0178430E18.json"
   },
@@ -314,8 +318,8 @@
    "isin": "ES0180907000",
    "empresa": "Unicaja",
    "ficha": "https://elespeculador.com/ibex35/unicaja/",
-   "huella": "b1e39171a3d5",
-   "eventos": 4,
+   "huella": "05a1ec1c8a60",
+   "eventos": 6,
    "json": "https://datos.elespeculador.com/empresas/ES0180907000.json"
   }
  ]

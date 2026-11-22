@@ -12,6 +12,96 @@
    "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43734",
    "nreg": "43734",
    "grupo": "resultados-ES0165386014-43734"
+  },
+  {
+   "fecha": "2026-09-24",
+   "tipo": "Resultados 1S 2026",
+   "titulo": "La sociedad remite información financiera del primer semestre de 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42872",
+   "nreg": "42872",
+   "grupo": "resultados-ES0165386014-42666"
+  },
+  {
+   "fecha": "2026-09-09",
+   "tipo": "Fecha de resultados 1S 2026",
+   "titulo": "Solaria comunica que publicará los resultados correspondientes al primer semestre del año 2026 el próximo jueves 24 de septiembre.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42666",
+   "nreg": "42666",
+   "grupo": "resultados-ES0165386014-42666"
+  },
+  {
+   "fecha": "2026-05-18",
+   "tipo": "Resultados 1T 2026",
+   "titulo": "Resultados correspondientes a los primeros tres meses del ejercicio 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=40923",
+   "nreg": "40923",
+   "grupo": "resultados-ES0165386014-40823"
+  },
+  {
+   "fecha": "2026-05-12",
+   "tipo": "Fecha de resultados 1T 2026",
+   "titulo": "Solaria comunica que publicará los resultados correspondientes al primer trimestre del año 2026 el próximo lunes 18 de mayo.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=40823",
+   "nreg": "40823",
+   "grupo": "resultados-ES0165386014-40823"
+  },
+  {
+   "fecha": "2026-04-30",
+   "tipo": "Ampliación de capital",
+   "titulo": "Solaria - La escritura de acuerdo de Aumento de Capital ha quedado inscrita en el Registro Mercantil de Madrid.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=40606",
+   "nreg": "40606",
+   "grupo": "opvs-ampliaciones-ES0165386014-3174"
+  },
+  {
+   "fecha": "2026-04-29",
+   "tipo": "Colocación",
+   "titulo": "Solaria – Fijación de precio de la colocación acelerada de acciones",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3175",
+   "nreg": "3175",
+   "grupo": "opvs-ampliaciones-ES0165386014-3174"
+  },
+  {
+   "fecha": "2026-04-28",
+   "tipo": "Colocación",
+   "titulo": "Solaria comunica el lanzamiento de colocación acelerada de acciones.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3174",
+   "nreg": "3174",
+   "grupo": "opvs-ampliaciones-ES0165386014-3174"
+  },
+  {
+   "fecha": "2026-02-26",
+   "tipo": "Resultados 2S 2025",
+   "titulo": "La sociedad remite información financiera del segundo semestre de 2025",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39255",
+   "nreg": "39255",
+   "grupo": "resultados-ES0165386014-39255"
+  },
+  {
+   "fecha": "2026-02-26",
+   "tipo": "Resultados año 2025",
+   "titulo": "La sociedad remite el Informe Financiero Anual del ejercicio 2025",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39254",
+   "nreg": "39254",
+   "grupo": "resultados-ES0165386014-39254"
+  },
+  {
+   "fecha": "2026-01-23",
+   "tipo": "Fecha de resultados",
+   "titulo": "Solaria comunica que publicará los resultados correspondientes al año 2025 el próximo jueves 26 de febrero",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=38615",
+   "nreg": "38615",
+   "grupo": "resultados-ES0165386014-38615"
   }
  ],
  "dividendos": [],
@@ -330,7 +420,7 @@
  },
  "directivos": null,
  "accionistas": {
-  "fecha": "2026-04-30",
+  "fecha_derechos_voto": "2026-04-30",
   "derechos_voto": 132638164,
   "n": 9,
   "principales": [
@@ -375,12 +465,14 @@
     "fecha": "2026-08-04"
    }
   ],
+  "fecha_dato": "2026-11-21",
   "nota": "Solo personas jurídicas; 5 participaciones de personas físicas no se publican.",
   "fuente": "CNMV, participaciones significativas"
  },
  "recompra": {
   "ultimo_comunicado": null,
   "en_curso": false,
+  "fecha_dato": "2026-11-22",
   "fuente": "CNMV, comunicados de las empresas"
  },
  "cuatro_fuerzas": [],
@@ -794,21 +886,25 @@
    "fuente": "CNMV, registro de posiciones cortas netas"
   }
  ],
- "huella": "894fa74f5967",
- "version": "1.0.0",
- "actualizado": "2026-11-21",
+ "huella": "7b232f718f3e",
+ "version": "1.1.0",
+ "actualizado": "2026-11-22",
  "fuentes": {
   "registro_oficial": {
    "estado": "ok",
-   "fecha": "2026-11-21T22:27"
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22",
+   "alcance": "Comunicados a la CNMV de resultados, dividendos, recompras, ampliaciones y OPV, y OPA (información privilegiada y otra información relevante), de los últimos doce meses"
   },
   "dividendos": {
    "estado": "ok",
-   "fecha": "2026-11-21T22:27"
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22"
   },
   "recompra": {
    "estado": "ok",
-   "fecha": "2026-11-21T22:27"
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22"
   },
   "cortos": {
    "estado": "ok",
