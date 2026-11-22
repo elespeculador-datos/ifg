@@ -46,7 +46,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 LECTOR = "2026-11-22b"  # versión del lector de fichas: si cambia, las fichas se releen poco a poco (hasta el máximo por pasada)
 AQUI = Path(__file__).resolve().parent
 MADRID = ZoneInfo("Europe/Madrid")
@@ -439,11 +439,22 @@ def _oferente_txt(o: dict) -> str:
     return texto or "—"
 
 
+def _sin_precio(texto: str | None) -> bool:
+    """El registro remite a sus observaciones en vez de dar un precio («*», «Ver observaciones generales»)."""
+    t = (texto or "").strip().lower()
+    return not t or t == "*" or t.startswith("ver observaciones")
+
+
 def _contra_txt(o: dict) -> str:
-    if o.get("contraprestacion"):
-        extra = f" (modificada; la inicial era {o['contraprestacion_inicial']})" if o.get("contraprestacion_inicial") else ""
-        return html.escape(o["contraprestacion"] + extra)
-    return f'<a href="{html.escape(o["enlace"])}">ver la ficha de la CNMV</a>' if o.get("enlace") else "—"
+    ficha = html.escape(o.get("enlace") or URL_REGISTRO)
+    c = o.get("contraprestacion") or ""
+    if _sin_precio(c):
+        return f'<a href="{ficha}">ver la ficha de la CNMV</a>'
+    inicial = o.get("contraprestacion_inicial") or ""
+    extra = "" if not inicial else (" (modificada)" if _sin_precio(inicial) else f" (modificada; la inicial era {html.escape(inicial)})")
+    if "(*)" in c:
+        return f'{html.escape(c.replace("(*)", "").strip())} (<a href="{ficha}">condiciones en la ficha de la CNMV</a>){extra}'
+    return html.escape(c) + extra
 
 
 def frase(res: dict) -> str:
