@@ -34,7 +34,7 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 API = "https://data-api.ecb.europa.eu/service/data/CES/"
 PORTAL = "https://data.ecb.europa.eu/data/datasets/CES"
 AREAS = {"ES": "España", "Z18": "Zona euro (11 países de la encuesta)", "DE": "Alemania", "FR": "Francia", "IT": "Italia"}
@@ -310,8 +310,7 @@ def fragmento(res: dict, df: pd.DataFrame, ipc: pd.Series | None, fecha_pub: str
                "del crecimiento, del paro y del tipo de su hipoteca. El Especulador toma las medianas ponderadas que publica el BCE en su portal de datos, sin "
                "modificarlas, y las compara con el IPC general interanual del INE del mismo mes (brecha de percepción) y con la expectativa de doce meses antes "
                "(acierto). Las variaciones son en puntos porcentuales; el percentil es «débil» (porcentaje de meses con un valor igual o inferior) desde el inicio de la "
-               "serie. Históricamente, una expectativa de inflación que sube ha ido acompañada de más demanda de protección frente a la inflación; esta página "
-               "describe la expectativa, no predice la inflación ni recomienda nada.</p>"
+               "serie. Esta página describe lo que esperan los hogares y cuánto acertaron; no predice la inflación ni recomienda nada.</p>"
                f'<p class="has-small-font-size">Fuente: BCE, <a href="{PORTAL}">Consumer Expectations Survey (conjunto CES)</a>, series mensuales desde {_mes_txt(res["primer_mes"])}; '
                "INE, IPC general, variación anual (licencia CC BY 4.0: «Elaboración propia con datos extraídos del sitio web del INE: www.ine.es»). Reutilización según la "
                "política del SEBC, citando la fuente y sin modificar las series; la brecha, el acierto, las variaciones y los percentiles son cálculo de El Especulador "

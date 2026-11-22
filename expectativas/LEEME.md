@@ -4,7 +4,7 @@ Cada día hábil a las 11:30 (hora de Madrid), el servidor smpro-datos-1 (`servi
 
 - `fragmento-wp.html`: la lectura del mes (inflación esperada a doce meses con variaciones y percentil, inflación percibida frente al IPC real del INE, expectativas a tres y cinco años), la tabla de países, el acierto de hace un año, la tabla de lo demás que esperan los hogares (vivienda, ingresos, gasto, crecimiento, paro, hipoteca), un gráfico SVG de tres años y el método, entre `<!-- expectativas:inicio HUELLA -->` y `<!-- expectativas:fin -->`;
 - `index.html`: página propia de la salida;
-- `datos/ultima.json` (versión 1.0.0) y `datos/serie.csv` (todas las series, formato largo con nombre).
+- `datos/ultima.json` (versión 1.0.1) y `datos/serie.csv` (todas las series, formato largo con nombre).
 
 La encuesta sale una vez al mes (el BCE publica el mes T hacia finales de T+1); la pasada diaria es una sola petición y el fragmento solo cambia cuando entra un mes nuevo.
 
