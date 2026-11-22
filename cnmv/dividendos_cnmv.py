@@ -42,7 +42,7 @@ PAUSA = 2.0
 LIMITE = 20          # comunicados nuevos por pasada
 MAX_INTENTOS = 3     # un comunicado sin documento legible se vuelve a pedir hasta tres veces
 # Versión del lector. Si cambia, las filas leídas con otra se vuelven a leer (desde la caché, sin volver a descargar).
-LECTOR = "2026-11-22b"
+LECTOR = "2026-11-22d"
 COLUMNAS = ["canal", "nreg", "fecha_comunicado", "isin", "empresa", "tipo", "importe_bruto", "moneda", "fecha_ex",
             "fecha_registro", "fecha_pago", "extraccion", "intentos", "enlace", "lector"]
 
@@ -113,11 +113,12 @@ ETIQUETAS = {
                  "ex-dividendo"],   # «la acción cotizará ex-dividendo el 29 de octubre de 2026» (Santander)
     "fecha_registro": ["fechaderegistro", "recorddate"],
     "fecha_pago": ["fechadepago", "paymentdate", "sepagarael", "seabonarael", "seabonaraapartirdel", "fechadeabono",
-                   "pagadero", "aabonar", "pagoserealizara", "seharaefectivo"],
+                   "pagadero", "aabonar", "pagoserealizara", "seharaefectivo", "pagodeldividendoserealizara",
+                   "pagodeldividendoseefectuara", "pagoseefectuara"],
 }
 # Entre la etiqueta y la fecha solo puede haber signos y estas palabras de enlace (sin espacios). Así no se
 # toma una fecha que solo está cerca («en la fecha ex-dividendo, y se prevé anunciarlo el 3 de noviembre»).
-ENLACE_OK = re.compile(r"(?:deldividendo)?(?:\(?[a-z-]*date\)?)?(?:sera|seran|seria|serian|es|sea)?"
+ENLACE_OK = re.compile(r"(?:deldividendo)?(?:\(?[a-z-]*(?:date|day)\)?)?(?:sera|seran|seria|serian|es|sea)?"
                        r"(?:el|del|eldia|apartirdel|elproximo|delproximo|proximo|on)?")   # «Fecha de pago del dividendo: 17 de junio» (Puig)
 
 
@@ -209,7 +210,7 @@ RE_IMPORTE = [
     (re.compile(r"(\d+[.,]\d+)\)?" + EUR + r"\)?(?:brutos?)?\)?por(?:cada)?accion"), 1, "EUR"),
     # céntimos: «12,7 céntimos de euro por acción» (Santander), «8,44 céntimos brutos por acción» (Unicaja)
     (re.compile(r"(\d+[.,]\d+)centimos(?:deeuro)?(?:brutos)?(?:por(?:cada)?accion)?"), 100, "EUR"),
-    (re.compile(r"dividendo(?:bruto)?(?:acuenta|complementario|extraordinario|ordinario)?(?:de|porimportede)(\d+[.,]\d+)" + EUR), 1, "EUR"),
+    (re.compile(r"dividendo(?:bruto)?(?:acuenta|complementario|extraordinario|ordinario|final)?(?:de|porimportede)(\d+[.,]\d+)" + EUR), 1, "EUR"),
     (re.compile(r"gross(?:amount|dividend)[^0-9]{0,30}?(\d+[.,]\d+)"), 1, None),
     (re.compile(r"(?:dividend|dividendo)(?:of|de)" + USD + r"(\d+[.,]\d+)"), 1, "USD"),
     # «dividendo a cuenta de los resultados del ejercicio 2026 de 0,15 euros por cada una de las acciones» (Grifols),
@@ -221,7 +222,9 @@ RE_IMPORTE = [
 # antes de la cifra (ANTES_NO) o justo después (DESPUES_NO).
 ANTES_NO = ("yarealizad", "yapagad", "yaabonad", "distribuyo", "percibirian", "retribuciontotal", "importetotal",
             "remuneraciontotal", "entotal", "ascendera", "ascendio", "sesuma", "elpasado",
-            "esperadistribuir", "prevedistribuir", "alcanzar")
+            "esperadistribuir", "prevedistribuir", "alcanzar", "suelode", "minimode",   # «establece un suelo de 0,80 euros» (Redeia)
+            "dividendoanual", "retencion", "importeneto", "dividendoneto", "netoporaccion",   # IAG: total del año, retención y neto
+            "primadeemision")   # Merlin: la parte con cargo a la prima de emisión no es todo lo que se paga por acción
 DESPUES_NO = ("yapagad", "yaabonad", "pagadaen", "pagadoen", "pagadosen", "pagadasen", "abonadaen", "abonadoen",
               "abonadosen", "abonadasen", "endospagos", "entrespagos", "endosplazos")
 LARGO = 30_000   # caracteres del texto compacto: más es un informe de resultados o de estrategia, no un anuncio
@@ -384,7 +387,9 @@ def actualizar(datos: Path = DATOS, limite: int = LIMITE, todos: bool = False, t
     for _, c in com.iterrows():
         previa = hechas.get((c["canal"], c["nreg"]))
         intentos = int(previa.intentos or 0) if previa is not None else 0
-        if previa is not None and not todos and previa.lector == LECTOR \
+        # se relee si el lector cambia o si el colector clasifica de otra forma el comunicado (de «Dividendo» a
+        # «Dividendo flexible», por ejemplo)
+        if previa is not None and not todos and previa.lector == LECTOR and previa.tipo == c["etiqueta"] \
                 and (previa.extraccion != "sin documento" or intentos >= MAX_INTENTOS):
             continue
         if len(nuevas) >= limite:
@@ -402,10 +407,13 @@ def actualizar(datos: Path = DATOS, limite: int = LIMITE, todos: bool = False, t
                        "empresa": c["empresa"], "tipo": c["etiqueta"],
                        **{k: ("" if r.get(k) is None else str(r.get(k))) for k in ("importe_bruto", "moneda", "fecha_ex", "fecha_registro", "fecha_pago")},
                        "extraccion": r["extraccion"], "intentos": str(intentos + 1), "enlace": c["enlace"], "lector": LECTOR})
-    if nuevas:
+    # un comunicado que el colector ya no clasifica como dividendo (Ferrovial, OIR 37412: una nota de resultados) sale
+    vigentes = set(zip(com["canal"], com["nreg"]))
+    sobran = [(a, b) not in vigentes for a, b in zip(previas["canal"], previas["nreg"])]
+    if nuevas or any(sobran):
         n = pd.DataFrame(nuevas, columns=COLUMNAS)
         clave = set(zip(n["canal"], n["nreg"]))
-        resto = previas[[(a, b) not in clave for a, b in zip(previas["canal"], previas["nreg"])]]
+        resto = previas[[(a, b) not in clave and (a, b) in vigentes for a, b in zip(previas["canal"], previas["nreg"])]]
         todo = pd.concat([resto, n], ignore_index=True).sort_values(["fecha_comunicado", "canal", "nreg"])
         datos.mkdir(parents=True, exist_ok=True)
         tmp = salida.with_suffix(".csv.tmp")

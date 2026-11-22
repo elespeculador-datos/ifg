@@ -502,13 +502,18 @@ def clasificar(categoria: str, texto: str) -> tuple[str, str] | None:
     if not deuda and _hay(todo, " oferta publica de adquisicion ", " ofertas publicas de adquisicion ", " opa ", " opas ",
                           " tender offer ", " takeover bid ", " oferta publica voluntaria ", " oferta publica obligatoria "):
         return "opas", ("OPA de exclusión" if _hay(todo, " exclusion ") else "OPA")
+    # «dividendo opcional» (ACS, Iberdrola): el accionista elige acciones o efectivo, como en el flexible
     if _hay(todo, " ampliacion de capital liberada ", " aumento de capital liberado ", " dividendo flexible ",
-            " retribucion flexible ", " scrip ", " derechos de asignacion gratuita "):
+            " retribucion flexible ", " scrip ", " derechos de asignacion gratuita ", " dividendo opcional "):
         return "dividendos", "Dividendo flexible"
     # «planes estratégicos … y política de retribución al accionista» (Santander, 25/02/2026): es la política, no un pago
     if _hay(t, " politica de retribucion ", " politica de dividendos ", " politica de remuneracion ") and \
             not _hay(t, " a cuenta ", " complementario ", " pago ", " abono ", " importe ", " euros "):
         return "dividendos", "Política de dividendos"
+    # Nota de prensa de resultados que nombra dividendos de otros (Ferrovial, 29/10/2025: «se rectifica la divisa de los
+    # dividendos acordados por la autopista 407ETR»): son resultados, no un dividendo de la empresa
+    if _hay(t, " nota de prensa ", " version inglesa ") and _hay(t, " resultados del ", " resultados de los ", " resultados correspondientes "):
+        return "resultados", "Resultados"
     if _hay(todo, " dividendo ", " dividendos ", " retribucion al accionista ", " pago a cuenta ",
             " devolucion de prima ", " distribucion de prima "):
         return "dividendos", "Dividendo"

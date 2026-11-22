@@ -261,6 +261,16 @@ def pruebas_clasificacion() -> None:
     ok(cn.clasificar("Contratos de liquidez y contrapartida", "Información trimestral del contrato de liquidez") is None,
        "los contratos de liquidez siguen fuera")
     ok(cn.clasificar("Otra información relevante", "MERLIN - Dividendo a cuenta 2026") == ("dividendos", "Dividendo"), "los dividendos no cambian")
+    ok(cn.clasificar("Total número de derechos de voto y de capital", "Ampliación y reducción de capital simultánea para 2ª ejecución "
+                     "del dividendo opcional aprobado por la JGA de 9 de mayo de 2025") == ("dividendos", "Dividendo flexible"),
+       "«dividendo opcional» (ACS, OIR 38877): dividendo flexible, sin importe que leer")
+    ok(cn.clasificar("Sobre negocio y situación financiera", "Ferrovial remite nueva versión inglesa de la nota de prensa relativa a los "
+                     "resultados del tercer trimestre de 2025. Se rectifica la divisa utilizada en los dividendos acordados por la "
+                     "autopista 407ETR, debiendo ser CAD en lugar de EUR") == ("resultados", "Resultados"),
+       "nota de prensa de resultados que nombra dividendos de otra sociedad (Ferrovial, OIR 37412): resultados")
+    ok(dv.extraer("El importe está en línea con la política de dividendos, que establece un suelo de 0,80 euros por acción. "
+                  "Dividendo bruto por acción: 0,2000 euros.", __import__("datetime").date(2025, 10, 29))["importe_bruto"] == 0.2,
+       "el suelo de la política de dividendos (Redeia, OIR 37403) no es el importe del pago")
     ok(cn.clasificar("Sobre planes estratégicos y previsiones", "Nota de prensa relativa a la presentación de planes estratégicos y objetivos "
                      "en el Investor Day, y a la política de retribución al accionista") == ("dividendos", "Política de dividendos"),
        "anuncio de la política de retribución: «Política de dividendos», no un pago")
@@ -331,6 +341,11 @@ MAS_DIVIDENDOS_REALES = {
     "OIR-41312": (0.03001963, "EUR", "2026-06-16", "2026-06-17", "2026-06-18", "completa"),  # Acciona Energía: ajustado
     "OIR-41438": (0.05, "EUR", "2026-06-25", "2026-06-26", "2026-06-29", "completa"),      # IAG: «Dividendo total bruto 0,05 €»
     "OIR-41502": (None, None, "2026-07-10", "2026-07-13", "2026-07-14", "parcial"),        # Fluidra: dos pagos futuros, sin elegir
+    "OIR-37403": (0.2, "EUR", "2026-01-05", "2026-01-06", "2026-01-07", "completa"),       # Redeia: el «suelo de 0,80» no cuenta
+    "OIR-38212": (0.31, "EUR", None, None, "2026-01-23", "parcial"),                      # Acerinox: «El pago del dividendo se realizará el…»
+    "OIR-39316": (0.05, "EUR", None, None, "2026-06-29", "parcial"),                      # IAG: «dividendo final»; ni el anual ni la retención
+    "OIR-40294": (None, None, "2026-04-21", "2026-04-22", "2026-04-23", "parcial"),       # Unicaja: «(payment day)»; sin importe escrito
+    "OIR-40548": (None, None, "2026-05-07", "2026-05-08", "2026-05-25", "parcial"),       # Merlin: dividendo y prima: sin importe completo
 }
 
 
@@ -416,6 +431,19 @@ def pruebas_dividendos() -> None:
     tabla = {(r["canal"], r["nreg"]): r for r in csv.DictReader((datos / "dividendos.csv").open(encoding="utf-8"))}
     ok(r3["leidos"] == 9 and tabla[("IP", "3391")]["importe_bruto"] == "0.56" and tabla[("IP", "3391")]["lector"] == dv.LECTOR,
        f"lector nuevo: se vuelve a leer todo (desde la caché) y se corrige lo que leía mal el anterior ({r3['leidos']})")
+    clasif = (datos / "ibex35.csv").read_text(encoding="utf-8")
+    (datos / "ibex35.csv").write_text(clasif.replace(",dividendos,Dividendo,,g0", ",dividendos,Dividendo flexible,,g0"), encoding="utf-8")
+    r4 = dv.actualizar(datos, limite=20, texto_de=texto_de)
+    tabla = {(r["canal"], r["nreg"]): r for r in csv.DictReader((datos / "dividendos.csv").open(encoding="utf-8"))}
+    primero = next(iter(DIVIDENDOS_REALES)).split("-")
+    ok(r4["leidos"] == 1 and tabla[tuple(primero)]["tipo"] == "Dividendo flexible" and tabla[tuple(primero)]["extraccion"] == "flexible: ver comunicado",
+       f"si el colector reclasifica un comunicado, su fila se vuelve a leer con el tipo nuevo ({r4['leidos']})")
+    clasif = (datos / "ibex35.csv").read_text(encoding="utf-8")
+    (datos / "ibex35.csv").write_text(clasif.replace(",dividendos,Dividendo flexible,,g0", ",resultados,Resultados,,g0"), encoding="utf-8")
+    r5 = dv.actualizar(datos, limite=20, texto_de=texto_de)
+    tabla = {(r["canal"], r["nreg"]): r for r in csv.DictReader((datos / "dividendos.csv").open(encoding="utf-8"))}
+    ok(r5["leidos"] == 0 and tuple(primero) not in tabla and len(tabla) == 8,
+       f"si un comunicado deja de ser de dividendos, su fila sale de dividendos.csv ({len(tabla)})")
 
 
 # --------------------------------------------------------------------------- 4. paridad con la web y BME
