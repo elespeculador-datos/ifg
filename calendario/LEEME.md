@@ -45,5 +45,5 @@ Sobre los doce meses de comunicados de la CNMV de la PR #111 (6.988 comunicados;
 - Fragmento: `https://datos.elespeculador.com/calendario/fragmento-wp.html` (marcas `dividendos:inicio` / `dividendos:fin`).
 - JSON: `https://datos.elespeculador.com/calendario/datos/ultima.json`; CSV: `https://datos.elespeculador.com/calendario/datos/calendario.csv`.
 - Pasada: al minuto 37 de 06 a 23, todos los días (media hora después de cada pasada de `cnmv`). Dato nuevo: cambia la huella de la primera línea.
-- Página en borrador: 9495 (`/calendario-dividendos-ibex-35/`), creada el 22/11/2026 con el fragmento real. Escenario de Make 10212212 (DIARIO, inactivo hasta que el servidor sirva `/calendario/`; cada dos horas de 06:45 a 23:00). Propuesta a Federico: sustituir el contenido de 8578 por el del borrador (misma dirección) y apuntar el escenario a 8578.
+- Página en borrador: 9495 (`/calendario-dividendos-ibex-35/`), creada el 22/11/2026 con el fragmento real. Escenario de Make 10212212 (DIARIO, inactivo hasta que el servidor sirva `/calendario/`; cada hora de 06:45 a 23:30, todos los días). Propuesta a Federico: sustituir el contenido de 8578 por el del borrador (misma dirección) y apuntar el escenario a 8578.
 - Dependencias: ninguna fuera de la biblioteca estándar (las pruebas usan pandas).
