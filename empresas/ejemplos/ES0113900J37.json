@@ -1,0 +1,824 @@
+{
+ "contrato": "1.0",
+ "empresa": "Santander",
+ "isin": "ES0113900J37",
+ "ficha": "https://elespeculador.com/ibex35/banco-santander/",
+ "registro_oficial": [
+  {
+   "fecha": "2026-10-28",
+   "tipo": "Programa de recompra",
+   "titulo": "Finalización del Programa de Recompra y próxima reducción de capital social de aproximadamente un 1,03% como consecuencia del mismo.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43376",
+   "nreg": "43376",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-10-28",
+   "tipo": "Resultados 3T 2026",
+   "titulo": "Resultados obtenidos durante los primeros nueve meses de 2026: Presentación de resultados",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3375",
+   "nreg": "3375",
+   "grupo": "resultados-ES0113900J37-43248"
+  },
+  {
+   "fecha": "2026-10-28",
+   "tipo": "Resultados 3T 2026",
+   "titulo": "Resultados obtenidos durante los primeros nueve meses de 2026: Informe financiero",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3374",
+   "nreg": "3374",
+   "grupo": "resultados-ES0113900J37-43248"
+  },
+  {
+   "fecha": "2026-10-28",
+   "tipo": "Resultados 3T 2026",
+   "titulo": "Resultados obtenidos durante los primeros nueve meses de 2026: Nota de prensa",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3373",
+   "nreg": "3373",
+   "grupo": "resultados-ES0113900J37-43248"
+  },
+  {
+   "fecha": "2026-10-22",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 15 y el 21 de octubre bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43266",
+   "nreg": "43266",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-10-21",
+   "tipo": "Fecha de resultados 3T 2026",
+   "titulo": "Anuncio de la presentación de resultados correspondientes a los primeros nueve meses de 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43248",
+   "nreg": "43248",
+   "grupo": "resultados-ES0113900J37-43248"
+  },
+  {
+   "fecha": "2026-10-15",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 8 y el 14 de octubre bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43179",
+   "nreg": "43179",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-10-08",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 1 y el 7 de octubre bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43112",
+   "nreg": "43112",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-10-01",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 24 y el 30 de septiembre bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42970",
+   "nreg": "42970",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-09-29",
+   "tipo": "Dividendo",
+   "titulo": "Aprobación por el consejo de administración del pago de un dividendo a cuenta en efectivo",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3356",
+   "nreg": "3356",
+   "grupo": "dividendos-ES0113900J37-3356"
+  },
+  {
+   "fecha": "2026-09-24",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 17 y el 23 de septiembre bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42871",
+   "nreg": "42871",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-09-17",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 10 y el 16 de septiembre bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42770",
+   "nreg": "42770",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-09-10",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 3 y el 9 de septiembre bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42682",
+   "nreg": "42682",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-09-03",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 27 de agosto y el 2 de septiembre bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42581",
+   "nreg": "42581",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-09-01",
+   "tipo": "Ampliación de capital",
+   "titulo": "Inscripción en el Registro Mercantil de Santander con fecha 1 de septiembre de 2026 de la escritura pública de aumento de capital (y modificación estatutaria) de fecha 20 de agosto de 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42570",
+   "nreg": "42570",
+   "grupo": "opvs-ampliaciones-ES0113900J37-42570"
+  },
+  {
+   "fecha": "2026-08-27",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 24 y el 26 de agosto bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42522",
+   "nreg": "42522",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-08-21",
+   "tipo": "Programa de recompra",
+   "titulo": "Finalización del Programa de Recompra y próxima reducción de capital social de aproximadamente un 3,08% como consecuencia del mismo.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42494",
+   "nreg": "42494",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-08-20",
+   "tipo": "Ampliación de capital",
+   "titulo": "Conclusión de la adquisición de Webster y ejecución del aumento de capital relacionado",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42481",
+   "nreg": "42481",
+   "grupo": "opvs-ampliaciones-ES0113900J37-42481"
+  },
+  {
+   "fecha": "2026-08-13",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 6 y el 12 de agosto bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42425",
+   "nreg": "42425",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-08-10",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica el inicio de un programa de recompra de acciones propias",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3336",
+   "nreg": "3336",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-08-06",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 30 de julio y el 5 de agosto bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42373",
+   "nreg": "42373",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-07-30",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 23 y el 29 de julio bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42216",
+   "nreg": "42216",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-07-24",
+   "tipo": "Resultados 1S 2026",
+   "titulo": "La sociedad remite información financiera del primer semestre de 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42077",
+   "nreg": "42077",
+   "grupo": "resultados-ES0113900J37-41901"
+  },
+  {
+   "fecha": "2026-07-23",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 16 y el 22 de julio bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42040",
+   "nreg": "42040",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-07-22",
+   "tipo": "Resultados 1S 2026",
+   "titulo": "Resultados obtenidos durante el primer semestre de 2026: Presentación de resultados.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3289",
+   "nreg": "3289",
+   "grupo": "resultados-ES0113900J37-41901"
+  },
+  {
+   "fecha": "2026-07-22",
+   "tipo": "Resultados 1S 2026",
+   "titulo": "Resultados obtenidos durante el primer semestre de 2026: Informe financiero.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3288",
+   "nreg": "3288",
+   "grupo": "resultados-ES0113900J37-41901"
+  },
+  {
+   "fecha": "2026-07-22",
+   "tipo": "Resultados 1S 2026",
+   "titulo": "Resultados obtenidos durante el primer semestre de 2026: Nota de prensa",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3286",
+   "nreg": "3286",
+   "grupo": "resultados-ES0113900J37-41901"
+  },
+  {
+   "fecha": "2026-07-16",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 9 y el 15 de julio bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41916",
+   "nreg": "41916",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-07-15",
+   "tipo": "Fecha de resultados 1S 2026",
+   "titulo": "Anuncio de la presentación de resultados correspondientes al primer semestre de 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41901",
+   "nreg": "41901",
+   "grupo": "resultados-ES0113900J37-41901"
+  },
+  {
+   "fecha": "2026-07-09",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 2 y el 8 de julio bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41837",
+   "nreg": "41837",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-07-02",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 25 de junio y el 1 de julio bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41692",
+   "nreg": "41692",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-06-25",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 18 y el 24 de junio bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41543",
+   "nreg": "41543",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-06-18",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 11 y el 17 de junio bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41416",
+   "nreg": "41416",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-06-11",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 4 y el 10 de junio bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41331",
+   "nreg": "41331",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-06-04",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 28 de mayo y el 3 de junio bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41261",
+   "nreg": "41261",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-05-27",
+   "tipo": "Programa de recompra",
+   "titulo": "Reanudación del programa de recompra de acciones propias",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41050",
+   "nreg": "41050",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-04-29",
+   "tipo": "Resultados 1T 2026",
+   "titulo": "Resultados obtenidos durante el primer trimestre de 2026: Presentación de resultados",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3179",
+   "nreg": "3179",
+   "grupo": "resultados-ES0113900J37-40380"
+  },
+  {
+   "fecha": "2026-04-29",
+   "tipo": "Resultados 1T 2026",
+   "titulo": "Resultados obtenidos durante el primer trimestre de 2026: Informe Financiero",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3178",
+   "nreg": "3178",
+   "grupo": "resultados-ES0113900J37-40380"
+  },
+  {
+   "fecha": "2026-04-29",
+   "tipo": "Resultados 1T 2026",
+   "titulo": "Resultados obtenidos durante el primer trimestre de 2026: Nota de Prensa",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3177",
+   "nreg": "3177",
+   "grupo": "resultados-ES0113900J37-40380"
+  },
+  {
+   "fecha": "2026-04-24",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 16 y el 23 de abril bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=40430",
+   "nreg": "40430",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-04-23",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander informa de la suspensión temporal del programa de recompra de acciones propias",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=40404",
+   "nreg": "40404",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-04-22",
+   "tipo": "Fecha de resultados 1T 2026",
+   "titulo": "Anuncio de la presentación de resultados del primer trimestre de 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=40380",
+   "nreg": "40380",
+   "grupo": "resultados-ES0113900J37-40380"
+  },
+  {
+   "fecha": "2026-04-16",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 8 y el 15 de abril bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=40286",
+   "nreg": "40286",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-04-08",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 26 de marzo y el 7 de abril bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=40149",
+   "nreg": "40149",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-03-26",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 19 y el 25 de marzo bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39925",
+   "nreg": "39925",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-03-19",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 12 y el 18 de marzo bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39792",
+   "nreg": "39792",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-03-12",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 5 y el 11 de marzo bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39689",
+   "nreg": "39689",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-03-05",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 27 de febrero y el 4 de marzo bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39574",
+   "nreg": "39574",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-02-27",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 19 y el 26 de febrero bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39454",
+   "nreg": "39454",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-02-25",
+   "tipo": "Resultados 2S 2025",
+   "titulo": "La sociedad remite información financiera del segundo semestre de 2025",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39116",
+   "nreg": "39116",
+   "grupo": "resultados-ES0113900J37-39116"
+  },
+  {
+   "fecha": "2026-02-25",
+   "tipo": "Resultados año 2025",
+   "titulo": "La sociedad remite el Informe Financiero Anual del ejercicio 2025",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39113",
+   "nreg": "39113",
+   "grupo": "resultados-ES0113900J37-3072"
+  },
+  {
+   "fecha": "2026-02-25",
+   "tipo": "Política de dividendos",
+   "titulo": "Nota de prensa relativa a la presentación de planes estratégicos y objetivos en el Investor Day, y a la política de retribución al accionista",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3116",
+   "nreg": "3116",
+   "grupo": "dividendos-ES0113900J37-3115"
+  },
+  {
+   "fecha": "2026-02-25",
+   "tipo": "Dividendo",
+   "titulo": "Aprobación por el consejo de administración de un dividendo complementario en efectivo y acuerdo para celebrar la próxima Junta General Ordinaria de Accionistas",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3115",
+   "nreg": "3115",
+   "grupo": "dividendos-ES0113900J37-3115"
+  },
+  {
+   "fecha": "2026-02-19",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 12 y el 18 de febrero bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=38941",
+   "nreg": "38941",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-02-12",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 4 y el 11 de febrero bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=38842",
+   "nreg": "38842",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-02-04",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica el inicio de un programa de recompra de acciones propias",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3077",
+   "nreg": "3077",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2026-02-03",
+   "tipo": "Resultados año 2025",
+   "titulo": "Resultados obtenidos durante el ejercicio 2025: Presentación de resultados (Información complementaria)",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3076",
+   "nreg": "3076",
+   "grupo": "resultados-ES0113900J37-3072"
+  },
+  {
+   "fecha": "2026-02-03",
+   "tipo": "Resultados año 2025",
+   "titulo": "Resultados obtenidos durante el ejercicio 2025: Informe Financiero.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3075",
+   "nreg": "3075",
+   "grupo": "resultados-ES0113900J37-3072"
+  },
+  {
+   "fecha": "2026-02-03",
+   "tipo": "Resultados año 2025",
+   "titulo": "Resultados obtenidos durante el ejercicio 2025: Nota de Prensa (Modificada para eliminar detalles obsoletos de las presentaciones con analistas y medios de comunicación.)",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3074",
+   "nreg": "3074",
+   "grupo": "resultados-ES0113900J37-3072"
+  },
+  {
+   "fecha": "2026-02-03",
+   "tipo": "Resultados año 2025",
+   "titulo": "Resultados obtenidos durante el ejercicio 2025: Presentación de resultados",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3073",
+   "nreg": "3073",
+   "grupo": "resultados-ES0113900J37-3072"
+  },
+  {
+   "fecha": "2026-02-03",
+   "tipo": "Resultados año 2025",
+   "titulo": "Resultados obtenidos durante el ejercicio 2025: Nota de Prensa",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3072",
+   "nreg": "3072",
+   "grupo": "resultados-ES0113900J37-3072"
+  },
+  {
+   "fecha": "2026-01-28",
+   "tipo": "Fecha de resultados",
+   "titulo": "Anuncio de la presentación de resultados 2025",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=38656",
+   "nreg": "38656",
+   "grupo": "resultados-ES0113900J37-38656"
+  },
+  {
+   "fecha": "2025-12-23",
+   "tipo": "Programa de recompra",
+   "titulo": "Finalización del Programa de Recompra y reducción de capital social de aproximadamente un 1,32% como consecuencia del mismo.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=38297",
+   "nreg": "38297",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2025-12-18",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 11 y el 17 de diciembre bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=38217",
+   "nreg": "38217",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2025-12-11",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 4 y el 10 de diciembre bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=38102",
+   "nreg": "38102",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2025-12-04",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 27 de noviembre y el 3 de diciembre bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=38006",
+   "nreg": "38006",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  {
+   "fecha": "2025-12-02",
+   "tipo": "Colocación",
+   "titulo": "Banco Santander comunica que ha completado una colocación acelerada de acciones ordinarias de su filial Santander Bank Polska S.A.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=37959",
+   "nreg": "37959",
+   "grupo": "opvs-ampliaciones-ES0113900J37-37959"
+  },
+  {
+   "fecha": "2025-11-27",
+   "tipo": "Programa de recompra",
+   "titulo": "Banco Santander comunica las operaciones sobre acciones propias que ha realizado entre el 20 y el 26 de noviembre bajo el programa de recompra",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=37915",
+   "nreg": "37915",
+   "grupo": "recompras-ES0113900J37-37323"
+  }
+ ],
+ "dividendos": [
+  {
+   "fecha_comunicado": "2026-09-29",
+   "tipo": "Dividendo",
+   "titulo": "Aprobación por el consejo de administración del pago de un dividendo a cuenta en efectivo",
+   "importe": 0.127,
+   "moneda": "EUR",
+   "fecha_ex": "2026-10-29",
+   "fecha_registro": "2026-10-30",
+   "fecha_pago": "2026-11-02",
+   "lectura": "leído del comunicado",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3356",
+   "nreg": "3356"
+  },
+  {
+   "fecha_comunicado": "2026-02-25",
+   "tipo": "Política de dividendos",
+   "titulo": "Nota de prensa relativa a la presentación de planes estratégicos y objetivos en el Investor Day, y a la política de retribución al accionista",
+   "importe": null,
+   "moneda": null,
+   "fecha_ex": null,
+   "fecha_registro": null,
+   "fecha_pago": null,
+   "lectura": "anuncio de política de dividendos, sin un pago concreto: ver el comunicado",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3116",
+   "nreg": "3116"
+  },
+  {
+   "fecha_comunicado": "2026-02-25",
+   "tipo": "Dividendo",
+   "titulo": "Aprobación por el consejo de administración de un dividendo complementario en efectivo y acuerdo para celebrar la próxima Junta General Ordinaria de Accionistas",
+   "importe": 0.125,
+   "moneda": "EUR",
+   "fecha_ex": "2026-04-30",
+   "fecha_registro": "2026-05-04",
+   "fecha_pago": "2026-05-05",
+   "lectura": "leído del comunicado",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3115",
+   "nreg": "3115"
+  }
+ ],
+ "cortos": {
+  "total_publicado": 0.0,
+  "fecha_dato": "2026-11-20",
+  "tenedores": 0,
+  "posiciones": [],
+  "ultima_posicion": null,
+  "cambios_30d": [],
+  "fuente": "CNMV, registro de posiciones cortas netas"
+ },
+ "directivos": null,
+ "accionistas": {
+  "fecha_derechos_voto": "2026-11-11",
+  "derechos_voto": 14405887701,
+  "n": 1,
+  "principales": [
+   {
+    "accionista": "BLACKROCK INC.",
+    "total_pct": 6.861,
+    "fecha": "2025-07-04"
+   }
+  ],
+  "fecha_dato": "2026-11-21",
+  "nota": "Solo personas jurídicas.",
+  "fuente": "CNMV, participaciones significativas"
+ },
+ "recompra": {
+  "ultimo_comunicado": {
+   "fecha": "2026-10-28",
+   "tipo": "Programa de recompra",
+   "caja": "recompras",
+   "titulo": "Finalización del Programa de Recompra y próxima reducción de capital social de aproximadamente un 1,03% como consecuencia del mismo.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43376",
+   "nreg": "43376",
+   "canal": "OIR",
+   "grupo": "recompras-ES0113900J37-37323"
+  },
+  "en_curso": false,
+  "fecha_dato": "2026-11-22",
+  "fuente": "CNMV, comunicados de las empresas"
+ },
+ "cuatro_fuerzas": [],
+ "perfil": {
+  "sede": "",
+  "cierre_ejercicio": "",
+  "web_ri": "https://www.santander.com/es/accionistas-e-inversores",
+  "fuente": "Web de Banco Santander: la dirección responde (22/11/2026), pero su contenido no se puede leer desde Datos (protección contra robots del sitio); domicilio social y ejercicio, pendientes de comprobar en una fuente oficial",
+  "fecha": "2026-11-22"
+ },
+ "eventos": [
+  {
+   "fecha": "2026-11-02",
+   "tipo": "dividendo_pago",
+   "isin": "ES0113900J37",
+   "empresa": "Santander",
+   "ficha": "https://elespeculador.com/ibex35/banco-santander/",
+   "titulo": "Pago de dividendo: Santander",
+   "detalle": "Dividendo de 0,127 € brutos por acción; ex-dividendo el 29/10/2026.",
+   "url": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3356",
+   "fuente": "CNMV"
+  },
+  {
+   "fecha": "2026-10-29",
+   "tipo": "dividendo_ex",
+   "isin": "ES0113900J37",
+   "empresa": "Santander",
+   "ficha": "https://elespeculador.com/ibex35/banco-santander/",
+   "titulo": "Fecha ex-dividendo: Santander",
+   "detalle": "Dividendo de 0,127 € brutos por acción; pago el 02/11/2026.",
+   "url": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3356",
+   "fuente": "CNMV"
+  },
+  {
+   "fecha": "2026-10-28",
+   "tipo": "comunicado_resultados",
+   "isin": "ES0113900J37",
+   "empresa": "Santander",
+   "ficha": "https://elespeculador.com/ibex35/banco-santander/",
+   "titulo": "Resultados: Santander",
+   "detalle": "Resultados obtenidos durante los primeros nueve meses de 2026: Presentación de resultados",
+   "url": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3375",
+   "fuente": "CNMV"
+  },
+  {
+   "fecha": "2026-10-28",
+   "tipo": "comunicado_resultados",
+   "isin": "ES0113900J37",
+   "empresa": "Santander",
+   "ficha": "https://elespeculador.com/ibex35/banco-santander/",
+   "titulo": "Resultados: Santander",
+   "detalle": "Resultados obtenidos durante los primeros nueve meses de 2026: Informe financiero",
+   "url": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3374",
+   "fuente": "CNMV"
+  },
+  {
+   "fecha": "2026-10-28",
+   "tipo": "comunicado_resultados",
+   "isin": "ES0113900J37",
+   "empresa": "Santander",
+   "ficha": "https://elespeculador.com/ibex35/banco-santander/",
+   "titulo": "Resultados: Santander",
+   "detalle": "Resultados obtenidos durante los primeros nueve meses de 2026: Nota de prensa",
+   "url": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3373",
+   "fuente": "CNMV"
+  },
+  {
+   "fecha": "2026-10-28",
+   "tipo": "comunicado_recompras",
+   "isin": "ES0113900J37",
+   "empresa": "Santander",
+   "ficha": "https://elespeculador.com/ibex35/banco-santander/",
+   "titulo": "Comunicado de recompra: Santander",
+   "detalle": "Finalización del Programa de Recompra y próxima reducción de capital social de aproximadamente un 1,03% como consecuencia del mismo.",
+   "url": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43376",
+   "fuente": "CNMV"
+  }
+ ],
+ "huella": "7ef3fa744ba1",
+ "version": "1.1.0",
+ "actualizado": "2026-11-22",
+ "fuentes": {
+  "registro_oficial": {
+   "estado": "ok",
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22",
+   "alcance": "Comunicados a la CNMV de resultados, dividendos, recompras, ampliaciones y OPV, y OPA (información privilegiada y otra información relevante), de los últimos doce meses"
+  },
+  "dividendos": {
+   "estado": "ok",
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22"
+  },
+  "recompra": {
+   "estado": "ok",
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22"
+  },
+  "cortos": {
+   "estado": "ok",
+   "fecha": "2026-11-20"
+  },
+  "directivos": {
+   "estado": "vacio",
+   "fecha": null
+  },
+  "accionistas": {
+   "estado": "ok",
+   "fecha": "2026-11-21"
+  },
+  "cuatro_fuerzas": {
+   "estado": "pendiente",
+   "fecha": null
+  },
+  "perfil": {
+   "estado": "ok",
+   "fecha": "2026-11-22"
+  }
+ },
+ "licencia": "El Especulador, a partir de datos de la CNMV (comunicados, posiciones cortas, notificaciones de directivos y participaciones significativas), reproducidos fielmente; gratuitos en cnmv.es. Cuatro fuerzas y perfil: cada cifra con su documento y página.",
+ "aviso": "Datos con fin informativo y educativo; no son una recomendación de inversión."
+}
