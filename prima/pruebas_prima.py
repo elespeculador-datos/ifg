@@ -220,6 +220,17 @@ def prueba_tesoro():
         t = prima.leer_tesoro(raiz)
         ok(t["letras_12m"]["marginal"] == 3.068 and t["letras_12m"]["cobertura"] == 1.69, "tesoro: letras a 12 meses con cobertura")
         ok(t["obligaciones_10a"]["fecha"] == "2026-10-15" and t["obligaciones_10a"]["marginal"] == 3.95, "tesoro: la última a 10 años no indexada")
+        # JSON de bonos del 21/11/2026 (versión anterior): la reapertura del 19/11 en la columna de 10 años llevaba «plazo» 8.
+        (raiz / "bonos" / "datos" / "ultima.json").write_text(json.dumps({
+            "fuente": "Tesoro", "ultimas": [
+                {"grupo": "bonos", "columna": 5, "plazo": 5, "fecha": "2026-11-19", "marginal": 3.77, "denominacion": "O 3,75% (7A)"},
+                {"grupo": "obligaciones", "columna": 10, "plazo": 8, "fecha": "2026-11-19", "marginal": 3.85, "denominacion": "O 3,20% (VR 8a 11m)", "cobertura": 1.84},
+                {"grupo": "obligaciones", "columna": 15, "plazo": 15, "fecha": "2026-11-05", "marginal": 4.101, "denominacion": "O 3,50%"},
+                {"grupo": "indexados", "columna": 10, "plazo": 10, "fecha": "2026-10-01", "marginal": 1.968, "denominacion": "O€i 1,15%", "indexado": True}]}),
+            encoding="utf-8")
+        t = prima.leer_tesoro(raiz)
+        ok(t.get("obligaciones_10a", {}).get("denominacion") == "O 3,20% (VR 8a 11m)" and t["obligaciones_10a"]["marginal"] == 3.85,
+           "tesoro: la columna de 10 años del Tesoro manda sobre el «plazo» de vida residual del JSON antiguo")
         (raiz / "bonos" / "datos" / "ultima.json").write_text("{roto", encoding="utf-8")
         prima.AVISOS.clear()
         ok(prima.leer_tesoro(raiz) == {} and prima.AVISOS, "tesoro: JSON roto avisa y no publica nada")

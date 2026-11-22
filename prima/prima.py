@@ -308,7 +308,9 @@ def leer_tesoro(carpeta: Path | None) -> dict:
         ruta = carpeta / "bonos" / "datos" / "ultima.json"
         if ruta.exists():
             d = json.loads(ruta.read_text(encoding="utf-8"))
-            diez = [u for u in (d.get("ultimas") or []) if isinstance(u, dict) and u.get("plazo") == 10
+            # El plazo es la columna en que el Tesoro publica la subasta (criterio único de bonos/ desde el 23/11/2026);
+            # con un JSON anterior, que daba a las reaperturas su vida residual como «plazo», se usa «columna» si está.
+            diez = [u for u in (d.get("ultimas") or []) if isinstance(u, dict) and u.get("columna", u.get("plazo")) == 10
                     and u.get("marginal") is not None and u.get("fecha") and not u.get("indexado")]
             if diez:
                 u = max(diez, key=lambda x: x["fecha"])
