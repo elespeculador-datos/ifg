@@ -35,7 +35,7 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 API = "https://publicreporting.cftc.gov/resource/6dca-aqww.json"
 PORTAL = "https://www.cftc.gov/MarketReports/CommitmentsofTraders/index.htm"
 PAGINA_WP = "https://elespeculador.com/posicionamiento-especulativo-cot/"
@@ -283,9 +283,9 @@ def fragmento(res: dict, df: pd.DataFrame, fecha_pub: str) -> str:
               "los no comerciales (fondos y grandes especuladores), los comerciales (quienes cubren un negocio real) y los pequeños. El Especulador toma el "
               "informe «Legacy, futures only» por el código de cada mercado, sin modificar las cifras, y calcula el neto de los especuladores, sus variaciones, "
               "el índice COT y el percentil sobre una ventana de tres años (156 semanas; con menos de 52 no se publica), y el neto sobre el interés abierto. "
-              "Históricamente, los extremos de posicionamiento han coincidido con fases en las que el mercado tenía poco combustible para seguir en la misma "
-              "dirección, pero un extremo puede durar meses: esta página describe cómo están colocados los grandes especuladores, no lo que hará el precio, "
-              "y no es una señal de compra ni de venta.</p>"
+              "Un índice cerca de 0 o de 100 solo dice que el neto de los especuladores está en un extremo de sus tres últimos años, y un extremo puede "
+              "durar meses: esta página describe cómo están colocados los grandes especuladores, no lo que hará el precio, y no es una señal de compra "
+              "ni de venta.</p>"
               f'<p class="has-small-font-size">Fuente: CFTC, <a href="{PORTAL}">Commitments of Traders</a> (informe Legacy, futures only, API pública), datos desde {_f(res["primera_fecha"])}. '
               "Obra del Gobierno de Estados Unidos, de dominio público; los cálculos (neto, índice COT, percentiles) son de El Especulador y se publican con licencia CC BY 4.0. "
               "Contenido informativo y educativo; no es asesoramiento financiero ni recomendación de inversión.</p>",
