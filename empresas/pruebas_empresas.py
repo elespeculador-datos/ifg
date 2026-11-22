@@ -94,6 +94,11 @@ def fuentes(raiz: Path, cortos=True, directivos=True, accionistas=True, cnmv=Tru
             f"OIR,43600,2026-11-02T08:00:00,BANCO SANTANDER S.A.,Dividendos,Dividendo a cuenta,https://cnmv/oir/43600,{SAN},Santander,santander,dividendos,Dividendo,,g4",
             f"OIR,41000,2026-09-20T08:00:00,BANCO SANTANDER S.A.,Programas de recompra,Fin de programa,https://cnmv/oir/41000,{SAN},Santander,santander,recompras,Programa de recompra,,g5",
             f"OIR,43244,2026-10-21T08:29:27,IBERDROLA S.A.,Sobre instrumentos financieros,Iberdrola Retribución Flexible,https://cnmv/oir/43244,{IBE},Iberdrola,iberdrola,dividendos,Dividendo flexible,,g9",
+            # el mismo dividendo dos veces (aprobado y ajustado por la autocartera) y otro distinto con la misma fecha
+            f"OIR,43001,2026-10-01T08:00:00,IBERDROLA S.A.,Otra información relevante,Dividendo a cuenta,https://cnmv/oir/43001,{IBE},Iberdrola,iberdrola,dividendos,Dividendo,,g10",
+            f"OIR,43002,2026-10-05T08:00:00,IBERDROLA S.A.,Otra información relevante,Importe ajustado del dividendo a cuenta,https://cnmv/oir/43002,{IBE},Iberdrola,iberdrola,dividendos,Dividendo,,g11",
+            f"OIR,43003,2026-10-06T08:00:00,IBERDROLA S.A.,Otra información relevante,Dividendo extraordinario,https://cnmv/oir/43003,{IBE},Iberdrola,iberdrola,dividendos,Dividendo,,g12",
+            f"OIR,43004,2026-10-07T08:00:00,IBERDROLA S.A.,Otra información relevante,Recordatorio del dividendo a cuenta,https://cnmv/oir/43004,{IBE},Iberdrola,iberdrola,dividendos,Dividendo,,g13",
         ]
         escribe(raiz, "cnmv/datos/ibex35.csv", cab + "\n".join(filas) + "\n")
         escribe(raiz, "cnmv/datos/ultima.json", json.dumps({"actualizado": "2026-11-18T19:07", "historico": {
@@ -102,7 +107,11 @@ def fuentes(raiz: Path, cortos=True, directivos=True, accionistas=True, cnmv=Tru
                 "canal,nreg,fecha_comunicado,isin,empresa,tipo,importe_bruto,moneda,fecha_ex,fecha_registro,fecha_pago,extraccion,intentos,enlace\n"
                 f"OIR,43650,2026-11-12,{REP},Repsol,Dividendo,0.5,EUR,2026-12-15,2026-12-16,2026-12-17,completa,1,https://cnmv/oir/43650\n"
                 f"OIR,43600,2026-11-02,{SAN},Santander,Dividendo,,,,,2026-11-04,parcial,1,https://cnmv/oir/43600\n"
-                f"OIR,43244,2026-10-21,{IBE},Iberdrola,Dividendo flexible,,,,,,flexible: ver comunicado,1,https://cnmv/oir/43244\n")
+                f"OIR,43244,2026-10-21,{IBE},Iberdrola,Dividendo flexible,,,,,,flexible: ver comunicado,1,https://cnmv/oir/43244\n"
+                f"OIR,43001,2026-10-01,{IBE},Iberdrola,Dividendo,5.65,EUR,2026-11-25,2026-11-26,2026-11-27,completa,1,https://cnmv/oir/43001\n"
+                f"OIR,43002,2026-10-05,{IBE},Iberdrola,Dividendo,5.74867096,EUR,2026-11-25,2026-11-26,2026-11-27,completa,1,https://cnmv/oir/43002\n"
+                f"OIR,43003,2026-10-06,{IBE},Iberdrola,Dividendo,0.5,EUR,2026-11-25,2026-11-26,2026-11-27,completa,1,https://cnmv/oir/43003\n"
+                f"OIR,43004,2026-10-07,{IBE},Iberdrola,Dividendo,,,2026-11-25,,2026-11-27,parcial,1,https://cnmv/oir/43004\n")
 
 
 def todas_las_claves(x):
@@ -208,6 +217,11 @@ with tempfile.TemporaryDirectory() as d:
        f"Eventos: detalle del dividendo con importe y la otra fecha ({evd['detalle']})")
     ok([e["tipo"] for e in por[SAN]["eventos"]].count("dividendo_pago") == 1 and not any(e["tipo"] == "dividendo_ex" for e in por[SAN]["eventos"]),
        "Eventos: dividendo parcial, solo la fecha que se leyó")
+    exi = sorted(e["detalle"] + " " + e["url"] for e in por[IBE]["eventos"] if e["tipo"] == "dividendo_ex")
+    ok(exi == ["Dividendo de 0,5 € brutos por acción; pago el 27/11/2026. https://cnmv/oir/43003",
+               "Dividendo de 5,74867096 € brutos por acción; pago el 27/11/2026. https://cnmv/oir/43002"],
+       f"Eventos: el mismo dividendo anunciado varias veces da un evento (el importe ajustado, más reciente; el recordatorio sin importe "
+       f"no lo borra); otro dividendo con la misma fecha, otro evento ({exi})")
     ok(tipos == sorted(tipos, reverse=True), "Eventos: del más reciente al más antiguo")
     ev = [e for e in f["eventos"] if e["tipo"] == "insider_compra"][0]
     ok("un consejero" in ev["detalle"] and "30.100 €" in ev["detalle"] and ev["url"] == "https://cnmv/doc1" and ev["ficha"].endswith("/ibex35/repsol/"),

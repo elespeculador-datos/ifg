@@ -378,18 +378,35 @@ def eventos_de(isin: str, empresa: str, ficha: str, c: dict | None, d: dict | No
     for x in (cn or {}).get("registro", []):
         tipo = f"comunicado_{x['caja']}" if f"comunicado_{x['caja']}" in TIPOS_EVENTO else "comunicado_otro"
         add(x["fecha"], tipo, f"{TIPOS_EVENTO[tipo]}: {empresa}", x["titulo"], x["enlace"], "CNMV")
-    vistos = set()   # un mismo dividendo puede anunciarse dos veces (anuncio y recordatorio): un evento
-    for x in sorted((cn or {}).get("dividendos", []), key=lambda d: (d["fecha_comunicado"], d["nreg"])):
-        importe = (f"{x['importe']:.6g}".replace(".", ",") + f" {'€' if x['moneda'] == 'EUR' else x['moneda']} brutos por acción") if x.get("importe") and x.get("moneda") else "importe en el comunicado"
+    # Un mismo dividendo puede anunciarse dos veces (anuncio y recordatorio, o el importe aprobado y luego el ajustado
+    # por la autocartera): misma fecha e importe igual, a menos de un 5 % o sin importe en uno de los dos. Da un solo
+    # evento, con los datos del comunicado más reciente que tenga importe.
+    divs: dict = {}
+    for x in sorted((cn or {}).get("dividendos", []), key=lambda d: (d["fecha_comunicado"], int(d["nreg"]))):
         for campo, tipo in (("fecha_ex", "dividendo_ex"), ("fecha_pago", "dividendo_pago")):
-            if not x.get(campo) or (tipo, x[campo], x.get("importe")) in vistos:
+            if not x.get(campo):
                 continue
-            vistos.add((tipo, x[campo], x.get("importe")))
-            otra = x.get("fecha_pago") if tipo == "dividendo_ex" else x.get("fecha_ex")
-            detalle = f"Dividendo de {importe}" + (f"; {'pago' if tipo == 'dividendo_ex' else 'ex-dividendo'} el {_fecha_es(otra)}" if otra else "") + "."
-            add(x[campo], tipo, f"{TIPOS_EVENTO[tipo]}: {empresa}", detalle, x["enlace"], "CNMV")
+            clave = next((k for k in divs if k[:2] == (tipo, x[campo]) and _mismo_importe(divs[k].get("importe"), x.get("importe"))),
+                         (tipo, x[campo], len(divs)))
+            if clave not in divs or x.get("importe") or not divs[clave].get("importe"):
+                divs[clave] = x
+    for (tipo, fecha, _), x in divs.items():
+        importe = f"{_importe_es(x['importe'])} {'€' if x['moneda'] == 'EUR' else x['moneda']} brutos por acción" \
+            if x.get("importe") and x.get("moneda") else "importe en el comunicado"
+        otra = x.get("fecha_pago") if tipo == "dividendo_ex" else x.get("fecha_ex")
+        detalle = f"Dividendo de {importe}" + (f"; {'pago' if tipo == 'dividendo_ex' else 'ex-dividendo'} el {_fecha_es(otra)}" if otra else "") + "."
+        add(fecha, tipo, f"{TIPOS_EVENTO[tipo]}: {empresa}", detalle, x["enlace"], "CNMV")
     ev.sort(key=lambda e: (e["fecha"], e["tipo"], e["titulo"]), reverse=True)
     return ev
+
+
+def _mismo_importe(a, b) -> bool:
+    return a is None or b is None or abs(a - b) <= 0.05 * max(a, b)
+
+
+def _importe_es(v: float) -> str:
+    """Importe por acción tal como lo da el comunicado, sin redondear (5,74867096) ni ceros de más (0,2)."""
+    return f"{v:.8f}".rstrip("0").rstrip(".").replace(".", ",")
 
 
 def huella_de(obj) -> str:
