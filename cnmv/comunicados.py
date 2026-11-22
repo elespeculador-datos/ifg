@@ -553,6 +553,8 @@ def clasificar(categoria: str, texto: str) -> tuple[str, str] | None:
 
 PERIODOS = [(r"\b(primer|1er) trimestre\b|\b1t(\d\d)?\b|\bq1\b|\btres primeros meses\b|\bprimeros tres meses\b", "1T"), (r"\bsegundo trimestre\b|\b2t(\d\d)?\b|\bq2\b", "2T"),
             (r"\b(tercer|3er) trimestre\b|\b3t(\d\d)?\b|\bq3\b|\bnueve meses\b|\bnueve primeros meses\b|\bprimeros nueve meses\b|\b9m\b", "3T"), (r"\bcuarto trimestre\b|\b4t(\d\d)?\b|\bq4\b", "4T"),
+            # «información financiera del segundo semestre de 2025» (febrero): 2S, no 1S (35 comunicados del IBEX en 2026)
+            (r"\bsegundo semestre\b|\b2s(\d\d)?\b|\bh2\b", "2S"),
             (r"\b(primer )?semestre\b|\b1s(\d\d)?\b|\bh1\b|\bseis primeros meses\b|\bprimeros seis meses\b", "1S"), (r"\b(ejercicio|anuales?|anual)\b", "año")]
 
 

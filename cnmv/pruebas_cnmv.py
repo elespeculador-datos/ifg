@@ -253,6 +253,7 @@ def pruebas_clasificacion() -> None:
         ("Sobre negocio y situación financiera", "La compañía remite presentación sobre sus resultados de los nueve primeros meses de 2026", "3T 2026"),
         ("Sobre resultados", "Ferrovial remite la presentación de resultados operativos correspondiente a los nueve primeros meses de 2026", "3T 2026"),
         ("Otra información relevante", "Resultados de los seis primeros meses de 2026", "1S 2026"),
+        ("Información financiera intermedia", "La sociedad remite información financiera del segundo semestre de 2025", "2S 2025"),
         ("Otra información relevante", "Resultados correspondientes a los primeros tres meses de 2026", "1T 2026"),
     ]
     for cat, texto, per in casos:
