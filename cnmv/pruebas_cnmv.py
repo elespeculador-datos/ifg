@@ -80,6 +80,10 @@ def pruebas_ficha() -> None:
     ok(f is not None and f["fecha"] == "2026-11-07T12:37:00" and f["texto"] == "El Grupo ACS niega la OPA sobre Hochtief y la venta de Turner"
        and f["enlace"].endswith("Informacion-Privilegiada/Resultado-IP.aspx?nreg=3413"), "ficha IP 3413 (ACS, sábado 07/11) leída entera")
     ok(cn.leer_ficha(pagina("oir-43552"), "OIR", 43553) is None, "una ficha no se toma por otro número")
+    f = cn.leer_ficha(pagina("oir-41510"), "OIR", 41510)
+    ok(f is not None and f["nreg"] == 41510 and f["emisor"] == "MIQUEL Y COSTAS & MIQUEL, S.A." and f["fecha"] == "2026-06-23T12:04:00"
+       and "Número de registro: 41507" in f["texto"], "una subsanación que cita otro número en el título se lee con su propio número")
+    ok(cn.leer_ficha(pagina("oir-41510"), "OIR", 41507) is None, "y no se toma por la comunicación que cita")
     for nombre, canal in (("oir-99999", "OIR"), ("ip-99999", "IP")):
         ok(cn.leer_ficha(pagina(nombre), canal, 99999) is None and cn.pagina_sin_registro(pagina(nombre)),
            f"número inexistente ({canal}): sin fila y reconocido como «sin registro»")

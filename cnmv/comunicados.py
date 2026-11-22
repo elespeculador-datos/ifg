@@ -200,7 +200,12 @@ def leer_ficha(pagina: str, canal: str, nreg: int) -> dict | None:
     if not art:
         return None
     for li in re.findall(r'<li id="[^"]*_elementoPrimerNivel"[^>]*>(.*?)</ul>\s*</li>', art.group(1), flags=re.S):
-        m = re.search(r"N[úu]mero de registro:\s*(\d+)", _plano(li))
+        # El número va en su propio elemento; el título puede citar otro («Subsanación de error en la comunicación
+        # … con Número de registro: 41507», que es la 41510): se busca fuera del título.
+        m = re.search(r'<li class="[^"]*resumen[^"]*">\s*N[úu]mero de registro:\s*(\d+)\s*</li>', li)
+        if not m:
+            m = re.search(r"N[úu]mero de registro:\s*(\d+)",
+                          _plano(re.sub(r'<a [^>]*_subtituloRegistroEnlace"[^>]*>.*?</a>', " ", li, flags=re.S)))
         if not m or int(m.group(1)) != nreg:
             continue
         dia = _campo(li, r'class="fecha-con-hora"[^>]*>(.*?)</li>')
