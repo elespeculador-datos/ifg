@@ -56,8 +56,9 @@ def historico_servidor() -> pd.DataFrame:
 
 
 def limpiar() -> None:
-    if cn.SIN_REGISTRO.exists():
-        cn.SIN_REGISTRO.unlink()
+    for f in (cn.SIN_REGISTRO, cn.SIN_RESPUESTA):
+        if f.exists():
+            f.unlink()
 
 
 # --------------------------------------------------------------------------- 1. ficha por número de registro
@@ -209,12 +210,28 @@ def pruebas_atras() -> None:
     pedidos.clear()
     del paginas[("OIR", 98)]
     filas, estado, problema = cn.rellenar_atras(h, [], hoy, bajar=bajar, pausa=0, dias=30)
-    ok([f["nreg"] for f in filas] == [49, 99] and estado["OIR"] == "parado" and problema is None and not cn.leer_sin_registro(),
-       "hacia atrás: si una ficha no responde, ese canal se para sin anotar nada (la pasada siguiente sigue por ella)")
+    ok([f["nreg"] for f in filas] == [49, 99] and estado["OIR"] == "parado" and problema is None and not cn.leer_sin_registro()
+       and cn.leer_sin_respuesta() == {("OIR", 98): {"consultado": "2026-11-21", "intentos": 1}},
+       "hacia atrás: si una ficha no responde, ese canal se para y se anota el fallo, no como número inexistente")
     h3 = pd.concat([h, pd.DataFrame(filas, columns=cn.COLUMNAS).astype(str)], ignore_index=True)
     pedidos.clear()
     cn.rellenar_atras(h3, [], hoy, bajar=bajar, pausa=0, dias=30)
     ok(pedidos[:1] == [("OIR", 98)], f"la pasada siguiente empieza por el número que falló ({pedidos[:1]})")
+    pedidos.clear()
+    filas3, estado3, _ = cn.rellenar_atras(h3, [], hoy, bajar=bajar, pausa=0, dias=30)
+    ok(pedidos == [("OIR", 98)] and estado3["OIR"] == "parado" and cn.saltadas() == ["OIR 98"],
+       f"tercer fallo de la misma ficha: se anota como saltada ({pedidos}, {cn.saltadas()})")
+    pedidos.clear()
+    filas4, estado4, _ = cn.rellenar_atras(h3, [], hoy, bajar=bajar, pausa=0, dias=30)
+    ok(pedidos == [("OIR", 97)] and [f["nreg"] for f in filas4] == [97] and estado4["OIR"] == "completo",
+       f"con tres fallos, el relleno la salta y sigue hasta completar ({pedidos}, {estado4})")
+    limpiar()
+    cn.guardar_sin_respuesta({("OIR", 98): {"consultado": "2026-11-20", "intentos": 2}})
+    paginas[("OIR", 98)] = ficha_con(98, "25/10/2026")
+    filas5, _, _ = cn.rellenar_atras(h3, [], hoy, bajar=bajar, pausa=0, dias=30)
+    ok([f["nreg"] for f in filas5][:1] == [98] and cn.leer_sin_respuesta() == {} and cn.saltadas() == [],
+       "una ficha que falló y luego responde se guarda y sale de la lista de fallos")
+    del paginas[("OIR", 98)]
 
     limpiar()
     pedidos.clear()
