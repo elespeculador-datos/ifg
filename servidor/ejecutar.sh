@@ -26,6 +26,17 @@ exec >>"$REGISTRO" 2>&1
 echo "== $(date -u +'%F %T') UTC · $COLECTOR · inicio"
 INICIO_ISO="$(date -u +'%FT%TZ')"
 
+# Una pasada a la vez por colector (22/11/2026): si la anterior sigue en marcha (relleno de la CNMV, muchos PDF),
+# esta se salta sin tocar nada. Dos pasadas a la vez leerían el mismo CSV y la última en escribir borraría lo
+# que añadió la otra. Sin flock en el sistema, se sigue como antes.
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"${TMPDIR:-/tmp}/smpro-$COLECTOR.lock"
+  if ! flock -n 9; then
+    echo "== $(date -u +'%F %T') UTC · $COLECTOR · la pasada anterior sigue en marcha: esta se salta"
+    exit 0
+  fi
+fi
+
 # estado <resultado> <codigo>: escribe $ESPEC_DATOS_DIR/estado/<colector>.json de forma atómica (sin rutas ni texto del registro).
 estado() {
   local tmp="$ESPEC_DATOS_DIR/estado/.$COLECTOR.json.tmp"
