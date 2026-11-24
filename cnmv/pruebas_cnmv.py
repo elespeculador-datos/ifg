@@ -300,9 +300,13 @@ def pruebas_clasificacion() -> None:
     a, b = clave(antes), clave(nuevo)
     añadidas = {k: v for k, v in b.items() if k not in a}
     ok(all(b.get(k) == v for k, v in a.items()), "histórico real: ninguna clasificación anterior del IBEX 35 cambia")
+    # 24/11: más los cinco de Logista y Colonial que los alias antiguos de cnmv/empresas.csv no reconocían.
     ok(añadidas == {("OIR", "43360"): ("resultados", "Resultados", "3T 2026"), ("IP", "3408"): ("resultados", "Resultados", "3T 2026"),
-                    ("IP", "3409"): ("resultados", "Resultados", "3T 2026"), ("IP", "3372"): ("resultados", "Resultados", "3T 2026")},
-       f"histórico real: se añaden exactamente Aena 43360, Cellnex 3408 y 3409 y Ferrovial 3372 ({sorted(añadidas)})")
+                    ("IP", "3409"): ("resultados", "Resultados", "3T 2026"), ("IP", "3372"): ("resultados", "Resultados", "3T 2026"),
+                    ("OIR", "43515"): ("resultados", "Resultados", "año 2026"), ("OIR", "43516"): ("resultados", "Resultados", "año 2026"),
+                    ("OIR", "43524"): ("resultados", "Resultados", "año 2026"), ("OIR", "43528"): ("resultados", "Resultados", "2S 2025"),
+                    ("OIR", "43527"): ("resultados", "Fecha de resultados", "3T 2026")},
+       f"histórico real: se añaden exactamente Aena 43360, Cellnex 3408 y 3409, Ferrovial 3372 y los cinco de Logista y Colonial ({sorted(añadidas)})")
 
 
 # --------------------------------------------------------------------------- 3 bis. dividendos leídos del comunicado
@@ -476,7 +480,12 @@ def pruebas_paridad_y_bme() -> None:
             distintas.append(emp["ficha"])
         if "BME" in frag or "rentabilidad" in frag.lower() or "Dividendos de" in frag:
             distintas.append(emp["ficha"] + " (BME)")
-    ok(len(e) == 35 and not distintas, f"las 35 fichas: mismos comunicados y etiquetas que la web del 21/11 ({distintas})")
+    # 24/11: Logista y Colonial salían vacías en la web y en el servidor (alias antiguos); ahora el servidor tiene sus comunicados.
+    nuevas = {f: sorted(set(re.findall(r"nreg=(\d+)", cn.ficha_html(c, pd.Series(x), hoy, "2026-11-21T09:00", inicio))), key=int)
+              for x in e.to_dict("records") for f in [x["ficha"]] if f in ("logista", "colonial")}
+    ok(len(e) == 35 and sorted(distintas) == ["colonial", "logista"] and not web["logista"]["nreg"] and not web["colonial"]["nreg"]
+       and {"43515", "43516", "43524", "43528"} <= set(nuevas["logista"]) and "43527" in nuevas["colonial"],
+       f"las 35 fichas: mismos comunicados y etiquetas que la web del 21/11, salvo Logista y Colonial, que ahora tienen los suyos ({distintas}, {nuevas})")
     ok(not hasattr(cn, "DIVIDENDOS_BME") and not hasattr(cn, "dividendos_bme"), "el colector ya no tiene código de BME")
     lst = cn.listado_html(c, "dividendos", "Dividendos", hoy, "2026-11-21T09:00", inicio)
     ok("BME" not in lst and "rentabilidad" not in lst.lower() and "nreg=43636" in lst, "listado de dividendos: solo comunicados de la CNMV (Merlin 43636 incluido)")
@@ -485,8 +494,8 @@ def pruebas_paridad_y_bme() -> None:
     cn.ahora_madrid = lambda: datetime(2026, 11, 21, 9, 0, tzinfo=MADRID)
     cn.escribir(h, c, e, len(filas), True, {"huecos_pendientes": {"IP": 0, "OIR": 0}})
     j = json.loads((cn.DATOS / "ultima.json").read_text(encoding="utf-8"))
-    ok("bme" not in j and j["huecos_pendientes"] == {"IP": 0, "OIR": 0} and j["comunicados_ibex35_clasificados"] == 121,
-       f"ultima.json sin «bme», con los huecos pendientes y 121 comunicados del IBEX 35 ({j.get('comunicados_ibex35_clasificados')})")
+    ok("bme" not in j and j["huecos_pendientes"] == {"IP": 0, "OIR": 0} and j["comunicados_ibex35_clasificados"] == 126,
+       f"ultima.json sin «bme», con los huecos pendientes y 126 comunicados del IBEX 35, 121 más los cinco de Logista y Colonial ({j.get('comunicados_ibex35_clasificados')})")
     todo = "".join(p.read_text(encoding="utf-8") for p in cn.SALIDA.rglob("*.html"))
     ok("BME" not in todo, "ninguna salida HTML menciona BME")
 

@@ -10,6 +10,8 @@ Cada hora (en el servidor smpro-datos-1, de 06:07 a 23:07 todos los días; ver `
 
 Solo entran las empresas del IBEX 35 de `dividendos/ibex35.csv` (la misma composición que usa el calendario de dividendos), reconocidas por el nombre con que firman en la CNMV según `cnmv/empresas.csv`. **Tras cada revisión del IBEX hay que actualizar los dos ficheros y la fecha `IBEX35_VALIDA_HASTA` de `comunicados.py`**; si vence, el flujo se para en vez de publicar con una composición vieja.
 
+Los alias de `cnmv/empresas.csv` son expresiones regulares sobre el nombre del emisor normalizado (mayúsculas, sin tildes ni signos). Cuando una empresa cambia de nombre en la CNMV, el alias viejo deja de reconocerla sin avisar: el 24/11/2026 se vio que Logista firma como «LOGISTA INTEGRAL, S.A.» y Colonial como «COLONIAL SFL, SOCIMI, S.A.», y el colector no les había atribuido ninguno de sus 88 comunicados de doce meses. Los dos alias reconocen ahora el nombre actual y el anterior. `python cnmv/pruebas_alias.py` comprueba, sin red, que cada una de las 35 se reconoce por los nombres con que ha firmado en la CNMV en doce meses (`pruebas_cnmv/emisores-ibex-2026-11-24.csv`, sacado del histórico del servidor) y que ningún nombre se atribuye a dos empresas; tras cada revisión del IBEX se rehace ese fichero.
+
 El tipo sale de la categoría oficial de la CNMV y del texto del comunicado, con reglas fijas (`clasificar`):
 
 - **Recompras**: programas de recompra y autocartera (no los contratos de liquidez ni las recompras de bonos, obligaciones o preferentes).
