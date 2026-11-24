@@ -219,11 +219,15 @@ def main() -> None:
         for y in control.index if y), "control con pandas: recuento por año y resultado")
     ok([o["numreg"] for o in res2["en_marcha"]] == ["96", "95", "94"], "en marcha: autorizada sin empezar, en plazo y plazo terminado sin resultado")
     f2 = of.fragmento(res2, "2026-11-22")
-    ok(of._contra_txt(simulada("1", contraprestacion="49.75 (*)")) == ('49.75 (<a href="https://www.cnmv.es/portal/Consultas/Folletos/opa.aspx?numReg=1&amp;vista=0">'
+    ok(of._contra_txt(simulada("1", contraprestacion="49.75 (*)")) == ('49,75 (<a href="https://www.cnmv.es/portal/Consultas/Folletos/opa.aspx?numReg=1&amp;vista=0">'
                                                                        "condiciones en la ficha de la CNMV</a>)")
        and "ver la ficha de la CNMV" in of._contra_txt(simulada("2", contraprestacion="Ver observaciones generales"))
        and of._contra_txt(simulada("3", contraprestacion="18,360 € por acción", contraprestacion_inicial="Ver observaciones generales"))
        == "18,360 € por acción (modificada)", "contraprestación: «(*)», «Ver observaciones generales» y modificada sin precio inicial")
+    ok([of._coma_decimal(x) for x in ("49.75", "3.5", "12.3456", "1.234", "3,510 € por acción", "*", "", " 49.75 ")]
+       == ["49,75", "3,5", "12,3456", "1.234", "3,510 € por acción", "*", "", "49,75"],
+       "coma decimal: número suelto con punto (no los de tres cifras, que pueden ser miles) y el resto sin tocar")
+    ok(of._contra_txt(simulada("4", contraprestacion="49.75")) == "49,75", "contraprestación numérica sin «(*)»: coma decimal")
     ok("<h2>OPAs por año</h2>" in f2 and "Histórico en carga" not in f2 and "951,71 % (oferta parcial sobresuscrita: hubo prorrateo)" in f2
        and "Plazo terminado el 16/11/2026; resultado pendiente" in f2, "fragmento con el histórico completo: años, prorrateo y en marcha")
     ok("Hay <strong>3 OPAs en marcha</strong>" in of.frase(res2), "frase: tres en marcha sin presentadas")

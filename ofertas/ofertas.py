@@ -46,7 +46,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 LECTOR = "2026-11-22b"  # versión del lector de fichas: si cambia, las fichas se releen poco a poco (hasta el máximo por pasada)
 AQUI = Path(__file__).resolve().parent
 MADRID = ZoneInfo("Europe/Madrid")
@@ -445,6 +445,15 @@ def _sin_precio(texto: str | None) -> bool:
     return not t or t == "*" or t.startswith("ver observaciones")
 
 
+def _coma_decimal(texto: str) -> str:
+    """Un número suelto con punto decimal, como lo registra a veces la CNMV («49.75»), con coma («49,75»). Solo cambia el
+    separador: ni moneda ni unidad, que el registro no da. Con tres cifras tras el punto («1.234») puede ser separador de
+    miles y se deja tal cual."""
+    t = (texto or "").strip()
+    m = re.fullmatch(r"(\d+)\.(\d{1,2}|\d{4,})", t)
+    return f"{m.group(1)},{m.group(2)}" if m else t
+
+
 def _contra_txt(o: dict) -> str:
     ficha = html.escape(o.get("enlace") or URL_REGISTRO)
     c = o.get("contraprestacion") or ""
@@ -453,8 +462,8 @@ def _contra_txt(o: dict) -> str:
     inicial = o.get("contraprestacion_inicial") or ""
     extra = "" if not inicial else (" (modificada)" if _sin_precio(inicial) else f" (modificada; la inicial era {html.escape(inicial)})")
     if "(*)" in c:
-        return f'{html.escape(c.replace("(*)", "").strip())} (<a href="{ficha}">condiciones en la ficha de la CNMV</a>){extra}'
-    return html.escape(c) + extra
+        return f'{html.escape(_coma_decimal(c.replace("(*)", "")))} (<a href="{ficha}">condiciones en la ficha de la CNMV</a>){extra}'
+    return html.escape(_coma_decimal(c)) + extra
 
 
 def frase(res: dict) -> str:
