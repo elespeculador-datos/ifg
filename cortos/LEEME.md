@@ -12,6 +12,16 @@ Prueba local con un fichero ya descargado: `python cortos/rastreador.py --local 
 
 Rehacer solo el fragmento con los CSV ya publicados: `python cortos/rastreador.py --solo-fragmento`.
 
+## Lo nuevo del indicador 1 (presión bajista): sector, evolución y semana
+
+Desde la versión del 19/11/2026 el fragmento y `ultima.json` añaden tres bloques, calculados con lo que ya publica la CNMV:
+
+- **Presión bajista por sector** (`datos/sectores.csv`): con la clasificación propia de `sectores.csv`, por sector: emisores con cortos publicados, suma de las sumas publicadas de sus emisores, media por emisor, tenedores y el emisor con más suma. Mide dónde se concentran las apuestas en contra, no un porcentaje del sector. Los emisores sin fila en `sectores.csv` van a «sin sector» y abren aviso; sin la tabla sectorial el bloque no se publica y lo demás no cambia.
+- **Evolución de la suma publicada** (`datos/evolucion.csv`): para los quince emisores con más suma hoy, la suma vigente hace 4, 13 y 52 semanas, reconstruida con la serie histórica de notificaciones de la CNMV (hojas «Serie» y «Anteriores»): en cada fecha cuenta la última notificación de cada tenedor y se suman las iguales o superiores al 0,5 %.
+- **Entradas y salidas de la semana** (`semana` en `ultima.json`): posiciones nuevas y posiciones que dejan de publicarse en los últimos siete días, con recuento de subidas y bajadas, a partir de `historial_cambios.csv`.
+
+La huella del fragmento sigue siendo la fecha de publicación de la CNMV. Comprobaciones nuevas en `pruebas_rastreador.py` (sector, `suma_en`, evolución, semana y fragmento con y sin los bloques). Sin predicción: «describe cómo ha cambiado la presión, no hacia dónde irá».
+
 Comprobaciones, sin red: `python cortos/pruebas_rastreador.py` (cálculos) y `python cortos/pruebas_descarga.py` (descarga).
 
 La hoja «Última» de la CNMV no garantiza una sola fila por (ISIN, tenedor): el mismo tenedor puede aparecer dos veces sobre el mismo valor cuando el fichero recoge a la vez una posición y la comunicación con la que cruza el 0,5 %. Para los cambios del día y la suma por emisor se usa la comunicación de `fecha_posicion` más reciente, y el registro de la ejecución lo avisa. La tabla de todas las posiciones sí las muestra las dos: son dos comunicaciones reales.
