@@ -187,6 +187,38 @@ def main() -> None:
                            capture_output=True, text=True, check=False)
         ok(r.returncode == 0 and "5 dividendos con fecha ex" in r.stdout and (Path(t) / "datos" / "cal2" / "fragmento-wp.html").exists(),
            "por línea de órdenes, con --datos por defecto en la carpeta madre de --salida")
+        # 24/11/2026: dividendos anunciados en los resultados (Inditex) y efectivo de los flexibles
+        itx = [("OIR", "39667", "2026-03-11T07:29:00", "ES0148396007", "Inditex", "inditex", "resultados", "Resultados",
+                "La sociedad remite información sobre resultados anuales correspondientes al ejercicio 2025"),
+               ("OIR", "39999", "2026-03-12T07:29:00", "ES0148396007", "Inditex", "inditex", "recompras", "Programa de recompra", "Recompra")]
+        lect = [x if x[1] != "43244" else ("OIR", "43244", "2026-10-21", "", "", "", "", "2027-02-01", "flexible: parcial") for x in LECTURAS]
+        raiz2 = preparar(Path(t) / "res", COMUNICADOS + itx, lect)
+        cab = "canal,nreg,pago,fecha_comunicado,isin,empresa,concepto,importe_bruto,moneda,fecha_ex,fecha_registro,fecha_pago,extraccion,dividendo_anunciado,enlace,lector\n"
+        (raiz2 / "cnmv" / "datos" / "dividendos_resultados.csv").write_text(
+            cab + f"OIR,39667,1,2026-03-11,ES0148396007,Inditex,ordinario,0.875,EUR,2026-04-29,2026-04-30,2026-05-04,completa,1.75,{CNMV}39667,x\n"
+            f"OIR,39667,2,2026-03-11,ES0148396007,Inditex,ordinario y extraordinario,0.875,EUR,2026-10-29,2026-10-30,2026-11-02,completa,1.75,{CNMV}39667,x\n"
+            f"OIR,39999,1,2026-03-12,ES0148396007,Inditex,ordinario,9.99,EUR,2026-12-01,2026-12-02,2026-12-03,completa,9.99,{CNMV}39999,x\n",
+            encoding="utf-8")
+        d2, h2 = cal.leer(raiz2)
+        r2 = cal.calcular(d2, HOY, h2)
+        r2["huella"] = cal.huella(r2)
+        itx_pag = [(d["fecha_pago"], d["importe"], d["concepto"], d["fecha_ex"], d["nreg"]) for d in r2["pagados_90d"] if d["empresa"] == "Inditex"]
+        ok(itx_pag == [("2026-11-02", 0.875, "ordinario y extraordinario", "2026-10-29", "39667")],
+           f"Inditex: el pago del 02/11, anunciado en los resultados, entre los pagados en 90 días ({itx_pag})")
+        ok([d["fecha_pago"] for d in r2["todos"] if d["empresa"] == "Inditex"] == ["2026-05-04", "2026-11-02"]
+           and not any(d["nreg"] == "39999" for d in r2["todos"]), "Inditex: los dos pagos; una fila cuya nota ya no es de resultados no entra")
+        ok(h2 == hasta, "la fecha del último comunicado de dividendo no cambia por las notas de resultados")
+        fl = [d for d in r2["flexibles"] if d["empresa"] == "Iberdrola"][0]
+        ok(fl["fecha_pago"] == "2027-02-01" and fl["importe"] is None and {"importe", "moneda", "fecha_pago"} <= set(fl),
+           "flexible: la fecha de pago del efectivo llega a la lista")
+        frag2 = cal.fragmento(r2, h)
+        ok("Iberdrola Retribución Flexible: segunda edición</a> · pago del efectivo: 01/02/2027</li>" in frag2
+           and "hoy, Inditex" in frag2 and "<td>ordinario y extraordinario</td>" in frag2,
+           "fragmento: pago del efectivo del flexible, Inditex en el método y el tipo de su dividendo")
+        ok(cal._efectivo({"importe": 0.253, "moneda": "EUR", "fecha_pago": "2027-02-01"})
+           == " · efectivo para quien lo elige: 0,253 € por acción; pago del efectivo: 01/02/2027" and cal._efectivo({}) == "",
+           "texto del efectivo de un flexible")
+        ok(r2["huella"] != res["huella"], "los datos nuevos cambian la huella")
     if FALLOS:
         print(f"{len(FALLOS)} de {N} comprobaciones fallan.")
         sys.exit(1)

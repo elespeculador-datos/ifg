@@ -40,7 +40,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 MADRID = ZoneInfo("Europe/Madrid")
 PAGINA_WP = "https://elespeculador.com/calendario-dividendos/"
 FICHAS = "https://elespeculador.com/ibex35/"
@@ -51,6 +51,8 @@ TOLERANCIA = 0.05       # el importe aprobado y el ajustado por la autocartera s
 COLUMNAS_DIV = ["canal", "nreg", "fecha_comunicado", "isin", "empresa", "tipo", "importe_bruto", "moneda", "fecha_ex",
                 "fecha_registro", "fecha_pago", "extraccion", "enlace"]
 COLUMNAS_IBEX = ["canal", "nreg", "fecha", "texto", "enlace", "isin", "empresa", "ficha", "caja", "etiqueta"]
+COLUMNAS_RES = ["canal", "nreg", "pago", "fecha_comunicado", "isin", "empresa", "concepto", "importe_bruto", "moneda", "fecha_ex",
+                "fecha_registro", "fecha_pago", "extraccion", "enlace"]
 LECTURA = {"completa": "leído del comunicado", "parcial": "parcial: el resto, en el comunicado"}
 AVISOS: list[str] = []
 
@@ -99,8 +101,8 @@ def _float(x: str) -> float | None:
 def leer(datos: Path) -> tuple[list[dict], str]:
     """Dividendos del IBEX 35 que el colector cnmv sigue clasificando como tales, con su título y su ficha."""
     base = datos / "cnmv" / "datos"
-    ibex = {(r["canal"], r["nreg"]): r for r in _csv(base / "ibex35.csv", COLUMNAS_IBEX)
-            if r["caja"] == "dividendos" and r["etiqueta"] in ("Dividendo", "Dividendo flexible")}
+    todos = {(r["canal"], r["nreg"]): r for r in _csv(base / "ibex35.csv", COLUMNAS_IBEX)}
+    ibex = {k: r for k, r in todos.items() if r["caja"] == "dividendos" and r["etiqueta"] in ("Dividendo", "Dividendo flexible")}
     divs = []
     for r in _csv(base / "dividendos.csv", COLUMNAS_DIV):
         c = ibex.get((r["canal"], r["nreg"]))
@@ -112,6 +114,21 @@ def leer(datos: Path) -> tuple[list[dict], str]:
                      "moneda": (r["moneda"] or None) if _float(r["importe_bruto"]) else None,
                      "fecha_ex": r["fecha_ex"] or None, "fecha_registro": r["fecha_registro"] or None, "fecha_pago": r["fecha_pago"] or None,
                      "lectura": LECTURA.get(r["extraccion"], "sin leer: ver el comunicado"), "enlace": r["enlace"]})
+    # Dividendos que la empresa anuncia solo en su nota de resultados (lista cerrada del colector cnmv, hoy Inditex):
+    # una fila por pago, con la nota como comunicado. Si el colector ya no la clasifica como resultados, no entra.
+    if (base / "dividendos_resultados.csv").exists():
+        for r in _csv(base / "dividendos_resultados.csv", COLUMNAS_RES):
+            c = todos.get((r["canal"], r["nreg"]))
+            if c is None or c["caja"] != "resultados":
+                continue
+            divs.append({"canal": r["canal"], "nreg": r["nreg"], "fecha_comunicado": r["fecha_comunicado"], "isin": r["isin"],
+                         "empresa": c["empresa"], "ficha": c["ficha"], "titulo": c["texto"], "flexible": False,
+                         "concepto": r["concepto"], "importe": _float(r["importe_bruto"]),
+                         "moneda": (r["moneda"] or None) if _float(r["importe_bruto"]) else None,
+                         "fecha_ex": r["fecha_ex"] or None, "fecha_registro": r["fecha_registro"] or None, "fecha_pago": r["fecha_pago"] or None,
+                         "lectura": "anunciado en los resultados: " + ("leído del comunicado" if r["extraccion"] == "completa"
+                                                                     else "parcial: el resto, en el comunicado"),
+                         "enlace": r["enlace"]})
     hasta = max((r["fecha"] for r in ibex.values()), default="")[:10]
     return divs, hasta
 
@@ -162,7 +179,8 @@ def calcular(divs: list[dict], hoy: date, hasta: str) -> dict:
     return {"fecha": h, "comunicados_hasta": hasta,
             "proximos": [{k: d[k] for k in campos} for d in proximos],
             "pagados_90d": [{k: d[k] for k in campos} for d in pagados],
-            "flexibles": [{k: d[k] for k in ("empresa", "isin", "ficha", "titulo", "fecha_comunicado", "nreg", "enlace")} for d in flexibles],
+            "flexibles": [{k: d[k] for k in ("empresa", "isin", "ficha", "titulo", "fecha_comunicado", "nreg", "enlace", "importe", "moneda",
+                                             "fecha_pago")} for d in flexibles],
             "con_fecha_ex": len(con_ex), "empresas_con_fecha_ex": len({d["isin"] for d in con_ex}),
             "todos": [{k: d[k] for k in campos} for d in sorted(fundidos, key=lambda d: (_clave(d), d["empresa"]))]}
 
@@ -185,6 +203,16 @@ def _importe(d: dict) -> str:
     ent, _, dec = f"{d['importe']:.8f}".rstrip("0").partition(".")
     v = f"{ent},{dec.ljust(2, '0')}"  # como en los comunicados: dos decimales como mínimo y los que haga falta (0,080248)
     return f"{v} {'€' if d['moneda'] == 'EUR' else html.escape(d['moneda'])}"
+
+
+def _efectivo(d: dict) -> str:
+    """Efectivo por acción para quien lo elige y fecha de pago de un flexible, si el comunicado los fija."""
+    partes = []
+    if d.get("importe") and d.get("moneda"):
+        partes.append(f"efectivo para quien lo elige: {_importe(d)} por acción")
+    if d.get("fecha_pago"):
+        partes.append(f"pago del efectivo: {_f(d['fecha_pago'])}")
+    return (" · " + "; ".join(partes)) if partes else ""
 
 
 def _empresa(d: dict) -> str:
@@ -245,19 +273,20 @@ def fragmento(res: dict, fecha_pub: str) -> str:
         partes.append(f"<p>Ningún dividendo pagado en los últimos {DIAS_PAGADOS} días según los comunicados.</p>")
     if res["flexibles"]:
         partes.append("<h2>Dividendos flexibles</h2>")
-        partes.append("<p>En el dividendo flexible el accionista elige entre recibir acciones nuevas o vender sus derechos de asignación; "
-                      "el efectivo que recibe depende de esa elección y el calendario de cada edición está en el comunicado. "
-                      f"Último comunicado de cada empresa en los últimos {DIAS_FLEXIBLES} días:</p>")
+        partes.append("<p>En el dividendo flexible el accionista elige entre recibir acciones nuevas o cobrar en efectivo (vendiendo sus "
+                      "derechos a la empresa o con un dividendo en efectivo, según la empresa); quien elige acciones no cobra ese efectivo. "
+                      "Cuando el comunicado fija el efectivo por acción o la fecha en que se paga, va al lado; el resto del calendario de "
+                      f"cada edición está en el comunicado. Último comunicado de cada empresa en los últimos {DIAS_FLEXIBLES} días:</p>")
         partes.append("<ul>" + "".join(f'<li>{_empresa(d)} · {_f(d["fecha_comunicado"])} · <a href="{html.escape(d["enlace"])}">'
-                                       f'{html.escape(d["titulo"])}</a></li>' for d in res["flexibles"]) + "</ul>")
+                                       f'{html.escape(d["titulo"])}</a>{_efectivo(d)}</li>' for d in res["flexibles"]) + "</ul>")
     partes.append('<h2 id="metodo">De dónde sale y cómo se lee</h2>'
                   "<p>Las empresas del IBEX 35 comunican a la CNMV sus dividendos: el importe por acción, la fecha ex (desde la que la acción "
                   "cotiza sin derecho a cobrarlo), la fecha de registro y la de pago. El Especulador lee esos comunicados cada hora, saca de cada "
                   "uno el importe bruto y las fechas, y los ordena en este calendario. Si un dato no se puede leer con seguridad del propio "
                   "comunicado, la casilla queda en blanco y el enlace lleva al documento. Cuando una empresa comunica el mismo dividendo más de "
                   "una vez (por ejemplo, el importe aprobado y después el ajustado por la autocartera), aparece una sola vez, con el dato más "
-                  "reciente. Solo entran los dividendos que la empresa comunica en un comunicado propio: los que se anuncian únicamente dentro de "
-                  "la presentación de resultados no aparecen aquí. No hay rentabilidad por dividendo: para calcularla harían falta precios con "
+                  "reciente. Los dividendos que una empresa anuncia solo dentro de su nota de resultados entran cuando El Especulador ha revisado "
+                  "el formato de esa nota (hoy, Inditex); los de las demás empresas que lo hacen así, todavía no. No hay rentabilidad por dividendo: para calcularla harían falta precios con "
                   "licencia.</p>"
                   '<p class="has-small-font-size">Fuente: CNMV, comunicados de las empresas (otra información relevante e información privilegiada), '
                   "reproducidos fielmente (gratuitos en cnmv.es). La lectura, la selección y el calendario son de El Especulador y se publican "

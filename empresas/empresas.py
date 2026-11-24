@@ -48,7 +48,7 @@ import unicodedata
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 CONTRATO = "1.0"          # cambia solo si cambian los campos que lee la ficha de la web
 PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/empresas/"
 WEB = "https://elespeculador.com"
@@ -63,6 +63,10 @@ ALCANCE_REGISTRO = ("Comunicados a la CNMV de resultados, dividendos, recompras,
                     "(información privilegiada y otra información relevante), de los últimos doce meses")
 LECTURA = {"completa": "leído del comunicado", "parcial": "parcial: el resto, en el comunicado",
            "flexible: ver comunicado": "dividendo flexible: el importe depende de la opción del accionista; ver el comunicado",
+           "flexible: completa": "dividendo flexible: efectivo por acción para quien elige cobrar en efectivo y su fecha de pago, leídos "
+                                 "del comunicado; quien elige acciones nuevas cobra en acciones (más el dividendo de ajuste, si lo hay)",
+           "flexible: parcial": "dividendo flexible: lo leído es el efectivo por acción para quien elige cobrar en efectivo o su fecha "
+                                "de pago; el resto, en el comunicado",
            "sin pago: ver comunicado": "anuncio de política de dividendos, sin un pago concreto: ver el comunicado",
            "sin documento": "sin leer: ver el comunicado", "sin datos": "sin leer: ver el comunicado"}
 SEMANAS_INSIDERS = 13
@@ -286,10 +290,12 @@ def leer_cnmv(raiz: Path, hoy: date) -> tuple[dict, dict]:
     if (carpeta / "dividendos.csv").exists():
         leidos = {(r["canal"], r["nreg"]): r for r in _csv(carpeta / "dividendos.csv")}
     por_isin: dict[str, dict] = {}
+    titulos: dict[tuple[str, str], str] = {}
     for r in _csv(carpeta / "ibex35.csv"):
         if not r.get("isin"):
             continue
-        e = por_isin.setdefault(r["isin"], {"registro": [], "dividendos": [], "recompra": None})
+        titulos[(r.get("canal", ""), r.get("nreg", ""))] = r.get("texto", "") or r.get("categoria", "")
+        e = por_isin.setdefault(r["isin"], {"registro": [], "dividendos": [], "recompra": None, "completos": []})
         c = {"fecha": _dia(r["fecha"]), "tipo": (r.get("etiqueta", "") + (" " + r["periodo"] if r.get("periodo") else "")).strip(),
              "caja": r.get("caja", ""), "titulo": r.get("texto", "") or r.get("categoria", ""), "fuente": "CNMV",
              "enlace": r.get("enlace", ""), "nreg": r.get("nreg", ""), "canal": r.get("canal", ""), "grupo": r.get("grupo", "")}
@@ -308,10 +314,44 @@ def leer_cnmv(raiz: Path, hoy: date) -> tuple[dict, dict]:
                                     "fecha_pago": d.get("fecha_pago") or None,
                                     "lectura": LECTURA.get(d.get("extraccion", ""), "sin leer: ver el comunicado"),
                                     "fuente": "CNMV", "enlace": c["enlace"], "nreg": c["nreg"]})
+            e["completos"].append(COMPLETO.get(d.get("extraccion", ""), False))
+    # Dividendos anunciados dentro de los resultados (empresas de la lista cerrada de cnmv/dividendo_en_resultados.csv,
+    # como Inditex): un dividendo por pago, con el enlace a la nota de resultados que lo anuncia.
+    if (carpeta / "dividendos_resultados.csv").exists():
+        for d in _csv(carpeta / "dividendos_resultados.csv"):
+            if not d.get("isin") or not (desde <= d.get("fecha_comunicado", "") <= hoy.isoformat()):
+                continue
+            e = por_isin.setdefault(d["isin"], {"registro": [], "dividendos": [], "recompra": None, "completos": []})
+            completa = d.get("extraccion") == "completa"
+            que = f"dividendo {d['concepto']} anunciado en los resultados" if d.get("concepto") else "anunciado en los resultados"
+            e["dividendos"].append({"fecha_comunicado": d["fecha_comunicado"], "tipo": "Dividendo",
+                                    "titulo": titulos.get((d.get("canal", ""), d.get("nreg", ""))) or "Resultados",
+                                    "importe": _num(d.get("importe_bruto")), "moneda": d.get("moneda") or None,
+                                    "fecha_ex": d.get("fecha_ex") or None, "fecha_registro": d.get("fecha_registro") or None,
+                                    "fecha_pago": d.get("fecha_pago") or None,
+                                    "lectura": f"{que}: " + ("leído del comunicado" if completa else "parcial: el resto, en el comunicado"),
+                                    "fuente": "CNMV", "enlace": d.get("enlace", ""), "nreg": d.get("nreg", "")})
+            e["completos"].append(completa)
     for e in por_isin.values():
         e["registro"].sort(key=lambda c: (c["fecha"], c["canal"], int(c["nreg"] or 0)), reverse=True)
-        e["dividendos"].sort(key=lambda d: (d["fecha_comunicado"], int(d["nreg"] or 0)), reverse=True)
+        e["dividendos"].sort(key=lambda d: (d["fecha_comunicado"], int(d["nreg"] or 0), d["fecha_pago"] or ""), reverse=True)
+        e["estado_dividendos"] = estado_dividendos(e.pop("completos"))
     return por_isin, {"estado": "ok", "fecha": fecha, "desde": desde_hist or None}
+
+
+# Estado del bloque de dividendos de cada empresa (24/11/2026; antes era el del colector cnmv para todas):
+#   «vacio»   sin comunicados de dividendo en doce meses;
+#   «ok»      todos sus pagos leídos del comunicado (importe y fechas; en un flexible, el efectivo y su fecha de pago);
+#   «parcial» algún pago remite al comunicado, o solo hay anuncios de política de dividendos.
+# Los anuncios de política (sin un pago concreto) no cuentan como pago ni como pendiente.
+COMPLETO = {"completa": True, "flexible: completa": True, "sin pago: ver comunicado": None}
+
+
+def estado_dividendos(completos: list) -> str:
+    if not completos:
+        return "vacio"
+    pagos = [c for c in completos if c is not None]
+    return "ok" if pagos and all(pagos) else "parcial"
 
 
 def leer_tabla(ruta: Path, columnas: tuple[str, ...]) -> tuple[dict[str, list[dict]], dict]:
@@ -395,7 +435,12 @@ def eventos_de(isin: str, empresa: str, ficha: str, c: dict | None, d: dict | No
         importe = f"{_importe_es(x['importe'])} {'€' if x['moneda'] == 'EUR' else x['moneda']} brutos por acción" \
             if x.get("importe") and x.get("moneda") else "importe en el comunicado"
         otra = x.get("fecha_pago") if tipo == "dividendo_ex" else x.get("fecha_ex")
-        detalle = f"Dividendo de {importe}" + (f"; {'pago' if tipo == 'dividendo_ex' else 'ex-dividendo'} el {_fecha_es(otra)}" if otra else "") + "."
+        if x.get("tipo") == "Dividendo flexible":   # el importe es el efectivo para quien lo elige
+            inicio = f"Dividendo flexible: {importe} en efectivo para quien lo elige" if x.get("importe") and x.get("moneda") \
+                else "Dividendo flexible: pago del efectivo a quien lo elige; importe en el comunicado"
+        else:
+            inicio = f"Dividendo de {importe}"
+        detalle = inicio + (f"; {'pago' if tipo == 'dividendo_ex' else 'ex-dividendo'} el {_fecha_es(otra)}" if otra else "") + "."
         add(fecha, tipo, f"{TIPOS_EVENTO[tipo]}: {empresa}", detalle, x["enlace"], "CNMV")
     ev.sort(key=lambda e: (e["fecha"], e["tipo"], e["titulo"]), reverse=True)
     return ev
@@ -462,7 +507,10 @@ def ficha(emp: dict, fuentes: dict, estados: dict, hoy: date, previa: dict | Non
         "eventos": eventos_de(isin, empresa, slug, c, d, cn, hoy),
     }
     por_bloque = {
-        "registro_oficial": {**estados["cnmv"], "alcance": ALCANCE_REGISTRO}, "dividendos": dict(estados["cnmv"]), "recompra": dict(estados["cnmv"]),
+        "registro_oficial": {**estados["cnmv"], "alcance": ALCANCE_REGISTRO}, "recompra": dict(estados["cnmv"]),
+        # el de dividendos es el de la empresa (estado_dividendos) cuando el colector ha ido bien
+        "dividendos": {**estados["cnmv"], "estado": (cn or {}).get("estado_dividendos", "vacio")} if estados["cnmv"]["estado"] == "ok"
+        else dict(estados["cnmv"]),
         "cortos": dict(estados["cortos"]), "directivos": dict(estados["directivos"]),
         "accionistas": dict(estados["accionistas"]) if a is not None or estados["accionistas"]["estado"] == "ausente"
         else {"estado": "vacio", "fecha": estados["accionistas"]["fecha"]},
@@ -474,7 +522,9 @@ def ficha(emp: dict, fuentes: dict, estados: dict, hoy: date, previa: dict | Non
         if estados[fuente]["estado"] != "ausente" or not previa:
             continue
         antes = (previa.get("fuentes") or {})
-        if not all((antes.get(b) or {}).get("estado") in ("ok", "parcial", "anterior") for b in bloques):
+        # basta el primer bloque de la fuente (el registro oficial, en la CNMV): el de dividendos puede ir «vacio» en una
+        # empresa sin dividendos con el colector funcionando
+        if (antes.get(bloques[0]) or {}).get("estado") not in ("ok", "parcial", "anterior") or not all(b in antes for b in bloques):
             continue
         for b in bloques:
             cuerpo[b] = previa.get(b)
