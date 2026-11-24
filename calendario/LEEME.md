@@ -4,7 +4,7 @@ Cada hora, al minuto 37 de las 06 a las 23 y todos los días, el servidor smpro-
 
 - `fragmento-wp.html`: frase del día, próximos dividendos (fecha ex o de pago de hoy en adelante), pagados en los últimos 90 días, dividendos flexibles comunicados en los últimos 120 días y método, entre `<!-- dividendos:inicio HUELLA -->` y `<!-- dividendos:fin -->`, las mismas marcas que la página 8578 (/calendario-dividendos/);
 - `index.html`: página propia de la salida;
-- `datos/ultima.json` (versión 1.0.0) y `datos/calendario.csv` (un dividendo por fila).
+- `datos/ultima.json` (versión 1.1.0) y `datos/calendario.csv` (un dividendo por fila).
 
 Pregunta del lector: ¿qué dividendos vienen en el IBEX 35, cuánto paga cada uno por acción y en qué fechas?
 
@@ -20,11 +20,11 @@ CNMV: comunicados de otra información relevante e información privilegiada de 
 2. Un mismo dividendo anunciado varias veces (el importe aprobado, el ajustado por la autocartera, un recordatorio) sale una vez: misma empresa, misma fecha ex o misma fecha de pago e importe compatible (5 %); vale el comunicado más reciente con importe, y uno sin importe no borra el importe de otro anterior.
 3. Próximos: fecha ex o fecha de pago de hoy en adelante, por orden de fecha ex (o de pago si no hay ex). Una fecha ex ya pasada con el pago pendiente se marca «(pasada)». Sin fecha ex leída, raya.
 4. Pagados: pago en los últimos 90 días, del más reciente al más antiguo.
-5. Flexibles: último comunicado de cada empresa en 120 días, sin importe (el efectivo depende de lo que elija el accionista); fuera los que solo modifican una recompra.
+5. Flexibles: último comunicado de cada empresa en 120 días; fuera los que solo modifican una recompra. Desde la 1.1.0, si ese comunicado fija el efectivo por acción para quien elige cobrar en efectivo o la fecha en que se paga, va al lado (lectura de `cnmv/dividendos_cnmv.py`); quien elige acciones nuevas no cobra ese efectivo.
 6. Tipo (a cuenta, complementario, extraordinario): del título del comunicado; si el título no lo dice, raya.
 7. Importes brutos por acción en su moneda (dólares de ArcelorMittal, por ejemplo), con dos decimales como mínimo y los que dé el comunicado. Si el importe no se lee con seguridad, la casilla enlaza con el comunicado.
 
-Límite conocido: solo entran los dividendos comunicados en un comunicado propio. Los que una empresa anuncia únicamente dentro de su presentación de resultados (Inditex en los últimos doce meses) no aparecen, y así lo dice la página.
+Dividendos anunciados en los resultados (1.1.0, 24/11/2026): los de las empresas de la lista cerrada del colector `cnmv` (`cnmv/dividendo_en_resultados.csv`, hoy Inditex) entran desde `cnmv/datos/dividendos_resultados.csv`, una fila por pago, con la nota de resultados como comunicado. Los de otras empresas que solo anuncian el dividendo en sus resultados no aparecen hasta que se revise su formato, y así lo dice la página.
 
 ## Reglas
 
@@ -34,7 +34,7 @@ Límite conocido: solo entran los dividendos comunicados en un comunicado propio
 
 ## Comprobaciones
 
-`python calendario/pruebas_calendario.py`: 34 comprobaciones sin red con salidas simuladas del colector `cnmv` (formato real): lectura y exclusiones, concepto, un dividendo anunciado tres veces, fecha ex pasada con el pago pendiente, pago sin fecha ex, dos dividendos distintos el mismo día, pagados dentro y fuera de 90 días, flexibles y recompras, dólares, importe sin leer, títulos con caracteres especiales, frase del día (con y sin importe, singular, sin fechas ex por delante), marcas, huella, escritura, paradas, línea de órdenes y un caso de control con pandas.
+`python calendario/pruebas_calendario.py`: 41 comprobaciones sin red con salidas simuladas del colector `cnmv` (formato real): lectura y exclusiones, concepto, un dividendo anunciado tres veces, fecha ex pasada con el pago pendiente, pago sin fecha ex, dos dividendos distintos el mismo día, pagados dentro y fuera de 90 días, flexibles y recompras, dólares, importe sin leer, títulos con caracteres especiales, frase del día (con y sin importe, singular, sin fechas ex por delante), marcas, huella, escritura, paradas, línea de órdenes un caso de control con pandas y (1.1.0) los dividendos de Inditex anunciados en los resultados y el efectivo de los flexibles.
 
 ## Validación con datos reales (22/11/2026)
 

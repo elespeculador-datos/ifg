@@ -2,7 +2,7 @@
 
 Pregunta del lector (en la ficha de cada empresa del IBEX 35): ¿qué está pasando con esta empresa que no sale en la cotización: qué ha comunicado a la CNMV, qué dividendos ha anunciado, quién apuesta en contra, si compran o venden sus directivos, quién manda en el capital y si está recomprando?
 
-Estado: **contrato 1.0 con el chat de fichas de Tecnología (21/11/2026; encargo formal del 22/11), versión 1.1.0, en rama `empresas-contrato`**. Funciona con las fuentes que ya sirve el servidor (cnmv, cortos, accionistas filtrado) y completa `directivos` cuando se despliegue su colector. Sin nada de BME (ni dividendos, ni rentabilidades, ni precios).
+Estado: **contrato 1.0 con el chat de fichas de Tecnología (21/11/2026; encargo formal del 22/11), versión 1.2.0 (24/11/2026)**. Funciona con las fuentes que ya sirve el servidor (cnmv, cortos, accionistas filtrado) y completa `directivos` cuando se despliegue su colector. Sin nada de BME (ni dividendos, ni rentabilidades, ni precios).
 
 ## Contrato 1.0 (Datos ↔ chat «Fichas de valores», 21/11/2026)
 
@@ -33,7 +33,9 @@ Campos de cada `<ISIN>.json`:
 | `fuentes` | por bloque: `estado` y `fecha` del dato | — |
 | `licencia`, `aviso` | cita de la CNMV y aviso de fin informativo y educativo | — |
 
-Estados de `fuentes`: `ok`; `parcial` (accionistas: alguna empresa sin el filtro de personas jurídicas); `anterior` (el colector falló hoy y se conserva **el último dato bueno**, con su fecha); `vacio` (no hay dato: la ficha oculta el bloque); `pendiente` (cuatro fuerzas y perfil sin filas).
+Estados de `fuentes`: `ok`; `parcial` (accionistas: alguna empresa sin el filtro de personas jurídicas; dividendos: ver abajo); `anterior` (el colector falló hoy y se conserva **el último dato bueno**, con su fecha); `vacio` (no hay dato: la ficha oculta el bloque); `pendiente` (cuatro fuerzas y perfil sin filas).
+
+Estado del bloque `dividendos` (desde la 1.2.0, 24/11/2026; antes era el del colector `cnmv` para todas las empresas): es el de cada empresa. `ok`: todos sus pagos leídos del comunicado (importe y fechas; en un flexible, el efectivo y su fecha de pago); `parcial`: algún pago remite al comunicado, o solo hay anuncios de política de dividendos; `vacio`: ningún comunicado de dividendo en doce meses. Mismos valores del contrato 1.0, otro significado: Iberdrola sale `parcial` (sus comunicados de cierre y de capital del flexible no traen importe) e Inditex, `ok`. Los dividendos que una empresa anuncia solo en su nota de resultados (lista cerrada del colector `cnmv`, hoy Inditex) entran como un dividendo por pago, con `tipo` «Dividendo», la nota como `titulo` y `enlace`, y `lectura` «dividendo … anunciado en los resultados: leído del comunicado». En un flexible con el efectivo leído, `importe` es el efectivo por acción para quien elige cobrar en efectivo; `lectura` y el evento lo dicen.
 
 Tipos de evento (`TIPOS_EVENTO`): `corto_nueva`, `corto_sube`, `corto_baja`, `corto_sale`, `insider_compra`, `insider_venta`, `dividendo_ex`, `dividendo_pago`, `comunicado_recompras`, `comunicado_resultados`, `comunicado_dividendos`, `comunicado_opvs-ampliaciones`, `comunicado_opas`, `comunicado_otro`. Cada evento: `fecha`, `tipo`, `isin`, `empresa`, `ficha`, `titulo`, `detalle`, `url` (documento de la CNMV o página publicada de El Especulador; vacía si no hay), `fuente`. Los de dividendo (desde la 1.1.0) salen de las fechas leídas del comunicado de la CNMV; un mismo dividendo anunciado varias veces (misma fecha e importe a menos de un 5 %, o sin importe en uno: el aprobado y el ajustado por la autocartera, o un recordatorio) da un solo evento, con el importe exacto del comunicado más reciente que lo tenga.
 
@@ -53,11 +55,12 @@ Todo son datos de la CNMV ya publicados por otros colectores con licencia verifi
 
 ## Pruebas
 
-`python empresas/pruebas_empresas.py`: 72 comprobaciones con salidas simuladas de los colectores en su formato real: campos del contrato, direcciones `/ibex35/`, ninguna huella de BME aunque estén sus ficheros antiguos, cortos (persona física sin nombre, entidad sin forma societaria con nombre), directivos, accionistas, registro oficial de doce meses, dividendos de la CNMV sin rentabilidad, recompra, eventos, huella estable, escritura solo con cambios, `indice.json` con la fecha de comprobación, `cambios.csv`, último dato bueno, fuentes ausentes, cuatro fuerzas, perfil, un dividendo anunciado varias veces y una recompra que ha terminado. Las mutaciones de cada regla hacen fallar alguna.
+`python empresas/pruebas_empresas.py`: 81 comprobaciones con salidas simuladas de los colectores en su formato real: campos del contrato, direcciones `/ibex35/`, ninguna huella de BME aunque estén sus ficheros antiguos, cortos (persona física sin nombre, entidad sin forma societaria con nombre), directivos, accionistas, registro oficial de doce meses, dividendos de la CNMV sin rentabilidad, recompra, eventos, huella estable, escritura solo con cambios, `indice.json` con la fecha de comprobación, `cambios.csv`, último dato bueno, fuentes ausentes, cuatro fuerzas, perfil, un dividendo anunciado varias veces, una recompra que ha terminado y (1.2.0) el estado de dividendos por empresa con un control con pandas, los dividendos de Inditex anunciados en los resultados, un flexible con el efectivo leído y el último dato bueno de una empresa sin dividendos. Las mutaciones de cada regla hacen fallar alguna.
 
 ## Pendiente
 
 - Desplegar con los siete colectores pendientes (mensaje 1 de `Mensajes-para-pegar-2026-11-19`); primera pasada a mano y revisión de tres fichas.
+- Hecho en la 1.2.0 (24/11, a petición de Tecnología): estado de dividendos por empresa (Inditex salía «ok» con el bloque vacío), dividendos anunciados en los resultados (Inditex), efectivo de los flexibles (Iberdrola, ACS, Ferrovial, Sacyr) y perfil de Banco Santander con fuente de la CNMV (domicilio, OIR 39132; cierre del ejercicio, OIR 39978).
 - Hecho en la 1.1.0 (22/11): importe, moneda y fechas de cada dividendo leídos del comunicado de la CNMV (`cnmv/dividendos_cnmv.py`, PR #111), eventos de fecha ex y pago, fecha del dato en cada bloque, alcance y «desde» del registro oficial.
 - Siguiente: `recompra.ejecutado` con el colector de recompras; perfil de las 32 empresas restantes (tabla a mano con fuente oficial por fila; ~1 h de Datos).
 - Cuatro fuerzas: cuando la Redacción cierre la lista de cifras por fuerza (método en `CUATRO_FUERZAS.md`).

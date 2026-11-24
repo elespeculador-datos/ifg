@@ -151,8 +151,10 @@ def pruebas_resultados() -> None:
          x["concepto"]) for x in p] == esperado and all(x["extraccion"] == "completa" and x["moneda"] == "EUR"
                                                          and x["dividendo_anunciado"] == 1.75 for x in p),
        f"Inditex, OIR 39667: dos pagos de 0,875 € con sus fechas, como el PDF ({p})")
-    ok(dv.extraer_resultados(texto.replace("0,875€\npor acción (0,325€", "0,870€\npor acción (0,325€"), com) == [],
-       "si los pagos no suman el dividendo anunciado, nada")
+    import re
+    no_suma = re.sub(r"(2 noviembre 2026 un pago de )0,875€(\s+por acción \(0,325€)", r"\g<1>0,870€\2", texto)
+    ok(no_suma.count("0,870€") == 2 and dv.extraer_resultados(no_suma, com) == [],
+       "si los pagos no suman el dividendo anunciado (en las dos repeticiones del párrafo), nada")
     ok(dv.extraer_resultados(texto, date(2026, 6, 1)) == [], "un pago anterior al comunicado: nada")
     ok(dv.extraer_resultados(texto.replace("1,75€ por acción, compuesto por un dividendo ordinario de 1,20€ y un dividendo\n"
                                            "extraordinario de 0,55€ por acción. El dividendo se abonará en dos pagos iguales: El\n4 mayo",
