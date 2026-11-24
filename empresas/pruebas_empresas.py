@@ -327,6 +327,67 @@ with tempfile.TemporaryDirectory() as d:
     finally:
         empresas.CUATRO_FUERZAS, empresas.PERFIL = viejo
 
+# Estado de los dividendos por empresa, flexibles con efectivo y dividendos anunciados en los resultados (24/11/2026)
+ITX = "ES0148396007"
+with tempfile.TemporaryDirectory() as d:
+    raiz = Path(d)
+    fuentes(raiz)
+    ibex = (raiz / "cnmv/datos/ibex35.csv").read_text(encoding="utf-8")
+    escribe(raiz, "cnmv/datos/ibex35.csv", ibex + f"OIR,39667,2026-03-11T07:29:00,INDITEX,Sobre negocio,La sociedad remite información sobre resultados "
+            f"anuales correspondientes al ejercicio 2025,https://cnmv/oir/39667,{ITX},Inditex,inditex,resultados,Resultados,año 2025,g20\n")
+    escribe(raiz, "cnmv/datos/dividendos_resultados.csv",
+            "canal,nreg,pago,fecha_comunicado,isin,empresa,concepto,importe_bruto,moneda,fecha_ex,fecha_registro,fecha_pago,extraccion,dividendo_anunciado,enlace,lector\n"
+            f"OIR,39667,1,2026-03-11,{ITX},Inditex,ordinario,0.875,EUR,2026-04-29,2026-04-30,2026-05-04,completa,1.75,https://cnmv/oir/39667,x\n"
+            f"OIR,39667,2,2026-03-11,{ITX},Inditex,ordinario y extraordinario,0.875,EUR,2026-10-29,2026-10-30,2026-11-02,completa,1.75,https://cnmv/oir/39667,x\n"
+            f"OIR,30001,1,2025-03-11,{ITX},Inditex,ordinario,0.77,EUR,2025-04-29,2025-04-30,2025-05-02,completa,1.54,https://cnmv/oir/30001,x\n")
+    divs = (raiz / "cnmv/datos/dividendos.csv").read_text(encoding="utf-8")
+    escribe(raiz, "cnmv/datos/dividendos.csv", divs.replace(
+        f"OIR,43244,2026-10-21,{IBE},Iberdrola,Dividendo flexible,,,,,,flexible: ver comunicado,1,https://cnmv/oir/43244",
+        f"OIR,43244,2026-10-21,{IBE},Iberdrola,Dividendo flexible,0.253,EUR,,,2026-12-01,flexible: completa,1,https://cnmv/oir/43244"))
+    por = {x["isin"]: x for x in empresas.generar(raiz, HOY)}
+    estados = {i: por[i]["fuentes"]["dividendos"]["estado"] for i in (REP, SAN, IBE, ITX)}
+    ok(estados == {REP: "ok", SAN: "parcial", IBE: "parcial", ITX: "ok"},
+       f"Estado de dividendos por empresa: ok (todo leído), parcial (algo remite al comunicado) ({estados})")
+    sin = [x for x in por.values() if not x["dividendos"]]
+    ok(sin and all(x["fuentes"]["dividendos"]["estado"] == "vacio" for x in sin) and por[REP]["fuentes"]["dividendos"]["fecha"] == "2026-11-18T19:07",
+       "Empresa sin dividendos en doce meses: «vacio» (antes salía «ok»); la fecha sigue siendo la del colector")
+    it = por[ITX]["dividendos"]
+    ok([(x["fecha_pago"], x["importe"], x["fecha_ex"], x["nreg"], x["tipo"]) for x in it]
+       == [("2026-11-02", 0.875, "2026-10-29", "39667", "Dividendo"), ("2026-05-04", 0.875, "2026-04-29", "39667", "Dividendo")]
+       and it[0]["lectura"] == "dividendo ordinario y extraordinario anunciado en los resultados: leído del comunicado"
+       and it[0]["titulo"].startswith("La sociedad remite información sobre resultados") and it[0]["enlace"] == "https://cnmv/oir/39667",
+       f"Inditex: los dos pagos anunciados en los resultados, del más reciente al más antiguo, con su lectura y su enlace ({it})")
+    ok(set(it[0]) == set(por[REP]["dividendos"][0]), "Inditex: mismos campos que cualquier otro dividendo (contrato 1.0)")
+    ev = sorted((e["fecha"], e["tipo"], e["detalle"]) for e in por[ITX]["eventos"] if e["tipo"].startswith("dividendo_"))
+    ok(ev == [("2026-10-29", "dividendo_ex", "Dividendo de 0,875 € brutos por acción; pago el 02/11/2026."),
+              ("2026-11-02", "dividendo_pago", "Dividendo de 0,875 € brutos por acción; ex-dividendo el 29/10/2026.")],
+       f"Inditex: eventos de la fecha ex y del pago ({ev})")
+    fl = [x for x in por[IBE]["dividendos"] if x["tipo"] == "Dividendo flexible"][0]
+    ok(fl["importe"] == 0.253 and fl["fecha_pago"] == "2026-12-01" and fl["lectura"].startswith("dividendo flexible: efectivo por acción"),
+       "Flexible con el efectivo leído: importe, fecha de pago y su lectura")
+    evf = [e["detalle"] for e in por[IBE]["eventos"] if e["tipo"] == "dividendo_pago" and e["fecha"] == "2026-12-01"]
+    ok(evf == ["Dividendo flexible: 0,253 € brutos por acción en efectivo para quien lo elige."], f"Flexible: el evento dice que es el efectivo ({evf})")
+    # El último dato bueno se conserva aunque el bloque de dividendos fuera «vacio» (empresa sin dividendos)
+    salida = raiz / "empresas"
+    empresas.escribir(list(por.values()), HOY, salida)
+    shutil.rmtree(raiz / "cnmv")
+    vacia = sin[0]["isin"]
+    f6 = {x["isin"]: x for x in empresas.generar(raiz, date(2026, 11, 20), salida)}
+    ok(f6[vacia]["fuentes"]["registro_oficial"]["estado"] == "anterior" and f6[vacia]["fuentes"]["dividendos"]["estado"] == "anterior"
+       and f6[REP]["fuentes"]["dividendos"]["estado"] == "anterior" and f6[REP]["dividendos"] == por[REP]["dividendos"],
+       "Sin salida de la CNMV: se conserva el último dato bueno también en las empresas sin dividendos")
+
+# Control con pandas del estado de dividendos: mismo resultado que agrupar a mano
+import pandas as pd  # noqa: E402
+casos = pd.DataFrame([("A", "completa"), ("A", "flexible: completa"), ("B", "completa"), ("B", "parcial"), ("C", "sin pago: ver comunicado"),
+                      ("D", "flexible: ver comunicado"), ("E", "sin documento"), ("F", "completa"), ("F", "sin pago: ver comunicado")],
+                     columns=["empresa", "extraccion"])
+casos["pago"] = casos["extraccion"] != "sin pago: ver comunicado"
+casos["leido"] = casos["extraccion"].isin(["completa", "flexible: completa"])
+g = casos.groupby("empresa").apply(lambda x: "ok" if x["pago"].any() and x.loc[x["pago"], "leido"].all() else "parcial", include_groups=False)
+nuestro = {e: empresas.estado_dividendos([empresas.COMPLETO.get(v, False) for v in grupo]) for e, grupo in casos.groupby("empresa")["extraccion"]}
+ok(nuestro == g.to_dict() and empresas.estado_dividendos([]) == "vacio", f"Control con pandas del estado de dividendos ({nuestro})")
+
 # Utilidades
 ok(empresas._eur(30100) == "30.100 €" and empresas._eur(None) == "—" and empresas._pct(0.5) == "0,50 %" and empresas._fecha_es("2026-11-06T08:59") == "06/11/2026", "Formatos de euros, porcentajes y fechas")
 ok(empresas._dia("2026-11-06T08:59:25") == "2026-11-06" and empresas._dia(None) == "" and empresas._num("") is None and empresas._num("1.5") == 1.5, "Utilidades de fecha y número")
