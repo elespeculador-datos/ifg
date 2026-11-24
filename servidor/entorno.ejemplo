@@ -9,3 +9,12 @@ ESPEC_DATOS_BASE=https://datos.elespeculador.com/
 SMPRO_PYTHON=/home/smpro/venv/bin/python
 # Token de GitHub con permiso de incidencias (issues: read/write) sobre elespeculador-datos/ifg. Nunca en el repositorio.
 GH_TOKEN=
+# Escritura directa en WordPress (servidor/escribir_wp.py; sustituye a los escenarios DIARIO de Make). Apagada por defecto.
+# Se enciende con ESPEC_WP_ESCRIBIR=1 y un usuario de WordPress con contraseña de aplicación (permiso de editar páginas y
+# unfiltered_html). La contraseña se escribe aquí desde el propio servidor, nunca en un chat ni en el repositorio.
+ESPEC_WP_URL=https://elespeculador.com
+ESPEC_WP_ESCRIBIR=0
+ESPEC_WP_USUARIO=
+ESPEC_WP_CLAVE=
+# Opcional: solo estos colectores, separados por comas (para encenderlo poco a poco). Vacío = todos los de servidor/paginas_wp.csv.
+ESPEC_WP_SOLO=

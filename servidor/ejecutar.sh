@@ -71,6 +71,17 @@ if "${ORDEN[@]}"; then
   echo "== $(date -u +'%F %T') UTC · $COLECTOR · correcto"
   estado correcto 0
   "$REPO/servidor/avisar.sh" "$COLECTOR" cerrar "Pasada correcta el $(date -u +%F) a las $(date -u +%H:%M) UTC." || true
+  # Escritura directa en la página de WordPress (sustituye al escenario DIARIO de Make). Apagada salvo ESPEC_WP_ESCRIBIR=1
+  # con usuario y contraseña de aplicación en el entorno; nunca cambia el resultado de la pasada del colector.
+  if [ -f "$REPO/servidor/escribir_wp.py" ]; then
+    "$PYTHON" "$REPO/servidor/escribir_wp.py" "$COLECTOR"; WEB=$?
+    case "$WEB" in
+      0)  "$REPO/servidor/avisar.sh" "$COLECTOR-web" cerrar "Página de $COLECTOR al día el $(date -u +%F) a las $(date -u +%H:%M) UTC." || true ;;
+      10) : ;;
+      *)  "$REPO/servidor/avisar.sh" "$COLECTOR-web" abrir "No se ha podido escribir la página de $COLECTOR en WordPress el $(date -u +%F) a las $(date -u +%H:%M) UTC (código $WEB). La página sigue como estaba. Últimas líneas del registro $REGISTRO:
+$(tail -n 8 "$REGISTRO" | sed 's/^/    /')" || true ;;
+    esac
+  fi
   exit 0
 else
   CODIGO=$?
