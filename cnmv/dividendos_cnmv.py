@@ -12,6 +12,9 @@ busca el importe bruto por acción con su moneda, la fecha ex-dividendo, la fech
   efectivo y su fecha de pago, con las frases exactas de RE_FLEX_ACCION, RE_FLEX_DERECHO y RE_FLEX_PAGO (revisadas
   contra el PDF de Iberdrola, ACS, Ferrovial y Sacyr). Se descargan solo los comunicados cuyo título anuncia un
   documento que puede traerlos (FLEX_TITULOS). Quien elige acciones nuevas cobra en acciones: lo dice la ficha.
+- Dividendos anunciados dentro de los resultados (24/11/2026): solo las empresas de la lista cerrada
+  `cnmv/dividendo_en_resultados.csv` (hoy, Inditex), con el formato revisado de su nota (`extraer_resultados`); una
+  fila por pago en `<salida>/cnmv/datos/dividendos_resultados.csv`.
 - El PDF y su texto se guardan en `$ESPEC_CACHE_DIR/cnmv/` (por defecto `cache/cnmv/` del repositorio, fuera de
   lo que sirve el servidor y fuera de git) para no volver a pedirlos.
 - Salida: `<salida>/cnmv/datos/dividendos.csv` (escritura atómica); la lee la ficha integrada (`empresas/`).
@@ -44,6 +47,7 @@ CAB = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)"}
 PAUSA = 2.0
 LIMITE = 20          # comunicados nuevos por pasada
 MAX_INTENTOS = 3     # un comunicado sin documento legible se vuelve a pedir hasta tres veces
+LIMITE_RESULTADOS = 5   # notas de resultados nuevas por pasada (dividendos anunciados en los resultados)
 # Versión del lector. Si cambia, las filas leídas con otra se vuelven a leer (desde la caché, sin volver a descargar).
 LECTOR = "2026-11-24a"
 COLUMNAS = ["canal", "nreg", "fecha_comunicado", "isin", "empresa", "tipo", "importe_bruto", "moneda", "fecha_ex",
@@ -492,7 +496,145 @@ def actualizar(datos: Path = DATOS, limite: int = LIMITE, todos: bool = False, t
     if nuevas or pendientes:
         print(f"Dividendos de la CNMV: {len(nuevas)} comunicados leídos, {pendientes} pendientes para la pasada siguiente; "
               f"en total {len(todo)}: {resumen}")
-    return {"leidos": len(nuevas), "pendientes": pendientes, "total": len(todo), "resumen": resumen}
+    # dividendos anunciados dentro de los resultados (lista cerrada), después de lo anterior y con su propio límite
+    res = actualizar_resultados(datos, limite=LIMITE_RESULTADOS, texto_de=texto_de)
+    return {"leidos": len(nuevas), "pendientes": pendientes, "total": len(todo), "resumen": resumen, "resultados": res}
+
+
+# --------------------------------------------------------------------------- dividendos anunciados en los resultados
+# Algunas empresas del IBEX 35 no envían a la CNMV un comunicado propio de dividendo: lo anuncian en su nota de
+# resultados. Solo se leen las de la lista cerrada cnmv/dividendo_en_resultados.csv, cada una con el formato revisado
+# de su nota. Formato «pagos» (Inditex, OIR 39667 del 11/03/2026): «… propondrá a la Junta General de Accionistas un
+# dividendo de 1,75€ por acción … El dividendo se abonará en dos pagos iguales: El 4 mayo 2026 un pago de 0,875€ por
+# acción, correspondiente al dividendo ordinario. El 2 noviembre 2026 un pago de 0,875€ por acción (0,325€ ordinario +
+# 0,550€ extraordinario)», y una tabla «Fecha de pago Record date Ex-date» con una fila de tres fechas por pago.
+# Reglas: la suma de los pagos tiene que ser el dividendo anunciado; cada fecha de pago, posterior al comunicado y como
+# mucho dos años después; ex y registro solo si la tabla trae la fila de esa fecha de pago, y ex ≤ registro ≤ pago. Si
+# algo no cuadra, ese comunicado no da nada. Un mismo pago anunciado en varios comunicados (nota y presentación) sale una
+# vez, del primero. Salida: datos/dividendos_resultados.csv, una fila por pago; la leen la ficha integrada y el calendario.
+EN_RESULTADOS = Path(__file__).resolve().parent / "dividendo_en_resultados.csv"
+COLUMNAS_RES = ["canal", "nreg", "pago", "fecha_comunicado", "isin", "empresa", "concepto", "importe_bruto", "moneda",
+                "fecha_ex", "fecha_registro", "fecha_pago", "extraccion", "dividendo_anunciado", "enlace", "lector"]
+_F = r"(\d{1,2})(?:de)?(" + "|".join(sorted(MESES, key=len, reverse=True)) + r")(?:de)?(20\d\d)"
+RE_RES_ANCLA = re.compile(r"eldividendoseabonaraen(dos|tres|cuatro)pagos")
+NUM_PAGOS = {"dos": 2, "tres": 3, "cuatro": 4}
+RE_RES_TOTAL = re.compile(r"undividendode(\d+[.,]\d+)(?:€|euros)(?:brutos)?poraccion")
+RE_RES_PAGO = re.compile(r"(?<![a-z])el" + _F + r"unpagode(\d+[.,]\d+)(?:€|euros)(?:brutos)?poraccion")
+RES_TABLA = "fechadepagorecorddateex-date"
+RE_RES_FILA = re.compile(_F + _F + _F)
+
+
+def _fecha_res(d: str, mes: str, a: str) -> date | None:
+    try:
+        return date(int(a), MESES[mes], int(d))
+    except (ValueError, KeyError):
+        return None
+
+
+def extraer_resultados(texto_pdf: str, fecha_com: date, formato: str = "pagos") -> list[dict]:
+    """Pagos de dividendo anunciados en una nota de resultados con el formato revisado. Lista vacía si no cuadra."""
+    if formato != "pagos":
+        return []
+    t = re.sub(r"\s+", "", _norm(texto_pdf))
+    # La nota puede repetir el párrafo (resumen de la primera página y apartado «Dividendos»): todas las repeticiones
+    # tienen que decir lo mismo, y la tabla de fechas puede ir detrás de cualquiera de ellas.
+    pagos, total, filas = None, None, {}
+    for ancla in RE_RES_ANCLA.finditer(t):
+        totales = list(RE_RES_TOTAL.finditer(t[max(0, ancla.start() - 400):ancla.start()]))
+        if not totales:
+            return []
+        este_total = float(totales[-1].group(1).replace(",", "."))
+        cola = t[ancla.end():ancla.end() + 700]
+        estos = []
+        # tantos pagos como anuncia la frase («en dos pagos»): los siguientes ya son de otra repetición del párrafo
+        coincidencias = list(RE_RES_PAGO.finditer(cola))[:NUM_PAGOS[ancla.group(1)]]
+        if len(coincidencias) != NUM_PAGOS[ancla.group(1)]:
+            return []
+        for m in coincidencias:
+            f = _fecha_res(m.group(1), m.group(2), m.group(3))
+            if f is None or not (fecha_com < f <= date(fecha_com.year + 2, 12, 31)):
+                return []
+            resto = re.split(r"(?<![a-z])el\d|\.(?!\d)|\)", cola[m.end():m.end() + 120])[0]   # hasta el fin de la frase o del paréntesis
+            extra, ordi = "extraordinario" in resto, "ordinario" in resto.replace("extraordinario", "")
+            concepto = "ordinario y extraordinario" if extra and ordi else "extraordinario" if extra else "ordinario" if ordi else ""
+            estos.append({"fecha_pago": f, "importe_bruto": round(float(m.group(4).replace(",", ".")), 8), "concepto": concepto})
+        if (pagos is not None and (estos != pagos or este_total != total)) or len(estos) < 2 \
+                or len({p["fecha_pago"] for p in estos}) != len(estos) or abs(sum(p["importe_bruto"] for p in estos) - este_total) > 5e-4:
+            return []
+        pagos, total = estos, este_total
+        i = t.find(RES_TABLA, ancla.end())
+        if 0 <= i - ancla.end() < 1500:
+            resto = t[i + len(RES_TABLA):]
+            while True:
+                m = RE_RES_FILA.match(resto)
+                if not m:
+                    break
+                pago, registro, ex = (_fecha_res(*m.groups()[k:k + 3]) for k in (0, 3, 6))
+                if pago and registro and ex and ex <= registro <= pago:
+                    if filas.get(pago, (ex, registro)) != (ex, registro):
+                        return []
+                    filas[pago] = (ex, registro)
+                resto = resto[m.end():]
+    if not pagos:
+        return []
+    out = []
+    for n, p in enumerate(sorted(pagos, key=lambda x: x["fecha_pago"]), 1):
+        ex, registro = filas.get(p["fecha_pago"], (None, None))
+        out.append({**p, "pago": n, "moneda": "EUR", "fecha_ex": ex, "fecha_registro": registro, "dividendo_anunciado": total,
+                    "extraccion": "completa" if ex else "parcial"})
+    return out
+
+
+def lista_en_resultados(ruta: Path = EN_RESULTADOS) -> dict[str, dict]:
+    if not ruta.exists():
+        return {}
+    return {r["isin"].strip(): r for r in csv.DictReader(ruta.open(encoding="utf-8")) if r.get("isin", "").strip()}
+
+
+def actualizar_resultados(datos: Path = DATOS, limite: int = LIMITE, texto_de=None, lista: dict | None = None) -> dict:
+    """Relee las notas de resultados de las empresas de la lista cerrada y reescribe datos/dividendos_resultados.csv si
+    cambia. Los textos salen de la caché; solo se descargan los comunicados nuevos (hasta `limite` por pasada)."""
+    lista = lista_en_resultados() if lista is None else lista
+    clasif, salida = datos / "ibex35.csv", datos / "dividendos_resultados.csv"
+    if not clasif.exists():
+        return {"pagos": 0, "pendientes": 0}
+    com = pd.read_csv(clasif, dtype=str, keep_default_na=False)
+    com = com[(com["caja"] == "resultados") & (com["etiqueta"] == "Resultados") & com["isin"].isin(list(lista))]
+    com = com.sort_values(["fecha", "canal", "nreg"])
+    if texto_de is None:
+        sesion = requests.Session()
+        texto_de = lambda canal, nreg, enlace: texto_comunicado(sesion, canal, int(nreg), enlace)  # noqa: E731
+    filas, vistos, pedidos, pendientes = [], set(), 0, 0
+    for _, c in com.iterrows():
+        en_cache = (CACHE / f"{c['canal']}-{c['nreg']}.txt").exists()
+        if not en_cache and pedidos >= limite:
+            pendientes += 1
+            continue
+        pedidos += 0 if en_cache else 1
+        texto = texto_de(c["canal"], c["nreg"], c["enlace"])
+        if not texto:
+            continue
+        for p in extraer_resultados(texto, date.fromisoformat(c["fecha"][:10]), lista[c["isin"]].get("formato", "pagos")):
+            clave = (c["isin"], p["fecha_pago"])
+            if clave in vistos:   # el mismo pago, ya leído de un comunicado anterior (la nota antes que la presentación)
+                continue
+            vistos.add(clave)
+            filas.append({"canal": c["canal"], "nreg": c["nreg"], "pago": str(p["pago"]), "fecha_comunicado": c["fecha"][:10],
+                          "isin": c["isin"], "empresa": c["empresa"], "concepto": p["concepto"],
+                          "importe_bruto": str(p["importe_bruto"]), "moneda": p["moneda"],
+                          **{k: (p[k].isoformat() if p[k] else "") for k in ("fecha_ex", "fecha_registro", "fecha_pago")},
+                          "extraccion": p["extraccion"], "dividendo_anunciado": str(p["dividendo_anunciado"]),
+                          "enlace": c["enlace"], "lector": LECTOR})
+    nuevo = pd.DataFrame(filas, columns=COLUMNAS_RES)
+    previo = pd.read_csv(salida, dtype=str, keep_default_na=False) if salida.exists() else None
+    if previo is None or list(previo.columns) != COLUMNAS_RES or not previo.equals(nuevo):
+        datos.mkdir(parents=True, exist_ok=True)
+        tmp = salida.with_suffix(".csv.tmp")
+        nuevo.to_csv(tmp, index=False, quoting=csv.QUOTE_MINIMAL)
+        tmp.replace(salida)
+    if pendientes:
+        print(f"Dividendos anunciados en resultados: {pendientes} notas pendientes de descargar en la pasada siguiente.")
+    return {"pagos": len(filas), "pendientes": pendientes}
 
 
 def main() -> int:

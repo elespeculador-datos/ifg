@@ -137,10 +137,82 @@ def pruebas_actualizar() -> None:
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+# --------------------------------------------------------------------------- 2. dividendos anunciados en los resultados
+INDITEX = "ES0148396007"
+
+
+def pruebas_resultados() -> None:
+    texto = (TEXTOS / "resultados-OIR-39667.txt").read_text(encoding="utf-8")
+    com = date(2026, 3, 11)
+    p = dv.extraer_resultados(texto, com)
+    esperado = [(1, 0.875, "2026-05-04", "2026-04-30", "2026-04-29", "ordinario"),
+                (2, 0.875, "2026-11-02", "2026-10-30", "2026-10-29", "ordinario y extraordinario")]
+    ok([(x["pago"], x["importe_bruto"], x["fecha_pago"].isoformat(), x["fecha_registro"].isoformat(), x["fecha_ex"].isoformat(),
+         x["concepto"]) for x in p] == esperado and all(x["extraccion"] == "completa" and x["moneda"] == "EUR"
+                                                         and x["dividendo_anunciado"] == 1.75 for x in p),
+       f"Inditex, OIR 39667: dos pagos de 0,875 € con sus fechas, como el PDF ({p})")
+    ok(dv.extraer_resultados(texto.replace("0,875€\npor acción (0,325€", "0,870€\npor acción (0,325€"), com) == [],
+       "si los pagos no suman el dividendo anunciado, nada")
+    ok(dv.extraer_resultados(texto, date(2026, 6, 1)) == [], "un pago anterior al comunicado: nada")
+    ok(dv.extraer_resultados(texto.replace("1,75€ por acción, compuesto por un dividendo ordinario de 1,20€ y un dividendo\n"
+                                           "extraordinario de 0,55€ por acción. El dividendo se abonará en dos pagos iguales: El\n4 mayo",
+                                           "1,75€ por acción, compuesto por un dividendo ordinario de 1,20€ y un dividendo\n"
+                                           "extraordinario de 0,55€ por acción. El dividendo se abonará en dos pagos iguales: El\n5 mayo"), com) == [],
+       "si las dos repeticiones del párrafo no dicen lo mismo, nada")
+    sin_tabla = dv.extraer_resultados(texto.split("Fecha de pago Record date")[0], com)
+    ok(len(sin_tabla) == 2 and all(x["fecha_ex"] is None and x["extraccion"] == "parcial" for x in sin_tabla),
+       "sin la tabla de fechas: importe y pago, sin ex ni registro (parcial)")
+    tabla_mal = dv.extraer_resultados(texto.replace("4 mayo 2026 30 abril 2026 29 abril 2026", "4 mayo 2026 30 abril 2026 6 mayo 2026"), com)
+    ok(tabla_mal[0]["fecha_ex"] is None and tabla_mal[1]["fecha_ex"].isoformat() == "2026-10-29",
+       "una fila de la tabla con la ex después del pago no se usa")
+    ok(dv.extraer_resultados("La sociedad pagará un dividendo de 0,30 euros por acción el 4 de mayo de 2026.", com) == [],
+       "otro formato: nada")
+    ok(dv.extraer_resultados(texto, com, formato="otro") == [], "formato desconocido: nada")
+    lista = dv.lista_en_resultados()
+    ok(list(lista) == [INDITEX] and lista[INDITEX]["formato"] == "pagos", "lista cerrada: solo Inditex, formato «pagos»")
+
+    tmp = Path(tempfile.mkdtemp(prefix="pruebas_dividendos_res_"))
+    try:
+        datos = tmp / "cnmv" / "datos"
+        datos.mkdir(parents=True)
+        cab = "canal,nreg,fecha,emisor,categoria,texto,enlace,isin,empresa,ficha,caja,etiqueta,periodo,grupo\n"
+        filas = [
+            f'OIR,39667,2026-03-11T07:29:00,INDITEX,x,"La sociedad remite información sobre resultados anuales",https://x/39667,{INDITEX},Inditex,inditex,resultados,Resultados,año 2025,r1',
+            f'OIR,39672,2026-03-11T08:44:00,INDITEX,x,"Presentación de resultados",https://x/39672,{INDITEX},Inditex,inditex,resultados,Resultados,año 2025,r1',
+            f'OIR,39665,2026-03-10T18:03:00,INDITEX,x,"Convocatoria de la presentación de resultados",https://x/39665,{INDITEX},Inditex,inditex,resultados,Fecha de resultados,año 2025,r1',
+            'OIR,40000,2026-03-12T08:00:00,OTRA,x,"Resultados de otra",https://x/40000,ES0000000001,Otra,otra,resultados,Resultados,año 2025,r2',
+        ]
+        (datos / "ibex35.csv").write_text(cab + "\n".join(filas) + "\n", encoding="utf-8")
+        pedidos: list = []
+
+        def texto_de(canal, nreg, enlace):
+            pedidos.append(nreg)
+            return texto if nreg in ("39667", "39672") else None   # la presentación repite el párrafo
+
+        r = dv.actualizar_resultados(datos, limite=5, texto_de=texto_de, lista=lista)
+        out = list(csv.DictReader((datos / "dividendos_resultados.csv").open(encoding="utf-8")))
+        ok(sorted(pedidos) == ["39667", "39672"], f"solo notas de resultados de la lista cerrada ({pedidos})")
+        ok(r["pagos"] == 2 and [(x["nreg"], x["pago"], x["fecha_pago"], x["importe_bruto"], x["fecha_ex"]) for x in out]
+           == [("39667", "1", "2026-05-04", "0.875", "2026-04-29"), ("39667", "2", "2026-11-02", "0.875", "2026-10-29")],
+           f"un pago por fila, del primer comunicado que lo anuncia ({out})")
+        ok(list(out[0].keys()) == dv.COLUMNAS_RES and out[0]["lector"] == dv.LECTOR and out[0]["dividendo_anunciado"] == "1.75",
+           "columnas y versión del lector")
+        antes = (datos / "dividendos_resultados.csv").stat().st_mtime_ns
+        dv.actualizar_resultados(datos, limite=5, texto_de=texto_de, lista=lista)
+        ok((datos / "dividendos_resultados.csv").stat().st_mtime_ns == antes, "sin cambios no se reescribe")
+        r0 = dv.actualizar_resultados(datos, limite=0, texto_de=texto_de, lista=lista)
+        ok(r0["pendientes"] == 2, "con el límite agotado, las notas sin caché quedan para la pasada siguiente")
+        completo = dv.actualizar(datos, limite=5, texto_de=texto_de)
+        ok(completo.get("resultados", {}).get("pagos") == 2, "la pasada de dividendos lee también los anunciados en resultados")
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 if __name__ == "__main__":
     pruebas_flexibles()
     pruebas_titulos()
     pruebas_actualizar()
+    pruebas_resultados()
     if FALLOS:
         print(f"{len(FALLOS)} de {N} comprobaciones fallan.")
         sys.exit(1)
