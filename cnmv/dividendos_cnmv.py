@@ -8,7 +8,10 @@ busca el importe bruto por acción con su moneda, la fecha ex-dividendo, la fech
   cnmv.es). Cada fila lleva el enlace al comunicado original.
 - Solo se rellenan los campos que se leen con seguridad; un importe sin moneda explícita no se publica. Si falta
   algo, la fila queda «parcial» y la ficha remite al comunicado. Nada se inventa ni se completa a mano.
-- Dividendos flexibles (scrip): no se lee importe; el efectivo depende de la opción del accionista.
+- Dividendos flexibles (scrip), desde el 24/11/2026: solo el efectivo fijo por acción para quien elige cobrar en
+  efectivo y su fecha de pago, con las frases exactas de RE_FLEX_ACCION, RE_FLEX_DERECHO y RE_FLEX_PAGO (revisadas
+  contra el PDF de Iberdrola, ACS, Ferrovial y Sacyr). Se descargan solo los comunicados cuyo título anuncia un
+  documento que puede traerlos (FLEX_TITULOS). Quien elige acciones nuevas cobra en acciones: lo dice la ficha.
 - El PDF y su texto se guardan en `$ESPEC_CACHE_DIR/cnmv/` (por defecto `cache/cnmv/` del repositorio, fuera de
   lo que sirve el servidor y fuera de git) para no volver a pedirlos.
 - Salida: `<salida>/cnmv/datos/dividendos.csv` (escritura atómica); la lee la ficha integrada (`empresas/`).
@@ -42,7 +45,7 @@ PAUSA = 2.0
 LIMITE = 20          # comunicados nuevos por pasada
 MAX_INTENTOS = 3     # un comunicado sin documento legible se vuelve a pedir hasta tres veces
 # Versión del lector. Si cambia, las filas leídas con otra se vuelven a leer (desde la caché, sin volver a descargar).
-LECTOR = "2026-11-22d"
+LECTOR = "2026-11-24a"
 COLUMNAS = ["canal", "nreg", "fecha_comunicado", "isin", "empresa", "tipo", "importe_bruto", "moneda", "fecha_ex",
             "fecha_registro", "fecha_pago", "extraccion", "intentos", "enlace", "lector"]
 
@@ -285,11 +288,74 @@ def _importe(t: str, fecha_com: date, fechas: list[tuple[int, int, date]]) -> tu
     return None, None
 
 
+# Dividendos flexibles (24/11/2026). Solo el efectivo fijo por acción para quien elige cobrar en efectivo y la fecha en
+# que se paga, con estas frases exactas, revisadas contra el PDF (texto compacto: minúsculas, sin acentos ni espacios):
+#   Iberdrola, complemento al documento informativo de cada edición: «El importe del Dividendo a Cuenta bruto por acción
+#     es de 0,253 euros» (OIR 38415); con dividendo de ajuste vale el total: «El importe del Dividendo Complementario
+#     Total bruto por acción es de 0,427 euros» (OIR 41685, frente al 0,425 sin el ajuste).
+#   Ferrovial: «el importe del dividendo en efectivo asciende a 0,8350 euros por cada acción existente» (OIR 43459).
+#   ACS y Sacyr, precio fijo por derecho, con un derecho por acción («un derecho de asignación gratuita por cada
+#     acción»): «El precio del Compromiso de Compra de derechos asumido por ACS es de 1,866 euros brutos por derecho»
+#     (OIR 41519); «a un precio fijo de 0,049 euros brutos por cada derecho» (OIR 38419).
+#   Fecha de pago, la línea del calendario: «1 de febrero de 2027 • Pago del Dividendo a Cuenta a quienes hubieran
+#     optado por recibir efectivo» (Iberdrola), «15 de julio de 2026: Pago de efectivo a los accionistas que hayan
+#     solicitado retribución en efectivo» (ACS), «29 de enero de 2026 Pago de efectivo a los accionistas que hubieran
+#     optado por recibir efectivo» (Sacyr), «A partir del 10 de diciembre de 2026 : Pago del dividendo en efectivo y
+#     entrega de las acciones» (Ferrovial).
+# Los importes «como mínimo», «objetivo» o «máximo» de los términos y condiciones no casan con estas frases; dos
+# importes distintos o dos fechas distintas en el mismo comunicado, tampoco: se queda sin leer.
+RE_FLEX_ACCION = re.compile(r"elimportedeldividendo(?:(?:acuenta|complementario)(total)?brutoporaccionesde|enefectivoasciendea)"
+                            r"(\d+[.,]\d+)euros")
+RE_FLEX_DERECHO = re.compile(r"(?:elpreciodelcompromisodecompra(?:dederechos)?(?:asumidopor[a-z]{2,30})?esde|aunpreciofijode)"
+                             r"(\d+[.,]\d+)eurosbrutospor(?:cada)?derecho")
+UN_DERECHO_POR_ACCION = "underechodeasignaciongratuitaporcadaaccion"
+RE_FLEX_PAGO = re.compile(r"(?<!\d)(\d{1,2})de(" + "|".join(sorted(MESES, key=len, reverse=True)) + r")de(20\d\d)[^a-z0-9]{0,6}"
+                          r"pago(?:deldividendo(?:acuenta|complementario|enefectivo)|deefectivo)"
+                          r"(?:aquieneshubieranoptadoporrecibirefectivo|alosaccionistasque(?:hayansolicitadoretribucionenefectivo"
+                          r"|hubieranoptadoporrecibirefectivo)|yentrega)")
+# Títulos de los comunicados de flexible que pueden traer el importe o el calendario (el resto no se descarga):
+# «Complemento al documento informativo…», «Términos y condiciones…» (Iberdrola), «Primera ejecución del dividendo
+# flexible…» (ACS), «Ejecución del acuerdo de ampliación de capital (scrip dividend)…» (Sacyr), «Ferrovial anuncia el
+# importe del dividendo en efectivo…» y «…dividendo flexible (scrip dividend) pagadero en acciones o en efectivo».
+FLEX_TITULOS = ("documento informativo", "terminos y condiciones", "ejecucion", "importe del dividendo", "pagadero")
+
+
+def flexible_con_documento(titulo: str) -> bool:
+    t = " " + re.sub(r"\s+", " ", _norm(titulo)) + " "
+    return any(p in t for p in FLEX_TITULOS)
+
+
+def _extraer_flexible(t: str, fecha_com: date) -> dict:
+    """Efectivo fijo por acción y fecha de pago de un dividendo flexible, sobre el texto compacto."""
+    r = {"importe_bruto": None, "moneda": None, "fecha_ex": None, "fecha_registro": None, "fecha_pago": None}
+    por_accion = [(bool(m.group(1)), round(float(m.group(2).replace(",", ".")), 8)) for m in RE_FLEX_ACCION.finditer(t)]
+    valores = {v for total, v in por_accion if total} or {v for _, v in por_accion}
+    if not valores and UN_DERECHO_POR_ACCION in t:
+        valores = {round(float(m.group(1).replace(",", ".")), 8) for m in RE_FLEX_DERECHO.finditer(t)}
+    if len(valores) == 1 and 0 < min(valores) < 50:
+        r["importe_bruto"], r["moneda"] = min(valores), "EUR"
+    pagos = set()
+    for d, mes, a in RE_FLEX_PAGO.findall(t):
+        try:
+            f = date(int(a), MESES[mes], int(d))
+        except ValueError:
+            continue
+        if fecha_com <= f <= date(fecha_com.year + 1, 12, 31):
+            pagos.add(f)
+    if len(pagos) == 1:
+        r["fecha_pago"] = pagos.pop()
+    r["extraccion"] = ("flexible: completa" if r["importe_bruto"] and r["fecha_pago"]
+                       else "flexible: parcial" if r["importe_bruto"] or r["fecha_pago"] else "flexible: ver comunicado")
+    return r
+
+
 def extraer(texto_pdf: str, fecha_com: date, tipo: str = "Dividendo") -> dict:
     """Campos leídos del texto del comunicado. Valida coherencia; lo dudoso se deja vacío."""
     vacio = {"importe_bruto": None, "moneda": None, "fecha_ex": None, "fecha_registro": None, "fecha_pago": None}
     if tipo == "Dividendo flexible":
-        return {**vacio, "extraccion": "flexible: ver comunicado"}
+        if not texto_pdf.strip():
+            return {**vacio, "extraccion": "flexible: ver comunicado"}
+        return _extraer_flexible(re.sub(r"\s+", "", _norm(texto_pdf)), fecha_com)
     if tipo != "Dividendo":   # política de dividendos y otros anuncios sin un pago concreto: no se lee importe
         return {**vacio, "extraccion": "sin pago: ver comunicado"}
     plano = re.sub(r"\s+", " ", _norm(texto_pdf))
@@ -396,7 +462,8 @@ def actualizar(datos: Path = DATOS, limite: int = LIMITE, todos: bool = False, t
             pendientes += 1
             continue
         fecha_com = date.fromisoformat(c["fecha"][:10])
-        if c["etiqueta"] != "Dividendo":  # flexibles y política de dividendos: no se descarga nada
+        # política de dividendos y flexibles cuyo título no anuncia importe ni calendario: no se descarga nada
+        if c["etiqueta"] != "Dividendo" and not (c["etiqueta"] == "Dividendo flexible" and flexible_con_documento(c["texto"])):
             r = extraer("", fecha_com, c["etiqueta"])
         else:
             texto = texto_de(c["canal"], c["nreg"], c["enlace"])
