@@ -52,6 +52,7 @@ PAUSA = 1.0
 MAX_INFORMES = 40
 VENTANA_DIAS = 45   # las filas de un informe son de las semanas anteriores al comunicado (siete sesiones, art. 2.3 del RD 2016/1052)
 INTENTOS_MAX = 3
+LECTOR = "1.0.1"   # lector de fechas: lo leído «sin filas» con otro lector (o sin anotar) se relee una vez
 DIAS_SEMANA = 7
 DIAS_EN_CURSO = 45
 SEMANAS_TABLA = 8
@@ -60,7 +61,7 @@ AVISOS: list[str] = []
 
 CAMPOS_INFORMES = ["nreg", "isin", "empresa", "fecha_comunicado", "titulo", "enlace", "documento", "estado", "intentos", "filas",
                    "acciones", "precio_medio", "moneda", "importe_estimado_eur", "desde", "hasta", "dias", "centros", "total_declarado",
-                   "coincide", "acciones_programa", "importe_programa_eur", "pct_programa", "pct_capital", "finalizado", "leido"]
+                   "coincide", "acciones_programa", "importe_programa_eur", "pct_programa", "pct_capital", "finalizado", "leido", "lector"]
 CAMPOS_OPERACIONES = ["nreg", "isin", "empresa", "fecha", "centro", "operacion", "acciones", "precio", "moneda"]
 
 
@@ -214,14 +215,15 @@ def fuera_de_plazo(e: dict) -> bool:
 
 
 def pendientes(listado: list[dict], informes: list[dict]) -> list[dict]:
-    """Comunicados del listado sin leer, con error, o leídos con fechas fuera de plazo (fuera_de_plazo), con menos de
-    INTENTOS_MAX intentos, del más reciente al más antiguo."""
+    """Comunicados del listado sin leer, con error, leídos con fechas fuera de plazo (fuera_de_plazo) o leídos «sin filas»
+    con otro LECTOR, con menos de INTENTOS_MAX intentos, del más reciente al más antiguo."""
     estado = {i["nreg"]: i for i in informes}
     out = []
     for r in listado:
         e = estado.get(r["nreg"])
         quedan = e is not None and int(e.get("intentos") or 0) < INTENTOS_MAX
-        if e is None or (quedan and (e.get("estado") == "error" or (e.get("estado") == "leido" and fuera_de_plazo(e)))):
+        sin_filas_viejo = e is not None and e.get("estado") == "sin_filas" and (e.get("lector") or "") != LECTOR
+        if e is None or (quedan and (e.get("estado") == "error" or (e.get("estado") == "leido" and fuera_de_plazo(e)) or sin_filas_viejo)):
             out.append(r)
     return out
 
@@ -231,7 +233,7 @@ def _informe_base(r: dict) -> dict:
             "titulo": r.get("texto", ""), "enlace": r.get("enlace", ""), "documento": "", "estado": "error", "intentos": 0, "filas": 0,
             "acciones": 0, "precio_medio": "", "moneda": "", "importe_estimado_eur": "", "desde": "", "hasta": "", "dias": 0, "centros": "",
             "total_declarado": "", "coincide": "", "acciones_programa": "", "importe_programa_eur": "", "pct_programa": "", "pct_capital": "",
-            "finalizado": "", "leido": ""}
+            "finalizado": "", "leido": "", "lector": LECTOR}
 
 
 def informe_desde_textos(r: dict, textos: list[tuple[str, str]], hoy: date) -> tuple[dict, list[dict]]:

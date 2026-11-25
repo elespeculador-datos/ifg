@@ -63,3 +63,8 @@ ArcelorMittal escribe el resumen diario de algunos informes en mes/día (10/12/2
 - `filas.orden_fechas` deduce el orden de las fechas dd/dd/aaaa por el número mayor que 12, por separado en las líneas sin hora (resumen) y con hora (detalle).
 - `analizar` comprueba que cada fila caiga entre `VENTANA_DIAS` (45) días antes del comunicado y el propio día. Si no, prueba mes/día y se queda con la lectura que deja más filas dentro; las que siguen fuera se descartan con aviso.
 - `pendientes` relee una vez (con el límite de `INTENTOS_MAX`) lo ya leído con fechas fuera de plazo: con los datos del servidor del 24/11, solo el 43205, que pasa a 240.000 acciones del 12 al 16/10 y coincide con su total.
+
+Ampliado el mismo día (25/11/2026):
+- Las fechas sin cero delante (9/28/2026, 10/5/2026) también se reconocen. Dos informes de ArcelorMittal del 12/10 (43124 y 43125) quedaban «sin filas» por eso, y ahora se leen enteros: 206.534 y 300.000 acciones, que coinciden con sus totales.
+- Cada informe anota el `lector` con que se leyó. Lo leído «sin filas» con un lector anterior se relee una vez.
+- Con el estado del servidor del 24/11, de los 23 informes marcados («sin tabla legible» o sin coincidir con su total) cambian solo estos tres: 43205, 43124 y 43125.

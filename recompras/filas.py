@@ -30,7 +30,7 @@ CENTRO_TEXTO = [
 MESES = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6, "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
          "ene": 1, "abr": 4, "ago": 8, "sept": 9, "dic": 12}
 
-FECHA_ES = re.compile(r"\b(\d{2})/(\d{2})/(\d{4})\b")
+FECHA_ES = re.compile(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b")   # también sin cero delante (9/28/2026, ArcelorMittal)
 FECHA_ISO = re.compile(r"\b(\d{4})-(\d{2})-(\d{2})\b")
 FECHA_MES = re.compile(r"\b(\d{2})-([A-Za-z]{3,4})\.?-(\d{2,4})\b")  # 09-Nov-26 (inglés) o 28-oct.-26 (español)
 HORA = re.compile(r"\b\d{1,2}:\d{2}(?::\d{2})?\b")

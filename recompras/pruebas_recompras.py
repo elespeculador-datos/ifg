@@ -477,5 +477,58 @@ ok([r["nreg"] for r in recompras.pendientes(lst, [inf, {"nreg": "1", "estado": "
    and recompras.pendientes(lst[:1], [{**inf, "intentos": str(recompras.INTENTOS_MAX)}]) == [],
    "pendientes: se relee lo leído fuera de plazo, con el límite de intentos")
 
+# ArcelorMittal, comunicados 43124 y 43125 (12/10/2026), recortes literales: fechas en mes/día sin cero delante
+# (9/28/2026, 10/5/2026). Antes no se reconocían como fechas y los dos quedaban «sin filas».
+ARCELOR_124 = """Déclaration des transactions sur actions propres réalisées du 28/09/2026 au 02/10/2026
+
+
+
+Présentation agrégée par jour et marché
+
+
+                                                                                                                                             Prix moyen pondéré
+                                                  Code identifiant de    Jour de la      Code identifiant de     Volume total journalier                              Marché (code
+                     Nom de l'émetteur                                                                                                     journalier d'acquisition                                   Prix
+                                                     l'émetteur         transaction    l'instrument financier     (en nombre de titres)                                   MIC)
+                                                                                                                                                  des actions
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165    9/28/2026         LU1598757687                  20 818                    60.8092               CEUX                         22.02                         CHECK - Rentrer à la main
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165    9/28/2026         LU1598757687                  65 716                    60.8079               XAMS
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165    10/1/2026         LU1598757687                  60 000                    57.5262               XAMS
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165    10/2/2026         LU1598757687                  60 000                    57.0636               XAMS
+Arrondi à deux chiffres après la virgule                                                       TOTAL                     206 534                    58.77
+
+"""
+ARCELOR_125 = """Purchases of own shares on 5th October to 9th October 2026
+
+
+
+Aggregate presentation by day and market
+
+
+                                                                                                                                                        Daily weighted average
+                                                  Identity code of the       Day of the       Identity code of the financial   Total daily volume (in                            Market (MIC
+                  Name of the Issuer                                                                                                                     purchase price of the                                    Prix
+                                                         Issuer             transaction                 instrument              number of shares)                                  Code)
+                                                                                                                                                                shares
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/5/2026               LU1598757687                      60 000                  56.8507             XAMS                           22.02                           CHECK - Rentrer à la main
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/6/2026               LU1598757687                      60 000                  58.5122             XAMS
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/7/2026               LU1598757687                      60 000                  56.3312             XAMS
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/8/2026               LU1598757687                      60 000                  54.1702             XAMS
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/9/2026               LU1598757687                      60 000                  57.0835             XAMS
+Rounded to two digits after the decimal point                                                            TOTAL                        300 000                    56.59
+
+"""
+a124 = recompras.analizar(ARCELOR_124, date(2026, 10, 12))
+ok([x["fecha"] for x in a124["filas"]] == ["2026-09-28", "2026-09-28", "2026-10-01", "2026-10-02"] and a124["coincide"] is True and a124["resumen"]["acciones"] == 206534,
+   f"ArcelorMittal 43124: fechas sin cero en mes/día (9/28/2026); coincide con el TOTAL: {[x['fecha'] for x in a124['filas']]} {a124['resumen']['acciones']}")
+a125 = recompras.analizar(ARCELOR_125, date(2026, 10, 12))
+ok([x["fecha"] for x in a125["filas"]] == ["2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09"] and a125["coincide"] is True,
+   f"ArcelorMittal 43125: fechas ambiguas (10/5/2026), situadas por la fecha del comunicado: {[x['fecha'] for x in a125['filas']]}")
+viejo = {"nreg": "43124", "estado": "sin_filas", "intentos": "1", "leido": "2026-11-24", "fecha_comunicado": "2026-10-12", "desde": "", "hasta": ""}
+ok([r["nreg"] for r in recompras.pendientes([{"nreg": "43124"}], [viejo])] == ["43124"]
+   and recompras.pendientes([{"nreg": "43124"}], [{**viejo, "lector": recompras.LECTOR}]) == []
+   and recompras.pendientes([{"nreg": "43124"}], [{**viejo, "intentos": str(recompras.INTENTOS_MAX)}]) == [],
+   "pendientes: lo leído «sin filas» con un lector anterior se relee una vez")
+
 print(f"{TOTAL - len(FALLOS)}/{TOTAL} comprobaciones superadas")
 sys.exit(1 if FALLOS else 0)
