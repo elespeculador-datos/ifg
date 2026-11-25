@@ -14,7 +14,10 @@ busca el importe bruto por acción con su moneda, la fecha ex-dividendo, la fech
   documento que puede traerlos (FLEX_TITULOS). Quien elige acciones nuevas cobra en acciones: lo dice la ficha.
 - Dividendos anunciados dentro de los resultados (24/11/2026): solo las empresas de la lista cerrada
   `cnmv/dividendo_en_resultados.csv` (Inditex, Logista y Naturgy), con el formato revisado de su nota (`extraer_resultados`); una
-  fila por pago en `<salida>/cnmv/datos/dividendos_resultados.csv`.
+  fila por pago en `<salida>/cnmv/datos/dividendos_resultados.csv`. Las remisiones de información financiera periódica
+  (informe financiero anual e informes semestrales) no se piden: su ficha de la CNMV no tiene documento. Una nota sin
+  texto no tapa a las demás (25/11/2026): primero se piden las que nunca se han pedido y las que fallaron se repiten
+  una vez al día, hasta MAX_INTENTOS.
 - El PDF y su texto se guardan en `$ESPEC_CACHE_DIR/cnmv/` (por defecto `cache/cnmv/` del repositorio, fuera de
   lo que sirve el servidor y fuera de git) para no volver a pedirlos.
 - Salida: `<salida>/cnmv/datos/dividendos.csv` (escritura atómica); la lee la ficha integrada (`empresas/`).
@@ -540,6 +543,11 @@ def actualizar(datos: Path = DATOS, limite: int = LIMITE, todos: bool = False, t
 # …») y se descarta si otra nota da la fecha del mismo dividendo (misma empresa, ejercicio y tipo). Nunca se deduce una
 # fecha que la nota no da, salvo el año del pago a cuenta de Logista, que sale de la fecha de aprobación de la frase.
 EN_RESULTADOS = Path(__file__).resolve().parent / "dividendo_en_resultados.csv"
+# Remisiones de información financiera periódica: el informe financiero anual y los semestrales están en el registro
+# de información periódica de la CNMV, y su ficha de «Otra información relevante» no enlaza ningún documento
+# (/webservices/verdocumento/). Comprobado el 25/11/2026 con las once de Inditex, Logista y Naturgy de los trece meses
+# anteriores: ninguna lo tiene. No se piden.
+RE_PERIODICA = re.compile(r"remite (?:el )?informe financiero anual|remite informacion financiera del (?:primer|segundo) semestre")
 COLUMNAS_RES = ["canal", "nreg", "pago", "fecha_comunicado", "isin", "empresa", "concepto", "importe_bruto", "moneda",
                 "fecha_ex", "fecha_registro", "fecha_pago", "extraccion", "dividendo_anunciado", "enlace", "lector"]
 _F = r"(\d{1,2})(?:de)?(" + "|".join(sorted(MESES, key=len, reverse=True)) + r")(?:de)?(20\d\d)"
@@ -725,27 +733,70 @@ def lista_en_resultados(ruta: Path = EN_RESULTADOS) -> dict[str, dict]:
     return {r["isin"].strip(): r for r in csv.DictReader(ruta.open(encoding="utf-8")) if r.get("isin", "").strip()}
 
 
-def actualizar_resultados(datos: Path = DATOS, limite: int = LIMITE, texto_de=None, lista: dict | None = None) -> dict:
+def _sin_texto(marca: Path) -> tuple[date | None, int]:
+    """Fecha del último intento fallido y número de intentos de una nota, de su marca «.sin-texto» en la caché."""
+    try:
+        f, n = marca.read_text(encoding="utf-8").split()
+        return date.fromisoformat(f), int(n)
+    except (OSError, ValueError):
+        return None, 0
+
+
+def actualizar_resultados(datos: Path = DATOS, limite: int = LIMITE, texto_de=None, lista: dict | None = None,
+                          cache: Path | None = None, hoy: date | None = None) -> dict:
     """Relee las notas de resultados de las empresas de la lista cerrada y reescribe datos/dividendos_resultados.csv si
-    cambia. Los textos salen de la caché; solo se descargan los comunicados nuevos (hasta `limite` por pasada)."""
+    cambia. Los textos salen de la caché; solo se descargan los comunicados nuevos (hasta `limite` por pasada).
+
+    Cola de descargas (25/11/2026): primero las notas que nunca se han pedido, de la más antigua a la más reciente;
+    después, las que se pidieron y no dieron texto, una vez al día y hasta MAX_INTENTOS (cada fallo deja en la caché
+    `<canal>-<nreg>.sin-texto` con la fecha y los intentos). Antes, una nota sin documento se volvía a pedir la primera
+    en cada pasada: cinco a la cabeza de la cola gastaban el límite y ninguna otra se leía."""
     lista = lista_en_resultados() if lista is None else lista
+    cache = CACHE if cache is None else cache
+    hoy = date.today() if hoy is None else hoy
     clasif, salida = datos / "ibex35.csv", datos / "dividendos_resultados.csv"
     if not clasif.exists():
-        return {"pagos": 0, "pendientes": 0}
+        return {"pagos": 0, "pendientes": 0, "sin_texto": 0}
     com = pd.read_csv(clasif, dtype=str, keep_default_na=False)
     com = com[(com["caja"] == "resultados") & (com["etiqueta"] == "Resultados") & com["isin"].isin(list(lista))]
+    com = com[com["texto"].map(lambda x: not RE_PERIODICA.search(_norm(x))).astype(bool)]
     com = com.sort_values(["fecha", "canal", "nreg"])
     if texto_de is None:
         sesion = requests.Session()
         texto_de = lambda canal, nreg, enlace: texto_comunicado(sesion, canal, int(nreg), enlace)  # noqa: E731
-    filas, vistos, pedidos, pendientes, ejercicios = [], set(), 0, 0, []
+
+    # 1. qué se descarga en esta pasada
+    nunca, fallidas, sin_texto = [], [], []
     for _, c in com.iterrows():
-        en_cache = (CACHE / f"{c['canal']}-{c['nreg']}.txt").exists()
-        if not en_cache and pedidos >= limite:
-            pendientes += 1
+        if (cache / f"{c['canal']}-{c['nreg']}.txt").exists():
             continue
-        pedidos += 0 if en_cache else 1
+        ultimo, intentos = _sin_texto(cache / f"{c['canal']}-{c['nreg']}.sin-texto")
+        if intentos >= MAX_INTENTOS:
+            sin_texto.append(f"{c['canal']} {c['nreg']}")
+        elif intentos == 0:
+            nunca.append(c)
+        elif ultimo is None or ultimo < hoy:
+            fallidas.append(c)
+    cola = nunca + fallidas
+    pedir, pendientes = cola[:limite], max(len(cola) - limite, 0)
+    textos = {}
+    for c in pedir:
         texto = texto_de(c["canal"], c["nreg"], c["enlace"])
+        marca = cache / f"{c['canal']}-{c['nreg']}.sin-texto"
+        if texto:
+            textos[(c["canal"], c["nreg"])] = texto
+            marca.unlink(missing_ok=True)
+        elif not (cache / f"{c['canal']}-{c['nreg']}.txt").exists():
+            intentos = _sin_texto(marca)[1] + 1
+            cache.mkdir(parents=True, exist_ok=True)
+            marca.write_text(f"{hoy.isoformat()} {intentos}\n", encoding="utf-8")
+
+    # 2. las filas, en orden de fecha, de todas las notas con texto (recién descargado o de la caché)
+    filas, vistos, ejercicios = [], set(), []
+    for _, c in com.iterrows():
+        texto = textos.get((c["canal"], c["nreg"]))
+        if texto is None and (cache / f"{c['canal']}-{c['nreg']}.txt").exists():
+            texto = texto_de(c["canal"], c["nreg"], c["enlace"])
         if not texto:
             continue
         for p in extraer_resultados(texto, date.fromisoformat(c["fecha"][:10]), lista[c["isin"]].get("formato", "pagos")):
@@ -774,8 +825,10 @@ def actualizar_resultados(datos: Path = DATOS, limite: int = LIMITE, texto_de=No
         tmp.replace(salida)
     if pendientes:
         print(f"Dividendos anunciados en resultados: {pendientes} notas pendientes de descargar en la pasada siguiente.")
-    return {"pagos": len(filas), "pendientes": pendientes}
-
+    if sin_texto:
+        print(f"Dividendos anunciados en resultados: {len(sin_texto)} notas sin texto tras {MAX_INTENTOS} intentos, "
+              f"no se vuelven a pedir: {', '.join(sin_texto)}.")
+    return {"pagos": len(filas), "pendientes": pendientes, "sin_texto": len(sin_texto)}
 
 def main() -> int:
     ap = argparse.ArgumentParser()
