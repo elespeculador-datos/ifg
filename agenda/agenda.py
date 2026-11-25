@@ -46,7 +46,7 @@ from zoneinfo import ZoneInfo
 
 import requests
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 MADRID = ZoneInfo("Europe/Madrid")
 NUEVA_YORK = ZoneInfo("America/New_York")
 PAGINA_WP = "https://elespeculador.com/agenda-semanal/"
@@ -58,7 +58,7 @@ DIAS_CACHE = 35          # una lectura antigua de una fuente vale hasta aquí si
 HORIZONTE_DIAS = 14      # dos semanas: la que está en curso y la siguiente
 
 URL_INE = "https://servicios.ine.es/wstempus/js/ES/PUBLICACIONFECHA_PUBLICACION/{id}"
-URL_INE_CALENDARIO = "https://www.ine.es/dyngs/INEbase/es/calendario.htm"
+URL_INE_CALENDARIO = "https://www.ine.es/dynt3/Calendario/es/calenHTML.htm"  # la anterior (dyngs/INEbase/es/calendario.htm) da 404 desde noviembre de 2026
 URL_BCE = "https://www.ecb.europa.eu/press/calendars/mgcgc/html/index.en.html"
 URL_FED = "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
 URL_EUROSTAT = "https://ec.europa.eu/eurostat/o/calendars/eventsIcal?theme="
