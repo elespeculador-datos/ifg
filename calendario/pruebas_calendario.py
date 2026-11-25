@@ -219,6 +219,13 @@ def main() -> None:
            == " · efectivo para quien lo elige: 0,253 € por acción; pago del efectivo: 01/02/2027" and cal._efectivo({}) == "",
            "texto del efectivo de un flexible")
         ok(r2["huella"] != res["huella"], "los datos nuevos cambian la huella")
+    # Dividendos anunciados en resultados con los formatos de Logista y Naturgy (25/11/2026)
+    ok(cal.lectura_resultados("solo pago") == "importe y fecha de pago leídos de la nota, que no da la fecha ex"
+       and cal.lectura_resultados("anunciado: pago previsto en marzo de 2026")
+       == "propuesto, pendiente de la junta; pago previsto en marzo de 2026, sin fecha exacta"
+       and cal.lectura_resultados("completa") == "leído del comunicado"
+       and cal.lectura_resultados("parcial") == "parcial: el resto, en el comunicado",
+       "lectura de los dividendos anunciados en resultados: completa, solo pago, anunciado y parcial")
     if FALLOS:
         print(f"{len(FALLOS)} de {N} comprobaciones fallan.")
         sys.exit(1)

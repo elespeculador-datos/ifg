@@ -170,8 +170,8 @@ def pruebas_resultados() -> None:
     ok(dv.extraer_resultados("La sociedad pagará un dividendo de 0,30 euros por acción el 4 de mayo de 2026.", com) == [],
        "otro formato: nada")
     ok(dv.extraer_resultados(texto, com, formato="otro") == [], "formato desconocido: nada")
-    lista = dv.lista_en_resultados()
-    ok(list(lista) == [INDITEX] and lista[INDITEX]["formato"] == "pagos", "lista cerrada: solo Inditex, formato «pagos»")
+    lista = {INDITEX: dv.lista_en_resultados()[INDITEX]}
+    ok(lista[INDITEX]["formato"] == "pagos", "lista cerrada: Inditex, formato «pagos»")
 
     tmp = Path(tempfile.mkdtemp(prefix="pruebas_dividendos_res_"))
     try:
@@ -210,11 +210,105 @@ def pruebas_resultados() -> None:
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+# --------------------------------------------------------------------------- 3. formatos «politica» (Logista) y «efectivo» (Naturgy)
+# Recortes literales de cada nota (pdftotext); valores comprobados a mano contra el PDF el 25/11/2026.
+LOGISTA, NATURGY = "ES0105027009", "ES0116870314"
+ESPERADO_RES = {
+    ("OIR-37569", "politica", "2025-11-06"): [("a cuenta", 0.56, "2025-08-28", "2025", "solo pago"),
+                                            ("complementario", 1.53, None, "2025", "anunciado: pago previsto en el primer trimestre de 2026")],
+    ("OIR-38742", "politica", "2026-02-05"): [("a cuenta", 0.56, "2025-08-28", "2025", "solo pago"),
+                                            ("complementario y extraordinario", 1.53, "2026-02-26", "2025", "solo pago")],
+    ("OIR-40562", "politica", "2026-04-30"): [("a cuenta", 0.56, "2025-08-28", "2025", "solo pago"),
+                                            ("complementario y extraordinario", 1.53, "2026-02-26", "2025", "solo pago")],
+    ("OIR-43515", "politica", "2026-11-06"): [("a cuenta", 0.58, "2026-08-27", "2026", "solo pago"),
+                                            ("complementario", 1.59, None, "2026", "anunciado: pago previsto en el primer trimestre de 2027")],
+    ("IP-3095", "efectivo", "2026-02-18"): [("final", 0.6, "2025-04-09", "2024", "solo pago"),
+                                           ("final", 0.57, None, "2025", "anunciado: pago previsto en marzo de 2026")],
+    ("OIR-40515", "efectivo", "2026-04-29"): [("final", 0.57, "2026-03-31", "2025", "solo pago")],
+    ("IP-3290", "efectivo", "2026-07-22"): [("final", 0.57, "2026-03-31", "2025", "solo pago"),
+                                           ("a cuenta", 0.6, "2026-07-29", "2026", "solo pago")],
+    ("IP-3392", "efectivo", "2026-10-29"): [("a cuenta", 0.6, "2026-07-29", "2026", "solo pago"),
+                                           ("a cuenta", 0.6, "2026-11-05", "2026", "solo pago")],
+}
+
+
+def _lee(nombre: str) -> str:
+    return (TEXTOS / f"resultados-{nombre}.txt").read_text(encoding="utf-8")
+
+
+def _tuplas(p: list[dict]) -> list[tuple]:
+    return [(x["concepto"], x["importe_bruto"], x["fecha_pago"].isoformat() if x["fecha_pago"] else None, x["ejercicio"],
+             x["extraccion"]) for x in p]
+
+
+def pruebas_politica_efectivo() -> None:
+    for (nombre, formato, fecha), esperado in ESPERADO_RES.items():
+        p = dv.extraer_resultados(_lee(nombre), date.fromisoformat(fecha), formato)
+        ok(_tuplas(p) == esperado and all(x["fecha_ex"] is None and x["fecha_registro"] is None and x["moneda"] == "EUR" for x in p)
+           and [x["pago"] for x in p] == list(range(1, len(p) + 1)),
+           f"{nombre} («{formato}»): lo que dice la nota, sin fecha ex ({_tuplas(p)})")
+    lo, na = _lee("OIR-43515"), _lee("IP-3392")
+    ok(dv.extraer_resultados(lo, date(2026, 11, 6), "efectivo") == [] and dv.extraer_resultados(na, date(2026, 10, 29), "politica") == [],
+       "cada formato solo lee su redacción")
+    # complementario y extraordinario que no suman el total: fuera esa fila
+    mal = _lee("OIR-38742").replace("0,08 euros por acción", "0,09 euros por acción")
+    ok(mal != _lee("OIR-38742") and [x[0] for x in _tuplas(dv.extraer_resultados(mal, date(2026, 2, 5), "politica"))] == ["a cuenta"],
+       "si complementario y extraordinario no suman el total, esa fila no sale")
+    # a cuenta con una fecha anterior a su aprobación: el año siguiente queda a más de seis meses: fuera
+    antes = lo.replace("desembolsó el 27 de agosto", "desembolsó el 27 de junio")
+    ok(antes != lo and [x[0] for x in _tuplas(dv.extraer_resultados(antes, date(2026, 11, 6), "politica"))] == ["complementario"],
+       "a cuenta: una fecha de pago anterior a la aprobación no se convierte en otra fecha")
+    # propuesto con un año de pago fuera de lugar: fuera
+    lejos = lo.replace("año natural 2027", "año natural 2031")
+    ok(lejos != lo and [x[0] for x in _tuplas(dv.extraer_resultados(lejos, date(2026, 11, 6), "politica"))] == ["a cuenta"],
+       "propuesto: un año de pago lejano no sale")
+    # pagos contados demasiado tarde (más de 400 días antes de la nota): fuera
+    ok(_tuplas(dv.extraer_resultados(_lee("IP-3095"), date(2026, 6, 1), "efectivo")) == [("final", 0.57, None, "2025",
+       "anunciado: pago previsto en marzo de 2026")], "un pago de hace más de 400 días no sale")
+    # Naturgy: una frase con dos pagos y sin año («el 30 de julio y el 5 de noviembre, respectivamente») no se lee
+    ok("respectivamente" in _lee("IP-3095") and not any(x[2] in ("2025-07-30", "2025-11-05") for x in _tuplas(
+        dv.extraer_resultados(_lee("IP-3095"), date(2026, 2, 18), "efectivo"))), "Naturgy: la frase de dos pagos sin año no se lee")
+
+    # actualizar_resultados con las notas en orden: cada pago una vez, de la primera nota; los propuestos que otra nota
+    # fecha, fuera; el propuesto que nadie fecha (complementario de Logista de 2026), dentro
+    lista = {r["isin"]: r for r in dv.lista_en_resultados().values()}
+    ok(lista[LOGISTA]["formato"] == "politica" and lista[NATURGY]["formato"] == "efectivo" and lista[INDITEX]["formato"] == "pagos",
+       "lista cerrada: Inditex «pagos», Logista «politica», Naturgy «efectivo»")
+    tmp = Path(tempfile.mkdtemp(prefix="pruebas_dividendos_pol_"))
+    try:
+        datos = tmp / "cnmv" / "datos"
+        datos.mkdir(parents=True)
+        cab = "canal,nreg,fecha,emisor,categoria,texto,enlace,isin,empresa,ficha,caja,etiqueta,periodo,grupo\n"
+        notas = [("OIR", "37569", "2025-11-06", LOGISTA, "Logista"), ("OIR", "38742", "2026-02-05", LOGISTA, "Logista"),
+                 ("OIR", "40562", "2026-04-30", LOGISTA, "Logista"), ("OIR", "43515", "2026-11-06", LOGISTA, "Logista"),
+                 ("IP", "3095", "2026-02-18", NATURGY, "Naturgy"), ("OIR", "40515", "2026-04-29", NATURGY, "Naturgy"),
+                 ("IP", "3290", "2026-07-22", NATURGY, "Naturgy"), ("IP", "3392", "2026-10-29", NATURGY, "Naturgy")]
+        filas = [f'{c},{n},{f}T08:00:00,X,x,"Resultados",https://x/{n},{i},{e},{e.lower()},resultados,Resultados,año,r'
+                 for c, n, f, i, e in notas]
+        (datos / "ibex35.csv").write_text(cab + "\n".join(filas) + "\n", encoding="utf-8")
+        r = dv.actualizar_resultados(datos, limite=20, texto_de=lambda canal, nreg, enlace: _lee(f"{canal}-{nreg}"), lista=lista)
+        out = [(x["nreg"], x["empresa"], x["concepto"], x["importe_bruto"], x["fecha_pago"], x["extraccion"])
+               for x in csv.DictReader((datos / "dividendos_resultados.csv").open(encoding="utf-8"))]
+        esperado = [("37569", "Logista", "a cuenta", "0.56", "2025-08-28", "solo pago"),
+                    ("38742", "Logista", "complementario y extraordinario", "1.53", "2026-02-26", "solo pago"),
+                    ("43515", "Logista", "a cuenta", "0.58", "2026-08-27", "solo pago"),
+                    ("43515", "Logista", "complementario", "1.59", "", "anunciado: pago previsto en el primer trimestre de 2027"),
+                    ("3095", "Naturgy", "final", "0.6", "2025-04-09", "solo pago"),
+                    ("40515", "Naturgy", "final", "0.57", "2026-03-31", "solo pago"),
+                    ("3290", "Naturgy", "a cuenta", "0.6", "2026-07-29", "solo pago"),
+                    ("3392", "Naturgy", "a cuenta", "0.6", "2026-11-05", "solo pago")]
+        ok(r["pagos"] == len(esperado) and sorted(out) == sorted(esperado),
+           f"cada pago una vez, de la primera nota; fuera los propuestos que otra nota fecha ({out})")
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 if __name__ == "__main__":
     pruebas_flexibles()
     pruebas_titulos()
     pruebas_actualizar()
     pruebas_resultados()
+    pruebas_politica_efectivo()
     if FALLOS:
         print(f"{len(FALLOS)} de {N} comprobaciones fallan.")
         sys.exit(1)

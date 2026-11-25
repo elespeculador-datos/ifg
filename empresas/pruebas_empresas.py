@@ -396,5 +396,13 @@ ok(len(empresas.universo()) == 35, "El universo del repositorio tiene 35 empresa
 ok(empresas.es_entidad("Marshall Wace LLP") and empresas.es_entidad("Caisse de dépôt et placement du Québec") and not empresas.es_entidad("GARCIA PEREZ, JUAN"),
    "Regla de persona jurídica para tenedores de cortos")
 
+# Dividendos anunciados en resultados con los formatos de Logista y Naturgy (25/11/2026)
+ok(empresas.lectura_resultados("solo pago") == "importe y fecha de pago leídos de la nota, que no da la fecha ex"
+   and empresas.lectura_resultados("anunciado: pago previsto en el primer trimestre de 2027")
+   == "propuesto, pendiente de la junta; pago previsto en el primer trimestre de 2027, sin fecha exacta"
+   and empresas.lectura_resultados("completa") == "leído del comunicado"
+   and empresas.lectura_resultados("parcial") == "parcial: el resto, en el comunicado",
+   "lectura de los dividendos anunciados en resultados: completa, solo pago, anunciado y parcial")
+
 print(f"{TOTAL - len(FALLOS)}/{TOTAL} comprobaciones superadas")
 sys.exit(1 if FALLOS else 0)

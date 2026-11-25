@@ -2,7 +2,7 @@
 
 Pregunta del lector (en la ficha de cada empresa del IBEX 35): ¿qué está pasando con esta empresa que no sale en la cotización: qué ha comunicado a la CNMV, qué dividendos ha anunciado, quién apuesta en contra, si compran o venden sus directivos, quién manda en el capital y si está recomprando?
 
-Estado: **contrato 1.0 con el chat de fichas de Tecnología (21/11/2026; encargo formal del 22/11), versión 1.2.0 (24/11/2026)**. Funciona con las fuentes que ya sirve el servidor (cnmv, cortos, accionistas filtrado) y completa `directivos` cuando se despliegue su colector. Sin nada de BME (ni dividendos, ni rentabilidades, ni precios).
+Estado: **contrato 1.0 con el chat de fichas de Tecnología (21/11/2026; encargo formal del 22/11), versión 1.2.1 (25/11/2026)**. Funciona con las fuentes que ya sirve el servidor (cnmv, cortos, accionistas filtrado) y completa `directivos` cuando se despliegue su colector. Sin nada de BME (ni dividendos, ni rentabilidades, ni precios).
 
 ## Contrato 1.0 (Datos ↔ chat «Fichas de valores», 21/11/2026)
 
@@ -60,6 +60,7 @@ Todo son datos de la CNMV ya publicados por otros colectores con licencia verifi
 ## Pendiente
 
 - Desplegar con los siete colectores pendientes (mensaje 1 de `Mensajes-para-pegar-2026-11-19`); primera pasada a mano y revisión de tres fichas.
+- Hecho en la 1.2.1 (25/11): dividendos anunciados en los resultados de Logista y Naturgy (lista cerrada del colector `cnmv`), con `lectura` «importe y fecha de pago leídos de la nota, que no da la fecha ex» o, si es un dividendo propuesto sin fecha, «propuesto, pendiente de la junta; pago previsto en …, sin fecha exacta» (sin `fecha_ex` ni `fecha_pago`). Mismos campos.
 - Hecho en la 1.2.0 (24/11, a petición de Tecnología): estado de dividendos por empresa (Inditex salía «ok» con el bloque vacío), dividendos anunciados en los resultados (Inditex), efectivo de los flexibles (Iberdrola, ACS, Ferrovial, Sacyr) y perfil de Banco Santander con fuente de la CNMV (domicilio, OIR 39132; cierre del ejercicio, OIR 39978).
 - Hecho en la 1.1.0 (22/11): importe, moneda y fechas de cada dividendo leídos del comunicado de la CNMV (`cnmv/dividendos_cnmv.py`, PR #111), eventos de fecha ex y pago, fecha del dato en cada bloque, alcance y «desde» del registro oficial.
 - Siguiente: `recompra.ejecutado` con el colector de recompras; perfil de las 32 empresas restantes (tabla a mano con fuente oficial por fila; ~1 h de Datos).
