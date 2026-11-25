@@ -1,42 +1,7 @@
 {
-  "fecha": "2026-11-04",
-  "version": "0.10.0",
-  "valor": 1.39,
-  "valor_crudo": 1.39,
-  "valor_tendencia": 8.09,
-  "variacion": -4.07,
-  "tramo": "Calma",
-  "cobertura": 1.0,
-  "parcial": false,
-  "motores": [
-    {
-      "componente": "fletes",
-      "aporte_cambio": -0.4251,
-      "aporte_nivel": -0.7144
-    },
-    {
-      "componente": "gas",
-      "aporte_cambio": -0.167,
-      "aporte_nivel": -0.5125
-    }
-  ],
-  "componentes_activos": [
-    "energia",
-    "vol_energia",
-    "refugios",
-    "defensa",
-    "prima",
-    "transporte",
-    "fletes",
-    "grano",
-    "gas",
-    "gdelt",
-    "gpr"
-  ],
-  "estado_dato": "definitivo",
-  "licencia": "CC BY 4.0. Cita: el especulador.com, Índice de Fricción Global, versión 0.10.0.",
-  "aviso": "Contenido informativo y educativo. No constituye asesoramiento financiero ni recomendación de inversión.",
-  "estado": "preliminar: reglas congeladas, índice en validación prospectiva, no publicado como referencia citable",
-  "revisiones": "Un valor definitivo no se revisa nunca. Un valor provisional —al que le falta algún componente— queda abierto 5 sesiones por si la fuente vuelve, y toda corrección aplicada se publica en correcciones.csv. La deriva observada entre el recálculo y lo ya cerrado se publica en revisiones.csv.",
-  "generado": "2026-11-06T03:22:06+01:00"
+  "aviso": "Este archivo dejó de actualizarse en noviembre de 2026. El índice que se publicaba aquí como Índice de Fricción Global se llama desde el 25 de noviembre de 2026 Oscilador Geopolítico y se publica en https://datos.elespeculador.com/oscilador-geo/. El nombre Índice de Fricción Global queda reservado para otro índice, todavía no publicado.",
+  "datos": "https://datos.elespeculador.com/oscilador-geo/oscilador-geo.json",
+  "ficha": "https://elespeculador.com/indices/oscilador-geopolitico/",
+  "licencia": "Consulta y cita. Sin licencia de reutilización comercial ni de redistribución. Ver https://elespeculador.com/indices/oscilador-geopolitico/#licencia",
+  "aviso_legal": "Contenido informativo y educativo. No constituye asesoramiento financiero ni recomendación de inversión."
 }
