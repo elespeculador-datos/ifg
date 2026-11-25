@@ -312,13 +312,16 @@ function esp_indices_nombre_componente( $clave ) {
 		'energia'     => 'energía',
 		// Nombres cortos a propósito: el desglose va en dos columnas estrechas
 		// y una etiqueta que se parte en dos líneas desalinea toda la rejilla.
-		'vol_energia' => 'volatilidad',
+		// 2.0.1 (Cumplimiento, 25/11/2026): etiquetas exactas. La prima no es el
+		// diferencial España-Bund (es crédito de la zona euro frente a la curva
+		// AAA), los fletes son cotizaciones de navieras de crudo y el grano es trigo.
+		'vol_energia' => 'volatilidad crudo',
 		'refugios'    => 'activos refugio',
 		'defensa'     => 'defensa',
-		'prima'       => 'prima de riesgo',
-		'transporte'  => 'transporte',
-		'fletes'      => 'fletes marítimos',
-		'grano'       => 'grano',
+		'prima'       => 'prima zona euro',
+		'transporte'  => 'transporte aéreo',
+		'fletes'      => 'navieras de crudo',
+		'grano'       => 'trigo',
 		'gas'         => 'gas',
 		'gdelt'       => 'flujo de conflictos',
 		'gpr'         => 'riesgo geopolítico',

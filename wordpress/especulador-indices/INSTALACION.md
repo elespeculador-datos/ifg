@@ -1,6 +1,10 @@
 # Especulador Índices — instalación
 
-> **2.0.0 (20/11/2026).** El índice pasa a llamarse **Oscilador Geopolítico** (versión 0.11.0 del cálculo).
+> **2.0.1 (25/11/2026).** Para la versión **0.10.1** del cálculo (el de la 0.10.0 con nombre nuevo). La entradilla de la
+> ficha y la leyenda del desglose se leen del JSON (`lectura` y `leyenda_desglose`), así dicen siempre lo que mide la
+> versión publicada. Sustituye a la 2.0.0, que se escribió para la 0.11.0 y no llegó a instalarse.
+>
+> **2.0.0 (20/11/2026).** El índice pasa a llamarse **Oscilador Geopolítico**.
 > Shortcodes nuevos: `[esp_oscilador_geo]`, `[esp_oscilador_geo_panel]` y `[esp_oscilador_geo_valor]`.
 > Los antiguos `[esp_friccion*]` siguen pintando el Oscilador durante la migración y dejan de pintar nada
 > con el ajuste `friccion_retirado = 1` (el nombre «Índice de Fricción Global» queda para otro índice).

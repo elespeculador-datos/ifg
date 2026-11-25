@@ -108,30 +108,66 @@ if ( ! function_exists( 'esp_indices_articulo_componente' ) ) {
 }
 
 /**
+ * 2.0.1: nombre de cada componente dentro de una frase, con su artículo y su
+ * género. Más largo que la etiqueta del desglose, que va en columnas estrechas.
+ */
+function esp_indices_componente_en_frase( $clave ) {
+	$nombres = array(
+		'energia'     => array( 'la', 'energía', true ),
+		'vol_energia' => array( 'la', 'volatilidad del crudo', true ),
+		'refugios'    => array( 'los', 'activos refugio', false ),
+		'defensa'     => array( 'la', 'defensa europea', true ),
+		'prima'       => array( 'la', 'prima de crédito de la zona euro', true ),
+		'transporte'  => array( 'el', 'transporte aéreo', false ),
+		'fletes'      => array( 'las', 'navieras de crudo', true ),
+		'grano'       => array( 'el', 'trigo', false ),
+		'gas'         => array( 'el', 'gas', false ),
+		'gdelt'       => array( 'el', 'flujo de noticias de conflicto', false ),
+		'gpr'         => array( 'el', 'índice de riesgo geopolítico', false ),
+	);
+	return isset( $nombres[ $clave ] ) ? $nombres[ $clave ] : array( 'el', (string) $clave, false );
+}
+
+/**
  * La frase de "qué lo mueve hoy", construida con los dos motores del JSON.
  * Devuelve cadena vacía si no hay motores, en vez de una frase a medias.
+ * 2.0.1 (Cumplimiento, 25/11/2026): «el grano, al alza» podía leerse como una
+ * previsión del precio del grano. Ahora dice hacia dónde empuja cada componente
+ * al índice: «hacia más presión» o «hacia más alivio».
  */
 function esp_indices_frase_motores( $dia ) {
 	if ( empty( $dia['motores'] ) || ! is_array( $dia['motores'] ) ) {
 		return '';
 	}
 
-	$trozos = array();
+	$trozos   = array();
+	$sentidos = array();
+	$femenino = array();
 	foreach ( array_slice( $dia['motores'], 0, 2 ) as $m ) {
 		if ( ! isset( $m['componente'] ) ) {
 			continue;
 		}
-		$sentido  = ( isset( $m['aporte_cambio'] ) && (float) $m['aporte_cambio'] < 0 )
-			? 'a la baja' : 'al alza';
-		$trozos[] = esc_html( esp_indices_articulo_componente( $m['componente'] ) ) . ' <strong>' . esc_html( esp_indices_nombre_componente( $m['componente'] ) )
-			. '</strong>, ' . $sentido;
+		list( $articulo, $nombre, $fem ) = esp_indices_componente_en_frase( $m['componente'] );
+		$sentidos[] = ( isset( $m['aporte_cambio'] ) && (float) $m['aporte_cambio'] < 0 )
+			? 'hacia más alivio' : 'hacia más presión';
+		$trozos[]   = esc_html( $articulo ) . ' <strong>' . esc_html( $nombre ) . '</strong>';
+		$femenino[] = $fem;
 	}
 
 	if ( ! $trozos ) {
 		return '';
 	}
+	if ( 1 === count( $trozos ) ) {
+		$frase = 'Hoy lo mueve sobre todo ' . $trozos[0] . ', ' . $sentidos[0];
+	} elseif ( $sentidos[0] === $sentidos[1] ) {
+		$frase = 'Hoy lo mueven sobre todo ' . $trozos[0] . ' y ' . $trozos[1] . ', '
+			. ( ( $femenino[0] && $femenino[1] ) ? 'las dos ' : 'los dos ' ) . $sentidos[0];
+	} else {
+		$frase = 'Hoy lo mueven sobre todo ' . $trozos[0] . ', ' . $sentidos[0] . ', y '
+			. $trozos[1] . ', ' . $sentidos[1];
+	}
 
-	return '<p class="esp-ifg__motores">Hoy lo mueven ' . implode( ', y ', $trozos ) . '.</p>';
+	return '<p class="esp-ifg__motores">' . $frase . '.</p>';
 }
 
 /**
@@ -470,7 +506,14 @@ function esp_indices_sc_panel( $atributos ) {
 				<?php if ( 'no' !== $a['titulo'] ) : ?>
 					<h2 class="esp-ifg__titulo esp-ifg__titulo--grande"><?php echo esc_html( esp_indices_nombre( $dia ) ); ?></h2>
 				<?php endif; ?>
-				<p class="esp-ifg__entrada">Mide cuánto ha cambiado, en las últimas cinco sesiones, la tensión geopolítica que el mercado pone en los precios. No es un indicador del miedo bursátil. Se calcula cada día hábil de madrugada con reglas públicas y congeladas.</p>
+				<?php
+				// 2.0.1: la descripción la trae el JSON ('lectura'), para que diga siempre lo que
+				// mide la versión del cálculo que está publicada. Si no la trae, una genérica.
+				$lectura = ( isset( $dia['lectura'] ) && is_string( $dia['lectura'] ) && '' !== trim( $dia['lectura'] ) )
+					? $dia['lectura']
+					: 'Mide si los precios más sensibles a la tensión geopolítica se mueven en la dirección de más tensión o de menos, frente a su comportamiento reciente. El 50 es neutral: por encima, presión; por debajo, alivio. No mide el miedo bursátil.';
+				?>
+				<p class="esp-ifg__entrada"><?php echo esc_html( $lectura ); ?> Se calcula cada día hábil de madrugada con reglas públicas y congeladas.</p>
 			</div>
 			<div class="esp-ifg__sello">
 				<?php if ( esp_indices_opcion( 'mostrar_estado' ) ) : ?>
@@ -525,7 +568,12 @@ function esp_indices_sc_panel( $atributos ) {
 			<div class="esp-ifg__desglose">
 				<p class="esp-ifg__seccion">
 					Qué lo mueve hoy
-					<span class="esp-ifg__leyenda">Aportación de cada componente al cambio de las últimas cinco sesiones. A la derecha, más presión; a la izquierda, más alivio.</span>
+					<span class="esp-ifg__leyenda"><?php
+						// 2.0.1: la leyenda también la trae el JSON ('leyenda_desglose').
+						echo esc_html( ( isset( $dia['leyenda_desglose'] ) && is_string( $dia['leyenda_desglose'] ) && '' !== trim( $dia['leyenda_desglose'] ) )
+							? $dia['leyenda_desglose']
+							: 'Aportación de cada componente al valor de hoy. A la derecha, más presión; a la izquierda, más alivio.' );
+					?></span>
 				</p>
 				<?php
 				$desglose = $serie['desglose_nivel'];
