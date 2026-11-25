@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+#
+# Genera el PDF de la metodología a partir de METODOLOGIA.md.
+#
+# POR QUÉ ESTO ES UN SCRIPT Y NO UN PDF SUBIDO A MANO. El documento de
+# metodología es citable: tiene que poder regenerarse desde su fuente, y la
+# fuente tiene que ser el Markdown versionado en el repositorio, no un binario
+# que nadie puede auditar ni diferenciar. Si el PDF y el Markdown llegaran a
+# separarse, el Markdown manda.
+#
+# POR QUÉ NO SE USA LaTeX. Sería la opción tipográfica natural, pero la
+# instalación disponible está incompleta (falta lmodern.sty) y no hay forma de
+# completarla sin red hacia CTAN. La ruta pandoc -> HTML -> wkhtmltopdf da un
+# resultado perfectamente presentable y, de paso, deja el control de la
+# tipografía en una hoja de estilo que se puede leer y versionar.
+#
+# Requiere pandoc y wkhtmltopdf.
+#
+# Uso:
+#   ./construir_metodologia_pdf.sh
+#   ./construir_metodologia_pdf.sh docs/metodologia-ifg-0.10.0.pdf
+
+set -euo pipefail
+
+FUENTE="METODOLOGIA.md"
+CSS="recursos/metodologia.css"
+VERSION=$(python3 -c "import config; print(config.VERSION)")
+SALIDA="${1:-docs/metodologia-ifg-${VERSION}.pdf}"
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+
+for f in "$FUENTE" "$CSS"; do
+  [ -f "$f" ] || { echo "No encuentro $f. Ejecuta esto desde la raíz del repositorio." >&2; exit 1; }
+done
+command -v pandoc      >/dev/null || { echo "Falta pandoc." >&2; exit 1; }
+command -v wkhtmltopdf >/dev/null || { echo "Falta wkhtmltopdf." >&2; exit 1; }
+
+mkdir -p "$(dirname "$SALIDA")"
+
+# EL PDF VERSIONADO ES INMUTABLE, Y AQUÍ SE HACE CUMPLIR.
+#
+# Si ya existe uno para esta versión, no se regenera. El documento con el
+# número de versión en el nombre es el que alguien puede haber citado, y
+# tiene que seguir siendo byte a byte el mismo. El generador incrusta una
+# marca de tiempo de creación, así que regenerarlo produce un archivo
+# distinto aunque el texto sea idéntico: eso basta para romper una suma de
+# comprobación y para que cualquiera que compare dos descargas se pregunte
+# qué ha cambiado.
+#
+# Pasó: una reejecución del script dejó el versionado modificado en el árbol
+# de git, con el mismo texto y otro CreationDate. Lo cazó la comprobación de
+# cambios sin confirmar, no la vista.
+#
+# Para cambiar de verdad el contenido se numera una versión nueva, que es lo
+# que exige el requisito 2. --forzar existe solo para corregir un documento
+# que nunca llegó a publicarse.
+FORZAR="${FORZAR:-0}"
+if [ -f "$SALIDA" ] && [ "$FORZAR" != "1" ]; then
+  echo "Ya existe $SALIDA y es inmutable: no se regenera."
+  echo "Si de verdad hay que rehacerlo, FORZAR=1 $0"
+  echo "Se actualiza solo la copia estable."
+  SOLO_ESTABLE=1
+fi
+
+# El Markdown empieza con su propio H1 y dos líneas de cabecera. En el PDF esa
+# cabecera se sustituye por una portada con formato, así que se recorta de la
+# fuente y se inyecta aparte. Así el .md sigue legible en GitHub por su cuenta
+# y el PDF no repite el título dos veces.
+SOLO_ESTABLE="${SOLO_ESTABLE:-0}"
+
+python3 - "$FUENTE" "$TMP/cuerpo.md" <<'PY'
+import sys
+origen, destino = sys.argv[1], sys.argv[2]
+lineas = open(origen, encoding="utf-8").read().split("\n")
+# Se descartan las líneas hasta la primera regla horizontal, que es donde
+# acaba el bloque de título del documento.
+for i, l in enumerate(lineas):
+    if l.strip() == "---" and i > 0:
+        lineas = lineas[i + 1:]
+        break
+open(destino, "w", encoding="utf-8").write("\n".join(lineas).lstrip("\n"))
+PY
+
+# El aviso del estado del índice va en la portada: es lo primero que un lector
+# tiene que ver, no algo que se encuentre en la página cuatro.
+ESTADO=$(python3 - "$FUENTE" <<'PY'
+import re, sys
+txt = open(sys.argv[1], encoding="utf-8").read()
+m = re.search(r"^> \*\*(Estado del índice[^*]*)\*\*", txt, re.M)
+print(m.group(1).strip() if m else "")
+PY
+)
+
+pandoc "$TMP/cuerpo.md" \
+  --from=markdown \
+  --to=html5 \
+  --standalone \
+  --toc --toc-depth=2 \
+  --metadata title="IFG" \
+  -o "$TMP/cuerpo.html"
+
+# Portada propia y hoja de estilo INCRUSTADA, no enlazada: wkhtmltopdf
+# resuelve las rutas relativas respecto al HTML, que vive en un directorio
+# temporal, así que un <link href="../recursos/..."> no encuentra nada y el
+# PDF sale sin estilo ninguno. Pasó en el primer intento.
+python3 - "$TMP/cuerpo.html" "$VERSION" "$ESTADO" "$CSS" <<'PY'
+import sys, datetime
+ruta, version, estado, css = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+html = open(ruta, encoding="utf-8").read()
+hoja = open(css, encoding="utf-8").read()
+html = html.replace("</head>", f"<style>\n{hoja}\n</style>\n</head>", 1)
+hoy = datetime.date.today().strftime("%d/%m/%Y")
+portada = f"""<div class="portada">
+  <div class="marca">el especulador.com &nbsp;·&nbsp; Documento de metodología</div>
+  <h1>Índice de Fricción Global</h1>
+  <p class="sub">Versión {version} &nbsp;·&nbsp; {hoy}</p>
+</div>
+<blockquote><p><strong>{estado}</strong></p></blockquote>
+"""
+html = html.replace("<body>", "<body>\n" + portada, 1)
+open(ruta, "w", encoding="utf-8").write(html)
+PY
+
+# Sin pies de página ni objeto "toc": este wkhtmltopdf viene sin parchear y
+# los ignora. El índice se genera con pandoc dentro del propio HTML, que
+# además es más fiable y se puede dar estilo desde la hoja CSS.
+DESTINO="$SALIDA"
+if [ "$SOLO_ESTABLE" = "1" ]; then
+  DESTINO="$(dirname "$SALIDA")/metodologia.pdf"
+fi
+
+wkhtmltopdf \
+  --quiet \
+  --enable-local-file-access \
+  --page-size A4 \
+  --margin-top 20mm --margin-bottom 18mm \
+  --margin-left 20mm --margin-right 20mm \
+  "$TMP/cuerpo.html" "$DESTINO"
+
+# Copia con nombre ESTABLE, además de la versionada.
+#
+# Por qué las dos. La versionada es inmutable: quien cite la 0.10.0 tiene que
+# seguir encontrando exactamente ese documento dentro de dos años, aunque el
+# índice vaya por la 1.3.0. La estable es a la que enlaza la web, para que el
+# enlace no haya que tocarlo en cada versión y para que nunca apunte a un
+# documento viejo. Enlazar la web a la versionada garantiza que algún día se
+# quedará desfasada sin que nadie se dé cuenta.
+ESTABLE="$(dirname "$SALIDA")/metodologia.pdf"
+if [ "$SOLO_ESTABLE" != "1" ] && [ "$DESTINO" != "$ESTABLE" ]; then
+  cp "$DESTINO" "$ESTABLE"
+  echo "Copia estable: $ESTABLE"
+fi
+
+echo "PDF generado: $DESTINO"
+python3 -c "
+from pypdf import PdfReader
+r = PdfReader('$DESTINO')
+print(f'  paginas: {len(r.pages)}')
+" 2>/dev/null || true
+ls -la "$DESTINO"
