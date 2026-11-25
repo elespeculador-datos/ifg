@@ -4,7 +4,7 @@ Cada día hábil a las 11:30 (hora de Madrid), el servidor smpro-datos-1 (`servi
 
 - `fragmento-wp.html`: la lectura del mes (inflación esperada a doce meses con variaciones y percentil, inflación percibida frente al IPC real del INE, expectativas a tres y cinco años), la tabla de países, el acierto de hace un año, la tabla de lo demás que esperan los hogares (vivienda, ingresos, gasto, crecimiento, paro, hipoteca), un gráfico SVG de tres años y el método, entre `<!-- expectativas:inicio HUELLA -->` y `<!-- expectativas:fin -->`;
 - `index.html`: página propia de la salida;
-- `datos/ultima.json` (versión 1.0.1) y `datos/serie.csv` (todas las series, formato largo con nombre).
+- `datos/ultima.json` (versión 1.0.2) y `datos/serie.csv` (todas las series, formato largo con nombre).
 
 La encuesta sale una vez al mes (el BCE publica el mes T hacia finales de T+1); la pasada diaria es una sola petición y el fragmento solo cambia cuando entra un mes nuevo.
 
@@ -23,3 +23,5 @@ Comprobaciones sin red: `python expectativas/pruebas_expectativas.py` (31 compro
 Validado con datos reales el 18/11/2026 (flujo `expectativas-validacion`, ejecución 44391478221; en el ejecutor no hay IPC al lado, en el servidor sí): encuesta de septiembre de 2026, España espera 3,8 % a doce meses (+0,7 p.p. en el mes; percentil 73 desde 2020; máximo 5,6 % en marzo de 2022), percibe 4,4 %, 3,2 % a tres años y 3,0 % a cinco; zona euro 3,1 %, Alemania 2,9 %, Francia 2,9 %, Italia 4,4 %; vivienda +4,1 %, ingresos +1,8 %, paro esperado 10,5 %, hipoteca 3,5 %. Verificados sobre el dato, no estimados.
 
 Entrega a Tecnología: fragmento `https://datos.elespeculador.com/expectativas/fragmento-wp.html` (marcas `expectativas:inicio`/`expectativas:fin`), JSON `https://datos.elespeculador.com/expectativas/datos/ultima.json`; pasada diaria 11:30 L-V; dato nuevo cuando cambia la huella (una vez al mes). Página de WordPress en borrador: /expectativas-de-los-hogares/. Dependencias: `requests pandas`.
+
+1.0.2 (25/11/2026): la frase de la brecha de percepción ya no termina en «p.p..» (doble punto). La huella incluye la versión, así que la página 9400 se reescribe en la primera pasada tras la fusión.
