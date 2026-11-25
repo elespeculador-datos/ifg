@@ -47,6 +47,77 @@ def _leer_cache(nombre: str, dias_validez: int = 1) -> pd.DataFrame | None:
     return df
 
 
+def _leer_cache_bruto(nombre: str) -> pd.DataFrame | None:
+    """
+    Devuelve el caché guardado SIN mirar si ha caducado.
+
+    `_leer_cache` sirve para decidir si hace falta descargar. Esto es otra
+    cosa: el histórico que ya está en el repositorio, que se necesita para
+    comprobar que la descarga de hoy no se lleva por delante lo de ayer.
+    """
+    ruta = _ruta_cache(nombre)
+    if not os.path.exists(ruta):
+        return None
+    try:
+        return pd.read_csv(ruta, index_col=0, parse_dates=True)
+    except Exception as exc:                          # noqa: BLE001
+        log.warning("No se ha podido leer el histórico de %s: %s", nombre, exc)
+        return None
+
+
+def _conservar_historia(nuevo: pd.DataFrame,
+                        previo: pd.DataFrame) -> pd.DataFrame:
+    """
+    Funde la descarga de hoy con el histórico guardado: lo que ya estaba NO
+    se pierde nunca; donde hay dato fresco, manda el fresco.
+
+    POR QUÉ EXISTE ESTO. El 2 de noviembre de 2026, TTF=F devolvió UNA sesión
+    en vez de 2.269. El aviso salió en el registro -"Histórico insuficiente
+    para gas_ttf: 1 sesiones"- y no sirvió de nada, porque era solo un aviso:
+    la descarga se escribió encima del caché y se llevó nueve años de gas
+    europeo. Consecuencias de ese único volcado:
+
+      - el componente de gas se quedó sin z-score ese día (le hace falta la
+        ventana de 750 sesiones), la cobertura bajó a 0,864 y el valor
+        publicado del 30 de octubre salió unos 13 puntos por debajo de lo que
+        le correspondía, con el tramo equivocado;
+      - el recálculo se separó 18,07 puntos de filas YA CERRADAS, con 180
+        sesiones cambiando de tramo desde 2021. La guardia de estabilidad
+        aguantó y la serie publicada no se movió, pero una republicación
+        lanzada en ese estado habría reescrito nueve años de historia.
+
+    Un cierre pasado no cambia: si estaba y la descarga no lo trae, falta la
+    descarga, no el dato. De ahí la regla, que es la misma que ya gobierna la
+    serie publicada en publicar_diario.py: lo que está escrito se conserva y
+    solo se añade.
+
+    LO QUE ESTO CUESTA, dicho claro: si una fuente retira de verdad un cierre
+    porque estaba mal, esta función lo mantiene. Se acepta a sabiendas: una
+    retirada legítima es rarísima y deja rastro en el registro de abajo,
+    mientras que un volcado por descarga corta ya ha pasado una vez y pasa sin
+    hacer ruido.
+    """
+    columnas_perdidas = []
+    for col in previo.columns:
+        antes = int(previo[col].notna().sum())
+        if not antes:
+            continue
+        ahora = int(nuevo[col].notna().sum()) if col in nuevo.columns else 0
+        if ahora < antes:
+            columnas_perdidas.append((col, antes, ahora))
+
+    for col, antes, ahora in columnas_perdidas:
+        log.error("DESCARGA CORTA en %s: %d sesiones frente a %d guardadas. "
+                  "Se conserva el histórico y solo se añade lo nuevo.",
+                  col, ahora, antes)
+
+    fundido = nuevo.combine_first(previo).sort_index()
+    log.info("Histórico conservado: %d sesiones (%d en la descarga, %d en el "
+             "caché), %d columnas con descarga corta.",
+             len(fundido), len(nuevo), len(previo), len(columnas_perdidas))
+    return fundido
+
+
 def _escribir_cache(nombre: str, df: pd.DataFrame) -> None:
     df.to_csv(_ruta_cache(nombre))
 
@@ -160,6 +231,12 @@ def descargar_precios(tickers: dict[str, str],
     df = pd.DataFrame(series).sort_index()
     df.index = pd.to_datetime(df.index).tz_localize(None).normalize()
     df = df[~df.index.duplicated(keep="last")]
+    # La descarga NUNCA se escribe a pelo: se funde con lo que ya había. Ver
+    # _conservar_historia, que explica el volcado que obligó a poner esto.
+    previo = _leer_cache_bruto("precios")
+    if previo is not None and not previo.empty:
+        df = _conservar_historia(df, previo)
+
     _escribir_cache("precios", df)
     return df
 
@@ -241,33 +318,6 @@ def _serie_bce(clave: str) -> pd.Series | None:
     return serie
 
 
-def _prima_stooq() -> pd.Series | None:
-    """
-    Rendimientos de deuda a 10 años desde Stooq, que publica series de bonos
-    en CSV abierto. HIPÓTESIS POR VALIDAR: los identificadores son los que usa
-    Stooq para España y Alemania, pero no se han podido comprobar.
-    """
-    import requests
-    series = {}
-    for pais, ticker in (("es", config.STOOQ_BONO_ES), ("de", config.STOOQ_BONO_DE)):
-        try:
-            resp = requests.get("https://stooq.com/q/d/l/",
-                                params={"s": ticker, "i": "d"}, timeout=60)
-            resp.raise_for_status()
-            df = pd.read_csv(io.StringIO(resp.text))
-            if "Date" not in df.columns or "Close" not in df.columns:
-                log.info("Stooq %s: respuesta sin datos utilizables.", ticker)
-                return None
-            series[pais] = (df.assign(Date=pd.to_datetime(df["Date"]))
-                              .set_index("Date")["Close"].sort_index())
-        except Exception as exc:                      # noqa: BLE001
-            log.info("Stooq %s no disponible: %s", ticker, exc)
-            return None
-    prima = ((series["es"] - series["de"]) * 100).dropna()
-    log.info("Prima de riesgo obtenida de Stooq.")
-    return prima
-
-
 def _prima_bce_curva() -> pd.Series | None:
     """
     Aproximación con las curvas de tipos del BCE: rendimiento a 10 años de
@@ -286,60 +336,58 @@ def _prima_bce_curva() -> pd.Series | None:
     return prima
 
 
-def _prima_manual() -> pd.Series | None:
-    """
-    Fichero puesto a mano por el usuario: dos columnas, fecha y valor en
-    puntos básicos. Vale una descarga del Banco de España o del Tesoro.
-    """
-    ruta = config.RUTA_PRIMA_MANUAL
-    if not os.path.exists(ruta):
-        return None
-    try:
-        df = pd.read_csv(ruta)
-        serie = pd.Series(pd.to_numeric(df.iloc[:, 1], errors="coerce").values,
-                          index=_parsear_fechas(df.iloc[:, 0])).dropna()
-        log.info("Prima de riesgo leída del fichero manual %s.", ruta)
-        return serie
-    except Exception as exc:                          # noqa: BLE001
-        log.warning("No se ha podido leer %s: %s", ruta, exc)
-        return None
-
-
 def descargar_prima_riesgo(usar_cache: bool = True) -> pd.Series | None:
     """
-    Diferencial España-Alemania a 10 años, en puntos básicos.
+    Diferencial periférico a 10 años, en puntos básicos. FUENTE ÚNICA: las
+    curvas de rendimiento de la zona euro del BCE.
 
-    Se intentan varias fuentes en orden y se registra cuál ha funcionado. Si
-    ninguna responde, el componente se desactiva y su peso se reparte: es
-    preferible a inventarse una aproximación silenciosa.
+    POR QUÉ UNA SOLA FUENTE (cambio P4 de la revisión de cumplimiento del
+    27-10-2026). Antes se intentaban tres en orden —un fichero manual, Stooq y
+    el BCE— y ganaba la primera que respondiera, sin caché y en cada ejecución
+    de madrugada. La serie guardada sale del BCE, pero si Stooq hubiera
+    contestado un día la fuente habría cambiado sola, sin aviso y sin versión
+    nueva, y la tabla de fuentes de la ficha pública habría quedado falsa. Una
+    fuente declarada en público no puede depender de quién contesta primero.
+    Las otras dos vías no se dejan desactivadas: se quitan, para que no puedan
+    volver por descuido. Están en el historial de git si alguna vez hacen
+    falta.
 
-    Nota sobre el BCE: su portal publica la curva agregada de la zona euro a
-    diario, pero el rendimiento diario del bono español a 10 años no está ahí,
-    y por eso las claves del intento anterior devolvían 404. Para el dato
-    exacto, la fuente natural es el Banco de España.
+    SI EL BCE NO RESPONDE no se busca sustituto. Se devuelve None, el
+    componente se desactiva y la fila nace provisional, que es el tratamiento
+    previsto para una fuente caída: el índice se publica puntualmente aunque
+    le falte un componente. Detener la publicación entera por esto cambiaría
+    el requisito de puntualidad, y aceptar una aproximación de otra
+    procedencia es justo lo que este cambio viene a impedir.
+
+    OJO CON EL NOMBRE, que la metodología corrige desde la fe de erratas del
+    27-10-2026: lo que publica el BCE a diario no es España menos Alemania,
+    sino el rendimiento a 10 años de todos los soberanos de la zona euro menos
+    el de los de máxima calificación. Es un diferencial de crédito de la zona
+    euro en conjunto, no el diferencial España-Bund.
     """
     if usar_cache:
         cacheado = _leer_cache("prima", dias_validez=1)
         if cacheado is not None:
             return cacheado.iloc[:, 0]
 
-    for intento in (_prima_manual, _prima_stooq, _prima_bce_curva):
-        prima = intento()
-        if prima is None or prima.empty:
-            continue
-        prima.index = pd.to_datetime(prima.index).normalize()
-        prima.name = "prima"
-        prima = _validar_serie(prima, "Prima de riesgo")
-        if prima is None:
-            continue
-        _escribir_cache("prima", prima.to_frame())
-        log.info("Prima de riesgo: %d días de %s a %s",
-                 len(prima), prima.index[0].date(), prima.index[-1].date())
-        return prima
+    prima = _prima_bce_curva()
+    if prima is None or prima.empty:
+        log.warning("Prima de riesgo no disponible en el BCE. El componente se "
+                    "desactiva y su peso se reparte; no se usa otra fuente.")
+        return None
 
-    log.warning("Prima de riesgo no disponible por ninguna vía. "
-                "El componente se desactiva y su peso se reparte.")
-    return None
+    prima.index = pd.to_datetime(prima.index).normalize()
+    prima.name = "prima"
+    prima = _validar_serie(prima, "Prima de riesgo")
+    if prima is None:
+        log.warning("La prima del BCE no pasa la validación de serie. El "
+                    "componente se desactiva; no se usa otra fuente.")
+        return None
+
+    _escribir_cache("prima", prima.to_frame())
+    log.info("Prima de riesgo (BCE): %d días de %s a %s",
+             len(prima), prima.index[0].date(), prima.index[-1].date())
+    return prima
 
 
 # ---------------------------------------------------------------------------
