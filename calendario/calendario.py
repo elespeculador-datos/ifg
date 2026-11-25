@@ -40,7 +40,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 MADRID = ZoneInfo("Europe/Madrid")
 PAGINA_WP = "https://elespeculador.com/calendario-dividendos/"
 FICHAS = "https://elespeculador.com/ibex35/"
@@ -62,6 +62,17 @@ class DatosRaros(Exception):
 
 
 # --------------------------------------------------------------------------- lectura
+
+def lectura_resultados(extraccion: str) -> str:
+    """Cómo se leyó un dividendo anunciado en una nota de resultados (cnmv/dividendos_cnmv.py, formatos de la lista cerrada)."""
+    if extraccion == "completa":
+        return "leído del comunicado"
+    if extraccion == "solo pago":
+        return "importe y fecha de pago leídos de la nota, que no da la fecha ex"
+    if extraccion.startswith("anunciado:"):
+        return "propuesto, pendiente de la junta; " + extraccion.split(":", 1)[1].strip() + ", sin fecha exacta"
+    return "parcial: el resto, en el comunicado"
+
 def _csv(ruta: Path, columnas: list[str]) -> list[dict]:
     if not ruta.exists():
         raise DatosRaros(f"falta {ruta} (¿el colector cnmv no ha pasado todavía con la PR #111?)")
@@ -114,7 +125,7 @@ def leer(datos: Path) -> tuple[list[dict], str]:
                      "moneda": (r["moneda"] or None) if _float(r["importe_bruto"]) else None,
                      "fecha_ex": r["fecha_ex"] or None, "fecha_registro": r["fecha_registro"] or None, "fecha_pago": r["fecha_pago"] or None,
                      "lectura": LECTURA.get(r["extraccion"], "sin leer: ver el comunicado"), "enlace": r["enlace"]})
-    # Dividendos que la empresa anuncia solo en su nota de resultados (lista cerrada del colector cnmv, hoy Inditex):
+    # Dividendos que la empresa anuncia solo en su nota de resultados (lista cerrada del colector cnmv: Inditex, Logista, Naturgy):
     # una fila por pago, con la nota como comunicado. Si el colector ya no la clasifica como resultados, no entra.
     if (base / "dividendos_resultados.csv").exists():
         for r in _csv(base / "dividendos_resultados.csv", COLUMNAS_RES):
@@ -126,8 +137,7 @@ def leer(datos: Path) -> tuple[list[dict], str]:
                          "concepto": r["concepto"], "importe": _float(r["importe_bruto"]),
                          "moneda": (r["moneda"] or None) if _float(r["importe_bruto"]) else None,
                          "fecha_ex": r["fecha_ex"] or None, "fecha_registro": r["fecha_registro"] or None, "fecha_pago": r["fecha_pago"] or None,
-                         "lectura": "anunciado en los resultados: " + ("leído del comunicado" if r["extraccion"] == "completa"
-                                                                     else "parcial: el resto, en el comunicado"),
+                         "lectura": "anunciado en los resultados: " + lectura_resultados(r["extraccion"]),
                          "enlace": r["enlace"]})
     hasta = max((r["fecha"] for r in ibex.values()), default="")[:10]
     return divs, hasta
@@ -286,7 +296,7 @@ def fragmento(res: dict, fecha_pub: str) -> str:
                   "comunicado, la casilla queda en blanco y el enlace lleva al documento. Cuando una empresa comunica el mismo dividendo más de "
                   "una vez (por ejemplo, el importe aprobado y después el ajustado por la autocartera), aparece una sola vez, con el dato más "
                   "reciente. Los dividendos que una empresa anuncia solo dentro de su nota de resultados entran cuando El Especulador ha revisado "
-                  "el formato de esa nota (hoy, Inditex); los de las demás empresas que lo hacen así, todavía no. No hay rentabilidad por dividendo: para calcularla harían falta precios con "
+                  "el formato de esa nota (hoy, Inditex, Logista y Naturgy); los de las demás empresas que lo hacen así, todavía no. Si la nota no da la fecha ex, esa casilla lleva un guion. No hay rentabilidad por dividendo: para calcularla harían falta precios con "
                   "licencia.</p>"
                   '<p class="has-small-font-size">Fuente: CNMV, comunicados de las empresas (otra información relevante e información privilegiada), '
                   "reproducidos fielmente (gratuitos en cnmv.es). La lectura, la selección y el calendario son de El Especulador y se publican "

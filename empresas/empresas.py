@@ -48,7 +48,7 @@ import unicodedata
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 CONTRATO = "1.0"          # cambia solo si cambian los campos que lee la ficha de la web
 PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/empresas/"
 WEB = "https://elespeculador.com"
@@ -316,7 +316,8 @@ def leer_cnmv(raiz: Path, hoy: date) -> tuple[dict, dict]:
                                     "fuente": "CNMV", "enlace": c["enlace"], "nreg": c["nreg"]})
             e["completos"].append(COMPLETO.get(d.get("extraccion", ""), False))
     # Dividendos anunciados dentro de los resultados (empresas de la lista cerrada de cnmv/dividendo_en_resultados.csv,
-    # como Inditex): un dividendo por pago, con el enlace a la nota de resultados que lo anuncia.
+    # Inditex, Logista y Naturgy): un dividendo por pago, con el enlace a la nota de resultados que lo anuncia; un dividendo
+    # propuesto sin fecha (Logista, complementario) sale sin fechas, con su importe.
     if (carpeta / "dividendos_resultados.csv").exists():
         for d in _csv(carpeta / "dividendos_resultados.csv"):
             if not d.get("isin") or not (desde <= d.get("fecha_comunicado", "") <= hoy.isoformat()):
@@ -329,7 +330,7 @@ def leer_cnmv(raiz: Path, hoy: date) -> tuple[dict, dict]:
                                     "importe": _num(d.get("importe_bruto")), "moneda": d.get("moneda") or None,
                                     "fecha_ex": d.get("fecha_ex") or None, "fecha_registro": d.get("fecha_registro") or None,
                                     "fecha_pago": d.get("fecha_pago") or None,
-                                    "lectura": f"{que}: " + ("leído del comunicado" if completa else "parcial: el resto, en el comunicado"),
+                                    "lectura": f"{que}: " + lectura_resultados(d.get("extraccion", "")),
                                     "fuente": "CNMV", "enlace": d.get("enlace", ""), "nreg": d.get("nreg", "")})
             e["completos"].append(completa)
     for e in por_isin.values():
@@ -344,6 +345,17 @@ def leer_cnmv(raiz: Path, hoy: date) -> tuple[dict, dict]:
 #   «ok»      todos sus pagos leídos del comunicado (importe y fechas; en un flexible, el efectivo y su fecha de pago);
 #   «parcial» algún pago remite al comunicado, o solo hay anuncios de política de dividendos.
 # Los anuncios de política (sin un pago concreto) no cuentan como pago ni como pendiente.
+def lectura_resultados(extraccion: str) -> str:
+    """Cómo se leyó un dividendo anunciado en una nota de resultados (cnmv/dividendos_cnmv.py, formatos de la lista cerrada)."""
+    if extraccion == "completa":
+        return "leído del comunicado"
+    if extraccion == "solo pago":
+        return "importe y fecha de pago leídos de la nota, que no da la fecha ex"
+    if extraccion.startswith("anunciado:"):
+        return "propuesto, pendiente de la junta; " + extraccion.split(":", 1)[1].strip() + ", sin fecha exacta"
+    return "parcial: el resto, en el comunicado"
+
+
 COMPLETO = {"completa": True, "flexible: completa": True, "sin pago: ver comunicado": None}
 
 

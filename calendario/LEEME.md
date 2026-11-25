@@ -24,7 +24,7 @@ CNMV: comunicados de otra información relevante e información privilegiada de 
 6. Tipo (a cuenta, complementario, extraordinario): del título del comunicado; si el título no lo dice, raya.
 7. Importes brutos por acción en su moneda (dólares de ArcelorMittal, por ejemplo), con dos decimales como mínimo y los que dé el comunicado. Si el importe no se lee con seguridad, la casilla enlaza con el comunicado.
 
-Dividendos anunciados en los resultados (1.1.0, 24/11/2026): los de las empresas de la lista cerrada del colector `cnmv` (`cnmv/dividendo_en_resultados.csv`, hoy Inditex) entran desde `cnmv/datos/dividendos_resultados.csv`, una fila por pago, con la nota de resultados como comunicado. Los de otras empresas que solo anuncian el dividendo en sus resultados no aparecen hasta que se revise su formato, y así lo dice la página.
+Dividendos anunciados en los resultados (1.1.0, 24/11/2026): los de las empresas de la lista cerrada del colector `cnmv` (`cnmv/dividendo_en_resultados.csv`: Inditex; Logista y Naturgy desde la 1.1.1, 25/11/2026, sin fecha ex porque sus notas no la dan) entran desde `cnmv/datos/dividendos_resultados.csv`, una fila por pago, con la nota de resultados como comunicado. Los de otras empresas que solo anuncian el dividendo en sus resultados no aparecen hasta que se revise su formato, y así lo dice la página.
 
 ## Reglas
 

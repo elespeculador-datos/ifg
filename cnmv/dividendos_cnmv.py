@@ -13,7 +13,7 @@ busca el importe bruto por acción con su moneda, la fecha ex-dividendo, la fech
   contra el PDF de Iberdrola, ACS, Ferrovial y Sacyr). Se descargan solo los comunicados cuyo título anuncia un
   documento que puede traerlos (FLEX_TITULOS). Quien elige acciones nuevas cobra en acciones: lo dice la ficha.
 - Dividendos anunciados dentro de los resultados (24/11/2026): solo las empresas de la lista cerrada
-  `cnmv/dividendo_en_resultados.csv` (hoy, Inditex), con el formato revisado de su nota (`extraer_resultados`); una
+  `cnmv/dividendo_en_resultados.csv` (Inditex, Logista y Naturgy), con el formato revisado de su nota (`extraer_resultados`); una
   fila por pago en `<salida>/cnmv/datos/dividendos_resultados.csv`.
 - El PDF y su texto se guardan en `$ESPEC_CACHE_DIR/cnmv/` (por defecto `cache/cnmv/` del repositorio, fuera de
   lo que sirve el servidor y fuera de git) para no volver a pedirlos.
@@ -34,7 +34,7 @@ import subprocess
 import sys
 import time
 import unicodedata
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -512,6 +512,33 @@ def actualizar(datos: Path = DATOS, limite: int = LIMITE, todos: bool = False, t
 # mucho dos años después; ex y registro solo si la tabla trae la fila de esa fecha de pago, y ex ≤ registro ≤ pago. Si
 # algo no cuadra, ese comunicado no da nada. Un mismo pago anunciado en varios comunicados (nota y presentación) sale una
 # vez, del primero. Salida: datos/dividendos_resultados.csv, una fila por pago; la leen la ficha integrada y el calendario.
+#
+# Formato «politica» (Logista: apartado «D. Política de dividendos» de sus notas de resultados; OIR 37569, 38742, 40562
+# y 43515, revisadas el 25/11/2026). Tres frases:
+#  - propuesto: «… tiene la intención de proponer a la Junta General de Accionistas la distribución de un dividendo bruto
+#    complementario del ejercicio 2026 de 211 millones de euros (1,59 euros por acción), que se pagará en el primer
+#    trimestre del año natural 2027» → importe sin fechas: «anunciado: pago previsto en el primer trimestre de 2027»;
+#  - a cuenta: «el Consejo de Administración aprobó el 23 de julio de 2026, la distribución de un dividendo bruto a cuenta
+#    del ejercicio 2026, que se desembolsó el 27 de agosto y alcanzó a 77 millones de euros (0,58 euros por acción)»: la
+#    fecha de pago no trae año; se toma el de la aprobación (o, sin ella, el del ejercicio) y el pago tiene que caer
+#    entre la aprobación y seis meses después;
+#  - complementario aprobado: «La Junta General de Accionistas celebrada el 4 de febrero de 2026, aprobó la distribución
+#    de un dividendo complementario del ejercicio 2025 de 203 millones de euros (1,53 euros por acción). Este dividendo
+#    está compuesto por un dividendo complementario de 1,45 euros por acción más un dividendo extraordinario de 0,08
+#    euros por acción, ambos desembolsados el pasado 26 de febrero de 2026» (o «ambos que se pagarán conjuntamente el
+#    próximo …»): las dos partes tienen que sumar el total.
+# Formato «efectivo» (Naturgy: IP 3095, 3290 y 3392 y OIR 40515, revisadas el 25/11/2026):
+#  - «Naturgy pagó su dividendo final de 2025 de 0,57€/acción en efectivo el 31 de marzo de 2026», «pagará su primer
+#    dividendo a cuenta de 2026 de 0,60€/acción en efectivo el 29 de julio de 2026», «… y pagará un segundo dividendo a
+#    cuenta de 2026 de 0,60€ por acción en efectivo el 5 de noviembre de 2026», «El dividendo final de Naturgy para
+#    2024 de 0,60€/acción se pagó en efectivo el 9 de abril de 2025»;
+#  - propuesto: «un dividendo final para 2025 de 0,57€/acción, sujeto a aprobación por la JGA, a pagar en marzo de 2026».
+#  No se lee «El primer y segundo dividendo a cuenta de 2025 de 0,60€/acción se pagaron en efectivo el 30 de julio y el 5
+#  de noviembre, respectivamente» (dos pagos en una frase y sin año).
+# En los dos formatos: ninguna nota da fecha ex ni de registro, así que un pago fechado sale «solo pago»; un pago puede
+# ser anterior a la nota (lo cuenta después), como mucho 400 días; un dividendo propuesto sale sin fechas («anunciado:
+# …») y se descarta si otra nota da la fecha del mismo dividendo (misma empresa, ejercicio y tipo). Nunca se deduce una
+# fecha que la nota no da, salvo el año del pago a cuenta de Logista, que sale de la fecha de aprobación de la frase.
 EN_RESULTADOS = Path(__file__).resolve().parent / "dividendo_en_resultados.csv"
 COLUMNAS_RES = ["canal", "nreg", "pago", "fecha_comunicado", "isin", "empresa", "concepto", "importe_bruto", "moneda",
                 "fecha_ex", "fecha_registro", "fecha_pago", "extraccion", "dividendo_anunciado", "enlace", "lector"]
@@ -522,6 +549,32 @@ RE_RES_TOTAL = re.compile(r"undividendode(\d+[.,]\d+)(?:€|euros)(?:brutos)?por
 RE_RES_PAGO = re.compile(r"(?<![a-z])el" + _F + r"unpagode(\d+[.,]\d+)(?:€|euros)(?:brutos)?poraccion")
 RES_TABLA = "fechadepagorecorddateex-date"
 RE_RES_FILA = re.compile(_F + _F + _F)
+_MESR = "(" + "|".join(sorted(MESES, key=len, reverse=True)) + ")"
+TRIMESTRE = {"primer": "primer", "segundo": "segundo", "tercer": "tercer", "cuarto": "cuarto"}
+RE_POL_PROPUESTO = re.compile(
+    r"proponeralajuntageneraldeaccionistasladistribuciondeundividendo(?:bruto)?complementariodelejercicio(?P<ej>20\d\d)"
+    r"de[\d.,]+millonesdeeuros\((?P<imp>\d+,\d+)eurosporaccion\),quesepagaraenel(?P<tri>primer|segundo|tercer|cuarto)"
+    r"trimestredelanonatural(?P<a>20\d\d)")
+RE_POL_CUENTA = re.compile(
+    r"(?:aproboel(?P<ad>\d{1,2})de(?P<am>" + _MESR[1:-1] + r")de(?P<aa>20\d\d),?)?ladistribuciondeundividendo(?:bruto)?"
+    r"acuentadelejercicio(?P<ej>20\d\d),quese(?:desembolso|abono)el(?P<d>\d{1,2})de(?P<m>" + _MESR[1:-1] + r")(?:de(?P<a>20\d\d))?"
+    r"y(?:alcanzo|ascendio)a[\d.,]+millonesdeeuros\((?P<imp>\d+,\d+)(?:€|euros)poraccion\)")
+RE_POL_COMPLEMENTARIO = re.compile(
+    r"lajuntageneraldeaccionistascelebradael(?:pasado)?\d{1,2}de(?:" + _MESR[1:-1] + r")(?:de20\d\d)?,aproboladistribucion"
+    r"deundividendocomplementariodelejercicio(?P<ej>20\d\d)de[\d.,]+millonesdeeuros\((?P<imp>\d+,\d+)eurosporaccion\)\."
+    r"estedividendoestacompuestoporundividendocomplementariode(?P<c>\d+,\d+)eurosporaccionmasundividendoextraordinario"
+    r"de(?P<x>\d+,\d+)eurosporaccion[.,]ambos(?:quesepagaranconjuntamenteelproximo|desembolsadoselpasado)"
+    r"(?P<d>\d{1,2})de(?P<m>" + _MESR[1:-1] + r")de(?P<a>20\d\d)")
+RE_EF_VERBO = re.compile(
+    r"(?:pago|pagara)(?:enefectivo)?(?:su|un)(?:primer|segundo)?dividendo(?P<tipo>final|acuenta)de(?P<ej>20\d\d)"
+    r"de(?P<imp>\d+,\d+)€(?:/accion|poraccion)(?:enefectivo)?el(?P<d>\d{1,2})de(?P<m>" + _MESR[1:-1] + r")de(?P<a>20\d\d)")
+RE_EF_PASIVA = re.compile(
+    r"eldividendo(?P<tipo>final|acuenta)denaturgypara(?P<ej>20\d\d)de(?P<imp>\d+,\d+)€(?:/accion|poraccion)"
+    r"sepagoenefectivoel(?P<d>\d{1,2})de(?P<m>" + _MESR[1:-1] + r")de(?P<a>20\d\d)")
+RE_EF_PROPUESTO = re.compile(
+    r"undividendo(?P<tipo>final|acuenta|complementario)para(?P<ej>20\d\d)de(?P<imp>\d+,\d+)€(?:/accion|poraccion),"
+    r"sujetoaaprobacionporlajga,apagaren(?P<m>" + _MESR[1:-1] + r")de(?P<a>20\d\d)")
+CONCEPTO_EF = {"final": "final", "acuenta": "a cuenta", "complementario": "complementario"}
 
 
 def _fecha_res(d: str, mes: str, a: str) -> date | None:
@@ -533,6 +586,10 @@ def _fecha_res(d: str, mes: str, a: str) -> date | None:
 
 def extraer_resultados(texto_pdf: str, fecha_com: date, formato: str = "pagos") -> list[dict]:
     """Pagos de dividendo anunciados en una nota de resultados con el formato revisado. Lista vacía si no cuadra."""
+    if formato == "politica":
+        return _extraer_politica(texto_pdf, fecha_com)
+    if formato == "efectivo":
+        return _extraer_efectivo(texto_pdf, fecha_com)
     if formato != "pagos":
         return []
     t = re.sub(r"\s+", "", _norm(texto_pdf))
@@ -585,6 +642,83 @@ def extraer_resultados(texto_pdf: str, fecha_com: date, formato: str = "pagos") 
     return out
 
 
+def _num(x: str) -> float:
+    return round(float(x.replace(",", ".")), 8)
+
+
+def _pago_valido(f: date | None, fecha_com: date) -> bool:
+    """Un pago que la nota cuenta (hasta 400 días antes) o anuncia (hasta el final del segundo año siguiente)."""
+    return f is not None and fecha_com - timedelta(days=400) <= f <= date(fecha_com.year + 2, 12, 31)
+
+
+def _fila_res(concepto: str, importe: float, fecha_pago: date | None, ejercicio: str, extraccion: str) -> dict:
+    return {"concepto": concepto, "importe_bruto": importe, "moneda": "EUR", "fecha_ex": None, "fecha_registro": None,
+            "fecha_pago": fecha_pago, "dividendo_anunciado": importe, "extraccion": extraccion, "ejercicio": ejercicio}
+
+
+def _numerar(filas: list[dict]) -> list[dict]:
+    """Un dividendo una vez por nota (la nota puede repetir la frase); fechados primero, por fecha; numerados."""
+    vistos, out = set(), []
+    for f in filas:
+        clave = (f["fecha_pago"], f["concepto"], f["importe_bruto"], f["ejercicio"])
+        if clave not in vistos:
+            vistos.add(clave)
+            out.append(f)
+    out.sort(key=lambda f: (f["fecha_pago"] is None, f["fecha_pago"] or date.max))
+    return [{**f, "pago": n} for n, f in enumerate(out, 1)]
+
+
+def _extraer_politica(texto_pdf: str, fecha_com: date) -> list[dict]:
+    """Formato «politica» (Logista): ver el comentario del bloque."""
+    t = re.sub(r"\s+", "", _norm(texto_pdf))
+    filas = []
+    for m in RE_POL_PROPUESTO.finditer(t):
+        a = int(m["a"])
+        if not (int(m["ej"]) <= a <= int(m["ej"]) + 1 and fecha_com.year <= a <= fecha_com.year + 2):
+            continue
+        filas.append(_fila_res("complementario", _num(m["imp"]), None, m["ej"],
+                               f"anunciado: pago previsto en el {m['tri']} trimestre de {a}"))
+    for m in RE_POL_CUENTA.finditer(t):
+        aprob = _fecha_res(m["ad"], m["am"], m["aa"]) if m["ad"] else None
+        if m["a"]:
+            f = _fecha_res(m["d"], m["m"], m["a"])
+        else:
+            ano = aprob.year if aprob else int(m["ej"])
+            f = _fecha_res(m["d"], m["m"], str(ano))
+            if f and aprob and f < aprob:
+                f = _fecha_res(m["d"], m["m"], str(ano + 1))
+        if not _pago_valido(f, fecha_com) or (aprob and not (aprob <= f <= aprob + timedelta(days=183))):
+            continue
+        filas.append(_fila_res("a cuenta", _num(m["imp"]), f, m["ej"], "solo pago"))
+    for m in RE_POL_COMPLEMENTARIO.finditer(t):
+        f = _fecha_res(m["d"], m["m"], m["a"])
+        total, partes = _num(m["imp"]), _num(m["c"]) + _num(m["x"])
+        if not _pago_valido(f, fecha_com) or abs(total - partes) > 5e-4:
+            continue
+        filas.append(_fila_res("complementario y extraordinario", total, f, m["ej"], "solo pago"))
+    return _numerar(filas)
+
+
+def _extraer_efectivo(texto_pdf: str, fecha_com: date) -> list[dict]:
+    """Formato «efectivo» (Naturgy): ver el comentario del bloque."""
+    t = re.sub(r"\s+", "", _norm(texto_pdf))
+    filas = []
+    for m in list(RE_EF_VERBO.finditer(t)) + list(RE_EF_PASIVA.finditer(t)):
+        f = _fecha_res(m["d"], m["m"], m["a"])
+        if _pago_valido(f, fecha_com):
+            filas.append(_fila_res(CONCEPTO_EF[m["tipo"]], _num(m["imp"]), f, m["ej"], "solo pago"))
+    for m in RE_EF_PROPUESTO.finditer(t):
+        a = int(m["a"])
+        if fecha_com.year <= a <= fecha_com.year + 2:
+            filas.append(_fila_res(CONCEPTO_EF[m["tipo"]], _num(m["imp"]), None, m["ej"],
+                                   f"anunciado: pago previsto en {m['m']} de {a}"))
+    return _numerar(filas)
+
+
+def _familia(concepto: str) -> str:
+    return "complementario" if concepto.split(" ")[0] in ("complementario", "final") else concepto
+
+
 def lista_en_resultados(ruta: Path = EN_RESULTADOS) -> dict[str, dict]:
     if not ruta.exists():
         return {}
@@ -604,7 +738,7 @@ def actualizar_resultados(datos: Path = DATOS, limite: int = LIMITE, texto_de=No
     if texto_de is None:
         sesion = requests.Session()
         texto_de = lambda canal, nreg, enlace: texto_comunicado(sesion, canal, int(nreg), enlace)  # noqa: E731
-    filas, vistos, pedidos, pendientes = [], set(), 0, 0
+    filas, vistos, pedidos, pendientes, ejercicios = [], set(), 0, 0, []
     for _, c in com.iterrows():
         en_cache = (CACHE / f"{c['canal']}-{c['nreg']}.txt").exists()
         if not en_cache and pedidos >= limite:
@@ -615,16 +749,22 @@ def actualizar_resultados(datos: Path = DATOS, limite: int = LIMITE, texto_de=No
         if not texto:
             continue
         for p in extraer_resultados(texto, date.fromisoformat(c["fecha"][:10]), lista[c["isin"]].get("formato", "pagos")):
-            clave = (c["isin"], p["fecha_pago"])
-            if clave in vistos:   # el mismo pago, ya leído de un comunicado anterior (la nota antes que la presentación)
+            # el mismo pago, ya leído de un comunicado anterior (la nota antes que la presentación); un dividendo
+            # propuesto sin fecha, por su ejercicio y su tipo
+            clave = (c["isin"], p["fecha_pago"] or ("propuesto", p.get("ejercicio"), _familia(p["concepto"])))
+            if clave in vistos:
                 continue
             vistos.add(clave)
+            ejercicios.append((c["isin"], p.get("ejercicio"), _familia(p["concepto"]), p["fecha_pago"] is None))
             filas.append({"canal": c["canal"], "nreg": c["nreg"], "pago": str(p["pago"]), "fecha_comunicado": c["fecha"][:10],
                           "isin": c["isin"], "empresa": c["empresa"], "concepto": p["concepto"],
                           "importe_bruto": str(p["importe_bruto"]), "moneda": p["moneda"],
                           **{k: (p[k].isoformat() if p[k] else "") for k in ("fecha_ex", "fecha_registro", "fecha_pago")},
                           "extraccion": p["extraccion"], "dividendo_anunciado": str(p["dividendo_anunciado"]),
                           "enlace": c["enlace"], "lector": LECTOR})
+    # Un dividendo propuesto sin fecha sobra si otra nota da la fecha del mismo (misma empresa, ejercicio y tipo).
+    fechados = {(i, e, fam) for i, e, fam, sin_fecha in ejercicios if not sin_fecha and e}
+    filas = [f for f, (i, e, fam, sin_fecha) in zip(filas, ejercicios) if not (sin_fecha and (i, e, fam) in fechados)]
     nuevo = pd.DataFrame(filas, columns=COLUMNAS_RES)
     previo = pd.read_csv(salida, dtype=str, keep_default_na=False) if salida.exists() else None
     if previo is None or list(previo.columns) != COLUMNAS_RES or not previo.equals(nuevo):
