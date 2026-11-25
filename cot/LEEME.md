@@ -4,7 +4,7 @@ Los sábados y los lunes a las 07:00 (hora de Madrid), el servidor smpro-datos-1
 
 - `fragmento-wp.html`: lectura de la semana (mercados más largos y más cortos en términos de tres años, extremos), tabla mercado por mercado (neto de los especuladores, variación semanal y a cuatro semanas, neto sobre interés abierto, índice COT de tres años, percentil de tres años, lectura, neto de los comerciales), cuatro gráficos SVG de tres años (euro, oro, WTI, S&P 500) y método, entre `<!-- cot:inicio HUELLA -->` y `<!-- cot:fin -->`;
 - `index.html`: página propia de la salida;
-- `datos/ultima.json` (versión 1.0.1) y `datos/serie.csv` (netos semanales de todos los mercados desde 2015).
+- `datos/ultima.json` (versión 1.0.2) y `datos/serie.csv` (netos semanales de todos los mercados desde 2015).
 
 Pregunta del lector (trader de tntbolsa; contenido premium según la decisión de Federico del 18/11/2026): ¿cómo están colocados los grandes especuladores en los futuros que mueven a los mercados y dónde hay un extremo?
 
@@ -21,3 +21,5 @@ Comprobaciones sin red: `python cot/pruebas_cot.py` (31 comprobaciones con un JS
 Validado con datos reales el 19/11/2026 (flujo `cot-validacion`, ejecución 44419014071): informe del 10/11/2026, 18 mercados, 10.972 observaciones desde el 06/01/2015; extremos cortos de tres años en euro (−136.396 contratos, índice 6), plata, WTI, gas natural y nota a 10 años; yen, índice dólar y bitcoin largos. Verificados sobre el dato, no estimados.
 
 Entrega a Tecnología: fragmento `https://datos.elespeculador.com/cot/fragmento-wp.html` (marcas `cot:inicio`/`cot:fin`), JSON `https://datos.elespeculador.com/cot/datos/ultima.json`; pasada sábados y lunes 07:00 (la CFTC publica los viernes a las 15:30 de Washington; el lunes recoge los retrasos por festivo); dato nuevo cuando cambia la huella (una vez por semana). Página de WordPress en borrador: /posicionamiento-especulativo-cot/ (zona premium cuando exista). Dependencias: `requests pandas`.
+
+1.0.2 (25/11/2026): la frase de resumen nombra los mercados como se escriben en una frase (en minúscula, sin el paréntesis de la tabla) y une las listas con «y» («yen, índice dólar y soja»); los extremos se agrupan en largos y cortos. La huella incluye la versión: la página se reescribe en la primera pasada tras la fusión.

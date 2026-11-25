@@ -35,7 +35,7 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 API = "https://publicreporting.cftc.gov/resource/6dca-aqww.json"
 PORTAL = "https://www.cftc.gov/MarketReports/CommitmentsofTraders/index.htm"
 PAGINA_WP = "https://elespeculador.com/posicionamiento-especulativo-cot/"
@@ -51,6 +51,14 @@ MERCADOS = {
     "13874A": ("S&P 500 (E-mini)", "bolsa y tipos"), "209742": ("Nasdaq 100 (mini)", "bolsa y tipos"), "043602": ("Nota del Tesoro a 10 años", "bolsa y tipos"),
     "1170E1": ("VIX", "bolsa y tipos"),
     "001602": ("Trigo (SRW)", "agrícolas"), "002602": ("Maíz", "agrícolas"), "005602": ("Soja", "agrícolas"),
+}
+# Nombre de cada mercado dentro de una frase (la tabla usa el de MERCADOS).
+EN_FRASE = {
+    "099741": "euro", "096742": "libra esterlina", "097741": "yen", "098662": "índice dólar", "133741": "bitcoin",
+    "088691": "oro", "084691": "plata", "076651": "platino", "085692": "cobre",
+    "067651": "petróleo WTI", "023651": "gas natural",
+    "13874A": "S&P 500", "209742": "Nasdaq 100", "043602": "nota del Tesoro a 10 años", "1170E1": "VIX",
+    "001602": "trigo", "002602": "maíz", "005602": "soja",
 }
 CAMPOS = ["report_date_as_yyyy_mm_dd", "cftc_contract_market_code", "market_and_exchange_names", "open_interest_all",
           "noncomm_positions_long_all", "noncomm_positions_short_all", "comm_positions_long_all", "comm_positions_short_all"]
@@ -245,13 +253,39 @@ def grafico_svg(df: pd.DataFrame, codigos: list[str], fecha: pd.Timestamp) -> st
     return "\n".join(partes)
 
 
+def _lista(nombres: list[str]) -> str:
+    """«a», «a y b», «a, b y c»; «e» en vez de «y» ante palabra que empieza por «i» o «hi» (yen e índice dólar)."""
+    if len(nombres) <= 1:
+        return "".join(nombres)
+    ultimo = nombres[-1]
+    y = "e" if ultimo[:1].lower() in ("i", "í") or (ultimo[:2].lower() == "hi" and ultimo[:3].lower() != "hie") else "y"
+    return ", ".join(nombres[:-1]) + f" {y} {ultimo}"
+
+
+def _en_frase(nombre: str) -> str:
+    """Nombre de la tabla -> nombre dentro de una frase (en minúscula salvo siglas y nombres propios)."""
+    for codigo, (n, _) in MERCADOS.items():
+        if n == nombre:
+            return EN_FRASE[codigo]
+    return nombre
+
+
 def fragmento(res: dict, df: pd.DataFrame, fecha_pub: str) -> str:
     m = res["mercados"]
     ext = res["extremos"]
-    frase = (f"Con el informe del {_f(res['fecha'])}, los grandes especuladores están más largos, en términos de tres años, en "
-             f"{', '.join(res['mas_largos'][:3])}, y más cortos en {', '.join(res['mas_cortos'][:3])}. ")
+    largos = [_en_frase(n) for n in res["mas_largos"][:3]]
+    cortos = [_en_frase(n) for n in res["mas_cortos"][:3]]
+    frase = (f"Con el informe del {_f(res['fecha'])}, frente a sus últimos tres años, los grandes especuladores están más largos en "
+             f"{_lista(largos)}, y más cortos en {_lista(cortos)}. ")
     if ext:
-        frase += "En extremo de tres años: " + "; ".join(f"{n} ({t})" for n, t in ext) + "."
+        ext_largos = [_en_frase(n) for n, t in ext if t == "largo extremo"]
+        ext_cortos = [_en_frase(n) for n, t in ext if t == "corto extremo"]
+        if ext_largos and ext_cortos:
+            frase += f"Están en un extremo largo de tres años en {_lista(ext_largos)}, y en uno corto en {_lista(ext_cortos)}."
+        elif ext_largos:
+            frase += f"Están en un extremo largo de tres años en {_lista(ext_largos)}."
+        else:
+            frase += f"Están en un extremo corto de tres años en {_lista(ext_cortos)}."
     else:
         frase += "Ningún mercado está en un extremo de tres años."
     eur = m.get("099741")
