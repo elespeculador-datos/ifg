@@ -43,13 +43,14 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import filas  # noqa: E402
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/recompras/"
 WEB = "https://elespeculador.com"
 CNMV = "https://www.cnmv.es"
 CABECERAS = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos; +https://elespeculador.com)", "Accept-Language": "es-ES,es;q=0.9"}
 PAUSA = 1.0
 MAX_INFORMES = 40
+VENTANA_DIAS = 45   # las filas de un informe son de las semanas anteriores al comunicado (siete sesiones, art. 2.3 del RD 2016/1052)
 INTENTOS_MAX = 3
 DIAS_SEMANA = 7
 DIAS_EN_CURSO = 45
@@ -166,16 +167,28 @@ def resumen_programa(texto: str) -> dict:
     return out
 
 
-def analizar(texto: str) -> dict:
+def analizar(texto: str, fecha_comunicado: date | None = None) -> dict:
     """Filas, resumen y acumulado del programa de un informe. `coincide` compara la suma de acciones con el total
-    declarado (None si el documento no lo declara)."""
+    declarado (None si el documento no lo declara). Con `fecha_comunicado`, una fila fuera de la ventana del informe
+    (de VENTANA_DIAS días antes del comunicado al propio día) delata una fecha mal leída: si el otro orden de las
+    fechas dd/dd/aaaa (mes/día) deja más filas dentro, se lee así; las que sigan fuera se descartan con aviso."""
     f = filas.leer_filas(texto)
+    fuera: list[dict] = []
+    if fecha_comunicado is not None and f:
+        def dentro(x):
+            return fecha_comunicado - timedelta(days=VENTANA_DIAS) <= date.fromisoformat(x["fecha"]) <= fecha_comunicado
+        if not all(dentro(x) for x in f):
+            otro = filas.leer_filas(texto, orden="md")
+            if sum(1 for x in otro if dentro(x)) > sum(1 for x in f if dentro(x)):
+                f = otro
+            fuera = [x for x in f if not dentro(x)]
+            f = [x for x in f if dentro(x)]
     r = filas.resumen(f)
     declarados = filas.totales_declarados(texto)
     coincide = None
     if declarados and r["acciones"]:
         coincide = r["acciones"] in declarados
-    return {"filas": f, "resumen": r, "declarados": declarados, "coincide": coincide, "programa": resumen_programa(texto)}
+    return {"filas": f, "resumen": r, "declarados": declarados, "coincide": coincide, "programa": resumen_programa(texto), "fuera": fuera}
 
 
 # --------------------------------------------------------------------------- estado entre pasadas
@@ -190,13 +203,25 @@ def cargar_estado(carpeta: Path) -> tuple[list[dict], list[dict]]:
     return informes, operaciones
 
 
+def fuera_de_plazo(e: dict) -> bool:
+    """Informe leído con operaciones fuera de su ventana (antes de VENTANA_DIAS días o después del comunicado): fechas
+    mal leídas por una versión anterior del lector. Se relee (con el límite de INTENTOS_MAX)."""
+    try:
+        c, d0, d1 = (date.fromisoformat(e[k]) for k in ("fecha_comunicado", "desde", "hasta"))
+    except (KeyError, TypeError, ValueError):
+        return False
+    return d0 < c - timedelta(days=VENTANA_DIAS) or d1 > c
+
+
 def pendientes(listado: list[dict], informes: list[dict]) -> list[dict]:
-    """Comunicados del listado sin leer, o con error y menos de INTENTOS_MAX intentos, del más reciente al más antiguo."""
+    """Comunicados del listado sin leer, con error, o leídos con fechas fuera de plazo (fuera_de_plazo), con menos de
+    INTENTOS_MAX intentos, del más reciente al más antiguo."""
     estado = {i["nreg"]: i for i in informes}
     out = []
     for r in listado:
         e = estado.get(r["nreg"])
-        if e is None or (e.get("estado") == "error" and int(e.get("intentos") or 0) < INTENTOS_MAX):
+        quedan = e is not None and int(e.get("intentos") or 0) < INTENTOS_MAX
+        if e is None or (quedan and (e.get("estado") == "error" or (e.get("estado") == "leido" and fuera_de_plazo(e)))):
             out.append(r)
     return out
 
@@ -216,10 +241,14 @@ def informe_desde_textos(r: dict, textos: list[tuple[str, str]], hoy: date) -> t
     inf["leido"] = hoy.isoformat()
     ops: list[dict] = []
     elegido = None
+    try:
+        fecha_com = date.fromisoformat((r.get("fecha") or "")[:10])
+    except ValueError:
+        fecha_com = None
     for url, texto in textos:
         if not texto.strip():
             continue
-        a = analizar(texto)
+        a = analizar(texto, fecha_com)
         if a["filas"] and (elegido is None or not elegido[1]["filas"]):
             elegido = (url, a)
         elif elegido is None:
@@ -249,6 +278,9 @@ def informe_desde_textos(r: dict, textos: list[tuple[str, str]], hoy: date) -> t
     inf["centros"] = "+".join(rs["centros"])
     inf["total_declarado"] = a["declarados"][0] if a["declarados"] else ""
     inf["coincide"] = "" if a["coincide"] is None else (1 if a["coincide"] else 0)
+    if a["fuera"]:
+        aviso(f"recompras: {inf['empresa']} nreg {inf['nreg']}: {len(a['fuera'])} filas con fecha fuera de la ventana del comunicado "
+              f"({', '.join(sorted({x['fecha'] for x in a['fuera']}))}); descartadas")
     if a["coincide"] is False:
         aviso(f"recompras: {inf['empresa']} nreg {inf['nreg']}: la suma de filas ({rs['acciones']}) no coincide con el total declarado {a['declarados']}; a verificar")
     for f in a["filas"]:

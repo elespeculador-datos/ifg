@@ -41,14 +41,33 @@ OPERACION = re.compile(r"\b(compra|comprar|purchase|buy|venta|vender|sale|sell)\
 MONEDA = {"£": "GBP", "$": "USD", "€": "EUR"}
 
 
-def _fecha(linea):
+def orden_fechas(texto, con_hora=None):
+    """Orden de las fechas dd/dd/aaaa de un texto: «dm» (día/mes, como en España), «md» (mes/día, como en EE. UU.) o
+    None si el texto no lo delata o se contradice. Si alguna fecha tiene el primer número mayor que 12, es día/mes; si
+    alguna tiene el segundo mayor que 12, mes/día. `con_hora` mira solo las líneas con hora (True, el detalle) o sin
+    ella (False, el resumen diario): ArcelorMittal escribe el resumen en mes/día y el detalle en día/mes (comunicado
+    43205, 19/10/2026)."""
+    primero = segundo = False
+    for linea in texto.splitlines():
+        if con_hora is not None and bool(HORA.search(linea)) != con_hora:
+            continue
+        for m in FECHA_ES.finditer(linea):
+            primero |= int(m.group(1)) > 12
+            segundo |= int(m.group(2)) > 12
+    if primero != segundo:
+        return "dm" if primero else "md"
+    return None
+
+
+def _fecha(linea, orden="dm"):
     """(fecha ISO, tramo, estilo numérico que sugiere la fecha) o (None, None, None). El estilo de la fecha solo se
-    usa cuando las propias cifras de la fila no lo delatan (ver _estilo)."""
+    usa cuando las propias cifras de la fila no lo delatan (ver _estilo). `orden`: «dm» o «md» para dd/dd/aaaa."""
     m = FECHA_ES.search(linea)
     if m:
-        d, mes, a = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        a, b, anio = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        d, mes = (b, a) if orden == "md" else (a, b)
         if 1 <= mes <= 12 and 1 <= d <= 31:
-            return f"{a:04d}-{mes:02d}-{d:02d}", m.span(), "es"
+            return f"{anio:04d}-{mes:02d}-{d:02d}", m.span(), ("en" if orden == "md" else "es")
         return None, None, None
     m = FECHA_ISO.search(linea)
     if m:
@@ -125,26 +144,33 @@ def primera_tabla(texto):
     return texto
 
 
-def leer_filas(texto, solo_primera_tabla=True):
+def leer_filas(texto, solo_primera_tabla=True, orden=None):
     """Filas de operaciones del texto de un informe. Cada fila: fecha, centro, operacion, acciones,
     precio, moneda, detalle (True si la fila lleva hora: operación individual del anexo, no el
     resumen diario), linea (texto original, para auditar). Por defecto solo la primera tabla (el
-    resumen diario); si esa parte no tiene filas, se lee el texto entero y se descartan las de detalle."""
+    resumen diario); si esa parte no tiene filas, se lee el texto entero y se descartan las de detalle.
+    `orden` fuerza «dm» o «md» en las fechas dd/dd/aaaa; si no se da, se deduce del propio texto leído
+    (orden_fechas) y, si no lo delata, día/mes."""
+    def _o(t):
+        if orden:
+            return orden, orden
+        return orden_fechas(t, con_hora=False) or "dm", orden_fechas(t, con_hora=True) or "dm"
     if solo_primera_tabla:
-        filas = [f for f in _filas(primera_tabla(texto)) if not f["detalle"]]
+        t1 = primera_tabla(texto)
+        filas = [f for f in _filas(t1, *_o(t1)) if not f["detalle"]]
         if filas:
             return filas
-        return [f for f in _filas(texto) if not f["detalle"]]
-    return _filas(texto)
+        return [f for f in _filas(texto, *_o(texto)) if not f["detalle"]]
+    return _filas(texto, *_o(texto))
 
 
-def _filas(texto):
+def _filas(texto, orden="dm", orden_detalle="dm"):
     filas = []
     for cruda in texto.splitlines():
         linea = cruda.strip()
         if not linea:
             continue
-        fecha, tramo_fecha, estilo_fecha = _fecha(linea)
+        fecha, tramo_fecha, estilo_fecha = _fecha(linea, orden_detalle if HORA.search(linea) else orden)
         if not fecha:
             continue
         centro, tramo_centro = _centro(linea)
