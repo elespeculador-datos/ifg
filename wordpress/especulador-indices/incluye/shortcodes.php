@@ -222,7 +222,7 @@ function esp_indices_sc_portada( $atributos ) {
 
 	$a = shortcode_atts(
 		array(
-			'titulo'  => 'Radar de fricción global',
+			'titulo'  => 'Radar geopolítico', // 2.0.1: «fricción global» queda para el IFG nuevo (decisión de Federico, 25/11/2026)
 			'entrada' => 'Los focos que pueden alterar la sesión.',
 			'focos'     => 8,             // cuántas noticias se traen como mucho
 			'categoria' => 'geopolitica', // el slug de la categoría, por si no es ese
