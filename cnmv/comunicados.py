@@ -17,22 +17,28 @@ programa de recompra, los dos comunicados de una misma ampliación, el anuncio d
 resultados) se muestran como una sola entrada con el último comunicado y el número de comunicados. Una ampliación
 y un dividendo de la misma empresa son dos entradas distintas, cada una en su recuadro.
 
+Relleno por número de registro (21/11/2026): el RSS no deja recuperar lo pasado ni trae los comunicados de los fondos
+de titulización. En cada pasada, los números de registro que faltan entre los comunicados de los últimos 45 días se
+piden uno a uno a la ficha pública de la CNMV (como ya hacía el colector de WordPress, fragmento 64). Así se recupera
+cualquier hueco: el del 07/11 al 15/11/2026, cuando no corría ningún colector, y los que vengan.
+
 Uso:
-  python cnmv/comunicados.py                         descarga y publica si hay novedades
-  python cnmv/comunicados.py --local IP.xml OIR.xml  usa canales ya descargados (pruebas)
+  python cnmv/comunicados.py                         descarga, rellena huecos y publica si hay novedades
+  python cnmv/comunicados.py --local IP.xml OIR.xml  usa canales ya descargados (pruebas; sin relleno)
   python cnmv/comunicados.py --forzar                reescribe aunque no haya comunicados nuevos
+  python cnmv/comunicados.py --sin-relleno           solo el RSS
 """
 from __future__ import annotations
 
 import argparse
-import hashlib
 import html
 import json
+import os
 import re
 import sys
 import time
 import unicodedata
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -47,17 +53,38 @@ CANALES = {
 CABECERAS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36", "Accept": "application/rss+xml, application/xml, text/xml, */*"}
 MADRID = ZoneInfo("Europe/Madrid")
 RAIZ = Path(__file__).resolve().parent.parent
-SALIDA = RAIZ / "docs" / "cnmv"
+# Carpeta de salida. Por defecto, docs/cnmv del repositorio (GitHub Pages); en el
+# servidor, ESPEC_DATOS_DIR apunta a la carpeta que sirve datos.elespeculador.com,
+# fuera del git, para que git pull nunca choque con los datos.
+SALIDA = Path(os.environ.get("ESPEC_DATOS_DIR", RAIZ / "docs")) / "cnmv"
 DATOS = SALIDA / "datos"
 HISTORICO = DATOS / "comunicados.csv"
 EMPRESAS = Path(__file__).resolve().parent / "empresas.csv"
 IBEX35 = RAIZ / "dividendos" / "ibex35.csv"      # la misma composición que usa el calendario de dividendos
 IBEX35_VALIDA_HASTA = "2026-12-20"                 # mover junto con la de dividendos/calendario.py tras cada revisión
 FICHAS = "https://elespeculador.com/ibex35/"
-PAGES = "https://elespeculador-datos.github.io/ifg/cnmv/"
+# Dirección pública de esta salida. Por defecto, GitHub Pages; en el servidor
+# smpro-datos-1, la variable de entorno ESPEC_DATOS_BASE vale
+# "https://datos.elespeculador.com/". Siempre termina en barra.
+PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/cnmv/"
 DIAS_CAJA = 60          # antigüedad máxima de lo que sale en los recuadros
 POR_CAJA = 6            # entradas por recuadro
 COLUMNAS = ["canal", "nreg", "fecha", "emisor", "categoria", "texto", "enlace"]
+# Ficha pública de cada comunicado por número de registro (relleno de huecos) y forma del enlace que guarda el RSS.
+FICHA_CNMV = {"IP": "https://www.cnmv.es/portal/Informacion-Privilegiada/Resultado-IP?nreg={}",
+              "OIR": "https://www.cnmv.es/portal/Otra-Informacion-Relevante/Resultado-OIR?nreg={}"}
+ENLACE_CNMV = {"IP": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg={}",
+               "OIR": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg={}"}
+SIN_REGISTRO = DATOS / "numeros_sin_registro.csv"   # números que la CNMV no enseña: dos consultas en días distintos y no más
+# Fichas que la CNMV no llega a servir en el relleno hacia atrás (la de OIR 40928 tarda 39 s). Tras MAX_FALLOS_ATRAS
+# pasadas sin respuesta, el relleno las salta para no quedarse parado en ellas; quedan a la vista en ultima.json.
+SIN_RESPUESTA = DATOS / "numeros_sin_respuesta.csv"
+MAX_FALLOS_ATRAS = 3
+DIAS_HUECOS = 45        # se buscan huecos de numeración desde el primer comunicado de los últimos 45 días
+MAX_RELLENO = 200       # fichas como máximo por pasada (el primer relleno del 07/11-15/11 son unas 200)
+PAUSA_RELLENO = 0.5     # segundos entre dos fichas, por cortesía con la CNMV
+DIAS_HISTORICO = 400    # hacia atrás, el histórico se completa hasta el primer comunicado anterior a hoy − 400 días
+MAX_ATRAS = 300         # fichas como máximo por pasada en el relleno hacia atrás (unas 7.000 en total para un año)
 
 CAJAS = [  # clave (igual que el id del panel en la plantilla de la web), título, descripción del recuadro
     ("resultados", "Resultados", "Cuentas y fechas de publicación comunicadas a la CNMV."),
@@ -72,7 +99,6 @@ CAJAS = [  # clave (igual que el id del panel en la plantilla de la web), títul
 EN_WEB = {"resultados", "dividendos", "recompras", "opvs-ampliaciones", "opas"}
 VENTANA = {"resultados": 30, "dividendos": 10, "recompras": 45, "opvs-ampliaciones": 10, "opas": 120}  # días para seguir en la misma operación
 DIAS_LISTADO = 365      # antigüedad máxima de lo que sale en las páginas de cada tipo
-DIVIDENDOS_BME = RAIZ / "docs" / "dividendos" / "datos"   # datos del calendario de dividendos (fuente: BME)
 # Páginas de elespeculador.com con el listado completo de cada tipo (shortcode espec_cnmv_listado) y texto del botón
 # que lleva a ellas desde cada recuadro. Con BOTONES = False el botón no se publica (páginas aún en borrador).
 BOTONES = True
@@ -165,8 +191,261 @@ def descargar() -> list[dict]:
     return filas
 
 
+# --------------------------------------------------------------------------- relleno por número de registro
+def _campo(bloque: str, patron: str) -> str:
+    m = re.search(patron, bloque, flags=re.S)
+    return re.sub(r"\s+", " ", _plano(m.group(1))).strip() if m else ""
+
+
+def leer_ficha(pagina: str, canal: str, nreg: int) -> dict | None:
+    """La fila del histórico (mismos campos que el RSS) a partir de la ficha pública de un comunicado, o None si la
+    página no muestra ese número de registro. La hora de la ficha no trae segundos."""
+    art = re.search(r'<article class="block-content-pdf block-content">(.*?)</article>', pagina, flags=re.S)
+    if not art:
+        return None
+    for li in re.findall(r'<li id="[^"]*_elementoPrimerNivel"[^>]*>(.*?)</ul>\s*</li>', art.group(1), flags=re.S):
+        # El número va en su propio elemento; el título puede citar otro («Subsanación de error en la comunicación
+        # … con Número de registro: 41507», que es la 41510): se busca fuera del título.
+        m = re.search(r'<li class="[^"]*resumen[^"]*">\s*N[úu]mero de registro:\s*(\d+)\s*</li>', li)
+        if not m:
+            m = re.search(r"N[úu]mero de registro:\s*(\d+)",
+                          _plano(re.sub(r'<a [^>]*_subtituloRegistroEnlace"[^>]*>.*?</a>', " ", li, flags=re.S)))
+        if not m or int(m.group(1)) != nreg:
+            continue
+        dia = _campo(li, r'class="fecha-con-hora"[^>]*>(.*?)</li>')
+        hora = _campo(li, r'class="time"[^>]*>(.*?)</li>')
+        emisor = _campo(li, r'class="tit-small"[^>]*>(.*?)</span>')
+        try:
+            fecha = datetime.strptime(f"{dia} {hora}", "%d/%m/%Y %H:%M")
+        except ValueError:
+            raise DatosRaros(f"Ficha {canal} {nreg} de la CNMV con fecha inesperada: {dia!r} {hora!r}")
+        if not emisor:
+            raise DatosRaros(f"Ficha {canal} {nreg} de la CNMV sin emisor")
+        return {"canal": canal, "nreg": nreg, "fecha": fecha.strftime("%Y-%m-%dT%H:%M:00"), "emisor": emisor,
+                "categoria": _campo(li, r'class="negrita"[^>]*>(.*?)</span>'),
+                "texto": _campo(li, r'_subtituloRegistroEnlace"[^>]*>(.*?)</a>'),
+                "enlace": ENLACE_CNMV[canal].format(nreg)}
+    return None
+
+
+def pagina_sin_registro(pagina: str) -> bool:
+    """Página normal de la CNMV que dice que ese número no existe (y no una página de error o de mantenimiento)."""
+    return 'id="ctl00_H1"' in pagina and "block-content-pdf" not in pagina and "No se han encontrado datos disponibles" in pagina
+
+
+def leer_sin_registro() -> dict[tuple[str, int], dict]:
+    if not SIN_REGISTRO.exists():
+        return {}
+    d = pd.read_csv(SIN_REGISTRO, dtype=str, keep_default_na=False)
+    return {(r.canal, int(r.nreg)): {"consultado": r.consultado, "intentos": int(r.intentos)} for r in d.itertuples()}
+
+
+def guardar_sin_registro(sin: dict[tuple[str, int], dict]) -> None:
+    DATOS.mkdir(parents=True, exist_ok=True)
+    filas = [{"canal": c, "nreg": n, **v} for (c, n), v in sorted(sin.items())]
+    tmp = SIN_REGISTRO.with_suffix(".tmp")
+    pd.DataFrame(filas, columns=["canal", "nreg", "consultado", "intentos"]).to_csv(tmp, index=False)
+    os.replace(tmp, SIN_REGISTRO)
+
+
+def leer_sin_respuesta() -> dict[tuple[str, int], dict]:
+    if not SIN_RESPUESTA.exists():
+        return {}
+    d = pd.read_csv(SIN_RESPUESTA, dtype=str, keep_default_na=False)
+    return {(r.canal, int(r.nreg)): {"consultado": r.consultado, "intentos": int(r.intentos)} for r in d.itertuples()}
+
+
+def guardar_sin_respuesta(fallos: dict[tuple[str, int], dict]) -> None:
+    DATOS.mkdir(parents=True, exist_ok=True)
+    filas = [{"canal": c, "nreg": n, **v} for (c, n), v in sorted(fallos.items())]
+    tmp = SIN_RESPUESTA.with_suffix(".tmp")
+    pd.DataFrame(filas, columns=["canal", "nreg", "consultado", "intentos"]).to_csv(tmp, index=False)
+    os.replace(tmp, SIN_RESPUESTA)
+
+
+def saltadas() -> list[str]:
+    """Fichas que el relleno hacia atrás ha saltado por no responder (para ultima.json)."""
+    return [f"{c} {n}" for (c, n), v in sorted(leer_sin_respuesta().items()) if v["intentos"] >= MAX_FALLOS_ATRAS]
+
+
+def huecos(h: pd.DataFrame, nuevas: list[dict], hoy: datetime, saltar: set) -> dict[str, list[int]]:
+    """Números de registro que faltan en cada canal, de los más recientes a los más antiguos: entre el primero de los
+    comunicados de los últimos DIAS_HUECOS días y el último conocido (histórico más lo que acaba de traer el RSS)."""
+    desde = (hoy - timedelta(days=DIAS_HUECOS)).strftime("%Y-%m-%d")
+    out = {}
+    for canal in CANALES:
+        conocidos = {int(n) for n in h.loc[h["canal"] == canal, "nreg"]} | {int(f["nreg"]) for f in nuevas if f["canal"] == canal}
+        recientes = [int(n) for n, f in zip(h.loc[h["canal"] == canal, "nreg"], h.loc[h["canal"] == canal, "fecha"]) if str(f)[:10] >= desde]
+        recientes += [int(f["nreg"]) for f in nuevas if f["canal"] == canal and str(f["fecha"])[:10] >= desde]
+        if not recientes:
+            out[canal] = []
+            continue
+        out[canal] = [n for n in range(max(conocidos), min(recientes) - 1, -1) if n not in conocidos and (canal, n) not in saltar]
+    return out
+
+
+def _bajar_ficha(sesion: requests.Session, canal: str, nreg: int) -> str:
+    # hasta 90 s de lectura: algunas fichas tardan (OIR 40928, 39 s el 22/11/2026)
+    r = sesion.get(FICHA_CNMV[canal].format(nreg), headers={**CABECERAS, "Accept": "text/html,application/xhtml+xml"}, timeout=(10, 90))
+    if r.status_code != 200:
+        raise requests.RequestException(f"HTTP {r.status_code}")
+    r.encoding = "utf-8"
+    return r.text
+
+
+def rellenar(h: pd.DataFrame, nuevas: list[dict], hoy: datetime, bajar=None, limite: int = MAX_RELLENO,
+             pausa: float = PAUSA_RELLENO) -> tuple[list[dict], dict[str, int], str | None]:
+    """Pide a la CNMV la ficha de cada número que falta (los más recientes primero, hasta `limite`). Devuelve las filas
+    recuperadas, los huecos que quedan por canal y, si la CNMV ha cambiado la forma de sus fichas, el motivo (el colector
+    publica igual y después sale con error para que se abra la incidencia). Un fallo de red no para nada: el número se
+    vuelve a pedir en la pasada siguiente."""
+    sin = leer_sin_registro()
+    hoy_txt = hoy.strftime("%Y-%m-%d")
+    saltar = {k for k, v in sin.items() if v["intentos"] >= 2 or v["consultado"] == hoy_txt}
+    pend = huecos(h, nuevas, hoy, saltar)
+    cola = [(c, n) for c in CANALES for n in pend[c]][:limite]
+    if bajar is None:
+        sesion = requests.Session()
+        bajar = lambda c, n: _bajar_ficha(sesion, c, n)  # noqa: E731
+    filas, raras, seguidos, problema, pedidos = [], [], 0, None, 0
+    for i, (canal, n) in enumerate(cola):
+        if i and pausa:
+            time.sleep(pausa)
+        pedidos += 1
+        try:
+            pagina = bajar(canal, n)
+        except Exception as e:  # red, tiempo agotado, HTTP 5xx: se reintenta en la pasada siguiente
+            seguidos += 1
+            print(f"::warning::Ficha {canal} {n} de la CNMV no disponible ({type(e).__name__}: {e})")
+            if seguidos >= 5:
+                print("::warning::Cinco fichas seguidas sin respuesta de la CNMV: el relleno sigue en la pasada siguiente")
+                break
+            continue
+        seguidos = 0
+        try:
+            fila = leer_ficha(pagina, canal, n)
+        except DatosRaros as e:
+            raras.append(str(e))
+            continue
+        if fila:
+            filas.append(fila)
+        elif pagina_sin_registro(pagina):
+            previo = sin.get((canal, n), {"intentos": 0})
+            sin[(canal, n)] = {"consultado": hoy_txt, "intentos": previo["intentos"] + 1}
+        else:
+            raras.append(f"Ficha {canal} {n}: página de la CNMV con una forma que el colector no reconoce")
+    if cola:
+        guardar_sin_registro(sin)
+    leidas = len(filas) + len(raras)
+    if raras and len(raras) >= max(3, leidas // 2):
+        problema = f"{len(raras)} de {leidas} fichas de la CNMV no se pueden leer (¿ha cambiado la página?): {raras[0]}"
+    for r in raras[:5]:
+        print(f"::warning::{r}")
+    quedan = {c: len(pend[c]) for c in CANALES}
+    for f in filas:
+        quedan[f["canal"]] -= 1
+    if cola:
+        print(f"Relleno por número de registro: {len(filas)} comunicados recuperados de {pedidos} números pedidos; "
+              f"quedan {quedan['IP']} en IP y {quedan['OIR']} en OIR.")
+    return filas, quedan, problema
+
+
+def rellenar_atras(h: pd.DataFrame, nuevas: list[dict], hoy: datetime, bajar=None, limite: int = MAX_ATRAS,
+                   pausa: float = PAUSA_RELLENO, dias: int = DIAS_HISTORICO) -> tuple[list[dict], dict[str, str], str | None]:
+    """Completa el histórico hacia atrás, número a número, desde el primer número conocido de cada canal hasta el
+    primer comunicado anterior a hoy − `dias` (el registro oficial de las fichas cubre doce meses). Primero IP, que
+    tiene pocos, luego OIR; hasta `limite` fichas por pasada. Si una ficha falla (red, CNMV), para ese canal y anota
+    el fallo: la pasada siguiente sigue por el mismo número. Si esa ficha falla en MAX_FALLOS_ATRAS pasadas, se salta
+    (con aviso) y queda en numeros_sin_respuesta.csv, para que una ficha que la CNMV no sirve no pare el relleno para
+    siempre. Devuelve las filas, el estado de cada canal (completo, en curso, parado) y, si la CNMV ha cambiado la
+    forma de sus fichas, el motivo."""
+    objetivo = (hoy - timedelta(days=dias)).strftime("%Y-%m-%d")
+    sin = leer_sin_registro()
+    fallos = leer_sin_respuesta()
+    hoy_txt = hoy.strftime("%Y-%m-%d")
+    if bajar is None:
+        sesion = requests.Session()
+        bajar = lambda c, n: _bajar_ficha(sesion, c, n)  # noqa: E731
+    filas, estado, problema, pedidos, cambia_sin, cambia_fallos = [], {}, None, 0, False, False
+    for canal in CANALES:
+        fechas = [str(f)[:10] for f in h.loc[h["canal"] == canal, "fecha"]] + [str(f["fecha"])[:10] for f in nuevas if f["canal"] == canal]
+        if not fechas:
+            estado[canal] = "sin datos"
+            continue
+        if min(fechas) < objetivo:
+            estado[canal] = "completo"
+            continue
+        conocidos = ({int(n) for n in h.loc[h["canal"] == canal, "nreg"]} | {int(f["nreg"]) for f in nuevas if f["canal"] == canal}
+                     | {n for (c, n) in sin if c == canal}
+                     | {n for (c, n), v in fallos.items() if c == canal and v["intentos"] >= MAX_FALLOS_ATRAS})
+        n = min(conocidos) - 1
+        estado[canal] = "en curso"
+        while n > 0:
+            if pedidos >= limite:
+                break
+            if pedidos and pausa:
+                time.sleep(pausa)
+            pedidos += 1
+            try:
+                pagina = bajar(canal, n)
+            except Exception as e:  # se para el canal; la pasada siguiente sigue por este número, salvo que ya lleve tres fallos
+                intentos = fallos.get((canal, n), {"intentos": 0})["intentos"] + 1
+                fallos[(canal, n)] = {"consultado": hoy_txt, "intentos": intentos}
+                cambia_fallos = True
+                if intentos >= MAX_FALLOS_ATRAS:
+                    print(f"::warning::Ficha {canal} {n} sin respuesta de la CNMV en {intentos} pasadas: el relleno hacia atrás "
+                          f"la salta y sigue (queda en {SIN_RESPUESTA.name} y en ultima.json)")
+                else:
+                    print(f"::warning::Relleno hacia atrás parado en la ficha {canal} {n} ({type(e).__name__}: {e})")
+                estado[canal] = "parado"
+                break
+            if fallos.pop((canal, n), None) is not None:
+                cambia_fallos = True
+            try:
+                fila = leer_ficha(pagina, canal, n)
+            except DatosRaros as e:
+                problema = str(e)
+                estado[canal] = "parado"
+                break
+            if fila:
+                filas.append(fila)
+                if fila["fecha"][:10] < objetivo:
+                    estado[canal] = "completo"
+                    break
+            elif pagina_sin_registro(pagina):
+                sin[(canal, n)] = {"consultado": hoy_txt, "intentos": 2}  # hacia atrás no se vuelve a preguntar
+                cambia_sin = True
+            else:
+                problema = f"Ficha {canal} {n}: página de la CNMV con una forma que el colector no reconoce (relleno hacia atrás)"
+                estado[canal] = "parado"
+                break
+            n -= 1
+    if cambia_sin:
+        guardar_sin_registro(sin)
+    if cambia_fallos:
+        guardar_sin_respuesta(fallos)
+    if pedidos:
+        print(f"Relleno hacia atrás (hasta el {objetivo}): {len(filas)} comunicados de {pedidos} números pedidos; "
+              f"IP {estado.get('IP')}, OIR {estado.get('OIR')}.")
+    return filas, estado, problema
+
+
+def resumen_historico(h: pd.DataFrame, hoy: datetime, dias: int = DIAS_HISTORICO) -> dict:
+    """Desde qué fecha tiene el histórico cada canal y si ya cubre los `dias` hacia atrás."""
+    objetivo = (hoy - timedelta(days=dias)).strftime("%Y-%m-%d")
+    out = {}
+    for canal in CANALES:
+        f = [str(x)[:10] for x in h.loc[h["canal"] == canal, "fecha"]]
+        out[canal] = {"desde": min(f) if f else None, "completo": bool(f) and min(f) < objetivo}
+    return out
+
+
+def leer_historico() -> pd.DataFrame:
+    return pd.read_csv(HISTORICO, dtype=str, keep_default_na=False) if HISTORICO.exists() else pd.DataFrame(columns=COLUMNAS)
+
+
 def acumular(nuevas: list[dict]) -> tuple[pd.DataFrame, int]:
-    previo = pd.read_csv(HISTORICO, dtype=str, keep_default_na=False) if HISTORICO.exists() else pd.DataFrame(columns=COLUMNAS)
+    previo = leer_historico()
     n = pd.DataFrame(nuevas, columns=COLUMNAS).astype(str)
     d = pd.concat([previo, n], ignore_index=True).drop_duplicates(["canal", "nreg"], keep="first")
     d = d.sort_values(["fecha", "canal", "nreg"], ascending=False).reset_index(drop=True)
@@ -207,6 +486,11 @@ def _hay(texto: str, *frases: str) -> bool:
     return any(f in texto for f in frases)
 
 
+# «resultados de los nueve primeros meses», «primeros seis meses»: el colector de WordPress (fragmento 64) ya los
+# reconocía y este no (Aena, Cellnex y Ferrovial del 27/10 al 05/11 quedaban sin clasificar; comparación del 21/11/2026).
+MESES_ACUMULADOS = r"(nueve|seis|tres) primeros meses|primeros (nueve|seis|tres) meses"
+
+
 def clasificar(categoria: str, texto: str) -> tuple[str, str] | None:
     """(caja, etiqueta) o None si no es de ninguno de los cuatro recuadros."""
     c, t = _t(categoria), _t(texto)
@@ -218,15 +502,29 @@ def clasificar(categoria: str, texto: str) -> tuple[str, str] | None:
     if not deuda and _hay(todo, " oferta publica de adquisicion ", " ofertas publicas de adquisicion ", " opa ", " opas ",
                           " tender offer ", " takeover bid ", " oferta publica voluntaria ", " oferta publica obligatoria "):
         return "opas", ("OPA de exclusión" if _hay(todo, " exclusion ") else "OPA")
+    # «dividendo opcional» (ACS, Iberdrola): el accionista elige acciones o efectivo, como en el flexible
     if _hay(todo, " ampliacion de capital liberada ", " aumento de capital liberado ", " dividendo flexible ",
-            " retribucion flexible ", " scrip ", " derechos de asignacion gratuita "):
+            " retribucion flexible ", " scrip ", " derechos de asignacion gratuita ", " dividendo opcional "):
         return "dividendos", "Dividendo flexible"
+    # «planes estratégicos … y política de retribución al accionista» (Santander, 25/02/2026): es la política, no un pago
+    if _hay(t, " politica de retribucion ", " politica de dividendos ", " politica de remuneracion ") and \
+            not _hay(t, " a cuenta ", " complementario ", " pago ", " abono ", " importe ", " euros "):
+        return "dividendos", "Política de dividendos"
+    # Nota de prensa de resultados que nombra dividendos de otros (Ferrovial, 29/10/2025: «se rectifica la divisa de los
+    # dividendos acordados por la autopista 407ETR»): son resultados, no un dividendo de la empresa
+    if _hay(t, " nota de prensa ", " version inglesa ") and _hay(t, " resultados del ", " resultados de los ", " resultados correspondientes "):
+        return "resultados", "Resultados"
     if _hay(todo, " dividendo ", " dividendos ", " retribucion al accionista ", " pago a cuenta ",
             " devolucion de prima ", " distribucion de prima "):
         return "dividendos", "Dividendo"
     if _hay(todo, " estabilizacion ") and _hay(todo, " oferta ", " colocacion ", " opv "):
         return "opvs-ampliaciones", "Colocación"
     if _hay(todo, " recompra ", " autocartera ") or (_hay(t, " acciones propias ") and _hay(t, " adquisicion ", " compra ", " bloque ")):
+        # Una oferta de recompra de bonos, obligaciones o preferentes no es un programa de recompra de acciones
+        # (Unicaja, Mapfre, Santander e IAG en 2026, vistos al rellenar doce meses el 22/11/2026): queda fuera.
+        if (deuda or _hay(todo, " preferentes ", " convertibles ", " emision en circulacion ", " emisiones en circulacion ")) \
+                and not _hay(t, " acciones ", " autocartera "):
+            return None
         return "recompras", "Programa de recompra"
     valores_deuda = _hay(todo, " bonos ", " obligaciones ", " pagares ", " notas ", " warrants ", " turbos ",
                          " certificados ", " renta fija ", " cedulas ")
@@ -243,19 +541,21 @@ def clasificar(categoria: str, texto: str) -> tuple[str, str] | None:
             and _hay(t, " publicacion ", " presentacion ", " calendario ", " presentara ", " publicara "):
         return "resultados", "Fecha de resultados"
     # «Aena anuncia la celebración de la presentación de resultados…», «Anuncio webcast seguimiento de la actividad 9M»
-    trimestral = r"\b(trimestre|trimestral|semestre|semestral|nueve meses|9m|[1-4]t(\d\d)?|q[1-4]|[12]s(\d\d)?|h[12])\b"
+    trimestral = rf"\b(trimestre|trimestral|semestre|semestral|nueve meses|{MESES_ACUMULADOS}|9m|[1-4]t(\d\d)?|q[1-4]|[12]s(\d\d)?|h[12])\b"
     if re.search(r"\b(anuncia|anuncio|convoca|convocatoria|celebracion|webcast)\b", t) and \
             (_hay(t, " resultados ") or re.search(trimestral, t)):
         return "resultados", "Fecha de resultados"
     if _hay(todo, " resultados ", " cuentas ", " informe financiero ", " informacion financiera ", " beneficio ") and re.search(
-            r"\b(trimestre|trimestral|semestre|semestral|ejercicio|anual|anuales|nueve meses|9m|[1-4]t(\d\d)?|q[1-4]|[12]s(\d\d)?|h[12]|situacion financiera)\b", t):
+            rf"\b(trimestre|trimestral|semestre|semestral|ejercicio|anual|anuales|nueve meses|{MESES_ACUMULADOS}|9m|[1-4]t(\d\d)?|q[1-4]|[12]s(\d\d)?|h[12]|situacion financiera)\b", t):
         return "resultados", "Resultados"
     return None
 
 
-PERIODOS = [(r"\b(primer|1er) trimestre\b|\b1t(\d\d)?\b|\bq1\b", "1T"), (r"\bsegundo trimestre\b|\b2t(\d\d)?\b|\bq2\b", "2T"),
-            (r"\b(tercer|3er) trimestre\b|\b3t(\d\d)?\b|\bq3\b|\bnueve meses\b|\b9m\b", "3T"), (r"\bcuarto trimestre\b|\b4t(\d\d)?\b|\bq4\b", "4T"),
-            (r"\b(primer )?semestre\b|\b1s(\d\d)?\b|\bh1\b", "1S"), (r"\b(ejercicio|anuales?|anual)\b", "año")]
+PERIODOS = [(r"\b(primer|1er) trimestre\b|\b1t(\d\d)?\b|\bq1\b|\btres primeros meses\b|\bprimeros tres meses\b", "1T"), (r"\bsegundo trimestre\b|\b2t(\d\d)?\b|\bq2\b", "2T"),
+            (r"\b(tercer|3er) trimestre\b|\b3t(\d\d)?\b|\bq3\b|\bnueve meses\b|\bnueve primeros meses\b|\bprimeros nueve meses\b|\b9m\b", "3T"), (r"\bcuarto trimestre\b|\b4t(\d\d)?\b|\bq4\b", "4T"),
+            # «información financiera del segundo semestre de 2025» (febrero): 2S, no 1S (35 comunicados del IBEX en 2026)
+            (r"\bsegundo semestre\b|\b2s(\d\d)?\b|\bh2\b", "2S"),
+            (r"\b(primer )?semestre\b|\b1s(\d\d)?\b|\bh1\b|\bseis primeros meses\b|\bprimeros seis meses\b", "1S"), (r"\b(ejercicio|anuales?|anual)\b", "año")]
 
 
 def periodo(texto: str, fecha: str) -> str:
@@ -393,62 +693,7 @@ def navegacion(actual: str) -> str:
             ' · <a href="https://elespeculador.com/ibex-35/">Volver al IBEX 35</a></p>')
 
 
-def _euros(x: float, moneda: str) -> str:
-    if x is None or pd.isna(x):
-        return "—"
-    t = f"{x:.4f}".rstrip("0")
-    entero, _, dec = t.partition(".")
-    return f"{entero},{dec.ljust(2, '0')} {'€' if moneda == 'EUR' else moneda}"
-
-
-def _pct(x) -> str:
-    return "—" if x is None or pd.isna(x) else f"{x:.2f}".replace(".", ",") + " %"
-
-
-def dividendos_bme(e: pd.DataFrame, hoy: pd.Timestamp) -> str:
-    """Próximos dividendos y lo pagado en doce meses por las empresas del IBEX 35, con los datos de BME que ya
-    publica el calendario de dividendos. Si esos ficheros no están, la página sale solo con los comunicados."""
-    try:
-        prox = pd.read_csv(DIVIDENDOS_BME / "proximos.csv", dtype={"isin": str})
-        rent = pd.read_csv(DIVIDENDOS_BME / "rentabilidad.csv", dtype={"isin": str})
-    except (FileNotFoundError, pd.errors.EmptyDataError):
-        return ""
-    emp = e.set_index("isin")
-    prox = prox[prox["isin"].isin(emp.index) & (pd.to_datetime(prox["fecha_ex"]) >= hoy)].sort_values(["fecha_ex", "empresa"])
-    rent = rent[rent["isin"].isin(emp.index)].sort_values("rentabilidad_ordinaria_pct", ascending=False)
-
-    def celda_emp(isin: str) -> str:
-        x = emp.loc[isin]
-        return f'<a href="{FICHAS}{x["ficha"]}/">{_e(x["nombre"])}</a>'
-
-    def tipo(r) -> str:
-        t = "Flexible" if str(r.flexible) == "True" else ("Extraordinario" if str(r.extraordinario) == "True" else "Ordinario")
-        return f"{t} ({r.concepto})" if isinstance(r.concepto, str) and r.concepto else t
-
-    partes = []
-    filas = "\n".join(
-        f'<tr data-empresa="{_e(emp.loc[r.isin]["nombre"])}"><td>{_f(r.fecha_ex)}</td><td>{celda_emp(r.isin)}</td>'
-        f'<td>{_euros(r.bruto, r.moneda)}</td><td>{_e(tipo(r))}</td><td>{_f(r.fecha_pago) if isinstance(r.fecha_pago, str) else "—"}</td></tr>'
-        for r in prox.itertuples())
-    partes.append('<h2>Próximos dividendos del IBEX 35</h2>\n'
-                  '<figure class="wp-block-table espec-bme-tabla"><table><thead><tr><th>Fecha ex</th><th>Empresa</th>'
-                  '<th>Importe bruto</th><th>Tipo</th><th>Fecha de pago</th></tr></thead><tbody>\n'
-                  + (filas or '<tr><td colspan="5">Ninguna empresa del IBEX 35 tiene ahora mismo un dividendo anunciado con fecha ex por delante.</td></tr>')
-                  + '\n</tbody></table></figure>')
-    if not rent.empty:
-        filas = "\n".join(
-            f'<tr data-empresa="{_e(emp.loc[r.isin]["nombre"])}"><td>{celda_emp(r.isin)}</td><td>{int(r.pagos)}</td>'
-            f'<td>{_euros(r.bruto_ordinario, r.moneda)}</td><td>{_pct(r.rentabilidad_ordinaria_pct)}</td></tr>'
-            for r in rent.itertuples())
-        partes.append('<h2>Lo que han pagado en los últimos doce meses</h2>\n'
-                      '<p class="espec-cnmv-intro">Dividendo ordinario bruto por acción con fecha ex en los últimos doce meses y su rentabilidad sobre el último cierre. Ordenado de mayor a menor rentabilidad.</p>\n'
-                      '<figure class="wp-block-table espec-bme-tabla"><table><thead><tr><th>Empresa</th><th>Pagos</th>'
-                      '<th>Dividendo ordinario</th><th>Rentabilidad</th></tr></thead><tbody>\n' + filas + '\n</tbody></table></figure>')
-    return "\n".join(partes) + '\n<p class="espec-cnmv-pie">Fechas, importes y rentabilidades: El Especulador, a partir de datos de BME.</p>\n'
-
-
-def listado_html(c: pd.DataFrame, clave: str, titulo: str, hoy: pd.Timestamp, sello: str, inicio: pd.Timestamp,
-                 e: pd.DataFrame | None = None) -> str:
+def listado_html(c: pd.DataFrame, clave: str, titulo: str, hoy: pd.Timestamp, sello: str, inicio: pd.Timestamp) -> str:
     """Listado completo de un tipo para su página de elespeculador.com: tabla sin imágenes; cada fila lleva la
     empresa en data-empresa para que la página pueda filtrar por empresa."""
     es = entradas(c, clave, hoy, DIAS_LISTADO)
@@ -461,11 +706,9 @@ def listado_html(c: pd.DataFrame, clave: str, titulo: str, hoy: pd.Timestamp, se
     if not filas:
         filas = f'<tr><td colspan="5">{_e(vacio(titulo, inicio, hoy))}</td></tr>'
     desde = max(inicio, hoy - pd.Timedelta(days=DIAS_LISTADO))
-    bme = dividendos_bme(e, hoy) if clave == "dividendos" and e is not None else ""
     return (f"<!-- cnmv-listado:inicio {clave} {sello} -->\n"
             f"{navegacion(clave)}\n"
-            f"{bme}"
-            f'{"<h2>Anuncios de dividendo comunicados a la CNMV</h2>" if bme else ""}\n'
+            "\n"
             f'<p class="espec-cnmv-intro">{_e(INTRO[clave])}</p>\n'
             f'<figure class="wp-block-table espec-cnmv-tabla"><table><thead><tr><th>Fecha</th><th>Empresa</th><th>Tipo</th>'
             f'<th>Comunicado</th><th>Fuente</th></tr></thead><tbody>\n{filas}\n</tbody></table></figure>\n'
@@ -491,10 +734,10 @@ def _comunicados_empresa(c: pd.DataFrame, isin: str, hoy: pd.Timestamp) -> list[
     return out
 
 
-def ficha_html(c: pd.DataFrame, emp: pd.Series, hoy: pd.Timestamp, sello: str, inicio: pd.Timestamp,
-               prox: pd.DataFrame | None, rent: pd.DataFrame | None, hist: pd.DataFrame | None) -> str:
-    """Bloque para la ficha de una empresa en elespeculador.com/ibex35/<ficha>/: comunicados a la CNMV y
-    dividendos, en listas sin imágenes con las mismas clases que el resto de la ficha (ef-card, ef-news, ef-note)."""
+def ficha_html(c: pd.DataFrame, emp: pd.Series, hoy: pd.Timestamp, sello: str, inicio: pd.Timestamp) -> str:
+    """Bloque para la ficha de una empresa en elespeculador.com/ibex35/<ficha>/: sus comunicados a la CNMV (también
+    los anuncios de dividendo), en una lista sin imágenes con las mismas clases que el resto de la ficha (ef-card,
+    ef-news, ef-note). Sin datos de BME: ni importes, ni rentabilidades, ni precios (21/11/2026)."""
     nombre = emp["nombre"]
     lineas = []
     for r in _comunicados_empresa(c, emp["isin"], hoy)[:FICHA_COMUNICADOS]:
@@ -513,49 +756,14 @@ def ficha_html(c: pd.DataFrame, emp: pd.Series, hoy: pd.Timestamp, sello: str, i
                f'<p class="ef-note">Resultados, dividendos, recompras, ampliaciones y OPAs de los últimos doce meses. '
                f'Los comunicados de una misma operación salen en una línea, con un enlace a cada uno. Todas las empresas del IBEX 35: {enlaces}.</p>\n</div>']
 
-    div = []
-    if prox is not None:
-        p = prox[(prox["isin"] == emp["isin"]) & (pd.to_datetime(prox["fecha_ex"]) >= hoy)].sort_values("fecha_ex")
-        for r in p.itertuples():
-            tipo = "dividendo flexible" if str(r.flexible) == "True" else ("dividendo extraordinario" if str(r.extraordinario) == "True" else "dividendo")
-            pago = f", se paga el {_f(r.fecha_pago)}" if isinstance(r.fecha_pago, str) and r.fecha_pago else ""
-            div.append(f'<li><time>{_f(r.fecha_ex)}</time><span><strong>Próximo:</strong> {_euros(r.bruto, r.moneda)} brutos por acción '
-                       f'({_e(tipo)}{" " + _e(r.concepto) if isinstance(r.concepto, str) and r.concepto else ""}). '
-                       f'Fecha ex el {_f(r.fecha_ex)}{pago}.</span></li>')
-    if hist is not None:
-        hh = hist[(hist["isin"] == emp["isin"]) & (pd.to_datetime(hist["fecha_ex"]) < hoy)].sort_values("fecha_ex", ascending=False).head(6)
-        for r in hh.itertuples():
-            tipo = "flexible" if str(r.flexible) == "True" else ("extraordinario" if str(r.extraordinario) == "True" else "")
-            conc = " · ".join(x for x in [r.concepto if isinstance(r.concepto, str) else "", tipo] if x)
-            div.append(f'<li><time>{_f(r.fecha_ex)}</time><span>{_euros(r.bruto, r.moneda)} brutos por acción'
-                       f'{" (" + _e(conc) + ")" if conc else ""}</span></li>')
-    resumen = ""
-    if rent is not None:
-        rr = rent[rent["isin"] == emp["isin"]]
-        if not rr.empty:
-            r = rr.iloc[0]
-            veces = "un pago" if int(r.pagos) == 1 else f"{int(r.pagos)} pagos"
-            resumen = (f"<p>En los últimos doce meses ha repartido {_euros(r.bruto_ordinario, r.moneda)} brutos por acción "
-                       f"de dividendo ordinario en {veces}, un {_pct(r.rentabilidad_ordinaria_pct)} sobre el cierre del {_f(r.fecha_cierre)}.</p>")
-    if div or resumen:
-        bloques.append(f'<div class="ef-card">\n<h2>Dividendos de {_e(nombre)}</h2>\n{resumen}\n'
-                       + ('<ul class="ef-news">\n' + "\n".join(div) + "\n</ul>\n" if div else "")
-                       + f'<p class="ef-note">Fechas e importes: El Especulador, a partir de datos de BME. '
-                         f'<a href="{LISTADOS["dividendos"][0]}">Dividendos de todo el IBEX 35</a>.</p>\n</div>')
     return (f"<!-- ficha-cnmv:inicio {emp['ficha']} {sello} -->\n" + "\n".join(bloques) + "\n<!-- ficha-cnmv:fin -->\n")
 
 
 def fichas(c: pd.DataFrame, e: pd.DataFrame, hoy: pd.Timestamp, sello: str, inicio: pd.Timestamp) -> int:
-    def leer(n):
-        try:
-            return pd.read_csv(DIVIDENDOS_BME / n, dtype={"isin": str})
-        except (FileNotFoundError, pd.errors.EmptyDataError):
-            return None
-    prox, rent, hist = leer("proximos.csv"), leer("rentabilidad.csv"), leer("dividendos.csv")
     carpeta = SALIDA / "empresas"
     carpeta.mkdir(parents=True, exist_ok=True)
     for emp in e.to_dict("records"):
-        frag = ficha_html(c, pd.Series(emp), hoy, sello, inicio, prox, rent, hist)
+        frag = ficha_html(c, pd.Series(emp), hoy, sello, inicio)
         assert "$" not in frag
         (carpeta / f"{emp['ficha']}.html").write_text(frag, encoding="utf-8")
     return len(e)
@@ -587,29 +795,19 @@ a{{color:#1f4e8c}} .pie{{color:#5b6675;font-size:.85rem;margin-top:2em}}
 <p><strong>Actualizado el {_e(sello.replace('T', ' a las '))}.</strong> Los comunicados de una misma operación (por ejemplo, los informes semanales de un programa de recompra) se agrupan en una sola fila, con el último comunicado y, entre paréntesis, cuántos hay.</p>
 {"".join(secciones)}
 <h2>Datos abiertos</h2>
-<p>CSV: <a href="datos/ibex35.csv">comunicados del IBEX 35 clasificados</a> · <a href="datos/comunicados.csv">todos los comunicados leídos</a> · <a href="datos/ultima.json">JSON</a>. Licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>, citando «El Especulador, a partir de datos de la CNMV».</p>
+<p>CSV: <a href="datos/ibex35.csv">comunicados del IBEX 35 clasificados</a> · <a href="datos/comunicados.csv">todos los comunicados leídos</a> · <a href="datos/ultima.json">JSON</a>. Fuente: CNMV, comunicados de información privilegiada y otra información relevante, reproducidos fielmente (gratuitos en cnmv.es). La clasificación y el resumen de El Especulador se publican con licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>, citando «El Especulador, a partir de datos de la CNMV».</p>
 <p class="pie">Fuente: CNMV, canales de información privilegiada y de otra información relevante. La clasificación es automática; el texto oficial de cada comunicado es el de la CNMV. Contenido informativo; no constituye asesoramiento financiero.</p>
 </body></html>
 """
 
 
-def _huella_bme() -> str:
-    h = hashlib.md5()
-    for n in ("proximos.csv", "rentabilidad.csv"):
-        f = DIVIDENDOS_BME / n
-        h.update(f.read_bytes() if f.exists() else b"-")
-    return h.hexdigest()
-
-
-def escribir(h: pd.DataFrame, c: pd.DataFrame, e: pd.DataFrame, nuevos: int, forzar: bool) -> bool:
-    """Reescribe si hay comunicados nuevos, si ha cambiado el día (los recuadros y los próximos dividendos dependen
-    de la fecha) o si el calendario de dividendos ha cambiado sus datos."""
+def escribir(h: pd.DataFrame, c: pd.DataFrame, e: pd.DataFrame, nuevos: int, forzar: bool, extra: dict | None = None) -> bool:
+    """Reescribe si hay comunicados nuevos o si ha cambiado el día (los recuadros dependen de la fecha)."""
     ahora = ahora_madrid()
     hoy = pd.Timestamp(ahora.date())
     sello = ahora.strftime("%Y-%m-%dT%H:%M")
-    huella = _huella_bme()
     previo = json.loads((DATOS / "ultima.json").read_text(encoding="utf-8")) if (DATOS / "ultima.json").exists() else {}
-    if (nuevos == 0 and not forzar and (SALIDA / "cajas.html").exists() and previo.get("bme") == huella
+    if (nuevos == 0 and not forzar and (SALIDA / "cajas.html").exists()
             and str(previo.get("actualizado", ""))[:10] == sello[:10]):
         return False
     DATOS.mkdir(parents=True, exist_ok=True)
@@ -618,7 +816,7 @@ def escribir(h: pd.DataFrame, c: pd.DataFrame, e: pd.DataFrame, nuevos: int, for
     inicio = pd.Timestamp(pd.Timestamp(h["fecha"].min()).date())
     cajas = cajas_html(c, hoy, sello, inicio)
     for clave, titulo, _ in CAJAS:
-        lst = listado_html(c, clave, titulo, hoy, sello, inicio, e)
+        lst = listado_html(c, clave, titulo, hoy, sello, inicio)
         assert "$" not in lst
         (SALIDA / f"listado-{clave}.html").write_text(lst, encoding="utf-8")
     assert "$" not in cajas
@@ -629,8 +827,8 @@ def escribir(h: pd.DataFrame, c: pd.DataFrame, e: pd.DataFrame, nuevos: int, for
         "actualizado": sello, "generado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "comunicados_leidos": int(len(h)), "comunicados_ibex35_clasificados": int(len(c)),
         "por_recuadro": {k: len(entradas(c, k, hoy)) for k, _, _ in CAJAS},
-        "fuente": "CNMV, RSS de información privilegiada y otra información relevante", "licencia": "CC BY 4.0 · El Especulador",
-        "bme": huella,
+        "fuente": "CNMV, RSS de información privilegiada y otra información relevante, y ficha pública de cada comunicado por número de registro", "licencia": "Comunicados de la CNMV reproducidos fielmente (gratuitos en cnmv.es); clasificación y resumen de El Especulador con licencia CC BY 4.0",
+        **(extra or {}),
     }, ensure_ascii=False, indent=1), encoding="utf-8")
     return True
 
@@ -639,6 +837,10 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--local", nargs="+", help="ficheros RSS ya descargados (el nombre debe contener IP u OIR)")
     ap.add_argument("--forzar", action="store_true", help="reescribir aunque no haya comunicados nuevos")
+    ap.add_argument("--sin-relleno", action="store_true", help="no pedir a la CNMV los números de registro que faltan")
+    ap.add_argument("--relleno-max", type=int, default=MAX_RELLENO, help="fichas como máximo por pasada")
+    ap.add_argument("--atras-max", type=int, default=MAX_ATRAS, help="fichas como máximo por pasada hacia atrás (0 = no)")
+    ap.add_argument("--dividendos-max", type=int, default=20, help="comunicados de dividendo que se leen por pasada (0 = no)")
     args = ap.parse_args()
     if args.local:
         filas = []
@@ -647,13 +849,33 @@ def main() -> int:
             filas += leer_canal(Path(f).read_text(encoding="utf-8"), canal)
     else:
         filas = descargar()
+    extra, problema = None, None
+    if not args.local and not args.sin_relleno:
+        previo = leer_historico()
+        recuperadas, quedan, problema = rellenar(previo, filas, ahora_madrid(), limite=args.relleno_max)
+        filas += recuperadas
+        atras, _, problema_atras = rellenar_atras(previo, filas, ahora_madrid(), limite=args.atras_max) if args.atras_max else ([], {}, None)
+        filas += atras
+        problema = problema or problema_atras
+        extra = {"huecos_pendientes": quedan}
     h, nuevos = acumular(filas)
+    if extra is not None:
+        extra["historico"] = resumen_historico(h, ahora_madrid())
+        extra["sin_respuesta"] = saltadas()
     e = empresas_ibex(pd.Timestamp(ahora_madrid().date()))
     c = clasificados(h, e)
-    if escribir(h, c, e, nuevos, args.forzar):
+    if escribir(h, c, e, nuevos, args.forzar, extra):
         print(f"{nuevos} comunicados nuevos; {len(c)} del IBEX 35 clasificados en el histórico.")
     else:
         print(f"Sin comunicados nuevos en la CNMV ({len(h)} en el histórico): no se toca nada.")
+    if not args.local and not args.sin_relleno and args.dividendos_max:
+        try:  # importe y fechas de cada dividendo, leídos del propio comunicado (dividendos_cnmv.py)
+            import dividendos_cnmv
+            dividendos_cnmv.actualizar(DATOS, limite=args.dividendos_max)
+        except Exception as e:  # no frena lo ya publicado, pero abre la incidencia
+            problema = problema or f"dividendos de la CNMV: {type(e).__name__}: {e}"
+    if problema:  # lo leído se publica igual; el error abre la incidencia cnmv-fallido
+        raise DatosRaros(problema)
     return 0
 
 

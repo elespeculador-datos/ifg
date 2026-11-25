@@ -1,0 +1,82 @@
+name: Prima de riesgo (validación a mano)
+
+# Indicador 3 del catálogo de Datos: semáforo de la prima de riesgo con los rendimientos a
+# diez años de Eurostat (irt_lt_mcby_m, medias mensuales). En producción corre en el servidor smpro-datos-1
+# (servidor/ejecutar.sh prima, 14:10 hora de Madrid L-V; ver DESPLIEGUE.md) y escribe fuera del git.
+# Este flujo NO tiene horario ni guarda nada en el repositorio: se lanza a mano para validar
+# una rama con datos reales (el entorno de Datos no llega a Eurostat) y deja la salida como
+# artefacto. Dependencias del colector: requests pandas numpy scipy.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install requests pandas numpy scipy
+      - name: Comprobaciones sin red
+        run: python prima/pruebas_prima.py
+      - name: Descargar la respuesta de Eurostat y guardarla tal cual
+        run: |
+          mkdir -p salida
+          python - <<'EOF'
+          import json, sys
+          sys.path.insert(0, "prima")
+          import prima
+          texto = prima.descargar()
+          open("salida/eurostat.json", "w", encoding="utf-8").write(texto)
+          d = json.loads(texto)
+          print("etiqueta:", d.get("label"))
+          print("actualizado:", d.get("updated"))
+          print("dimensiones:", d.get("id"), d.get("size"))
+          for dim in d.get("id", []):
+              idx = d["dimension"][dim]["category"]["index"]
+              claves = list(idx) if isinstance(idx, dict) else idx
+              print(f"  {dim}: {len(claves)} categorías; primeras {claves[:4]}; últimas {claves[-3:]}")
+          EOF
+      - name: Calcular con la respuesta descargada
+        env:
+          ESPEC_DATOS_BASE: https://datos.elespeculador.com/
+        run: python prima/prima.py --salida salida/prima --local salida/eurostat.json --tesoro docs --forzar
+      - name: Resumen
+        run: |
+          echo "## Prima de riesgo: salida de validación" | tee -a "$GITHUB_STEP_SUMMARY"
+          head -n 1 salida/prima/fragmento-wp.html | tee -a "$GITHUB_STEP_SUMMARY"
+          python - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json
+          d = json.load(open("salida/prima/datos/ultima.json"))
+          print("```")
+          print("fecha_dato:", d["fecha_dato"], "desfase_dias:", d["desfase_dias"], "eurostat_actualizado:", d["eurostat_actualizado"])
+          print("semaforo:", d["semaforo"], "prima_es_de:", d["prima_es_de"])
+          for p, v in d["niveles"].items():
+              print(f"{p}: {v['valor']} % ({v['fecha']}), desde {v['desde']}, {v['observaciones']} obs, percentil hist {v['percentil_historico']}")
+          for n, v in d["diferenciales"].items():
+              print(f"{n}: {v['valor']} pb ({v['fecha']}), p3a {v['percentil_3a']}, phist {v['percentil_historico']}, max hist {v['maximo_historico']} el {v['fecha_maximo_historico']}, semaforo {v['semaforo']}")
+          for e in d["episodios"]:
+              print(f"episodio {e['episodio']}: {e['maximo']} pb el {e['fecha_maximo']}")
+          print("tesoro:", json.dumps(d["tesoro"], ensure_ascii=False))
+          print("```")
+          EOF
+      - name: Fragmento al registro (los artefactos no se pueden descargar desde el entorno de Datos)
+        run: |
+          echo "=== FRAGMENTO prima INICIO ==="
+          cat salida/prima/fragmento-wp.html
+          echo
+          echo "=== FRAGMENTO prima FIN ==="
+      - name: Guardar la salida como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prima-salida
+          path: salida
+          retention-days: 14

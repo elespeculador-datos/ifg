@@ -1,0 +1,62 @@
+name: Recompras (validación a mano)
+
+# Indicador 17 (recompras del IBEX 35). En producción corre en el servidor smpro-datos-1 (servidor/ejecutar.sh
+# recompras; ver DESPLIEGUE.md). Este flujo NO tiene horario ni escribe en el repositorio: se lanza a mano, hace una
+# pasada completa con el listado real de la CNMV y los PDF reales, y deja la salida como artefacto y el fragmento en
+# el registro (ver recompras/LEEME.md).
+on:
+  workflow_dispatch:
+    inputs:
+      max_informes:
+        description: "Comunicados a leer en la pasada"
+        default: "40"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  sonda:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar dependencias
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils >/dev/null && pip install requests pandas openpyxl xlrd
+      - name: Comprobaciones sin red
+        run: python recompras/pruebas_recompras.py
+      - name: Pasada con datos reales (listado de la CNMV servido por datos.elespeculador.com; PDF de la CNMV)
+        env:
+          ESPEC_DATOS_BASE: https://datos.elespeculador.com/
+        run: |
+          set -o pipefail
+          python recompras/recompras.py --salida salida/recompras --datos salida --cnmv https://datos.elespeculador.com/cnmv/datos/ibex35.csv --max "${{ inputs.max_informes || 40 }}" --guardar-textos salida/textos | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Resumen de la pasada
+        run: |
+          python - <<'EOF2' | tee -a "$GITHUB_STEP_SUMMARY"
+          import csv, json
+          j = json.load(open("salida/recompras/datos/ultima.json", encoding="utf-8"))
+          print(f"huella {j['huella']} · semana: {j['semana']['empresas']} empresas, {j['semana']['acciones']:,} acciones, {j['semana']['importe_estimado_eur']:,.0f} € estimados · en curso: {j['en_curso']['empresas']} · cobertura: {j['cobertura']}")
+          for i in csv.DictReader(open("salida/recompras/datos/informes.csv", encoding="utf-8")):
+              print(f"  {i['fecha_comunicado']} {i['empresa']:<14} {i['estado']:<9} filas={i['filas']:>3} acciones={i['acciones']:>10} medio={i['precio_medio']:<8} {i['moneda']:<7} total={i['total_declarado']:<9} coincide={i['coincide']:<2} pct={i['pct_programa']:<6} fin={i['finalizado']}")
+          print("\n===== fragmento-wp.html =====")
+          print(open("salida/recompras/fragmento-wp.html", encoding="utf-8").read())
+          print("\n===== textos de los informes sin filas o con pocas (para revisar la maqueta) =====")
+          import pathlib
+          for i in csv.DictReader(open("salida/recompras/datos/informes.csv", encoding="utf-8")):
+              if i["estado"] in ("sin_filas", "sin_texto") or int(i["filas"] or 0) <= 2:
+                  ruta = pathlib.Path("salida/textos") / f"{i['nreg']}.txt"
+                  print(f"\n----- {i['empresa']} nreg {i['nreg']} {i['fecha_comunicado']} estado {i['estado']} filas {i['filas']} | {i['titulo'][:100]}")
+                  if ruta.exists():
+                      lineas = [l[:170] for l in ruta.read_text(encoding="utf-8").splitlines() if l.strip()]
+                      print("\n".join(lineas[:45]) if lineas else "(texto vacío: PDF sin capa de texto)")
+          EOF2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recompras-sonda
+          path: salida
+          retention-days: 14

@@ -1,0 +1,58 @@
+name: Directivos, operaciones comunicadas a la CNMV (validación a mano)
+
+# Indicador 10 del catálogo de Datos: compras y ventas de administradores y directivos comunicadas a la
+# CNMV (art. 19 del Reglamento de abuso de mercado). En producción corre en el servidor smpro-datos-1
+# (servidor/ejecutar.sh directivos; ver DESPLIEGUE.md). Este flujo NO tiene horario ni guarda nada en el
+# repositorio: se lanza a mano para validar la rama con datos reales (el entorno de Datos no llega a cnmv.es)
+# y deja la salida como artefacto.
+on:
+  workflow_dispatch:
+    inputs:
+      max_documentos:
+        description: "PDF que se descargan como máximo"
+        default: "80"
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils >/dev/null && pip install requests scipy
+      - name: Comprobaciones sin red
+        run: python directivos/pruebas_directivos.py
+      - name: Pasada con datos reales
+        env:
+          ESPEC_DATOS_BASE: https://datos.elespeculador.com/
+        run: |
+          set -o pipefail
+          python directivos/directivos.py --salida salida/directivos --max-documentos "${{ github.event.inputs.max_documentos || '60' }}" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Fragmento, resumen y muestra de datos al registro
+        run: |
+          echo "===== fragmento-wp.html"; cat salida/directivos/fragmento-wp.html; echo
+          echo "===== resumen-mensual.html"; cat salida/directivos/resumen-mensual.html; echo
+          echo "===== cobertura.json"; cat salida/directivos/datos/cobertura.json; echo
+          echo "===== pendientes.csv"; cat salida/directivos/datos/pendientes.csv; echo
+          echo "===== operaciones.csv (sin la columna documento)"; python - <<'EOF'
+          import csv
+          with open("salida/directivos/datos/operaciones.csv", encoding="utf-8", newline="") as fh:
+              filas = list(csv.DictReader(fh))
+          print(len(filas), "líneas")
+          for f in filas:
+              print(" | ".join(str(f[k]) for k in ("registro", "fecha_registro", "fecha_operacion", "emisor", "isin", "motivo", "cargo_tipo", "instrumento", "operacion", "sentido", "tipo", "lugar", "volumen", "precio", "divisa", "importe_eur", "modificacion")))
+          EOF
+      - name: Guardar la salida como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: directivos-salida
+          path: salida
+          retention-days: 14

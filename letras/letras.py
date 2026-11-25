@@ -18,8 +18,15 @@ Comprobaciones antes de publicar:
 El servidor de tesoro.es no envía el certificado intermedio de su cadena TLS: se descarga el que anuncia
 el propio certificado (AIA, FNMT) y se añade al almacén de certifi. La verificación TLS sigue activa.
 
+Memoria y protección del CSV (desde el 23/11/2026, como en bonos/): la tabla de resultados del Tesoro solo enseña la
+última subasta de cada plazo y el Excel mensual tarda semanas en recoger las nuevas. Cada pasada lee su CSV anterior y
+conserva lo que leyó en la web aunque la tabla ya no lo muestre; antes de escribir compara con el CSV anterior por fila
+completa y conserva tal cual, con aviso, la subasta (fecha y plazo) que desaparecería.
+
 Uso:
   python letras/letras.py --salida docs/letras
+  python letras/letras.py --salida docs/letras --recuperar copia.csv   añade las subastas de copia.csv que falten
+  python letras/letras.py --salida docs/letras --comparar copia.csv    solo compara el CSV publicado con copia.csv
 """
 from __future__ import annotations
 
@@ -29,6 +36,7 @@ import hashlib
 import html
 import io
 import json
+import os
 import re
 import socket
 import ssl
@@ -51,9 +59,19 @@ CAB = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKi
                      "Chrome/124 Safari/537.36 (El Especulador, datos abiertos)", "Accept-Language": "es-ES,es;q=0.9"}
 PAGINA_WP = "https://elespeculador.com/letras-del-tesoro/"
 METODOLOGIA = PAGINA_WP + "#como-se-hace"
-PAGES = "https://elespeculador-datos.github.io/ifg/letras/"
+# Dirección pública de esta salida. Por defecto, GitHub Pages; en el servidor
+# smpro-datos-1, la variable de entorno ESPEC_DATOS_BASE vale
+# "https://datos.elespeculador.com/". Siempre termina en barra.
+PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/letras/"
 PLAZOS = (3, 6, 9, 12)
 TEXTOS = "2"  # súbelo al cambiar los textos fijos del fragmento, para que el escenario de Make los copie
+CSV_SUBASTAS = "subastas_letras.csv"
+# Columnas del CSV público y su clave interna, en orden (las mismas de siempre).
+COLUMNAS = (("fecha", "fecha"), ("plazo", "plazo"), ("tipo_medio", "medio"), ("tipo_marginal", "marginal"),
+            ("precio_medio", "precio_medio"), ("precio_minimo", "precio_minimo"), ("solicitado_mill", "solicitado"),
+            ("adjudicado_mill", "adjudicado"), ("segunda_vuelta_mill", "segunda_vuelta"), ("vencimiento", "vencimiento"),
+            ("liquidacion", "liquidacion"), ("fuente", "fuente"))
+CAMPOS_TEXTO = {"fecha", "vencimiento", "liquidacion", "fuente"}
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre",
          "diciembre"]
 
@@ -91,9 +109,14 @@ def _limpiar(x: str) -> str:
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", x))).strip()
 
 
+NOTA = re.compile(r"\[\d+\]")  # llamada a nota a pie de tabla, como «[1]» en la 2.ª vuelta pendiente de anunciar
+
+
 def _dec(x: str) -> float | None:
-    """Número con formato español de la web del Tesoro: 1.886,84 -> 1886.84."""
-    x = (x or "").strip()
+    """Número con formato español de la web del Tesoro: 1.886,84 -> 1886.84. Las llamadas a nota («[1]») se quitan: desde el
+    19/11/2026 el Tesoro pone «[1]» solo, en vez de la cifra, cuando los resultados de la 2.ª vuelta aún no se han anunciado
+    (la nota dice cuándo); una celda que solo tiene la nota vale None, como un guion."""
+    x = NOTA.sub("", x or "").strip()
     if not x or x in ("-", "—"):
         return None
     if not re.fullmatch(r"-?[\d.]+(,\d+)?", x):
@@ -145,7 +168,11 @@ def _get(s: requests.Session, url: str) -> requests.Response:
 # --------------------------------------------------------------------------- lectura
 def ultimas(s: requests.Session) -> list[dict]:
     """La tabla de la última subasta de cada plazo."""
-    t = _get(s, URL_ULTIMAS).text
+    return leer_ultimas(_get(s, URL_ULTIMAS).text)
+
+
+def leer_ultimas(t: str) -> list[dict]:
+    """La tabla de la última subasta de cada plazo, a partir del HTML de la página (sin red; para las pruebas)."""
     tabla = next((x for x in re.findall(r"<table.*?</table>", t, re.S) if "Tipo de inter" in x and "MESES" in x.upper()), None)
     if not tabla:
         raise DatosRaros("la página de últimas subastas no trae la tabla de Letras")
@@ -269,9 +296,47 @@ def calendario(s: requests.Session, hoy: date) -> list[dict]:
 
 
 # --------------------------------------------------------------------------- unión y comprobaciones
-def unir(web: list[dict], mensual: list[dict], historico: list[dict]) -> list[dict]:
+# --------------------------------------------------------------------------- CSV de todas las subastas
+def _fila_csv(f: dict) -> list[str]:
+    """La fila tal como se escribe en el CSV; también es la base de la comparación por fila completa."""
+    return ["" if f.get(k) is None or f.get(k) == "" else str(f[k]) for _, k in COLUMNAS]
+
+
+def leer_csv(ruta: Path | str) -> list[dict]:
+    """Filas de un CSV de subastas de Letras de este colector."""
+    ruta = Path(ruta)
+    try:
+        with ruta.open(newline="", encoding="utf-8") as fh:
+            lector = csv.DictReader(fh)
+            falta = [c for c, _ in COLUMNAS if c not in (lector.fieldnames or [])]
+            if falta:
+                raise DatosRaros(f"{ruta.name}: no es un CSV de subastas de Letras de este colector (faltan {', '.join(falta)})")
+            out = []
+            for i, d in enumerate(lector, 2):
+                f: dict = {}
+                try:
+                    for col, k in COLUMNAS:
+                        v = (d.get(col) or "").strip()
+                        f[k] = (v or None) if k in CAMPOS_TEXTO else int(v) if k == "plazo" else float(v) if v else None
+                except ValueError as e:
+                    raise DatosRaros(f"{ruta.name}, línea {i}: valor inesperado ({e})")
+                if not f["fecha"] or not f["fuente"]:
+                    raise DatosRaros(f"{ruta.name}, línea {i}: fila incompleta")
+                out.append(f)
+            return out
+    except (OSError, UnicodeDecodeError, csv.Error) as e:
+        raise DatosRaros(f"no se puede leer {ruta}: {e}")
+
+
+# --------------------------------------------------------------------------- unión y comprobaciones
+def unir(web: list[dict], mensual: list[dict], historico: list[dict], memoria: list[dict] = ()) -> list[dict]:
+    """memoria: filas del CSV anterior. Las que vinieron de la web y cuya subasta ya no está en la tabla del Tesoro (que solo
+    enseña la última de cada plazo) se tratan como si siguieran en ella: así no se pierden las subastas que la tabla deja
+    de mostrar antes de que el Excel mensual las recoja, ni lo que solo da la web (precios, vencimiento, liquidación)."""
+    vistas = {(w["fecha"], w["plazo"]) for w in web}
+    recordadas = [m for m in memoria if m.get("fuente") == "web" and (m["fecha"], m["plazo"]) not in vistas]
     por = {}
-    for fuente in (historico, mensual, web):  # lo más reciente manda
+    for fuente in (historico, mensual, recordadas, web):  # lo más reciente manda
         for f in fuente:
             k = (f["fecha"], f["plazo"])
             if k in por and f["fuente"] == "web" and por[k]["fuente"] == "mensual":
@@ -291,6 +356,89 @@ def unir(web: list[dict], mensual: list[dict], historico: list[dict]) -> list[di
     return filas
 
 
+# --------------------------------------------------------------------------- protección contra filas perdidas
+def proteger(previas: list[dict], filas: list[dict]) -> tuple[list[dict], dict]:
+    """Compara las filas nuevas con las del CSV anterior por fila completa. Una subasta de Letras es una fecha y un plazo:
+    cada fila anterior tiene que seguir igual o estar actualizada (la misma subasta con datos nuevos); si su subasta no
+    sale en esta pasada, se conserva tal cual y el flujo avisa: el CSV no pierde subastas."""
+    nuevas_por = {(f["fecha"], f["plazo"]): f for f in filas}
+    iguales, actualizadas, conservadas, vistas = 0, [], [], set()
+    for p in previas:
+        k = (p["fecha"], p["plazo"])
+        if k in vistas:
+            continue  # fila repetida en el CSV anterior: la subasta ya está contada
+        vistas.add(k)
+        n = nuevas_por.get(k)
+        if n is None:
+            conservadas.append(p)
+        elif _fila_csv(n) == _fila_csv(p):
+            iguales += 1
+        else:
+            actualizadas.append((p, n))
+    for p in conservadas:
+        AVISOS.append(f"La subasta del {p['fecha']} ({p['plazo']} meses) estaba en el CSV anterior y no sale en esta pasada: "
+                      f"se conserva tal cual")
+    nuevas = [f for k, f in nuevas_por.items() if k not in vistas]
+    return sorted(filas + conservadas, key=lambda f: (f["fecha"], f["plazo"])), {
+        "previas": len(previas), "iguales": iguales, "actualizadas": actualizadas, "conservadas": conservadas, "nuevas": nuevas}
+
+
+def _diferencias(p: dict, n: dict) -> list[str]:
+    return [f"{col}: {a!r} -> {b!r}" for (col, _), a, b in zip(COLUMNAS, _fila_csv(p), _fila_csv(n)) if a != b]
+
+
+def calcular(web: list[dict], mensual: list[dict], historico: list[dict], csv_anterior: Path,
+             recuperar: list[Path] = ()) -> tuple[list[dict], dict]:
+    """Las filas del CSV nuevo y el control de la comparación con el anterior."""
+    anteriores = leer_csv(csv_anterior) if Path(csv_anterior).exists() else []
+    claves = {(f["fecha"], f["plazo"]) for f in anteriores}
+    recuperadas = []
+    for ruta in recuperar:
+        if not Path(ruta).exists():
+            raise DatosRaros(f"no existe el CSV de recuperación {ruta}")
+        for f in leer_csv(ruta):
+            if (f["fecha"], f["plazo"]) not in claves:
+                recuperadas.append(f)
+                claves.add((f["fecha"], f["plazo"]))
+    previas = anteriores + recuperadas
+    filas, control = proteger(previas, unir(web, mensual, historico, memoria=previas))
+    control.update(anteriores=len(anteriores), recuperadas=recuperadas)
+    return filas, control
+
+
+def informe(control: dict) -> list[str]:
+    """Líneas del registro con la comparación por fila completa."""
+    c = control
+    out = [f"Comparación por fila completa con el CSV anterior ({c['anteriores']} filas) y {len(c['recuperadas'])} recuperadas: "
+           f"{c['iguales']} iguales, {len(c['actualizadas'])} actualizadas, {len(c['conservadas'])} conservadas; "
+           f"{len(c['nuevas'])} filas nuevas."]
+    out += [f"  recuperada   {r['fecha']} {r['plazo']} meses" for r in c["recuperadas"]]
+    out += [f"  actualizada  {p['fecha']} {p['plazo']} meses: " + "; ".join(_diferencias(p, n)) for p, n in c["actualizadas"]]
+    out += [f"  CONSERVADA   {p['fecha']} {p['plazo']} meses" for p in c["conservadas"]]
+    out += [f"  nueva        {n['fecha']} {n['plazo']} meses" for n in c["nuevas"]]
+    return out
+
+
+def control_json(control: dict) -> dict:
+    c = control
+    return {"anteriores": c["anteriores"], "recuperadas": len(c["recuperadas"]), "iguales": c["iguales"],
+            "actualizadas": len(c["actualizadas"]), "conservadas": len(c["conservadas"]), "nuevas": len(c["nuevas"]),
+            "detalle_conservadas": [{"fecha": p["fecha"], "plazo": p["plazo"]} for p in c["conservadas"]]}
+
+
+def comparar_archivos(publicado: Path, otro: Path) -> list[str]:
+    """Compara dos CSV de subastas de Letras por fila completa (sin red): lo que tiene cada uno y lo que cambia."""
+    a, b = leer_csv(otro), leer_csv(publicado)
+    _, c = proteger(a, b)
+    out = [f"{otro} ({len(a)} filas) frente a {publicado} ({len(b)} filas), por fila completa: {c['iguales']} iguales, "
+           f"{len(c['actualizadas'])} con cambios, {len(c['conservadas'])} que faltan en {publicado.name}, "
+           f"{len(c['nuevas'])} que solo están en {publicado.name}."]
+    out += [f"  cambia  {p['fecha']} {p['plazo']} meses: " + "; ".join(_diferencias(p, n)) for p, n in c["actualizadas"]]
+    out += [f"  FALTA   {p['fecha']} {p['plazo']} meses" for p in c["conservadas"]]
+    out += [f"  solo en {publicado.name}  {n['fecha']} {n['plazo']} meses" for n in c["nuevas"]]
+    return out
+
+
 def ultima_por_plazo(filas: list[dict]) -> dict[int, dict]:
     out = {}
     for f in filas:
@@ -299,9 +447,14 @@ def ultima_por_plazo(filas: list[dict]) -> dict[int, dict]:
     return out
 
 
-def huella(datos: dict) -> str:
+def proximas_desde(datos: dict, fecha: str) -> list[dict]:
+    """Las subastas del calendario a partir del día dado (todas si no se da fecha), en orden."""
+    return [c for c in datos["proximas"] if not fecha or c["subasta"] >= fecha]
+
+
+def huella(datos: dict, fecha: str = "") -> str:
     base = [[f["fecha"], f["plazo"], f.get("marginal"), f.get("medio")] for f in datos["subastas"][-60:]]
-    base.append([[c["subasta"], c["peticiones"]] for c in datos["proximas"][:4]])
+    base.append([[c["subasta"], c["peticiones"]] for c in proximas_desde(datos, fecha)[:4]])
     base.append(datos["tenedores"]["ultimo"])
     base.append(TEXTOS)
     return hashlib.sha256(json.dumps(base, sort_keys=True).encode()).hexdigest()[:12]
@@ -410,38 +563,43 @@ def ld_wp(fecha: str) -> str:
     }, ensure_ascii=False) + "</script>"
 
 
+def _escribir_csv(ruta: Path, cabecera: list[str], filas: list[list]) -> None:
+    """Escribe a un temporal y lo cambia de nombre: una pasada que se corta no deja un CSV a medias (la memoria del
+    colector es el propio CSV)."""
+    tmp = ruta.with_name("." + ruta.name + ".tmp")
+    with tmp.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(cabecera)
+        w.writerows(filas)
+    os.replace(tmp, ruta)
+
+
 def escribir(datos: dict, fecha: str, salida: Path) -> bool:
     dd = salida / "datos"
     dd.mkdir(parents=True, exist_ok=True)
     previo = dd / "ultima.json"
     antes = json.loads(previo.read_text(encoding="utf-8")) if previo.exists() else {}
-    nueva = huella(datos)
+    nueva = huella(datos, fecha)
     cambia = antes.get("huella") != nueva
     fecha_pub = fecha if cambia else antes.get("fecha", fecha)
-    campos = ["fecha", "plazo", "tipo_medio", "tipo_marginal", "precio_medio", "precio_minimo", "solicitado_mill",
-              "adjudicado_mill", "segunda_vuelta_mill", "vencimiento", "liquidacion", "fuente"]
-    with (dd / "subastas_letras.csv").open("w", newline="", encoding="utf-8") as fh:
-        w = csv.writer(fh)
-        w.writerow(campos)
-        for f in datos["subastas"]:
-            w.writerow([f["fecha"], f["plazo"], f.get("medio"), f.get("marginal"), f.get("precio_medio"), f.get("precio_minimo"),
-                        f.get("solicitado"), f.get("adjudicado"), f.get("segunda_vuelta"), f.get("vencimiento", ""),
-                        f.get("liquidacion", ""), f.get("fuente")])
-    with (dd / "proximas_subastas.csv").open("w", newline="", encoding="utf-8") as fh:
-        w = csv.writer(fh)
-        w.writerow(["subasta", "plazos_meses", "peticiones_particulares_hasta", "pago_particulares", "emision"])
-        for c in datos["proximas"]:
-            w.writerow([c["subasta"], " y ".join(map(str, c["plazos"])), c["peticiones"], c["pago"], c["emision"]])
-    previo.write_text(json.dumps({
+    _escribir_csv(dd / CSV_SUBASTAS, [c for c, _ in COLUMNAS], [_fila_csv(f) for f in datos["subastas"]])
+    _escribir_csv(dd / "proximas_subastas.csv",
+                  ["subasta", "plazos_meses", "peticiones_particulares_hasta", "pago_particulares", "emision"],
+                  [[c["subasta"], " y ".join(map(str, c["plazos"])), c["peticiones"], c["pago"], c["emision"]]
+                   for c in datos["proximas"]])
+    tmp = previo.with_name(".ultima.json.tmp")
+    tmp.write_text(json.dumps({
         "fecha": fecha_pub, "comprobado": datetime.now(timezone.utc).isoformat(timespec="seconds"), "huella": nueva,
         "ultimas": {str(k): v for k, v in ultima_por_plazo(datos["subastas"]).items()},
-        "proximas": datos["proximas"][:8], "tenedores": datos["tenedores"]["ultimo"],
+        "proximas": proximas_desde(datos, fecha)[:8], "tenedores": datos["tenedores"]["ultimo"],
+        "control_csv": datos.get("control"),
         "fuente_tenedores": "Tesoro Público, Letras del Tesoro: distribución por tenedores (estadísticas mensuales); según su nota, "
                             "2002-2015 Banco de España (Iberclear) y 2016-2023 Banco de España (Securities Holdings Statistics)",
         "fuente": "D. G. del Tesoro y Política Financiera (www.tesoro.es)",
         "condiciones": "Reproducción fiel de la información del Tesoro Público, que la ofrece gratuitamente en www.tesoro.es. "
                        "Cita: El Especulador, a partir de datos de la D. G. del Tesoro y Política Financiera",
     }, ensure_ascii=False, indent=1), encoding="utf-8")
+    os.replace(tmp, previo)
     frag = fragmento(datos, fecha_pub)
     marca = "\n<!-- letras:fin -->"
     ld = ld_wp(fecha_pub)
@@ -472,7 +630,16 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--salida", required=True)
     ap.add_argument("--fecha")
+    ap.add_argument("--recuperar", action="append", default=[], metavar="CSV",
+                    help="CSV de subastas de Letras de este colector del que se añaden las subastas que falten en el anterior")
+    ap.add_argument("--comparar", metavar="CSV",
+                    help="no hace pasada: compara por fila completa el CSV de --salida con este y termina")
     a = ap.parse_args()
+    salida = Path(a.salida)
+    if a.comparar:
+        for linea in comparar_archivos(salida / "datos" / CSV_SUBASTAS, Path(a.comparar)):
+            print(linea)
+        return 0
     hoy = date.fromisoformat(a.fecha) if a.fecha else datetime.now(timezone.utc).date()
     s = sesion()
     web = ultimas(s)
@@ -480,14 +647,17 @@ def main() -> int:
     historico = subastas_excel(_get(s, DOC + "historico_subastas-xlsx").content, "historico")
     if len(historico) < 1000 or len(mensual) < 20:
         raise DatosRaros(f"pocas subastas leídas: histórico {len(historico)}, mensual {len(mensual)}")
-    filas = unir(web, mensual, historico)
+    filas, control = calcular(web, mensual, historico, salida / "datos" / CSV_SUBASTAS, [Path(r) for r in a.recuperar])
     ult = max(f["fecha"] for f in filas)
     if (hoy - date.fromisoformat(ult)).days > 45:
         AVISOS.append(f"La última subasta de Letras leída es del {ult}")
-    datos = {"subastas": filas, "proximas": calendario(s, hoy), "tenedores": tenedores(_get(s, DOC + "04-xlsx").content)}
+    datos = {"subastas": filas, "proximas": calendario(s, hoy), "tenedores": tenedores(_get(s, DOC + "04-xlsx").content),
+             "control": control_json(control)}
     if not [c for c in datos["proximas"] if c["subasta"] >= hoy.isoformat()]:
         AVISOS.append("No hay próximas subastas en el calendario leído")
-    cambia = escribir(datos, hoy.isoformat(), Path(a.salida))
+    cambia = escribir(datos, hoy.isoformat(), salida)
+    for linea in informe(control):
+        print(linea)
     for av in AVISOS:
         print(f"::warning::{av}")
     u = ultima_por_plazo(filas)

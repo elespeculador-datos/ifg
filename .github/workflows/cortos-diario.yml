@@ -9,6 +9,11 @@ name: Cortos diario
 # la primera ejecución que encuentra un fichero nuevo.
 #
 # Es independiente del IFG: solo lee y escribe cortos/ y docs/cortos/.
+#
+# La descarga reintenta siete veces en unos seis minutos de espera porque la
+# CNMV cierra la conexión sin responder de vez en cuando (seis ejecuciones
+# entre el 21 y el 31 de octubre de 2026). Cada intento fallido queda en el
+# registro de la ejecución.
 on:
   schedule:
     - cron: "40 18 * * 1-5"
@@ -35,7 +40,7 @@ jobs:
           python-version: "3.12"
           cache: pip
       - name: Instalar dependencias
-        run: pip install pandas xlrd requests
+        run: pip install pandas xlrd python-calamine requests
       - name: Descargar y publicar
         run: python cortos/rastreador.py
       - name: Guardar el resultado en el repositorio

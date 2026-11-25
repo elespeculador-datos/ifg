@@ -15,7 +15,8 @@ capital) y lo convierte en datos abiertos y en una página legible:
   docs/cortos/fragmento-wp.html          tablas en HTML para la página de elespeculador.com
 
 Fuente: CNMV, «Posiciones cortas netas», fichero NetShortPositions.xls.
-Licencia de los datos derivados: CC BY 4.0, citando a El Especulador y a la CNMV.
+Los datos de la CNMV se reproducen fielmente (son gratuitos en cnmv.es); solo la elaboración
+de El Especulador (sumas, cambios, histórico) lleva licencia CC BY 4.0, citando a El Especulador y a la CNMV.
 
 Uso:
   python cortos/rastreador.py                 descarga y publica
@@ -28,6 +29,7 @@ import argparse
 import html
 import io
 import json
+import os
 import sys
 import time
 from datetime import datetime, timezone
@@ -40,9 +42,25 @@ URL = "https://www.cnmv.es/DocPortal/Posiciones-Cortas/NetShortPositions.xls"
 FICHA_CNMV = "https://www.cnmv.es/portal/consultas/busqueda?id=29"
 PILAR = "https://elespeculador.com/posiciones-cortas-bolsa-espanola/"
 PAGINA_WP = "https://elespeculador.com/posiciones-cortas-hoy/"
-PAGES = "https://elespeculador-datos.github.io/ifg/cortos/"
+# Dirección pública de esta salida. Por defecto, GitHub Pages; en el servidor
+# smpro-datos-1, la variable de entorno ESPEC_DATOS_BASE vale
+# "https://datos.elespeculador.com/". Siempre termina en barra.
+PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/cortos/"
+
+# Clasificación sectorial propia de El Especulador (cortos/sectores.csv). Si falta, el agregado por sector no se publica.
+try:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import sectores as _sectores
+    SECTORES = _sectores.cargar()
+except Exception:  # noqa: BLE001
+    _sectores, SECTORES = None, None
+SEMANAS_EVOLUCION = (4, 13, 52)
+EMISORES_EVOLUCION = 15
 RAIZ = Path(__file__).resolve().parent.parent
-SALIDA = RAIZ / "docs" / "cortos"
+# Carpeta de salida. Por defecto, docs/cortos del repositorio (GitHub Pages); en el
+# servidor, ESPEC_DATOS_DIR apunta a la carpeta que sirve datos.elespeculador.com,
+# fuera del git, para que git pull nunca choque con los datos.
+SALIDA = Path(os.environ.get("ESPEC_DATOS_DIR", RAIZ / "docs")) / "cortos"
 DATOS = SALIDA / "datos"
 
 COLUMNAS = ["lei", "isin", "emisor", "tenedor", "fecha_posicion", "posicion_pct"]
@@ -54,18 +72,32 @@ class DatosRaros(Exception):
 
 
 # --------------------------------------------------------------------------- descarga
-def descargar() -> bytes:
+# Esperas entre intentos, en segundos. Siete intentos repartidos en unos seis
+# minutos de espera (más el tiempo de cada petición), dentro de los 20 minutos
+# del flujo. Entre el 21 y el 31 de octubre de 2026 la CNMV cerró la conexión
+# sin responder en seis ejecuciones («Remote end closed connection without
+# response»); con cuatro intentos en poco más de tres minutos no bastaba.
+ESPERAS = [10, 20, 40, 60, 90, 120]
+CABECERAS = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)", "Connection": "close"}
+
+
+def descargar(esperas: list[int] | None = None, dormir=time.sleep) -> bytes:
+    """Descarga el .xls de la CNMV con reintentos espaciados; cada fallo queda en el registro."""
+    esperas = ESPERAS if esperas is None else esperas
     ultimo_error = None
-    for intento in range(4):
+    for intento in range(len(esperas) + 1):
         try:
-            r = requests.get(URL, timeout=90, headers={"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)"})
+            r = requests.get(URL, timeout=(20, 60), headers=CABECERAS)
             if r.status_code == 200 and r.content[:4] == b"\xd0\xcf\x11\xe0":
                 return r.content
             ultimo_error = f"HTTP {r.status_code}, {len(r.content)} bytes, cabecera {r.content[:8]!r}"
         except requests.RequestException as e:
             ultimo_error = str(e)
-        time.sleep(20 * (intento + 1))
-    raise DatosRaros(f"No se pudo descargar el fichero de la CNMV: {ultimo_error}")
+        print(f"AVISO  descarga, intento {intento + 1} de {len(esperas) + 1} "
+              f"({datetime.now(timezone.utc).strftime('%H:%M:%S')} UTC): {ultimo_error}", file=sys.stderr)
+        if intento < len(esperas):
+            dormir(esperas[intento])
+    raise DatosRaros(f"No se pudo descargar el fichero de la CNMV tras {len(esperas) + 1} intentos: {ultimo_error}")
 
 
 # --------------------------------------------------------------------------- lectura
@@ -97,10 +129,18 @@ def _tabla(df: pd.DataFrame, nombre: str) -> pd.DataFrame:
 
 
 def leer(contenido: bytes) -> tuple[str, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    # pandas 4 avisa de que el motor xlrd (el único que leía .xls hasta ahora)
+    # está en desuso. Se sigue leyendo con xlrd, que es lo probado con el
+    # fichero real; si un día deja de funcionar, se prueba calamine antes de
+    # rendirse. El flujo instala los dos.
     try:
         libro = pd.read_excel(io.BytesIO(contenido), sheet_name=None, header=None, engine="xlrd")
-    except Exception:
-        libro = pd.read_excel(io.BytesIO(contenido), sheet_name=None, header=None)
+    except Exception as e_xlrd:
+        try:
+            libro = pd.read_excel(io.BytesIO(contenido), sheet_name=None, header=None, engine="calamine")
+            print(f"AVISO  lectura: xlrd ha fallado ({e_xlrd}); leído con calamine.", file=sys.stderr)
+        except Exception as e_cal:
+            raise DatosRaros(f"No se puede leer el .xls ni con xlrd ({e_xlrd}) ni con calamine ({e_cal})")
     fecha_df = _hoja(libro, "fecha")
     texto = " ".join(str(v) for v in fecha_df.values.ravel() if pd.notna(v))
     fecha = pd.to_datetime(next((p for p in texto.split() if p[:2] == "20" and len(p) >= 10), ""), errors="coerce")
@@ -121,7 +161,11 @@ def leer(contenido: bytes) -> tuple[str, pd.DataFrame, pd.DataFrame, pd.DataFram
 
 # --------------------------------------------------------------------------- cálculos
 def resumen(vig: pd.DataFrame) -> pd.DataFrame:
-    vig = vig[vig["posicion_pct"] >= 0.5 - 1e-9]
+    # Una sola comunicación por tenedor y valor: «suma_publicada_pct» es la
+    # cifra de titular de la página y sumar dos veces al mismo tenedor la
+    # inflaría. Si no hay duplicados —el caso normal— esto no cambia nada.
+    vig = _una_por_clave(vig[vig["posicion_pct"] >= 0.5 - 1e-9], ["isin", "tenedor"],
+                         "resumen por emisor")
     g = vig.groupby(["isin", "emisor"], as_index=False).agg(
         tenedores=("tenedor", "nunique"),
         suma_publicada_pct=("posicion_pct", "sum"),
@@ -134,13 +178,51 @@ def resumen(vig: pd.DataFrame) -> pd.DataFrame:
     return g.sort_values(["suma_publicada_pct", "tenedores"], ascending=False).reset_index(drop=True)
 
 
+def _una_por_clave(df: pd.DataFrame, clave: list[str], nombre: str) -> pd.DataFrame:
+    """
+    Deja una sola fila por clave: la comunicación más reciente de ese tenedor.
+
+    POR QUÉ EXISTE. La hoja «Última» de la CNMV no garantiza una fila por
+    (ISIN, tenedor). El mismo tenedor puede aparecer dos veces sobre el mismo
+    valor cuando el fichero recoge a la vez una posición y la comunicación con
+    la que ese tenedor cruza el 0,5 %. El 29 de octubre de 2026 ocurrió por
+    primera vez y el rastreador se detuvo tres ejecuciones seguidas con
+    «TypeError: float() argument must be ... not 'Series'», porque indexar por
+    esa clave devolvía dos filas donde el código esperaba un número.
+
+    No era un cambio de formato de la CNMV: las guardas de `_tabla()` y
+    `leer()` pasaron. Era una suposición nuestra —clave única— que el fichero
+    no promete.
+
+    CRITERIO, SIN CIFRAS ELEGIDAS A OJO. Gana la `fecha_posicion` más alta y,
+    a igualdad, la última fila del fichero, que es el orden en que la CNMV las
+    publica. No se suma ni se promedia nada: las dos filas describen al mismo
+    tenedor en dos momentos, y la que retrata el día es la posterior.
+
+    Deja rastro en el registro de la ejecución. Un duplicado es legítimo, pero
+    es lo bastante infrecuente para querer verlo cuando pase.
+    """
+    dup = df.duplicated(subset=clave, keep=False)
+    if not dup.any():
+        return df
+    for _, r in df[dup].sort_values(clave).iterrows():
+        print(f"AVISO  {nombre}: {r['isin']} / {r['tenedor']} aparece más de una vez "
+              f"(fecha {r['fecha_posicion']}, {r['posicion_pct']} %).", file=sys.stderr)
+    orden = pd.to_datetime(df["fecha_posicion"], errors="coerce")
+    return (df.assign(_fecha=orden, _fila=range(len(df)))
+              .sort_values(["_fecha", "_fila"], na_position="first")
+              .drop_duplicates(subset=clave, keep="last")
+              .drop(columns=["_fecha", "_fila"])
+              .sort_index())
+
+
 def cambios(prev: pd.DataFrame | None, vig: pd.DataFrame, fecha: str) -> pd.DataFrame:
     clave = ["isin", "tenedor"]
     cols = ["fecha_publicacion", "isin", "emisor", "tenedor", "tipo", "antes_pct", "ahora_pct", "fecha_posicion"]
     if prev is None or prev.empty:
         return pd.DataFrame(columns=cols)
-    a = prev.set_index(clave)
-    b = vig.set_index(clave)
+    a = _una_por_clave(prev, clave, "publicación anterior").set_index(clave)
+    b = _una_por_clave(vig, clave, "fichero de la CNMV").set_index(clave)
     filas = []
     for k in b.index.difference(a.index):
         r = b.loc[k]
@@ -231,7 +313,7 @@ a{{color:var(--a)}} .pie{{color:var(--s);font-size:.85rem;margin-top:2em}}
 {filas_vig}
 </tbody></table></div>
 <h2>Datos abiertos</h2>
-<p>Descarga en CSV: <a href="datos/vigentes.csv">posiciones vigentes</a> · <a href="datos/resumen_emisores.csv">resumen por emisor</a> · <a href="datos/serie.csv">evolución de las vigentes</a> · <a href="datos/anteriores.csv">posiciones anteriores desde 2010</a> · <a href="datos/historial_cambios.csv">historial de cambios</a> · <a href="datos/ultima.json">JSON</a>. Licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>: puedes reutilizarlos citando «El Especulador, a partir de datos de la CNMV».</p>
+<p>Descarga en CSV: <a href="datos/vigentes.csv">posiciones vigentes</a> · <a href="datos/resumen_emisores.csv">resumen por emisor</a> · <a href="datos/serie.csv">evolución de las vigentes</a> · <a href="datos/anteriores.csv">posiciones anteriores desde 2010</a> · <a href="datos/historial_cambios.csv">historial de cambios</a> · <a href="datos/ultima.json">JSON</a>. Fuente: CNMV, registro de posiciones cortas netas, reproducido fielmente (la CNMV lo ofrece gratis en cnmv.es). La elaboración de El Especulador (sumas por emisor, cambios, histórico) se publica con licencia <a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>, citando «El Especulador, a partir de datos de la CNMV».</p>
 <p class="pie">Fuente: CNMV, <a href="{FICHA_CNMV}">posiciones cortas netas</a> (fichero <a href="{URL}">NetShortPositions.xls</a>). La fecha de posición es el día en que la posición alcanzó, cambió o bajó del umbral; la CNMV la publica al día hábil siguiente. Contenido informativo; no constituye asesoramiento financiero.</p>
 </body></html>
 """
@@ -279,8 +361,94 @@ def _tabla_tenedores(vig: pd.DataFrame, e) -> str:
             + filas + "\n</tbody></table></figure>")
 
 
+# --------------------------------------------------------------------------- lo nuevo del indicador 1: sector, evolución, semana
+def por_sector(res: pd.DataFrame) -> pd.DataFrame | None:
+    """Presión bajista por sector propio: emisores con cortos publicados, suma de las sumas publicadas, media por emisor,
+    tenedores y el emisor con más suma de cada sector. None sin tabla sectorial; los ISIN sin clasificar van a «sin-sector»."""
+    if SECTORES is None or res.empty:
+        return None
+    r = res.copy()
+    r["sector"] = r["isin"].map(lambda i: _sectores.sector_de(i, SECTORES))
+    sin = sorted(set(r.loc[r["sector"] == _sectores.SIN_SECTOR, "isin"]))
+    if sin:
+        print(f"::warning::cortos: {len(sin)} emisores con cortos sin sector en cortos/sectores.csv (van a «sin sector»): {', '.join(sin[:8])}")
+    g = r.groupby("sector", as_index=False).agg(emisores=("isin", "nunique"), suma_pct=("suma_publicada_pct", "sum"),
+                                                media_pct=("suma_publicada_pct", "mean"), tenedores=("tenedores", "sum"))
+    mayor = (r.sort_values("suma_publicada_pct", ascending=False).drop_duplicates("sector")[["sector", "emisor", "suma_publicada_pct"]]
+             .rename(columns={"emisor": "mayor_emisor", "suma_publicada_pct": "mayor_pct"}))
+    g = g.merge(mayor, on="sector")
+    g["nombre"] = g["sector"].map(_sectores.nombre_sector)
+    g["suma_pct"] = g["suma_pct"].round(2)
+    g["media_pct"] = g["media_pct"].round(2)
+    return g.sort_values(["suma_pct", "emisores"], ascending=False).reset_index(drop=True)
+
+
+def suma_en(historia: pd.DataFrame, isin: str, fecha: str) -> float:
+    """Suma de las posiciones iguales o superiores al 0,5 % vigentes para el ISIN en una fecha: la última notificación
+    de cada tenedor hasta esa fecha, según la serie histórica de la CNMV."""
+    h = historia[(historia["isin"] == isin) & (historia["fecha_posicion"].astype(str) <= fecha)]
+    if h.empty:
+        return 0.0
+    ult = h.sort_values("fecha_posicion").drop_duplicates("tenedor", keep="last")
+    return round(float(ult.loc[ult["posicion_pct"].astype(float) >= 0.5 - 1e-9, "posicion_pct"].astype(float).sum()), 2)
+
+
+def evolucion(historia: pd.DataFrame, res: pd.DataFrame, fecha: str, semanas=SEMANAS_EVOLUCION, n: int = EMISORES_EVOLUCION) -> pd.DataFrame:
+    """Para los n emisores con más suma publicada hoy: la suma vigente ahora y hace 4, 13 y 52 semanas."""
+    f = pd.Timestamp(fecha)
+    filas = []
+    for r in res.head(n).itertuples():
+        fila = {"isin": r.isin, "emisor": r.emisor, "ahora_pct": float(r.suma_publicada_pct)}
+        for w in semanas:
+            fila[f"hace_{w}_pct"] = suma_en(historia, r.isin, (f - pd.Timedelta(weeks=w)).date().isoformat())
+        filas.append(fila)
+    return pd.DataFrame(filas, columns=["isin", "emisor", "ahora_pct"] + [f"hace_{w}_pct" for w in semanas])
+
+
+def semana(historial: pd.DataFrame | None, fecha: str, dias: int = 7) -> dict:
+    """Entradas (posiciones nuevas) y salidas (dejan de publicarse) de los últimos `dias`, más recuentos de subidas y bajadas,
+    a partir del historial de cambios acumulado."""
+    vacio = {"desde": (pd.Timestamp(fecha) - pd.Timedelta(days=dias)).date().isoformat(), "hasta": fecha, "entradas": [], "salidas": [], "subidas": 0, "bajadas": 0}
+    if historial is None or historial.empty:
+        return vacio
+    h = historial[historial["fecha_publicacion"].astype(str) >= vacio["desde"]]
+    def filas(tipo):
+        return [{"fecha": str(x.fecha_publicacion), "emisor": x.emisor, "tenedor": x.tenedor, "pct": float(x.ahora_pct) if pd.notna(x.ahora_pct) else None,
+                 "antes_pct": float(x.antes_pct) if pd.notna(x.antes_pct) else None}
+                for x in h[h["tipo"] == tipo].sort_values(["fecha_publicacion", "emisor"], ascending=[False, True]).itertuples()]
+    vacio.update({"entradas": filas("nueva"), "salidas": filas("deja de publicarse"), "subidas": int((h["tipo"] == "sube").sum()), "bajadas": int((h["tipo"] == "baja").sum())})
+    return vacio
+
+
+def _bloque_nuevo(sec: pd.DataFrame | None, evo: pd.DataFrame | None, sem: dict | None, e) -> str:
+    partes = []
+    if sec is not None and not sec.empty:
+        partes.append("<h2>Presión bajista por sector</h2>\n"
+                      "<figure class=\"wp-block-table\"><table><thead><tr><th>Sector</th><th>Emisores con cortos</th><th>Suma de las sumas publicadas</th><th>Media por emisor</th><th>Tenedores</th><th>Más presión</th></tr></thead><tbody>\n"
+                      + "\n".join(f"<tr><td>{e(r.nombre)}</td><td>{int(r.emisores)}</td><td>{_pct(r.suma_pct)}</td><td>{_pct(r.media_pct)}</td><td>{int(r.tenedores)}</td><td>{e(r.mayor_emisor)} ({_pct(r.mayor_pct)})</td></tr>" for r in sec.itertuples())
+                      + "\n</tbody></table></figure>\n"
+                      "<p>Sectores según la clasificación propia de El Especulador (ocho sectores, por la actividad declarada de cada empresa). La suma de un sector agrega las sumas publicadas de sus emisores: mide dónde se concentran las apuestas en contra, no el porcentaje del sector.</p>")
+    if evo is not None and not evo.empty:
+        cols = [c for c in evo.columns if c.startswith("hace_")]
+        cab = "".join(f"<th>Hace {c.split('_')[1]} semanas</th>" for c in cols)
+        partes.append(f"<h2>Evolución de la suma publicada ({', '.join(c.split('_')[1] for c in cols)} semanas)</h2>\n"
+                      f"<figure class=\"wp-block-table\"><table><thead><tr><th>Emisor</th><th>Ahora</th>{cab}</tr></thead><tbody>\n"
+                      + "\n".join(f"<tr><td>{e(r.emisor)}</td><td>{_pct(r.ahora_pct)}</td>" + "".join(f"<td>{_pct(getattr(r, c))}</td>" for c in cols) + "</tr>" for r in evo.itertuples())
+                      + "\n</tbody></table></figure>\n"
+                      "<p>Suma de las posiciones iguales o superiores al 0,5 % vigentes en cada fecha, reconstruida con la serie histórica de notificaciones de la CNMV (la última notificación de cada tenedor hasta esa fecha). Describe cómo ha cambiado la presión, no hacia dónde irá.</p>")
+    if sem is not None:
+        ent = "".join(f"<li>{e(x['emisor'])}: {e(x['tenedor'])}, {_pct(x['pct'])} ({_fecha(x['fecha'])})</li>" for x in sem["entradas"])
+        sal = "".join(f"<li>{e(x['emisor'])}: {e(x['tenedor'])}, antes {_pct(x['antes_pct'])} ({_fecha(x['fecha'])})</li>" for x in sem["salidas"])
+        partes.append(f"<h2>Entradas y salidas de la semana</h2>\n<p>Del {_fecha(sem['desde'])} al {_fecha(sem['hasta'])}: {len(sem['entradas'])} posiciones nuevas, "
+                      f"{len(sem['salidas'])} que dejan de publicarse, {sem['subidas']} subidas y {sem['bajadas']} bajadas.</p>\n"
+                      + (f"<p><strong>Entran</strong></p><ul>{ent}</ul>" if ent else "")
+                      + (f"<p><strong>Salen</strong></p><ul>{sal}</ul>" if sal else ""))
+    return "\n".join(partes)
+
+
 # --------------------------------------------------------------------------- fragmento para WordPress
-def fragmento_wp(fecha: str, fecha_previa: str | None, vig: pd.DataFrame, res: pd.DataFrame, cam: pd.DataFrame, hist: dict | None = None) -> str:
+def fragmento_wp(fecha: str, fecha_previa: str | None, vig: pd.DataFrame, res: pd.DataFrame, cam: pd.DataFrame, hist: dict | None = None,
+                 sec: pd.DataFrame | None = None, evo: pd.DataFrame | None = None, sem: dict | None = None) -> str:
     """HTML estático que Make copia cada día en la página de elespeculador.com.
 
     Va entre dos marcas: Make sustituye solo lo que hay entre ellas y deja intacto
@@ -324,6 +492,7 @@ def fragmento_wp(fecha: str, fecha_previa: str | None, vig: pd.DataFrame, res: p
 <figure class="wp-block-table"><table><thead><tr><th>Emisor</th><th>Tenedores</th><th>Suma publicada</th><th>Mayor posición</th><th>Última fecha de posición</th></tr></thead><tbody>
 {filas_res}
 </tbody></table></figure>
+{_bloque_nuevo(sec, evo, sem, e)}
 <h2>Quién está corto en más empresas</h2>
 {_tabla_tenedores(vig, e)}
 {_bloque_historico(hist, e)}
@@ -363,10 +532,15 @@ def solo_fragmento() -> int:
     vig = pd.read_csv(DATOS / "vigentes.csv", dtype={"lei": str, "isin": str})
     res = pd.read_csv(DATOS / "resumen_emisores.csv", dtype={"isin": str})
     cam = pd.read_csv(DATOS / "cambios.csv", dtype={"isin": str})
-    hist = historico(pd.read_csv(DATOS / "serie.csv", dtype={"lei": str, "isin": str}),
-                     pd.read_csv(DATOS / "anteriores.csv", dtype={"lei": str, "isin": str}))
+    serie = pd.read_csv(DATOS / "serie.csv", dtype={"lei": str, "isin": str})
+    ant = pd.read_csv(DATOS / "anteriores.csv", dtype={"lei": str, "isin": str})
+    hist = historico(serie, ant)
+    sec = por_sector(res)
+    evo = evolucion(pd.concat([serie, ant], ignore_index=True), res, estado["fecha_publicacion"])
+    ruta_cambios = DATOS / "historial_cambios.csv"
+    sem = semana(pd.read_csv(ruta_cambios, dtype=str) if ruta_cambios.exists() else None, estado["fecha_publicacion"])
     (SALIDA / "fragmento-wp.html").write_text(con_ld(
-        fragmento_wp(estado["fecha_publicacion"], estado.get("publicacion_anterior"), vig, res, cam, hist),
+        fragmento_wp(estado["fecha_publicacion"], estado.get("publicacion_anterior"), vig, res, cam, hist, sec, evo, sem),
         ld_wp(estado["fecha_publicacion"], hist)), encoding="utf-8")
     print(f"Fragmento rehecho con la publicación del {estado['fecha_publicacion']}.")
     return 0
@@ -397,6 +571,8 @@ def main() -> int:
     res = resumen(vig)
     cam = cambios(previo, vig, fecha)
     hist = historico(serie, ant)
+    sec = por_sector(res)
+    evo = evolucion(pd.concat([serie, ant], ignore_index=True), res, fecha)
     vig.to_csv(DATOS / "vigentes.csv", index=False)
     res.to_csv(DATOS / "resumen_emisores.csv", index=False)
     serie.to_csv(DATOS / "serie.csv", index=False)
@@ -407,6 +583,10 @@ def main() -> int:
         cam.to_csv(ruta_cambios, mode="a", index=False, header=not ruta_cambios.exists())
     elif not ruta_cambios.exists():
         cam.to_csv(ruta_cambios, index=False)
+    sem = semana(pd.read_csv(ruta_cambios, dtype=str) if ruta_cambios.exists() else None, fecha)
+    if sec is not None:
+        sec.to_csv(DATOS / "sectores.csv", index=False)
+    evo.to_csv(DATOS / "evolucion.csv", index=False)
     estado.write_text(json.dumps({
         "fecha_publicacion": fecha,
         "publicacion_anterior": fecha_previa if fecha_previa != fecha else None,
@@ -414,12 +594,15 @@ def main() -> int:
         "posiciones": int((vig["posicion_pct"] >= 0.5 - 1e-9).sum()), "emisores": int(vig.loc[vig["posicion_pct"] >= 0.5 - 1e-9, "lei"].nunique()),
         "cambios": int(len(cam)),
         "historico": hist,
+        "sectores": sec.to_dict("records") if sec is not None else None,
+        "evolucion": evo.to_dict("records"),
+        "semana": sem,
         "top": res.head(10).assign(ultima_fecha_posicion=res.head(10)["ultima_fecha_posicion"].astype(str)).to_dict("records"),
-        "fuente": URL, "licencia": "CC BY 4.0 · El Especulador a partir de datos de la CNMV",
+        "fuente": URL, "licencia": "Datos de la CNMV reproducidos fielmente (gratuitos en cnmv.es); elaboración de El Especulador con licencia CC BY 4.0",
     }, ensure_ascii=False, indent=1), encoding="utf-8")
     (SALIDA / "index.html").write_text(pagina(fecha, vig, res, cam, primera=previo is None, hist=hist), encoding="utf-8")
     (SALIDA / "fragmento-wp.html").write_text(con_ld(
-        fragmento_wp(fecha, fecha_previa if fecha_previa != fecha else None, vig, res, cam, hist),
+        fragmento_wp(fecha, fecha_previa if fecha_previa != fecha else None, vig, res, cam, hist, sec, evo, sem),
         ld_wp(fecha, hist)), encoding="utf-8")
     print(f"Publicación del {fecha}: {len(vig)} filas vigentes, {vig['lei'].nunique()} emisores, {len(cam)} cambios.")
     return 0

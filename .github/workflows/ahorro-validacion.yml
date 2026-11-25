@@ -1,0 +1,114 @@
+name: Rentabilidad real del ahorro (validación a mano)
+
+# Indicador 4 del catálogo de Datos. En producción corre en el servidor smpro-datos-1
+# (servidor/ejecutar.sh ahorro, lunes 07:30 UTC; ver DESPLIEGUE.md) y escribe fuera del git.
+# Este flujo NO tiene horario ni guarda nada en el repositorio: se lanza a mano para validar
+# una rama con datos reales del BCE, el INE y el BOE (el entorno de Datos no llega a ninguno)
+# y deja las respuestas y la salida como artefacto. Dependencias: requests pandas numpy scipy.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install requests pandas numpy scipy
+      - name: Comprobaciones sin red
+        run: python ahorro/pruebas_ahorro.py
+      - name: Sonda de las fuentes (claves del BCE, nombre de la serie del INE, sumario del BOE)
+        run: |
+          mkdir -p salida/respuestas
+          python - <<'EOF'
+          import json, requests, sys
+          sys.path.insert(0, "ahorro")
+          import ahorro
+          H = {"User-Agent": "Mozilla/5.0 (El Especulador, datos abiertos)"}
+          # BCE: qué series de depósitos de hogares existen para ES y U2 (títulos incluidos).
+          r = requests.get(ahorro.BCE_API + "M.ES+U2.B.L21+L22+L23..R.A.2250.EUR.", params={"format": "csvdata", "lastNObservations": 1}, headers={**H, "Accept": "text/csv"}, timeout=120)
+          print("BCE sonda:", r.status_code, len(r.text), "caracteres")
+          import io, pandas as pd
+          if r.status_code == 200:
+              df = pd.read_csv(io.StringIO(r.text), dtype=str)
+              cols = [c for c in ("KEY", "TIME_PERIOD", "OBS_VALUE", "TITLE_COMPL") if c in df.columns]
+              print(df[cols].to_string(max_colwidth=120))
+          else:
+              print(r.text[:500])
+          # INE: nombre de la serie y últimos datos.
+          r = requests.get(ahorro.INE_META, params={"det": "2"}, headers=H, timeout=120)
+          print("\nINE meta:", r.status_code, r.text[:400])
+          r = requests.get(ahorro.INE_API, params={"nult": 3}, headers=H, timeout=120)
+          print("INE datos (nult=3):", r.status_code, r.text[:900])
+          r = requests.get(ahorro.INE_TABLA_API, params={"nult": 1}, headers=H, timeout=120)
+          print("INE tabla", ahorro.INE_TABLA, ":", r.status_code, len(r.text), "caracteres")
+          try:
+              for f in json.loads(r.text):
+                  if "general" in str(f.get("Nombre", "")).lower():
+                      print("  ", f.get("COD"), "|", f.get("Nombre"), "|", (f.get("Data") or [{}])[-1])
+          except Exception as e:
+              print("  no se pudo leer la tabla:", e, r.text[:300])
+          # BOE: sumario de un día con resolución conocida (02/10/2026) y su XML.
+          r = requests.get(ahorro.BOE_SUMARIO + "20261002", headers={**H, "Accept": "application/json"}, timeout=120)
+          print("\nBOE sumario 20261002:", r.status_code, r.headers.get("content-type"), len(r.text), "caracteres")
+          open("salida/respuestas/boe_sumario_20261002.txt", "w", encoding="utf-8").write(r.text)
+          try:
+              items = ahorro._items(json.loads(r.text))
+          except Exception:
+              items = ahorro._items_xml(r.text)
+          print("  elementos:", len(items))
+          for it in items:
+              if "banco de españa" in str(it["titulo"]).lower():
+                  print("  ", it["identificador"], "|", str(it["titulo"])[:150], "|", {k: v for k, v in it.items() if k.startswith("url")})
+          r = requests.get(ahorro.BOE_XML + "BOE-A-2026-20519", headers={**H, "Accept": "application/xml"}, timeout=120)
+          print("BOE xml BOE-A-2026-20519:", r.status_code, r.headers.get("content-type"), len(r.text), "caracteres")
+          open("salida/respuestas/boe_xml_20519.xml", "w", encoding="utf-8").write(r.text)
+          i = r.text.find("<texto>")
+          print(r.text[i:i + 1500] if i >= 0 else r.text[:1500])
+          print("\nlectura:", ahorro.leer_resolucion(r.text))
+          EOF
+      - name: Descargar las respuestas reales y guardarlas tal cual
+        run: |
+          python - <<'EOF'
+          import sys
+          sys.path.insert(0, "ahorro")
+          import ahorro
+          open("salida/respuestas/mir.csv", "w", encoding="utf-8").write(ahorro.descargar_bce())
+          meta, datos = ahorro.descargar_ine()
+          open("salida/respuestas/ipc_meta.json", "w", encoding="utf-8").write(meta)
+          open("salida/respuestas/ipc.json", "w", encoding="utf-8").write(datos)
+          print("mir.csv, ipc_meta.json e ipc.json guardados")
+          EOF
+      - name: Calcular con descarga real (tres meses de euríbor del BOE hacia atrás)
+        env:
+          ESPEC_DATOS_BASE: https://datos.elespeculador.com/
+        run: python ahorro/ahorro.py --salida salida/ahorro --meses-atras 3 --tesoro docs --forzar
+      - name: Resumen
+        run: |
+          echo "## Rentabilidad real del ahorro: salida de validación" | tee -a "$GITHUB_STEP_SUMMARY"
+          head -n 1 salida/ahorro/fragmento-wp.html | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+          cat salida/ahorro/datos/euribor_boe.csv | tee -a "$GITHUB_STEP_SUMMARY" || true
+          python -c "import json; d=json.load(open('salida/ahorro/datos/ultima.json')); [d.pop(k, None) for k in ('condiciones','fuente')]; print(json.dumps(d, ensure_ascii=False, indent=1))" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Fragmento al registro (los artefactos no se pueden descargar desde el entorno de Datos)
+        run: |
+          echo "=== FRAGMENTO ahorro INICIO ==="
+          cat salida/ahorro/fragmento-wp.html
+          echo
+          echo "=== FRAGMENTO ahorro FIN ==="
+      - name: Guardar la salida como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ahorro-salida
+          path: salida
+          retention-days: 14

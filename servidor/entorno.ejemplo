@@ -1,0 +1,20 @@
+# Copiar a /etc/smpro/entorno (solo lectura para el usuario que ejecuta los colectores). Sin comillas.
+# Carpeta que sirve https://datos.elespeculador.com/ (fuera del git del repositorio).
+# En smpro-datos-1 es /var/www/datos (la misma que ya usa el IFG para /var/www/datos/ifg).
+ESPEC_DATOS_DIR=/var/www/datos
+# Dirección pública que los colectores escriben en sus salidas (enlaces, JSON-LD).
+ESPEC_DATOS_BASE=https://datos.elespeculador.com/
+# Intérprete de Python con las dependencias instaladas. Si el servidor usa un entorno virtual, su python;
+# si las dependencias están en el sistema, se puede omitir (vale python3).
+SMPRO_PYTHON=/home/smpro/venv/bin/python
+# Token de GitHub con permiso de incidencias (issues: read/write) sobre elespeculador-datos/ifg. Nunca en el repositorio.
+GH_TOKEN=
+# Escritura directa en WordPress (servidor/escribir_wp.py; sustituye a los escenarios DIARIO de Make). Apagada por defecto.
+# Se enciende con ESPEC_WP_ESCRIBIR=1 y un usuario de WordPress con contraseña de aplicación (permiso de editar páginas y
+# unfiltered_html). La contraseña se escribe aquí desde el propio servidor, nunca en un chat ni en el repositorio.
+ESPEC_WP_URL=https://elespeculador.com
+ESPEC_WP_ESCRIBIR=0
+ESPEC_WP_USUARIO=
+ESPEC_WP_CLAVE=
+# Opcional: solo estos colectores, separados por comas (para encenderlo poco a poco). Vacío = todos los de servidor/paginas_wp.csv.
+ESPEC_WP_SOLO=

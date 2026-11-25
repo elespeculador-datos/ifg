@@ -1,0 +1,932 @@
+{
+ "contrato": "1.0",
+ "empresa": "Solaria",
+ "isin": "ES0165386014",
+ "ficha": "https://elespeculador.com/ibex35/solaria/",
+ "registro_oficial": [
+  {
+   "fecha": "2026-11-19",
+   "tipo": "Resultados 3T 2026",
+   "titulo": "Resultados correspondientes a los primeros nueve meses del ejercicio 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43734",
+   "nreg": "43734",
+   "grupo": "resultados-ES0165386014-43734"
+  },
+  {
+   "fecha": "2026-09-24",
+   "tipo": "Resultados 1S 2026",
+   "titulo": "La sociedad remite información financiera del primer semestre de 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42872",
+   "nreg": "42872",
+   "grupo": "resultados-ES0165386014-42666"
+  },
+  {
+   "fecha": "2026-09-09",
+   "tipo": "Fecha de resultados 1S 2026",
+   "titulo": "Solaria comunica que publicará los resultados correspondientes al primer semestre del año 2026 el próximo jueves 24 de septiembre.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42666",
+   "nreg": "42666",
+   "grupo": "resultados-ES0165386014-42666"
+  },
+  {
+   "fecha": "2026-05-18",
+   "tipo": "Resultados 1T 2026",
+   "titulo": "Resultados correspondientes a los primeros tres meses del ejercicio 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=40923",
+   "nreg": "40923",
+   "grupo": "resultados-ES0165386014-40823"
+  },
+  {
+   "fecha": "2026-05-12",
+   "tipo": "Fecha de resultados 1T 2026",
+   "titulo": "Solaria comunica que publicará los resultados correspondientes al primer trimestre del año 2026 el próximo lunes 18 de mayo.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=40823",
+   "nreg": "40823",
+   "grupo": "resultados-ES0165386014-40823"
+  },
+  {
+   "fecha": "2026-04-30",
+   "tipo": "Ampliación de capital",
+   "titulo": "Solaria - La escritura de acuerdo de Aumento de Capital ha quedado inscrita en el Registro Mercantil de Madrid.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=40606",
+   "nreg": "40606",
+   "grupo": "opvs-ampliaciones-ES0165386014-3174"
+  },
+  {
+   "fecha": "2026-04-29",
+   "tipo": "Colocación",
+   "titulo": "Solaria – Fijación de precio de la colocación acelerada de acciones",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3175",
+   "nreg": "3175",
+   "grupo": "opvs-ampliaciones-ES0165386014-3174"
+  },
+  {
+   "fecha": "2026-04-28",
+   "tipo": "Colocación",
+   "titulo": "Solaria comunica el lanzamiento de colocación acelerada de acciones.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Informacion-Privilegiada/Resultado-IP.aspx?nreg=3174",
+   "nreg": "3174",
+   "grupo": "opvs-ampliaciones-ES0165386014-3174"
+  },
+  {
+   "fecha": "2026-02-26",
+   "tipo": "Resultados 2S 2025",
+   "titulo": "La sociedad remite información financiera del segundo semestre de 2025",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39255",
+   "nreg": "39255",
+   "grupo": "resultados-ES0165386014-39255"
+  },
+  {
+   "fecha": "2026-02-26",
+   "tipo": "Resultados año 2025",
+   "titulo": "La sociedad remite el Informe Financiero Anual del ejercicio 2025",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39254",
+   "nreg": "39254",
+   "grupo": "resultados-ES0165386014-39254"
+  },
+  {
+   "fecha": "2026-01-23",
+   "tipo": "Fecha de resultados",
+   "titulo": "Solaria comunica que publicará los resultados correspondientes al año 2025 el próximo jueves 26 de febrero",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=38615",
+   "nreg": "38615",
+   "grupo": "resultados-ES0165386014-38615"
+  }
+ ],
+ "dividendos": [],
+ "cortos": {
+  "total_publicado": 9.72,
+  "fecha_dato": "2026-11-20",
+  "tenedores": 10,
+  "posiciones": [
+   {
+    "tenedor": "JPMorgan Asset Management (UK) Limited",
+    "pct": 2.54,
+    "fecha": "2026-11-19"
+   },
+   {
+    "tenedor": "Capital Fund Management SA",
+    "pct": 1.23,
+    "fecha": "2026-11-19"
+   },
+   {
+    "tenedor": "AHL PARTNERS LLP",
+    "pct": 1.11,
+    "fecha": "2026-11-06"
+   },
+   {
+    "tenedor": "MARCHANT MC LTD",
+    "pct": 1.0,
+    "fecha": "2026-07-14"
+   },
+   {
+    "tenedor": "Marshall Wace LLP",
+    "pct": 0.74,
+    "fecha": "2026-11-19"
+   },
+   {
+    "tenedor": "Acadian Asset Management LLC",
+    "pct": 0.7,
+    "fecha": "2026-11-02"
+   },
+   {
+    "tenedor": "Two Sigma Investments, LP",
+    "pct": 0.7,
+    "fecha": "2026-11-19"
+   },
+   {
+    "tenedor": "Citadel Securities GCS (Ireland) Limited",
+    "pct": 0.64,
+    "fecha": "2026-11-19"
+   },
+   {
+    "tenedor": "Citadel Advisors LLC",
+    "pct": 0.56,
+    "fecha": "2026-11-19"
+   },
+   {
+    "tenedor": "Systematica Investments Limited",
+    "pct": 0.5,
+    "fecha": "2026-11-19"
+   }
+  ],
+  "ultima_posicion": "2026-11-19",
+  "cambios_30d": [
+   {
+    "fecha": "2026-11-20",
+    "tenedor": "Two Sigma Investments, LP",
+    "tipo": "sube",
+    "antes_pct": 0.58,
+    "ahora_pct": 0.7
+   },
+   {
+    "fecha": "2026-11-20",
+    "tenedor": "Systematica Investments Limited",
+    "tipo": "nueva",
+    "antes_pct": null,
+    "ahora_pct": 0.5
+   },
+   {
+    "fecha": "2026-11-20",
+    "tenedor": "Marshall Wace LLP",
+    "tipo": "baja",
+    "antes_pct": 0.85,
+    "ahora_pct": 0.74
+   },
+   {
+    "fecha": "2026-11-20",
+    "tenedor": "JPMorgan Asset Management (UK) Limited",
+    "tipo": "sube",
+    "antes_pct": 2.41,
+    "ahora_pct": 2.54
+   },
+   {
+    "fecha": "2026-11-20",
+    "tenedor": "Citadel Securities GCS (Ireland) Limited",
+    "tipo": "sube",
+    "antes_pct": 0.52,
+    "ahora_pct": 0.64
+   },
+   {
+    "fecha": "2026-11-20",
+    "tenedor": "Citadel Advisors LLC",
+    "tipo": "nueva",
+    "antes_pct": null,
+    "ahora_pct": 0.56
+   },
+   {
+    "fecha": "2026-11-20",
+    "tenedor": "Capital Fund Management SA",
+    "tipo": "sube",
+    "antes_pct": 1.11,
+    "ahora_pct": 1.23
+   },
+   {
+    "fecha": "2026-11-19",
+    "tenedor": "Citadel Securities GCS (Ireland) Limited",
+    "tipo": "nueva",
+    "antes_pct": null,
+    "ahora_pct": 0.52
+   },
+   {
+    "fecha": "2026-11-18",
+    "tenedor": "Marshall Wace LLP",
+    "tipo": "baja",
+    "antes_pct": 0.9,
+    "ahora_pct": 0.85
+   },
+   {
+    "fecha": "2026-11-17",
+    "tenedor": "Capital Fund Management SA",
+    "tipo": "sube",
+    "antes_pct": 1.0,
+    "ahora_pct": 1.11
+   },
+   {
+    "fecha": "2026-11-16",
+    "tenedor": "Marshall Wace LLP",
+    "tipo": "sube",
+    "antes_pct": 0.84,
+    "ahora_pct": 0.9
+   },
+   {
+    "fecha": "2026-11-16",
+    "tenedor": "Capital Fund Management SA",
+    "tipo": "sube",
+    "antes_pct": 0.9,
+    "ahora_pct": 1.0
+   },
+   {
+    "fecha": "2026-11-13",
+    "tenedor": "Two Sigma Investments, LP",
+    "tipo": "baja",
+    "antes_pct": 0.63,
+    "ahora_pct": 0.58
+   },
+   {
+    "fecha": "2026-11-13",
+    "tenedor": "Systematica Investments Limited",
+    "tipo": "deja de publicarse",
+    "antes_pct": 0.5,
+    "ahora_pct": null
+   },
+   {
+    "fecha": "2026-11-13",
+    "tenedor": "Marshall Wace LLP",
+    "tipo": "baja",
+    "antes_pct": 0.89,
+    "ahora_pct": 0.84
+   },
+   {
+    "fecha": "2026-11-13",
+    "tenedor": "JPMorgan Asset Management (UK) Limited",
+    "tipo": "sube",
+    "antes_pct": 2.37,
+    "ahora_pct": 2.41
+   },
+   {
+    "fecha": "2026-11-13",
+    "tenedor": "Citadel Advisors LLC",
+    "tipo": "deja de publicarse",
+    "antes_pct": 0.68,
+    "ahora_pct": null
+   },
+   {
+    "fecha": "2026-11-13",
+    "tenedor": "Capital Fund Management SA",
+    "tipo": "sube",
+    "antes_pct": 0.75,
+    "ahora_pct": 0.9
+   },
+   {
+    "fecha": "2026-11-13",
+    "tenedor": "Acadian Asset Management LLC",
+    "tipo": "sube",
+    "antes_pct": 0.52,
+    "ahora_pct": 0.7
+   },
+   {
+    "fecha": "2026-11-13",
+    "tenedor": "AHL PARTNERS LLP",
+    "tipo": "sube",
+    "antes_pct": 1.1,
+    "ahora_pct": 1.11
+   },
+   {
+    "fecha": "2026-10-28",
+    "tenedor": "Marshall Wace LLP",
+    "tipo": "baja",
+    "antes_pct": 0.91,
+    "ahora_pct": 0.89
+   },
+   {
+    "fecha": "2026-10-28",
+    "tenedor": "JPMorgan Asset Management (UK) Limited",
+    "tipo": "sube",
+    "antes_pct": 1.82,
+    "ahora_pct": 2.37
+   },
+   {
+    "fecha": "2026-10-28",
+    "tenedor": "Capital Fund Management SA",
+    "tipo": "sube",
+    "antes_pct": 0.61,
+    "ahora_pct": 0.75
+   },
+   {
+    "fecha": "2026-10-28",
+    "tenedor": "AHL PARTNERS LLP",
+    "tipo": "sube",
+    "antes_pct": 1.0,
+    "ahora_pct": 1.1
+   },
+   {
+    "fecha": "2026-10-27",
+    "tenedor": "Systematica Investments Limited",
+    "tipo": "nueva",
+    "antes_pct": null,
+    "ahora_pct": 0.5
+   },
+   {
+    "fecha": "2026-10-27",
+    "tenedor": "JPMorgan Asset Management (UK) Limited",
+    "tipo": "sube",
+    "antes_pct": 1.54,
+    "ahora_pct": 1.82
+   },
+   {
+    "fecha": "2026-10-27",
+    "tenedor": "Acadian Asset Management LLC",
+    "tipo": "nueva",
+    "antes_pct": null,
+    "ahora_pct": 0.52
+   },
+   {
+    "fecha": "2026-10-26",
+    "tenedor": "Marshall Wace LLP",
+    "tipo": "sube",
+    "antes_pct": 0.89,
+    "ahora_pct": 0.91
+   },
+   {
+    "fecha": "2026-10-26",
+    "tenedor": "JPMorgan Asset Management (UK) Limited",
+    "tipo": "sube",
+    "antes_pct": 1.33,
+    "ahora_pct": 1.54
+   },
+   {
+    "fecha": "2026-10-26",
+    "tenedor": "Citadel Advisors LLC",
+    "tipo": "baja",
+    "antes_pct": 0.7,
+    "ahora_pct": 0.68
+   },
+   {
+    "fecha": "2026-10-26",
+    "tenedor": "Capital Fund Management SA",
+    "tipo": "sube",
+    "antes_pct": 0.5,
+    "ahora_pct": 0.61
+   },
+   {
+    "fecha": "2026-10-26",
+    "tenedor": "BlackRock Advisors, LLC",
+    "tipo": "deja de publicarse",
+    "antes_pct": 0.36,
+    "ahora_pct": null
+   },
+   {
+    "fecha": "2026-10-23",
+    "tenedor": "Marshall Wace LLP",
+    "tipo": "baja",
+    "antes_pct": 0.98,
+    "ahora_pct": 0.89
+   },
+   {
+    "fecha": "2026-10-23",
+    "tenedor": "Citadel Advisors LLC",
+    "tipo": "sube",
+    "antes_pct": 0.63,
+    "ahora_pct": 0.7
+   },
+   {
+    "fecha": "2026-10-23",
+    "tenedor": "BlackRock Advisors, LLC",
+    "tipo": "baja",
+    "antes_pct": 0.59,
+    "ahora_pct": 0.36
+   },
+   {
+    "fecha": "2026-10-23",
+    "tenedor": "AHL PARTNERS LLP",
+    "tipo": "sube",
+    "antes_pct": 0.94,
+    "ahora_pct": 1.0
+   }
+  ],
+  "fuente": "CNMV, registro de posiciones cortas netas"
+ },
+ "directivos": null,
+ "accionistas": {
+  "fecha_derechos_voto": "2026-04-30",
+  "derechos_voto": 132638164,
+  "n": 9,
+  "principales": [
+   {
+    "accionista": "STONESHIELD HOLDING S.A.R.L.",
+    "total_pct": 9.545,
+    "fecha": "2026-05-21"
+   },
+   {
+    "accionista": "MORGAN STANLEY",
+    "total_pct": 7.646,
+    "fecha": "2026-03-05"
+   },
+   {
+    "accionista": "BLACKROCK INC.",
+    "total_pct": 3.89,
+    "fecha": "2026-10-22"
+   },
+   {
+    "accionista": "UBS GROUP AG",
+    "total_pct": 3.234,
+    "fecha": "2026-10-30"
+   },
+   {
+    "accionista": "ARROWSTREET CAPITAL HOLDING LLC",
+    "total_pct": 3.009,
+    "fecha": "2026-11-06"
+   },
+   {
+    "accionista": "POINT72 LONDON INVESTMENTS LTD",
+    "total_pct": 2.271,
+    "fecha": "2026-11-20"
+   },
+   {
+    "accionista": "POINT72 ASSOCIATES, LLC",
+    "total_pct": 2.098,
+    "fecha": "2026-11-20"
+   },
+   {
+    "accionista": "INVESCO LTD.",
+    "total_pct": 1.961,
+    "fecha": "2026-08-04"
+   }
+  ],
+  "fecha_dato": "2026-11-21",
+  "nota": "Solo personas jurídicas; 5 participaciones de personas físicas no se publican.",
+  "fuente": "CNMV, participaciones significativas"
+ },
+ "recompra": {
+  "ultimo_comunicado": null,
+  "en_curso": false,
+  "fecha_dato": "2026-11-22",
+  "fuente": "CNMV, comunicados de las empresas"
+ },
+ "cuatro_fuerzas": [],
+ "perfil": null,
+ "eventos": [
+  {
+   "fecha": "2026-11-20",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "Two Sigma Investments, LP pasa del 0,58 % al 0,70 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-20",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "JPMorgan Asset Management (UK) Limited pasa del 2,41 % al 2,54 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-20",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "Citadel Securities GCS (Ireland) Limited pasa del 0,52 % al 0,64 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-20",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "Capital Fund Management SA pasa del 1,11 % al 1,23 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-20",
+   "tipo": "corto_nueva",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Nueva posición corta publicada en Solaria",
+   "detalle": "Systematica Investments Limited publica una posición corta del 0,50 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-20",
+   "tipo": "corto_nueva",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Nueva posición corta publicada en Solaria",
+   "detalle": "Citadel Advisors LLC publica una posición corta del 0,56 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-20",
+   "tipo": "corto_baja",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Baja una posición corta en Solaria",
+   "detalle": "Marshall Wace LLP pasa del 0,85 % al 0,74 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-19",
+   "tipo": "corto_nueva",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Nueva posición corta publicada en Solaria",
+   "detalle": "Citadel Securities GCS (Ireland) Limited publica una posición corta del 0,52 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-19",
+   "tipo": "comunicado_resultados",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Resultados: Solaria",
+   "detalle": "Resultados correspondientes a los primeros nueve meses del ejercicio 2026",
+   "url": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=43734",
+   "fuente": "CNMV"
+  },
+  {
+   "fecha": "2026-11-18",
+   "tipo": "corto_baja",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Baja una posición corta en Solaria",
+   "detalle": "Marshall Wace LLP pasa del 0,90 % al 0,85 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-17",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "Capital Fund Management SA pasa del 1,00 % al 1,11 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-16",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "Marshall Wace LLP pasa del 0,84 % al 0,90 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-16",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "Capital Fund Management SA pasa del 0,90 % al 1,00 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-13",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "JPMorgan Asset Management (UK) Limited pasa del 2,37 % al 2,41 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-13",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "Capital Fund Management SA pasa del 0,75 % al 0,90 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-13",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "Acadian Asset Management LLC pasa del 0,52 % al 0,70 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-13",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "AHL PARTNERS LLP pasa del 1,10 % al 1,11 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-13",
+   "tipo": "corto_sale",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Una posición corta deja de publicarse en Solaria",
+   "detalle": "Systematica Investments Limited deja de publicar su posición (antes 0,50 %).",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-13",
+   "tipo": "corto_sale",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Una posición corta deja de publicarse en Solaria",
+   "detalle": "Citadel Advisors LLC deja de publicar su posición (antes 0,68 %).",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-13",
+   "tipo": "corto_baja",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Baja una posición corta en Solaria",
+   "detalle": "Two Sigma Investments, LP pasa del 0,63 % al 0,58 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-11-13",
+   "tipo": "corto_baja",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Baja una posición corta en Solaria",
+   "detalle": "Marshall Wace LLP pasa del 0,89 % al 0,84 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-28",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "JPMorgan Asset Management (UK) Limited pasa del 1,82 % al 2,37 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-28",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "Capital Fund Management SA pasa del 0,61 % al 0,75 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-28",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "AHL PARTNERS LLP pasa del 1,00 % al 1,10 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-28",
+   "tipo": "corto_baja",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Baja una posición corta en Solaria",
+   "detalle": "Marshall Wace LLP pasa del 0,91 % al 0,89 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-27",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "JPMorgan Asset Management (UK) Limited pasa del 1,54 % al 1,82 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-27",
+   "tipo": "corto_nueva",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Nueva posición corta publicada en Solaria",
+   "detalle": "Systematica Investments Limited publica una posición corta del 0,50 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-27",
+   "tipo": "corto_nueva",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Nueva posición corta publicada en Solaria",
+   "detalle": "Acadian Asset Management LLC publica una posición corta del 0,52 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-26",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "Marshall Wace LLP pasa del 0,89 % al 0,91 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-26",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "JPMorgan Asset Management (UK) Limited pasa del 1,33 % al 1,54 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-26",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "Capital Fund Management SA pasa del 0,50 % al 0,61 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-26",
+   "tipo": "corto_sale",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Una posición corta deja de publicarse en Solaria",
+   "detalle": "BlackRock Advisors, LLC deja de publicar su posición (antes 0,36 %).",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-26",
+   "tipo": "corto_baja",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Baja una posición corta en Solaria",
+   "detalle": "Citadel Advisors LLC pasa del 0,70 % al 0,68 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-23",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "Citadel Advisors LLC pasa del 0,63 % al 0,70 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-23",
+   "tipo": "corto_sube",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Sube una posición corta en Solaria",
+   "detalle": "AHL PARTNERS LLP pasa del 0,94 % al 1,00 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-23",
+   "tipo": "corto_baja",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Baja una posición corta en Solaria",
+   "detalle": "Marshall Wace LLP pasa del 0,98 % al 0,89 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  },
+  {
+   "fecha": "2026-10-23",
+   "tipo": "corto_baja",
+   "isin": "ES0165386014",
+   "empresa": "Solaria",
+   "ficha": "https://elespeculador.com/ibex35/solaria/",
+   "titulo": "Baja una posición corta en Solaria",
+   "detalle": "BlackRock Advisors, LLC pasa del 0,59 % al 0,36 %.",
+   "url": "https://elespeculador.com/posiciones-cortas-hoy/",
+   "fuente": "CNMV, registro de posiciones cortas netas"
+  }
+ ],
+ "huella": "7b232f718f3e",
+ "version": "1.1.0",
+ "actualizado": "2026-11-22",
+ "fuentes": {
+  "registro_oficial": {
+   "estado": "ok",
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22",
+   "alcance": "Comunicados a la CNMV de resultados, dividendos, recompras, ampliaciones y OPV, y OPA (información privilegiada y otra información relevante), de los últimos doce meses"
+  },
+  "dividendos": {
+   "estado": "ok",
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22"
+  },
+  "recompra": {
+   "estado": "ok",
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22"
+  },
+  "cortos": {
+   "estado": "ok",
+   "fecha": "2026-11-20"
+  },
+  "directivos": {
+   "estado": "vacio",
+   "fecha": null
+  },
+  "accionistas": {
+   "estado": "ok",
+   "fecha": "2026-11-21"
+  },
+  "cuatro_fuerzas": {
+   "estado": "pendiente",
+   "fecha": null
+  },
+  "perfil": {
+   "estado": "pendiente",
+   "fecha": null
+  }
+ },
+ "licencia": "El Especulador, a partir de datos de la CNMV (comunicados, posiciones cortas, notificaciones de directivos y participaciones significativas), reproducidos fielmente; gratuitos en cnmv.es. Cuatro fuerzas y perfil: cada cifra con su documento y página.",
+ "aviso": "Datos con fin informativo y educativo; no son una recomendación de inversión."
+}

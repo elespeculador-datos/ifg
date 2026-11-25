@@ -26,3 +26,6 @@ aviso_deriva.json
 # El historial ya los contiene: si hay que limpiarlo lo decide Federico con el
 # abogado (pregunta 5.c de la revisión).
 datos/precios.csv
+
+# Caché de documentos descargados por los colectores (PDF de la CNMV y su texto): no se publica ni se versiona.
+cache/

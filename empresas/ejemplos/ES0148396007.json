@@ -1,0 +1,314 @@
+{
+ "contrato": "1.0",
+ "empresa": "Inditex",
+ "isin": "ES0148396007",
+ "ficha": "https://elespeculador.com/ibex35/inditex/",
+ "registro_oficial": [
+  {
+   "fecha": "2026-09-09",
+   "tipo": "Resultados 1S 2026",
+   "titulo": "La sociedad remite información financiera del primer semestre de 2026 - 2027",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42665",
+   "nreg": "42665",
+   "grupo": "resultados-ES0148396007-42660"
+  },
+  {
+   "fecha": "2026-09-09",
+   "tipo": "Resultados 1S 2026",
+   "titulo": "La sociedad remite presentación sobre los resultados correspondientes al primer semestre del ejercicio 2026.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42663",
+   "nreg": "42663",
+   "grupo": "resultados-ES0148396007-42660"
+  },
+  {
+   "fecha": "2026-09-09",
+   "tipo": "Resultados 1S 2026",
+   "titulo": "La sociedad remite información sobre resultados correspondientes al primer semestre del ejercicio 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42662",
+   "nreg": "42662",
+   "grupo": "resultados-ES0148396007-42660"
+  },
+  {
+   "fecha": "2026-09-08",
+   "tipo": "Fecha de resultados 1S 2026",
+   "titulo": "La Sociedad remite convocatoria de la presentación de resultados correspondientes al primer semestre del ejercicio 2026.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=42660",
+   "nreg": "42660",
+   "grupo": "resultados-ES0148396007-42660"
+  },
+  {
+   "fecha": "2026-06-30",
+   "tipo": "Programa de recompra",
+   "titulo": "La sociedad remite información de operaciones y finalización del programa de recompra.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41655",
+   "nreg": "41655",
+   "grupo": "recompras-ES0148396007-41326"
+  },
+  {
+   "fecha": "2026-06-24",
+   "tipo": "Programa de recompra",
+   "titulo": "La sociedad remite información de operaciones en el marco del programa de recompra.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41531",
+   "nreg": "41531",
+   "grupo": "recompras-ES0148396007-41326"
+  },
+  {
+   "fecha": "2026-06-17",
+   "tipo": "Programa de recompra",
+   "titulo": "La sociedad remite información de operaciones en el marco del programa de recompra.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41407",
+   "nreg": "41407",
+   "grupo": "recompras-ES0148396007-41326"
+  },
+  {
+   "fecha": "2026-06-10",
+   "tipo": "Programa de recompra",
+   "titulo": "La sociedad remite información de operaciones en el marco del programa de recompra.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41326",
+   "nreg": "41326",
+   "grupo": "recompras-ES0148396007-41326"
+  },
+  {
+   "fecha": "2026-06-03",
+   "tipo": "Resultados 1T 2026",
+   "titulo": "La sociedad remite presentación sobre los resultados correspondientes al primer trimestre del ejercicio 2026.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41206",
+   "nreg": "41206",
+   "grupo": "resultados-ES0148396007-41198"
+  },
+  {
+   "fecha": "2026-06-03",
+   "tipo": "Resultados 1T 2026",
+   "titulo": "La sociedad remite información sobre los resultados correspondientes al primer trimestre del ejercicio 2026.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41203",
+   "nreg": "41203",
+   "grupo": "resultados-ES0148396007-41198"
+  },
+  {
+   "fecha": "2026-06-02",
+   "tipo": "Fecha de resultados 1T 2026",
+   "titulo": "La Sociedad remite convocatoria de la presentación de resultados correspondientes al primer trimestre del ejercicio 2026.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41198",
+   "nreg": "41198",
+   "grupo": "resultados-ES0148396007-41198"
+  },
+  {
+   "fecha": "2026-03-25",
+   "tipo": "Programa de recompra",
+   "titulo": "La sociedad remite información de operaciones en el marco del programa de recompra.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39908",
+   "nreg": "39908",
+   "grupo": "recompras-ES0148396007-38735"
+  },
+  {
+   "fecha": "2026-03-18",
+   "tipo": "Programa de recompra",
+   "titulo": "La sociedad remite información de operaciones en el marco del programa de recompra.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39779",
+   "nreg": "39779",
+   "grupo": "recompras-ES0148396007-38735"
+  },
+  {
+   "fecha": "2026-03-11",
+   "tipo": "Resultados 2S 2025",
+   "titulo": "La sociedad remite información financiera del segundo semestre de 2025 - 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39678",
+   "nreg": "39678",
+   "grupo": "resultados-ES0148396007-39678"
+  },
+  {
+   "fecha": "2026-03-11",
+   "tipo": "Resultados año 2026",
+   "titulo": "La sociedad remite el Informe Financiero Anual del ejercicio 2026",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39677",
+   "nreg": "39677",
+   "grupo": "resultados-ES0148396007-39677"
+  },
+  {
+   "fecha": "2026-03-11",
+   "tipo": "Resultados año 2025",
+   "titulo": "La Sociedad remite presentación sobre los resultados correspondientes al ejercicio 2025.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39672",
+   "nreg": "39672",
+   "grupo": "resultados-ES0148396007-39665"
+  },
+  {
+   "fecha": "2026-03-11",
+   "tipo": "Resultados año 2025",
+   "titulo": "La sociedad remite información sobre resultados anuales correspondientes al ejercicio 2025",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39667",
+   "nreg": "39667",
+   "grupo": "resultados-ES0148396007-39665"
+  },
+  {
+   "fecha": "2026-03-10",
+   "tipo": "Fecha de resultados año 2025",
+   "titulo": "La Sociedad remite convocatoria de la presentación de resultados correspondientes al ejercicio 2025.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=39665",
+   "nreg": "39665",
+   "grupo": "resultados-ES0148396007-39665"
+  },
+  {
+   "fecha": "2026-02-11",
+   "tipo": "Programa de recompra",
+   "titulo": "La sociedad remite información de operaciones en el marco del programa de recompra.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=38824",
+   "nreg": "38824",
+   "grupo": "recompras-ES0148396007-38735"
+  },
+  {
+   "fecha": "2026-02-04",
+   "tipo": "Programa de recompra",
+   "titulo": "La compañía anuncia programa de recompra de acciones.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=38735",
+   "nreg": "38735",
+   "grupo": "recompras-ES0148396007-38735"
+  },
+  {
+   "fecha": "2025-12-03",
+   "tipo": "Resultados 3T 2025",
+   "titulo": "La sociedad remite presentación sobre los resultados correspondientes a los nueve primeros meses del ejercicio 2025.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=37983",
+   "nreg": "37983",
+   "grupo": "resultados-ES0148396007-37977"
+  },
+  {
+   "fecha": "2025-12-03",
+   "tipo": "Resultados 3T 2025",
+   "titulo": "La sociedad remite información sobre resultados correspondientes a los nueve primeros meses del ejercicio 2025",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=37979",
+   "nreg": "37979",
+   "grupo": "resultados-ES0148396007-37977"
+  },
+  {
+   "fecha": "2025-12-02",
+   "tipo": "Fecha de resultados 3T 2025",
+   "titulo": "La sociedad remite convocatoria de la presentación de resultados correspondientes a los nueve primeros meses del ejercicio 2025.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=37977",
+   "nreg": "37977",
+   "grupo": "resultados-ES0148396007-37977"
+  }
+ ],
+ "dividendos": [],
+ "cortos": {
+  "total_publicado": 0.0,
+  "fecha_dato": "2026-11-20",
+  "tenedores": 0,
+  "posiciones": [],
+  "ultima_posicion": null,
+  "cambios_30d": [],
+  "fuente": "CNMV, registro de posiciones cortas netas"
+ },
+ "directivos": null,
+ "accionistas": {
+  "fecha_derechos_voto": "2014-07-18",
+  "derechos_voto": 3116652000,
+  "n": 2,
+  "principales": [
+   {
+    "accionista": "PONTEGADEA INVERSIONES, S.L.",
+    "total_pct": 50.01,
+    "fecha": "2015-12-21"
+   },
+   {
+    "accionista": "ROSP CORUNNA PARTICIPACIONES EMPRESARIALES, S.L.",
+    "total_pct": 6.993,
+    "fecha": "2002-01-10"
+   }
+  ],
+  "fecha_dato": "2026-11-21",
+  "nota": "Solo personas jurídicas; 2 participaciones de personas físicas no se publican.",
+  "fuente": "CNMV, participaciones significativas"
+ },
+ "recompra": {
+  "ultimo_comunicado": {
+   "fecha": "2026-06-30",
+   "tipo": "Programa de recompra",
+   "caja": "recompras",
+   "titulo": "La sociedad remite información de operaciones y finalización del programa de recompra.",
+   "fuente": "CNMV",
+   "enlace": "https://www.cnmv.es/Portal/Otra-Informacion-Relevante/Resultado-OIR.aspx?nreg=41655",
+   "nreg": "41655",
+   "canal": "OIR",
+   "grupo": "recompras-ES0148396007-41326"
+  },
+  "en_curso": false,
+  "fecha_dato": "2026-11-22",
+  "fuente": "CNMV, comunicados de las empresas"
+ },
+ "cuatro_fuerzas": [],
+ "perfil": {
+  "sede": "Arteixo (A Coruña), Avenida de la Diputación, Edificio Inditex",
+  "cierre_ejercicio": "31/01",
+  "web_ri": "https://www.inditex.com/itxcomweb/es/es/inversores",
+  "fuente": "BORME núm. 105 de 04/06/2026, BORME-C-2026-3192 (convocatoria de la junta: domicilio social y «ejercicio social 2025, finalizado el 31 de enero de 2026»); web de Inditex (responde, comprobada el 22/11/2026)",
+  "fecha": "2026-11-22"
+ },
+ "eventos": [],
+ "huella": "3e02ae5dd2b7",
+ "version": "1.1.0",
+ "actualizado": "2026-11-22",
+ "fuentes": {
+  "registro_oficial": {
+   "estado": "ok",
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22",
+   "alcance": "Comunicados a la CNMV de resultados, dividendos, recompras, ampliaciones y OPV, y OPA (información privilegiada y otra información relevante), de los últimos doce meses"
+  },
+  "dividendos": {
+   "estado": "ok",
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22"
+  },
+  "recompra": {
+   "estado": "ok",
+   "fecha": "2026-11-22T08:01",
+   "desde": "2025-11-22"
+  },
+  "cortos": {
+   "estado": "ok",
+   "fecha": "2026-11-20"
+  },
+  "directivos": {
+   "estado": "vacio",
+   "fecha": null
+  },
+  "accionistas": {
+   "estado": "ok",
+   "fecha": "2026-11-21"
+  },
+  "cuatro_fuerzas": {
+   "estado": "pendiente",
+   "fecha": null
+  },
+  "perfil": {
+   "estado": "ok",
+   "fecha": "2026-11-22"
+  }
+ },
+ "licencia": "El Especulador, a partir de datos de la CNMV (comunicados, posiciones cortas, notificaciones de directivos y participaciones significativas), reproducidos fielmente; gratuitos en cnmv.es. Cuatro fuerzas y perfil: cada cifra con su documento y página.",
+ "aviso": "Datos con fin informativo y educativo; no son una recomendación de inversión."
+}
