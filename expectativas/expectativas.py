@@ -34,7 +34,7 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 API = "https://data-api.ecb.europa.eu/service/data/CES/"
 PORTAL = "https://data.ecb.europa.eu/data/datasets/CES"
 AREAS = {"ES": "España", "Z18": "Zona euro (11 países de la encuesta)", "DE": "Alemania", "FR": "Francia", "IT": "Italia"}
@@ -270,7 +270,7 @@ def fragmento(res: dict, df: pd.DataFrame, ipc: pd.Series | None, fecha_pub: str
         frase += f"La inflación que decía haber sufrido en los doce meses anteriores era del {_v(es['C1020']['valor'])} %"
         if res["ipc"]["valor"] is not None and res["ipc"]["mes"] == mes:
             frase += f", cuando el IPC del INE de ese mes fue del {_v(res['ipc']['valor'])} %: una brecha de percepción de {_pp(res['brecha_percepcion'])}"
-        frase += ". "
+        frase += " " if frase.endswith(".") else ". "  # «p.p.» ya cierra la frase: sin doble punto (errata del 25/11/2026)
     if es["C1220"] and es["E2020"]:
         frase += f"A tres años esperaba un {_v(es['C1220']['valor'])} % y a cinco, un {_v(es['E2020']['valor'])} %. "
     frase += f"Es el percentil {e12['percentil']:.0f} de la expectativa a doce meses desde {_mes_txt(e12['desde'])} (máximo {_v(e12['max'])} % en {_mes_txt(e12['mes_max'])}; mínimo {_v(e12['min'])} % en {_mes_txt(e12['mes_min'])})."

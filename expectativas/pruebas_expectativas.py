@@ -8,6 +8,7 @@ doce meses, huella, fragmento y escritura.
 """
 from __future__ import annotations
 
+import re
 import json
 import sys
 import tempfile
@@ -128,6 +129,8 @@ def prueba_escribir(df, res, ipc):
     ok(frag.startswith(f"<!-- expectativas:inicio {res['huella']} -->") and frag.rstrip().endswith("<!-- expectativas:fin -->"), "fragmento: marcas")
     ok("esperaba una inflación del <strong>3,8 %</strong>" in frag and "+0,7 p.p. respecto al mes anterior" in frag and "frente al 3,1 % del hogar mediano de la zona euro" in frag, "fragmento: frase")
     ok("brecha de percepción de −0,5 p.p." in frag and "esperaba un 2,5 % y el IPC de septiembre de 2026 ha sido del 4,9 % (−2,4 p.p.)" in frag, "fragmento: brecha y acierto")
+    ok("p.p.." not in frag and re.search(r"brecha de percepción de −0,5 p\.p\. [A-ZÁÉÍÓÚ]", frag) is not None,
+       "fragmento: la frase de la brecha termina en «p.p.» sin doble punto y sigue la siguiente")
     ok("Tasa de paro esperada a 12 meses" in frag and "10,5 % de paro" not in frag and "<td>10,5 % </td>" not in frag, "fragmento: tabla de otras expectativas")
     ok("protección frente a la inflación" not in frag and "históricamente" not in frag.lower() and "no predice la inflación ni recomienda nada" in frag,
        "fragmento: sin relacionar la expectativa con productos de inversión")
