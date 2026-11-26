@@ -13,12 +13,16 @@ import csv
 import shutil
 import sys
 import tempfile
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
 import dividendos_cnmv as dv  # noqa: E402
+
+# La caché de las pruebas, en una carpeta temporal: una caché real (cache/cnmv/ del repositorio) cambiaría lo que se
+# descarga, y las marcas «.sin-texto» de una pasada de prueba no deben quedar para la siguiente.
+dv.CACHE = Path(tempfile.mkdtemp(prefix="pruebas_dividendos_cache_"))
 
 TEXTOS = AQUI / "pruebas_cnmv" / "dividendos"
 FALLOS: list[str] = []
@@ -303,12 +307,94 @@ def pruebas_politica_efectivo() -> None:
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+# --------------------------------------------------------------------------- 4. cola de descargas de las notas de resultados
+def pruebas_cola_resultados() -> None:
+    """25/11/2026: once remisiones de información financiera periódica sin documento a la cabeza de la cola se volvían
+    a pedir en cada pasada y gastaban el límite de cinco: ninguna nota posterior se leía."""
+    ok(all(dv.RE_PERIODICA.search(dv._norm(x)) for x in (
+        "La sociedad remite el Informe Financiero Anual del ejercicio 2025",
+        "La sociedad remite información financiera del segundo semestre de 2024 - 2025",
+        "La sociedad remite información financiera del primer semestre de 2026"))
+       and not any(dv.RE_PERIODICA.search(dv._norm(x)) for x in (
+           "Logista publica los resultados del primer trimestre de su ejercicio fiscal 2026",
+           "Naturgy remite informe de resultados 1T26", "La Compañía publica la presentacion de resultados del ejercicio fiscal 2025")),
+       "remisiones periódicas: el informe financiero anual y los semestrales, no las notas ni las presentaciones")
+    lista = {LOGISTA: dv.lista_en_resultados()[LOGISTA]}
+    tmp = Path(tempfile.mkdtemp(prefix="pruebas_dividendos_cola_"))
+    try:
+        datos, cache = tmp / "cnmv" / "datos", tmp / "cache"
+        datos.mkdir(parents=True)
+        cab = "canal,nreg,fecha,emisor,categoria,texto,enlace,isin,empresa,ficha,caja,etiqueta,periodo,grupo\n"
+
+        def fila(nreg, fecha, titulo):
+            return f'OIR,{nreg},{fecha}T08:00:00,LOGISTA,x,"{titulo}",https://x/{nreg},{LOGISTA},Logista,logista,resultados,Resultados,año,r'
+
+        filas = [fila("37574", "2025-11-06", "La sociedad remite información financiera del segundo semestre de 2024 - 2025"),
+                 fila("37577", "2025-11-06", "La sociedad remite el Informe Financiero Anual del ejercicio 2025")]
+        filas += [fila(str(n), f"2025-12-0{n - 38000}", "Presentación de resultados") for n in range(38001, 38006)]   # sin texto
+        filas += [fila("38742", "2026-02-05", "Logista publica los resultados del primer trimestre de su ejercicio fiscal 2026")]
+        (datos / "ibex35.csv").write_text(cab + "\n".join(filas) + "\n", encoding="utf-8")
+        pedidos: list = []   # descargas: lo que no sale de la caché
+        con_texto = {"38742": _lee("OIR-38742")}
+
+        def texto_de(canal, nreg, enlace):   # como texto_comunicado: primero la caché; lo que se descarga, a la caché
+            txt = cache / f"{canal}-{nreg}.txt"
+            if txt.exists():
+                return txt.read_text(encoding="utf-8")
+            pedidos.append(nreg)
+            if nreg not in con_texto:
+                return None
+            cache.mkdir(parents=True, exist_ok=True)
+            txt.write_text(con_texto[nreg], encoding="utf-8")
+            return con_texto[nreg]
+
+        def pasada(dia, limite=5):
+            del pedidos[:]
+            r = dv.actualizar_resultados(datos, limite=limite, texto_de=texto_de, lista=lista, cache=cache, hoy=dia)
+            out = [(x["nreg"], x["concepto"], x["fecha_pago"]) for x in csv.DictReader((datos / "dividendos_resultados.csv").open(encoding="utf-8"))]
+            return r, list(pedidos), out
+
+        sin = ["38001", "38002", "38003", "38004", "38005"]
+        d = date(2026, 11, 25)
+        r, ped, out = pasada(d)
+        ok(ped == sin and out == [] and r["pendientes"] == 1, f"1.ª pasada: las cinco más antiguas, nunca las remisiones periódicas ({ped})")
+        ok(sorted(x.name for x in cache.glob("*.sin-texto")) == [f"OIR-{n}.sin-texto" for n in sin]
+           and (cache / "OIR-38001.sin-texto").read_text(encoding="utf-8").split() == ["2026-11-25", "1"],
+           "cada nota sin texto deja su marca con la fecha y el intento")
+        r, ped, out = pasada(d)
+        esperado = [("38742", "a cuenta", "2025-08-28"), ("38742", "complementario y extraordinario", "2026-02-26")]
+        ok(ped == ["38742"] and out == esperado and r["pendientes"] == 0,
+           f"2.ª pasada, el mismo día: las fallidas no se repiten y la nota siguiente se lee ({ped}, {out})")
+        r, ped, out = pasada(d)
+        ok(ped == [] and out == esperado, "3.ª pasada, el mismo día: nada que pedir; las filas salen de la caché")
+        filas.append(fila("40562", "2026-04-30", "Logista publica los resultados del primer semestre"))
+        (datos / "ibex35.csv").write_text(cab + "\n".join(filas) + "\n", encoding="utf-8")
+        con_texto["40562"] = _lee("OIR-40562")
+        con_texto["38003"] = "Presentación de resultados."   # una de las fallidas da texto al día siguiente (sin dividendos)
+        r, ped, out = pasada(d + timedelta(days=1))
+        ok(ped == ["40562"] + sin[:4] and r["pendientes"] == 1,
+           f"al día siguiente, primero la nota nueva y después las fallidas, hasta el límite ({ped})")
+        ok(not (cache / "OIR-38003.sin-texto").exists() and (cache / "OIR-38003.txt").exists()
+           and (cache / "OIR-38001.sin-texto").read_text(encoding="utf-8").split() == ["2026-11-26", "2"],
+           "la que da texto pierde su marca; las demás suman un intento")
+        r, ped, out = pasada(d + timedelta(days=1))
+        ok(ped == ["38005"], f"la que no cupo se pide en la pasada siguiente del mismo día ({ped})")
+        pasada(d + timedelta(days=2))
+        r, ped, out = pasada(d + timedelta(days=3))
+        ok(ped == [] and r["sin_texto"] == 4 and r["pendientes"] == 0,
+           f"tras {dv.MAX_INTENTOS} intentos en días distintos, no se vuelven a pedir y se cuentan ({ped}, {r})")
+        ok(("38742", "a cuenta", "2025-08-28") in out, "las filas siguen ahí")
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 if __name__ == "__main__":
     pruebas_flexibles()
     pruebas_titulos()
     pruebas_actualizar()
     pruebas_resultados()
     pruebas_politica_efectivo()
+    pruebas_cola_resultados()
     if FALLOS:
         print(f"{len(FALLOS)} de {N} comprobaciones fallan.")
         sys.exit(1)
