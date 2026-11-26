@@ -8,6 +8,7 @@ huella, fragmento, JSON y CSV.
 """
 from __future__ import annotations
 
+import re
 import json
 import sys
 import tempfile
@@ -118,7 +119,14 @@ def prueba_escribir(df, res):
     ok(cot.escribir(df, res, HOY, salida), "escribir: primera vez")
     frag = (salida / "fragmento-wp.html").read_text(encoding="utf-8")
     ok(frag.startswith(f"<!-- cot:inicio {res['huella']} -->") and frag.rstrip().endswith("<!-- cot:fin -->"), "fragmento: marcas")
-    ok("martes 10/11/2026" in frag and "En extremo de tres años: Euro (EUR/USD) (largo extremo);" in frag and "Oro (largo extremo)" in frag, "fragmento: frase")
+    ok("martes 10/11/2026" in frag and "frente a sus últimos tres años, los grandes especuladores están más largos en euro" in frag
+       and re.search(r"Están en un extremo largo de tres años en euro(, | y | e )[^.]*oro", frag) is not None, "fragmento: frase")
+    ok("(largo extremo)" not in frag.split("<h2>")[0] and "en términos de tres años" not in frag and "Euro (EUR/USD)," not in frag.split("<h2>")[0],
+       "fragmento: la frase usa los nombres en minúscula y une las listas con «y»")
+    ok(cot._lista(["oro"]) == "oro" and cot._lista(["oro", "plata"]) == "oro y plata" and cot._lista(["yen", "índice dólar"]) == "yen e índice dólar"
+       and cot._lista(["euro", "plata", "platino"]) == "euro, plata y platino" and cot._lista(["euro", "hielo"]) == "euro y hielo",
+       "lista: comas, «y» final y «e» ante «i»")
+    ok(all(c in cot.EN_FRASE for c in cot.MERCADOS), "lista: cada mercado tiene su nombre para la frase")
     ok("<strong>Euro (EUR/USD)</strong></td><td>299.500</td><td>+500</td><td>+2.000</td><td>+37,4 %</td><td>100</td><td>100</td><td>largo extremo</td><td>−200</td>" in frag, "fragmento: fila del euro")
     ok(frag.count("<svg") == 4 and "miles de contratos netos" in frag, "fragmento: cuatro gráficos")
     ok("no es una señal de compra ni de venta" in frag and "no es asesoramiento" in frag and '<script type="application/ld+json">' in frag, "fragmento: avisos y JSON-LD")
