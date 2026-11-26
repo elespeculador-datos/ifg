@@ -37,9 +37,12 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import diaria  # noqa: E402  (sección diaria: Banco de España y Bundesbank)
 import requests
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 API = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/irt_lt_mcby_m"
 PAISES = {"ES": "España", "DE": "Alemania", "IT": "Italia", "FR": "Francia"}
 PARAMS = [("format", "JSON"), ("lang", "EN")] + [("geo", p) for p in PAISES]
@@ -327,6 +330,9 @@ def huella(res: dict) -> str:
     base.update({n: [v["fecha"], v["valor"]] for n, v in res["diferenciales"].items()})
     base["tesoro"] = {k: [v.get("fecha"), v.get("marginal")] for k, v in res["tesoro"].items()}
     base["version"] = VERSION
+    d = res.get("diaria")
+    if d:
+        base["diaria"] = [d["fecha"], d["pb"]]
     return hashlib.sha256(json.dumps(base, sort_keys=True).encode()).hexdigest()[:12]
 
 
@@ -408,7 +414,8 @@ def fragmento(res: dict, fecha_pub: str) -> str:
     es_de = res["diferenciales"]["es_de"]
     es, de = res["niveles"]["ES"], res["niveles"]["DE"]
     partes = [f"<!-- prima:inicio {huella(res)} -->",
-              f'<p class="has-small-font-size">Actualizado el {_f(fecha_pub)} con las medias mensuales de Eurostat hasta {_m(es_de["fecha"])}.</p>']
+              f'<p class="has-small-font-size">Actualizado el {_f(fecha_pub)} con las medias mensuales de Eurostat hasta {_m(es_de["fecha"])}'
+              + (f' y el dato diario del Banco de España y del Bundesbank hasta el {_f(res["diaria"]["fecha"])}' if res.get("diaria") else "") + '.</p>']
     frase = (f"<p><strong>Semáforo: {es_de['semaforo']}.</strong> La prima de riesgo de España (diferencial entre el bono español y el alemán "
              f"a diez años) fue de <strong>{_v(es_de['valor'])} puntos básicos</strong> de media en {_m(es_de['fecha'])}: el bono español rendía el "
              f"{_v(es['valor'], 2)} % y el alemán el {_v(de['valor'], 2)} %. Frente a los últimos tres años está en el percentil "
@@ -421,6 +428,8 @@ def fragmento(res: dict, fecha_pub: str) -> str:
               f"{_dif(es_de['variacion_12m'])}. Máximo mensual desde {es_de['desde_historico'][:4]}: "
               f"{_v(es_de['maximo_historico'])} puntos básicos en {_m(es_de['fecha_maximo_historico'])}.</p>")
     partes.append(frase)
+    if res.get("diaria"):
+        partes.append(diaria.seccion(res["diaria"], _f, _v, _dif))
     partes += ["<h2>Los cuatro bonos a diez años</h2>",
                "<p>Rendimiento medio del mes del bono a diez años en el mercado secundario, del más alto al más bajo. Es el tipo de interés "
                "al que cada Estado se financia a largo plazo en el mercado.</p>",
@@ -471,7 +480,10 @@ def fragmento(res: dict, fecha_pub: str) -> str:
                "anticipa nada. El pulso del Tesoro reproduce los resultados de las últimas subastas tal como los publica el Tesoro.</p>",
                f'<p class="has-small-font-size">Fuente: Eurostat, <a href="{PORTAL}">conjunto irt_lt_mcby_m</a> (tipos de interés a largo plazo '
                f"del criterio de convergencia, recogidos por el BCE), reproducido sin modificar; pulso del Tesoro: D. G. del Tesoro y Política "
-               f"Financiera, a través de las páginas de letras y bonos de El Especulador. Los diferenciales, percentiles, variaciones y episodios "
+               f"Financiera, a través de las páginas de letras y bonos de El Especulador"
+               + ("; prima diaria: Banco de España (cuadro ti_1_3, tipos del mercado secundario de deuda del Estado a diez años) y Deutsche "
+                  "Bundesbank (rentabilidad diaria del Bund a diez años), elaboración propia de El Especulador" if res.get("diaria") else "")
+               + f". Los diferenciales, percentiles, variaciones y episodios "
                f"son cálculos de El Especulador y se publican con licencia CC BY 4.0. Contenido informativo y educativo; no es asesoramiento "
                f"financiero ni recomendación de inversión.</p>",
                "<!-- prima:fin -->"]
@@ -523,11 +535,18 @@ def escribir(df: pd.DataFrame, res: dict, meta: dict, hoy: date, salida: Path, f
         "eurostat_actualizado": meta.get("actualizado"),
         "semaforo": res["diferenciales"]["es_de"]["semaforo"], "prima_es_de": res["diferenciales"]["es_de"]["valor"],
         "niveles": res["niveles"], "diferenciales": res["diferenciales"], "ranking": res["ranking"],
-        "episodios": res["episodios"], "tesoro": res["tesoro"],
+        "episodios": res["episodios"], "tesoro": res["tesoro"], "diaria": res.get("diaria"),
         "fuente": "Eurostat, conjunto irt_lt_mcby_m (" + PORTAL + "); pulso del Tesoro: D. G. del Tesoro y Política Financiera",
         "condiciones": "Rendimientos de Eurostat reproducidos sin modificar, citando la fuente; diferenciales, percentiles, variaciones y "
                        "episodios son cálculos de El Especulador (CC BY 4.0). Contenido informativo; no es asesoramiento financiero.",
     }, ensure_ascii=False, indent=1), encoding="utf-8")
+    serie_d = res.get("diaria_serie")
+    if res.get("diaria") and serie_d is not None and len(serie_d):
+        with (dd / "diaria.csv").open("w", newline="", encoding="utf-8") as fh:
+            w = csv.writer(fh)
+            w.writerow(["fecha", "es_10a", "de_10a", "prima_pb"])
+            for t_, r in serie_d.iterrows():
+                w.writerow([t_.date().isoformat(), f"{r['es']:.3f}", f"{r['de']:.2f}", f"{r['pb']:.1f}"])
     frag = fragmento(res, fecha_pub)
     marca = "\n<!-- prima:fin -->"
     ld = ld_wp(fecha_pub)
@@ -547,11 +566,26 @@ a{{color:#1f4e8c}} .pie{{color:#5b6675;font-size:.85rem;margin-top:2em}}
 <h1>Prima de riesgo de España: semáforo frente a Alemania, Italia y Francia</h1>
 {cuerpo}
 <h2>Datos abiertos</h2>
-<p>CSV: <a href="datos/serie.csv">rendimientos y diferenciales mensuales</a> · <a href="datos/ultima.json">JSON</a>. Los rendimientos son de Eurostat y se reutilizan sin modificar, citando «Fuente: Eurostat»; los diferenciales, percentiles, variaciones y episodios son cálculos de El Especulador (CC BY 4.0). Explicación completa: <a href="{PAGINA_WP}">la página de elespeculador.com</a>.</p>
+<p>CSV: <a href="datos/serie.csv">rendimientos y diferenciales mensuales</a>{' · <a href="datos/diaria.csv">prima diaria</a>' if res.get("diaria") else ''} · <a href="datos/ultima.json">JSON</a>. Los rendimientos son de Eurostat y se reutilizan sin modificar, citando «Fuente: Eurostat»; los diferenciales, percentiles, variaciones y episodios son cálculos de El Especulador (CC BY 4.0). Explicación completa: <a href="{PAGINA_WP}">la página de elespeculador.com</a>.</p>
 <p class="pie">Comprobado el {_f(hoy.isoformat())}. Contenido informativo; no constituye asesoramiento financiero ni recomendación de inversión.</p>
 </body></html>
 """, encoding="utf-8")
     return cambia
+
+
+# --------------------------------------------------------------------------- prima diaria
+def seccion_diaria(df: pd.DataFrame, hoy: date, local_bde: str | None = None, local_bund: str | None = None):
+    """(resumen diario o None, serie diaria). Cualquier fallo deja la sección fuera con aviso: la parte mensual sigue igual."""
+    try:
+        es = diaria.leer_bde(Path(local_bde).read_text(encoding="latin-1") if local_bde else diaria.descargar(diaria.URL_BDE, "latin-1"))
+        de = diaria.leer_bund(Path(local_bund).read_text(encoding="utf-8-sig") if local_bund else diaria.descargar(diaria.URL_BUND.format(desde=diaria.DESDE), "utf-8-sig"))
+        mensual = diferenciales({p: g.set_index("fecha")["valor"].sort_index() for p, g in df.groupby("pais")})["es_de"]
+        res, serie, avisos = diaria.calcular(es, de, mensual, hoy)
+        AVISOS.extend(avisos)
+        return res, (serie if res else None)
+    except Exception as e:  # noqa: BLE001
+        AVISOS.append(f"Prima diaria no disponible: {type(e).__name__}: {str(e)[:160]}")
+        return None, None
 
 
 # --------------------------------------------------------------------------- principal
@@ -562,6 +596,8 @@ def main() -> int:
     ap.add_argument("--fecha", help="día de referencia AAAA-MM-DD (por defecto, hoy en UTC)")
     ap.add_argument("--tesoro", help="carpeta que contiene letras/ y bonos/ (por defecto, la carpeta madre de --salida)")
     ap.add_argument("--forzar", action="store_true", help="reescribir los ficheros aunque la huella no cambie (tras cambiar el código)")
+    ap.add_argument("--local-bde", help="cuadro ti_1_3 del Banco de España ya descargado (pruebas)")
+    ap.add_argument("--local-bund", help="CSV del Bund a 10 años del Bundesbank ya descargado (pruebas)")
     a = ap.parse_args()
     hoy = date.fromisoformat(a.fecha) if a.fecha else datetime.now(timezone.utc).date()
     salida = Path(a.salida)
@@ -569,13 +605,16 @@ def main() -> int:
     df, meta = leer(texto)
     tesoro = leer_tesoro(Path(a.tesoro) if a.tesoro else salida.resolve().parent)
     res = calcular(df, hoy, tesoro)
+    res["diaria"], res["diaria_serie"] = seccion_diaria(df, hoy, a.local_bde, a.local_bund)
     cambia = escribir(df, res, meta, hoy, salida, forzar=a.forzar)
     for av in AVISOS:
         print(f"::warning::{av}")
     d = res["diferenciales"]["es_de"]
     print(f"Prima España-Alemania {d['valor']} pb (media de {res['mes']}), semáforo {d['semaforo']}, percentil 3 años {d['percentil_3a']}, "
           f"histórico {d['percentil_historico']}. Eurostat actualizado: {meta.get('actualizado')}. {len(df)} observaciones. "
-          f"{'Datos nuevos.' if cambia else 'Sin cambios.'}")
+          f"{'Datos nuevos.' if cambia else 'Sin cambios.'}"
+          + (f" Diaria: {res['diaria']['pb']} pb el {res['diaria']['fecha']} (control frente a Eurostat: {res['diaria']['control']['dif_media_pb']} pb)."
+             if res.get("diaria") else " Diaria: no publicada."))
     return 0
 
 

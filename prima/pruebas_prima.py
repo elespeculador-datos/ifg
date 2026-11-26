@@ -10,6 +10,8 @@ devuelven el máximo de su ventana, y la escritura no reescribe si la huella no 
 from __future__ import annotations
 
 import importlib
+import io
+import csv
 import json
 import os
 import re
@@ -282,12 +284,80 @@ def prueba_escritura():
     ok(prima.PAGES.startswith("https://elespeculador-datos.github.io/ifg/"), "sin variable, GitHub Pages")
 
 
+# --------------------------------------------------------------------------- prima diaria (1.1.0)
+# Cabeceras literales del cuadro ti_1_3 del Banco de España (25/11/2026, recortado a tres series, con la de 10 años
+# en la tercera columna para comprobar que se busca por código) y del CSV del Bundesbank; las filas de datos son
+# simuladas, con valores conocidos.
+CAB_BDE = [['CÓDIGO DE LA SERIE', 'D_DTES00B7', 'D_G0B1F0ZP', 'D_G0B1F0ZQ'], ['NÚMERO SECUENCIAL', '80395', '97265', '303868'], ['ALIAS DE LA SERIE', 'TI_1_3.1', 'TI_1_3.11', 'TI_1_3.12'], ['DESCRIPCIÓN DE LA SERIE', 'Tipos de interés. Del mercado secundario de valores. Letras del tesoro. De 1 a 3 meses. Conjunto del mercado. Operaciones simples al contado', 'Tipos de interés. Del mercado secundario de valores. Bonos y obligaciones del Estado no segregados. 10 Años. Conjunto del mercado. Operaciones simples al contado', 'Tipos de interés. Del mercado secundario de valores. Bonos y obligaciones del Estado no segregados. 15 Años. Conjunto del mercado. Operaciones simples al contado'], ['DESCRIPCIÓN DE LAS UNIDADES', 'Porcentaje', 'Porcentaje', 'Porcentaje'], ['FRECUENCIA', 'DIARIA', 'DIARIA', 'DIARIA']]
+CAB_BUND = ['"",BBSSY.D.REN.EUR.A630.000000WT1010.A,BBSSY.D.REN.EUR.A630.000000WT1010.A_FLAGS', '"",Daily yield of the current 10 year federal bond,', 'Comment (in english),,', 'Decimals,2,', 'Time format code,P1D,', 'category,ZRWR,', 'unit,PROZENT,', 'unit multiplier,One,', 'last update,2026-11-25 12:29:19,']
+MESES_BDE = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"]
+
+
+def ficheros_diarios(dias: pd.DatetimeIndex, es: list[float], de: list[float], huecos_es=(), huecos_de=()) -> tuple[str, str]:
+    f = io.StringIO()
+    w = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
+    for fila in CAB_BDE:
+        w.writerow(fila)
+    for d, v in zip(dias, es):
+        w.writerow([f"{d.day:02d} {MESES_BDE[d.month - 1]} {d.year}", "2.5", "_" if d in huecos_es else f"{v:.3f}", "3.8"])
+    b = "\n".join(CAB_BUND) + "\n" + "\n".join(f"{d.date()},{'.' if d in huecos_de else f'{v:.2f}'}," for d, v in zip(dias, de))
+    return f.getvalue(), b
+
+
+def prueba_diaria():
+    import diaria
+    dias = pd.bdate_range("2023-01-02", "2026-11-23")
+    de = [round(2.0 + 0.01 * (i // 20), 2) for i in range(len(dias))]   # el Bundesbank publica con dos decimales
+    es = [x + 0.50 + 0.01 * (d.month % 5) for x, d in zip(de, dias)]   # prima de 50 a 54 pb según el mes
+    es[-1] = de[-1] + 0.65          # último día: 65 pb
+    es[-2] = de[-2] + 0.62          # sesión anterior: 62 pb
+    t_bde, t_bund = ficheros_diarios(dias, es, de, huecos_es={dias[10]}, huecos_de={dias[20]})
+    s_es, s_de = diaria.leer_bde(t_bde), diaria.leer_bund(t_bund)
+    ok(len(s_es) == len(dias) - 1 and len(s_de) == len(dias) - 1 and abs(s_es.iloc[-1] - es[-1]) < 1e-9,
+       f"diaria: lee las dos series por código y salta «_» y «.» ({len(s_es)}, {len(s_de)})")
+    # Eurostat mensual igual a la media mensual de la diaria (60 pb) salvo redondeo: el control pasa.
+    pb_sim = pd.Series([(x - y) * 100 for x, y in zip(es, de)], index=dias)
+    mensual = pb_sim.groupby(pb_sim.index.to_period("M")).mean().round(1)
+    mensual.index = mensual.index.to_timestamp()
+    mensual = mensual[mensual.index <= "2026-10-01"] + pd.Series([(-1) ** k * 0.4 for k in range(len(mensual[mensual.index <= "2026-10-01"]))], index=mensual[mensual.index <= "2026-10-01"].index)
+    r, serie, av = diaria.calcular(s_es, s_de, mensual, date(2026, 11, 25))
+    ok(r is not None and r["pb"] == 65.0 and r["var_sesion"] == 3.0 and r["fecha"] == "2026-11-23" and r["fecha_anterior"] == "2026-11-20",
+       f"diaria: prima del último día y variación frente a la sesión anterior: {r and (r['pb'], r['var_sesion'], r['fecha_anterior'])}")
+    ok(r["var_semana"] == 14.0 and r["max_12m"] == 65.0 and r["percentil"] == 100.0 and r["control"]["meses"] == 36 and abs(r["control"]["dif_media_pb"]) < 0.5 and r["control"]["correlacion"] is not None,
+       f"diaria: semana, máximo de doce meses, percentil y control: {r['var_semana']} {r['max_12m']} {r['percentil']} {r['control']}")
+    ok(len(serie) == len(dias) - 2 and av == [], "diaria: la serie común solo usa los días con dato de los dos países")
+    # Control: si la media mensual se aparta más de 10 pb de Eurostat, la sección no se publica.
+    r2, _, av2 = diaria.calcular(s_es, s_de, mensual + 15, date(2026, 11, 25))
+    ok(r2 is None and av2 and "se aparta" in av2[0], f"diaria: con 15 pb de diferencia frente a Eurostat no se publica: {av2}")
+    # Dato viejo: con más de 15 días no se publica; con más de 7, aviso.
+    r3, _, av3 = diaria.calcular(s_es, s_de, mensual, date(2026, 12, 10))
+    r4, _, av4 = diaria.calcular(s_es, s_de, mensual, date(2026, 12, 3))
+    ok(r3 is None and r4 is not None and av4 and "10 días" in av4[0], f"diaria: dato de 17 días, fuera; de 10, con aviso: {av3} {av4}")
+    # Sección y página.
+    sec = diaria.seccion(r, prima._f, prima._v, prima._dif)
+    ok("<h2>La prima, día a día</h2>" in sec and "<strong>65,0 puntos básicos</strong>" in sec and "23/11/2026" in sec and "percentil 100" in sec
+       and "Banco de España" in sec and "Bundesbank" in sec, "diaria: la sección dice la prima, la fecha, el percentil y las fuentes")
+    df, _ = prima.leer(jsonstat(SERIES))
+    res = prima.calcular(df, HOY)
+    sin = prima.fragmento(res, HOY.isoformat())
+    con = prima.fragmento({**res, "diaria": r}, HOY.isoformat())
+    ok("día a día" not in sin and "Bundesbank" not in sin and con.replace(sec + "\n", "").count("<h2>") == sin.count("<h2>"),
+       "diaria: sin dato diario la página queda como antes; con él, una sección más")
+    ok(prima.huella({**res, "diaria": r}) != prima.huella(res) and prima.huella({**res, "diaria": {**r, "pb": 66.0}}) != prima.huella({**res, "diaria": r}),
+       "diaria: la huella cambia con el dato diario")
+    # Un fallo de descarga o de lectura deja fuera la sección diaria, con aviso, sin tocar la parte mensual.
+    prima.AVISOS.clear()
+    d, s = prima.seccion_diaria(df, HOY, "/no/existe/ti_1_3.csv", "/no/existe/bund.csv")
+    ok(d is None and s is None and any("Prima diaria no disponible" in a for a in prima.AVISOS), "diaria: sin ficheros, fuera y con aviso")
+
+
 if __name__ == "__main__":
     prueba_lectura()
     prueba_calculos()
     prueba_calcular()
     prueba_tesoro()
     prueba_escritura()
+    prueba_diaria()
     if FALLOS:
         print(f"{len(FALLOS)} de {N} comprobaciones fallan.")
         sys.exit(1)
