@@ -49,7 +49,7 @@ from pathlib import Path
 
 import requests
 
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 PAGINA_WP = "https://elespeculador.com/compras-y-ventas-de-directivos/"
 PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/directivos/"
 URL_LISTADO = "https://www.cnmv.es/portal/consultas/directivos-resultado.aspx"
@@ -455,12 +455,24 @@ def _lunes(d: date) -> date:
     return d - timedelta(days=d.weekday())
 
 
-def serie_semanal(operaciones: list[dict], hoy: date) -> list[dict]:
-    """Compras y ventas discrecionales por semana (lunes), desde la primera operación hasta la semana actual."""
+def inicio_cubierto(cobertura: dict) -> date | None:
+    """Primer lunes con el registro ya leído: las semanas anteriores solo tienen notificaciones tardías y no sirven para
+    comparar. None si el registro está leído desde el inicio del formulario europeo o no se sabe desde cuándo."""
+    if cobertura.get("completo_hasta_inicio") or not cobertura.get("desde"):
+        return None
+    d = date.fromisoformat(cobertura["desde"])
+    return d + timedelta(days=(7 - d.weekday()) % 7)
+
+
+def serie_semanal(operaciones: list[dict], hoy: date, desde: date | None = None) -> list[dict]:
+    """Compras y ventas discrecionales por semana (lunes), desde la primera operación (o desde `desde`, el primer lunes
+    con el registro leído) hasta la semana actual."""
     disc = [o for o in operaciones if o["tipo"] == "discrecional" and o["sentido"] in ("compra", "venta")]
     if not disc:
         return []
     primera = _lunes(min(date.fromisoformat(o["fecha_operacion"]) for o in disc))
+    if desde is not None:
+        primera = max(primera, desde)
     semanas: dict[date, dict] = {}
     s = primera
     while s <= _lunes(hoy):
@@ -512,7 +524,7 @@ def percentil(valor: float, historia: list[float]) -> int | None:
 def calcular(operaciones: list[dict], hoy: date, cobertura: dict) -> dict:
     sustituidas = [o for o in operaciones if str(o.get("sustituida")) == "1"]
     operaciones = [o for o in operaciones if str(o.get("sustituida")) != "1"]
-    serie = serie_semanal(operaciones, hoy)
+    serie = serie_semanal(operaciones, hoy, inicio_cubierto(cobertura))
     actual = ventana_13(serie, len(serie) - 1) if serie else None
     historia = []
     if serie and len(serie) >= SEMANAS_MINIMAS + SEMANAS:
@@ -623,7 +635,20 @@ def _html(s: str) -> str:
 def _importe_txt(o: dict) -> str:
     if o["divisa"] == "EUR":
         return _eur(o["importe_eur"])
-    return _html(f"{o['volumen']} × {o['precio']} {o['divisa']}")
+    return _html(f"{_cifra(o['volumen'], 0)} × {_cifra(o['precio'], 2)} {o['divisa']}")
+
+
+def _cifra(v, minimo: int) -> str:
+    """Número a la española: miles con punto, decimales con coma, sin ceros sobrantes (como mínimo `minimo` decimales)."""
+    try:
+        x = float(v)
+    except (TypeError, ValueError):
+        return _html(v)
+    s = f"{abs(x):,.4f}".rstrip("0")
+    entero, _, dec = s.partition(".")
+    dec = dec.ljust(minimo, "0")
+    s = entero.replace(",", ".") + ("," + dec if dec else "")
+    return ("−" if x < 0 else "") + s
 
 
 def _nombre(e: str) -> str:
@@ -642,7 +667,8 @@ def fragmento(res: dict, fecha_pub: str) -> str:
     vendedoras = sorted([e for e in emp if e["neto_eur"] < 0], key=lambda e: e["neto_eur"])[:10]
     partes = [f"<!-- directivos:inicio {res['huella']} -->",
               f'<p class="has-small-font-size">Actualizado el {_f(fecha_pub)} con las notificaciones registradas en la CNMV hasta el {_f(res["totales"]["ultimo_registro"])}. '
-              f'Operaciones desde el {_f(res["totales"]["primera_operacion"])}; {res["totales"]["operaciones"]} líneas leídas, {res["totales"]["discrecionales"]} discrecionales'
+              + (f'Registro de la CNMV leído desde el {_f(res["cobertura"]["desde"])}: ' if inicio_cubierto(res["cobertura"]) else f'Operaciones desde el {_f(res["totales"]["primera_operacion"])}; ')
+              + f'{res["totales"]["operaciones"]} líneas leídas, {res["totales"]["discrecionales"]} discrecionales'
               + (f'; {res["totales"]["sustituidas"]} líneas iniciales sustituidas por notificaciones de modificación' if res["totales"]["sustituidas"] else "") + ".</p>"]
     if a and a["proporcion_compras"] is not None:
         frase = (f"En las últimas {SEMANAS} semanas, administradores y directivos de las cotizadas españolas han comunicado a la CNMV <strong>{a['compras_n']} compras</strong> "
@@ -650,7 +676,8 @@ def fragmento(res: dict, fecha_pub: str) -> str:
         if res["percentil_proporcion"] is not None:
             frase += f", percentil {res['percentil_proporcion']} de la serie semanal desde {res['serie'][0]['semana'][:4]} (ha sido igual o menor el {res['percentil_proporcion']} % de las semanas)"
         else:
-            frase += f" (el percentil histórico se publicará cuando la serie tenga {SEMANAS_MINIMAS} semanas; ahora tiene {res['semanas_de_historia']})"
+            frase += (f" (el percentil histórico se publicará cuando la serie tenga {SEMANAS_MINIMAS + SEMANAS} semanas completas; ahora tiene "
+                      f"{len(res['serie'])}, desde el {_f(res['serie'][0]['semana'])})")
         frase += f". En euros: {_eur(a['compras_eur'])} comprados frente a {_eur(a['ventas_eur'])} vendidos, neto {_eur(a['neto_eur'])}.</p>"
         partes.append("<p>" + frase)
     else:

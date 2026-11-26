@@ -314,6 +314,23 @@ def prueba_calculo():
     ok(h1 == d.calcular(ops, HOY, {"desde": "2024-11-01"})["huella"], "huella: estable")
     ok(h1 != d.calcular(ops + [op("2026-11-17", "compra", 10.0, nif="Z9")], HOY, {})["huella"], "huella: cambia con una operación nueva")
     ok(h1 != d.calcular(ops, HOY + timedelta(days=7), {})["huella"], "huella: cambia al cambiar de semana")
+    # Registro leído solo desde una fecha (se completa hacia atrás): las semanas anteriores tienen solo notificaciones
+    # tardías y no entran en la serie ni en el percentil (25/11/2026: el percentil publicado comparaba con semanas vacías).
+    cob = {"desde": "2026-03-21", "completo_hasta_inicio": False}
+    ok(d.inicio_cubierto(cob) == date(2026, 3, 23) and d.inicio_cubierto({"desde": "2026-03-23"}) == date(2026, 3, 23)
+       and d.inicio_cubierto({"desde": "2018-05-01", "completo_hasta_inicio": True}) is None and d.inicio_cubierto({}) is None,
+       "cobertura: primer lunes con el registro leído")
+    rc = d.calcular(ops, HOY, cob)
+    ok(rc["serie"][0]["semana"] == "2026-03-23" and rc["percentil_proporcion"] is None and rc["actual"] == v,
+       f"calcular: con el registro leído desde el 21/03/2026, la serie empieza el 23/03 y no hay percentil: {rc['serie'][0]['semana']} {rc['percentil_proporcion']}")
+    fc = d.fragmento(rc, HOY.isoformat())
+    ok("Registro de la CNMV leído desde el 21/03/2026:" in fc and "Operaciones desde el" not in fc
+       and f"cuando la serie tenga {d.SEMANAS_MINIMAS + d.SEMANAS} semanas completas; ahora tiene {len(rc['serie'])}, desde el 23/03/2026" in fc,
+       "fragmento: cobertura parcial dicha y percentil aplazado")
+    ok(d.calcular(ops, HOY, {"desde": "2018-05-01", "completo_hasta_inicio": True})["percentil_proporcion"] == 0, "calcular: con el registro completo, el percentil sigue igual")
+    ok(d._importe_txt({"divisa": "MXN", "volumen": 12100.0, "precio": 215.9, "importe_eur": None}) == "12.100 × 215,90 MXN"
+       and d._cifra("1234567", 0) == "1.234.567" and d._cifra(0.0525, 2) == "0,0525" and d._cifra(3, 2) == "3,00",
+       "importe en otra divisa: cifras a la española")
     # agregado por sector propio (cortos/sectores.csv): Repsol y Santander clasificados, el ISIN de relleno queda «sin sector»
     ok(d.SECTORES is not None and len(d.SECTORES) >= 59, "sectores: la tabla sectorial se carga")
     def con_isin(o, isin):
