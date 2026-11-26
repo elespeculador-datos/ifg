@@ -5,7 +5,7 @@ Cada día a las 06:20 (hora de Madrid), el servidor smpro-datos-1 (`servidor/eje
 - `fragmento-wp.html`: lo que marca la semana (citas destacadas), el día a día de lunes a viernes (sábado y domingo solo si tienen cita), la semana que viene y el método, entre `<!-- agenda:inicio HUELLA -->` y `<!-- agenda:fin -->`;
 - `boletin.html`: bloque corto para el boletín del lunes (Brevo): las citas destacadas de la semana, con hora, y un enlace a la agenda completa. Si la semana no tiene destacadas, las cinco primeras citas;
 - `index.html`: página propia de la salida;
-- `datos/eventos.json` (versionado, `version` 1.0.0, con el estado de cada fuente) y `datos/eventos.csv`: las citas de la semana en curso y de la siguiente;
+- `datos/eventos.json` (versionado, `version` 1.0.1, con el estado de cada fuente) y `datos/eventos.csv`: las citas de la semana en curso y de la siguiente;
 - `datos/fuentes/<fuente>.json`: la última lectura buena de cada fuente (estado del colector, con citas de hasta ocho semanas).
 
 Pregunta del lector: ¿qué citas públicas tiene esta semana el mercado español, qué día y a qué hora?
@@ -32,3 +32,5 @@ Prueba local con respuestas ya descargadas: `--local carpeta` con `ine_<id>.json
 Entrega a Tecnología: fragmento `https://datos.elespeculador.com/agenda/fragmento-wp.html` (marcas `agenda:inicio`/`agenda:fin`), boletín `https://datos.elespeculador.com/agenda/boletin.html`, JSON `https://datos.elespeculador.com/agenda/datos/eventos.json`; pasada diaria a las 06:20 de Madrid; hay dato nuevo cuando cambia la huella de la primera línea (normalmente, el lunes). Página de WordPress en borrador: /agenda-semanal/. El boletín del lunes toma `boletin.html` tal cual.
 
 Validado con datos reales el 18/11/2026 (flujo `agenda-validacion`, ejecución 44365956036): INE 15 fechas en ocho semanas (IPC avance de noviembre el 27/11 a las 09:00), BCE decisión del 17/12, FOMC del 9/12 con proyecciones, Eurostat 10 euroindicadores, Tesoro 6 subastas; todas las fuentes leídas.
+
+1.0.1 (25/11/2026): el enlace al calendario del INE pasa a https://www.ine.es/dynt3/Calendario/es/calenHTML.htm; el anterior (`dyngs/INEbase/es/calendario.htm`) da 404. La huella incluye la versión, así que la página se reescribe en la primera pasada tras la fusión.

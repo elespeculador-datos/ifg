@@ -281,6 +281,8 @@ def prueba_calcular_y_escribir():
     ok('<script type="application/ld+json">' in frag and "Dataset" in frag, "fragmento: JSON-LD")
     ok("no es asesoramiento" in frag and "históricamente" in frag and "se moverá" not in frag, "fragmento: marco educativo")
     ok("ine: leída" in frag and "tesoro: leída" in frag, "fragmento: estado de las fuentes")
+    ok('<a href="https://www.ine.es/dynt3/Calendario/es/calenHTML.htm">' in frag and "dyngs/INEbase/es/calendario.htm" not in frag,
+       "fragmento: el calendario del INE enlaza a la dirección vigente (la anterior da 404)")
     bol = (salida / "boletin.html").read_text(encoding="utf-8")
     ok("La agenda de la semana" in bol and "Reserva Federal" in bol and "hipotecas" not in bol and agenda.PAGINA_WP in bol, "boletín: solo destacadas y enlace a la agenda")
     ok("<strong>Viernes 27</strong>: INE: IPC de noviembre de 2026 (avance) (09:00 h)" in bol, f"boletín: línea del IPC: {bol}")
