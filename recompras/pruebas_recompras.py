@@ -399,5 +399,136 @@ try:
 except ImportError:
     print("aviso: pandas no disponible, control de referencia omitido")
 
+
+# ArcelorMittal, comunicado 43205 (19/10/2026), recorte literal: el resumen diario va en mes/día (10/12/2026 = 12 de
+# octubre) y el detalle en día/mes (12/10/2026 09:04:23). Con día/mes forzado salía una sola fila, fechada el
+# 10/12/2026 (en el futuro), y se perdían las otras cuatro (25/11/2026).
+ARCELOR_MD = """Purchases of own shares on 12th October to 16th October 2026
+
+
+
+Aggregate presentation by day and market
+
+
+                                                                                                                                                        Daily weighted average
+                                                  Identity code of the       Day of the       Identity code of the financial   Total daily volume (in                            Market (MIC
+                  Name of the Issuer                                                                                                                     purchase price of the                                    Prix
+                                                         Issuer             transaction                 instrument              number of shares)                                  Code)
+                                                                                                                                                                shares
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/12/2026              LU1598757687                      60 000                  56.6231             XAMS                           22.02                           CHECK - Rentrer à la main
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/13/2026              LU1598757687                      60 000                  56.8254             XAMS
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/14/2026              LU1598757687                      40 000                  56.6717             XAMS
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/15/2026              LU1598757687                      40 000                  55.8801             XAMS
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/16/2026              LU1598757687                      40 000                  57.1068             XAMS
+Rounded to two digits after the decimal point                                                            TOTAL                        240 000                    56.64
+
+
+Detail transaction by transaction
+
+
+
+
+                                                  Identity code of the                                                            Day/Hour of the         Identity code of the    Quantity                                 Identity code of the      Reference number of the
+                  Name of the Issuer                                     Name of the Broker   Identity code of the Broker                                                                      Price per unit   Currency                                                       Purpose of the buyback
+                                                         Issuer                                                                  transaction (CET)       financial instrument     bought                                          Market                   transaction
+
+
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165          Natixis         KX1WK48MPD4Y2NCUIZ63             12/10/2026 09:02:22         LU1598757687             459           57.36          EUR             XAMS            X0qqC3BORGuWQQEAkmJsGAA           Cancellation
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165          Natixis         KX1WK48MPD4Y2NCUIZ63             12/10/2026 09:04:23         LU1598757687             216           57.22          EUR             XAMS              vZxFfLwZQj6__CejOc05YAA         Cancellation
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165          Natixis         KX1WK48MPD4Y2NCUIZ63             12/10/2026 09:04:23         LU1598757687             210           57.20          EUR             XAMS              4xZxKvBPS_GJcj0Lf8K9UQA         Cancellation
+[…]
+                                ARCELORMITTAL   2EULGUTUI56JI9SAL165   Natixis   KX1WK48MPD4Y2NCUIZ63   13/10/2026 09:00:47   LU1598757687   234   56.66   EUR   XAMS    0RC8ylQeTAOLCTV_2i-sswA    Cancellation
+"""
+t1 = filas.primera_tabla(ARCELOR_MD)
+ok(filas.orden_fechas(ARCELOR_MD, con_hora=False) == "md" and filas.orden_fechas(ARCELOR_MD, con_hora=True) == "dm" and filas.orden_fechas(ARCELOR_MD) is None,
+   "fechas: ArcelorMittal, resumen en mes/día y detalle en día/mes; el texto entero se contradice")
+det = [x for x in filas.leer_filas(ARCELOR_MD, solo_primera_tabla=False) if x["detalle"]]
+ok(det and all(x["fecha"] in ("2026-10-12", "2026-10-13") for x in det), f"fechas: el detalle se lee en día/mes: {sorted({x['fecha'] for x in det})}")
+f = filas.leer_filas(ARCELOR_MD)
+ok([x["fecha"] for x in f] == ["2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16"]
+   and [x["acciones"] for x in f] == [60000, 60000, 40000, 40000, 40000] and abs(f[0]["precio"] - 56.6231) < 1e-9,
+   f"ArcelorMittal mes/día: cinco filas del 12 al 16 de octubre: {[(x['fecha'], x['acciones'], x['precio']) for x in f]}")
+viejo = filas.leer_filas(ARCELOR_MD, orden="dm")
+ok(len(viejo) == 1 and viejo[0]["fecha"] == "2026-12-10", f"control: leído como día/mes sale el error de producción (una fila del 10/12): {[(x['fecha'], x['acciones']) for x in viejo]}")
+a = recompras.analizar(ARCELOR_MD, date(2026, 10, 19))
+ok(a["coincide"] is True and a["resumen"]["acciones"] == 240000 and a["fuera"] == [] and a["resumen"]["desde"] == "2026-10-12",
+   f"ArcelorMittal mes/día: la suma coincide con el TOTAL (240 000): {a['resumen']['acciones']} {a['declarados']}")
+ok(filas.orden_fechas("13/10/2026 y 12/10/2026") == "dm" and filas.orden_fechas("10/13/2026") == "md"
+   and filas.orden_fechas("13/10/2026 10/13/2026") is None and filas.orden_fechas("05/10/2026") is None, "fechas: orden día/mes o mes/día por el número mayor que 12")
+# Fechas ambiguas (ningún número mayor que 12): decide la fecha del comunicado.
+AMBIGUO_MD = "\n".join(f"ACME  {d}  XMAD  10 000  5.0000" for d in ("10/05/2026", "10/06/2026", "10/07/2026", "10/08/2026", "10/09/2026")) + "\nTOTAL 50 000\n"
+am = recompras.analizar(AMBIGUO_MD, date(2026, 10, 12))
+ok([x["fecha"] for x in am["filas"]] == ["2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09"] and am["fuera"] == [],
+   f"fechas ambiguas en mes/día: las sitúa la fecha del comunicado: {[x['fecha'] for x in am['filas']]}")
+AMBIGUO_DM = "\n".join(f"ACME  {d}  XMAD  10.000  5,0000" for d in ("05/10/2026", "06/10/2026", "07/10/2026", "08/10/2026", "09/10/2026")) + "\nTOTAL 50.000\n"
+ad = recompras.analizar(AMBIGUO_DM, date(2026, 10, 12))
+ok([x["fecha"] for x in ad["filas"]] == ["2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09"] and ad["fuera"] == [],
+   "fechas ambiguas en día/mes: se quedan como están")
+ERRATA = "ACME  05/10/2026  XMAD  10.000  5,0000\nACME  06/10/2027  XMAD  10.000  5,0000\nTOTAL 20.000\n"
+ae = recompras.analizar(ERRATA, date(2026, 10, 12))
+ok([x["fecha"] for x in ae["filas"]] == ["2026-10-05"] and [x["fecha"] for x in ae["fuera"]] == ["2027-10-06"] and ae["coincide"] is False,
+   "fila con fecha imposible (después del comunicado): fuera, y la suma ya no coincide con el total")
+ok(recompras.analizar(ARCELOR_MD)["resumen"]["acciones"] == 240000, "sin fecha de comunicado, la lectura no cambia")
+# Releer una vez lo leído con fechas fuera de plazo.
+inf = {"nreg": "43205", "estado": "leido", "intentos": "1", "fecha_comunicado": "2026-10-19", "desde": "2026-12-10", "hasta": "2026-12-10"}
+ok(recompras.fuera_de_plazo(inf) and not recompras.fuera_de_plazo({**inf, "desde": "2026-10-12", "hasta": "2026-10-16"}), "fuera de plazo: lo detecta por las fechas del informe")
+lst = [{"nreg": "43205"}, {"nreg": "1"}]
+ok([r["nreg"] for r in recompras.pendientes(lst, [inf, {"nreg": "1", "estado": "leido", "intentos": "1", "fecha_comunicado": "2026-10-19", "desde": "2026-10-12", "hasta": "2026-10-16"}])] == ["43205"]
+   and recompras.pendientes(lst[:1], [{**inf, "intentos": str(recompras.INTENTOS_MAX)}]) == [],
+   "pendientes: se relee lo leído fuera de plazo, con el límite de intentos")
+
+# ArcelorMittal, comunicados 43124 y 43125 (12/10/2026), recortes literales: fechas en mes/día sin cero delante
+# (9/28/2026, 10/5/2026). Antes no se reconocían como fechas y los dos quedaban «sin filas».
+ARCELOR_124 = """Déclaration des transactions sur actions propres réalisées du 28/09/2026 au 02/10/2026
+
+
+
+Présentation agrégée par jour et marché
+
+
+                                                                                                                                             Prix moyen pondéré
+                                                  Code identifiant de    Jour de la      Code identifiant de     Volume total journalier                              Marché (code
+                     Nom de l'émetteur                                                                                                     journalier d'acquisition                                   Prix
+                                                     l'émetteur         transaction    l'instrument financier     (en nombre de titres)                                   MIC)
+                                                                                                                                                  des actions
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165    9/28/2026         LU1598757687                  20 818                    60.8092               CEUX                         22.02                         CHECK - Rentrer à la main
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165    9/28/2026         LU1598757687                  65 716                    60.8079               XAMS
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165    10/1/2026         LU1598757687                  60 000                    57.5262               XAMS
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165    10/2/2026         LU1598757687                  60 000                    57.0636               XAMS
+Arrondi à deux chiffres après la virgule                                                       TOTAL                     206 534                    58.77
+
+"""
+ARCELOR_125 = """Purchases of own shares on 5th October to 9th October 2026
+
+
+
+Aggregate presentation by day and market
+
+
+                                                                                                                                                        Daily weighted average
+                                                  Identity code of the       Day of the       Identity code of the financial   Total daily volume (in                            Market (MIC
+                  Name of the Issuer                                                                                                                     purchase price of the                                    Prix
+                                                         Issuer             transaction                 instrument              number of shares)                                  Code)
+                                                                                                                                                                shares
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/5/2026               LU1598757687                      60 000                  56.8507             XAMS                           22.02                           CHECK - Rentrer à la main
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/6/2026               LU1598757687                      60 000                  58.5122             XAMS
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/7/2026               LU1598757687                      60 000                  56.3312             XAMS
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/8/2026               LU1598757687                      60 000                  54.1702             XAMS
+                                 ARCELORMITTAL   2EULGUTUI56JI9SAL165        10/9/2026               LU1598757687                      60 000                  57.0835             XAMS
+Rounded to two digits after the decimal point                                                            TOTAL                        300 000                    56.59
+
+"""
+a124 = recompras.analizar(ARCELOR_124, date(2026, 10, 12))
+ok([x["fecha"] for x in a124["filas"]] == ["2026-09-28", "2026-09-28", "2026-10-01", "2026-10-02"] and a124["coincide"] is True and a124["resumen"]["acciones"] == 206534,
+   f"ArcelorMittal 43124: fechas sin cero en mes/día (9/28/2026); coincide con el TOTAL: {[x['fecha'] for x in a124['filas']]} {a124['resumen']['acciones']}")
+a125 = recompras.analizar(ARCELOR_125, date(2026, 10, 12))
+ok([x["fecha"] for x in a125["filas"]] == ["2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09"] and a125["coincide"] is True,
+   f"ArcelorMittal 43125: fechas ambiguas (10/5/2026), situadas por la fecha del comunicado: {[x['fecha'] for x in a125['filas']]}")
+viejo = {"nreg": "43124", "estado": "sin_filas", "intentos": "1", "leido": "2026-11-24", "fecha_comunicado": "2026-10-12", "desde": "", "hasta": ""}
+ok([r["nreg"] for r in recompras.pendientes([{"nreg": "43124"}], [viejo])] == ["43124"]
+   and recompras.pendientes([{"nreg": "43124"}], [{**viejo, "lector": recompras.LECTOR}]) == []
+   and recompras.pendientes([{"nreg": "43124"}], [{**viejo, "intentos": str(recompras.INTENTOS_MAX)}]) == [],
+   "pendientes: lo leído «sin filas» con un lector anterior se relee una vez")
+
 print(f"{TOTAL - len(FALLOS)}/{TOTAL} comprobaciones superadas")
 sys.exit(1 if FALLOS else 0)

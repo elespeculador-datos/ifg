@@ -55,3 +55,16 @@ Sonda (flujo `recompras-validacion`, ejecuciones 44420762376 y 44422466552) sobr
 Siete de ocho maquetas se leen con un único lector sin reglas por empresa; en las cinco que declaran total, la suma coincide. BBVA incrusta la tabla como imagen: solo se lee el acumulado del texto (OCR no previsto).
 
 Cómo lee `filas.py`: toda fila comparte tres señas, sea cual sea el orden de columnas: una fecha (`dd/mm/aaaa`, `aaaa-mm-dd`, `dd-Mon-aa` o `dd-oct.-aa`), un centro de negociación (código MIC o abreviatura: XMAD, CEUX, TQEX, AQEU, XLON, LON, MAD…, el texto «Centros de negociación estadounidenses» → EEUU, o, si no hay centro, un ISIN en la fila → «n/d», como en ArcelorMittal) y al menos dos cifras, de las que la primera es el número de acciones (entero) y la segunda el precio medio. El estilo numérico lo delata la cifra de acciones (`763.405` español, `391,656` inglés, `17 271` miles con espacio); si no tiene separador, lo sugiere la fecha; un único separador seguido de un grupo que no es de tres cifras es decimal en cualquier estilo (`54.61`, `42,9351`). Un símbolo de moneda delante del precio (£, $, €) fija la moneda; por defecto, euros. Solo se lee la primera tabla del documento: el texto se corta en la primera línea que empieza por «Anexo», «Se acompaña», «Detalle de/sobre las/cada», «Transaction details» o «Individual trade», porque los anexos repiten cada operación individual (con hora) y duplicarían la suma; si antes de esa marca no hay filas, se lee todo y se descartan las filas con hora. Las líneas «Total» se extraen aparte (`totales_declarados`) para contrastar la suma.
+
+## 1.0.1 (25/11/2026): fechas en mes/día
+
+ArcelorMittal escribe el resumen diario de algunos informes en mes/día (10/12/2026 = 12 de octubre) y el detalle en día/mes. El lector forzaba día/mes: del comunicado 43205 (12-16/10/2026) leía una sola fila, fechada el 10/12/2026, que creaba una semana futura en la página, y perdía las otras cuatro. Ahora:
+
+- `filas.orden_fechas` deduce el orden de las fechas dd/dd/aaaa por el número mayor que 12, por separado en las líneas sin hora (resumen) y con hora (detalle).
+- `analizar` comprueba que cada fila caiga entre `VENTANA_DIAS` (45) días antes del comunicado y el propio día. Si no, prueba mes/día y se queda con la lectura que deja más filas dentro; las que siguen fuera se descartan con aviso.
+- `pendientes` relee una vez (con el límite de `INTENTOS_MAX`) lo ya leído con fechas fuera de plazo: con los datos del servidor del 24/11, solo el 43205, que pasa a 240.000 acciones del 12 al 16/10 y coincide con su total.
+
+Ampliado el mismo día (25/11/2026):
+- Las fechas sin cero delante (9/28/2026, 10/5/2026) también se reconocen. Dos informes de ArcelorMittal del 12/10 (43124 y 43125) quedaban «sin filas» por eso, y ahora se leen enteros: 206.534 y 300.000 acciones, que coinciden con sus totales.
+- Cada informe anota el `lector` con que se leyó. Lo leído «sin filas» con un lector anterior se relee una vez.
+- Con el estado del servidor del 24/11, de los 23 informes marcados («sin tabla legible» o sin coincidir con su total) cambian solo estos tres: 43205, 43124 y 43125.
