@@ -327,6 +327,9 @@ def prueba_calculo():
     ok("Registro de la CNMV leído desde el 21/03/2026:" in fc and "Operaciones desde el" not in fc
        and f"cuando la serie tenga {d.SEMANAS_MINIMAS + d.SEMANAS} semanas completas; ahora tiene {len(rc['serie'])}, desde el 23/03/2026" in fc,
        "fragmento: cobertura parcial dicha y percentil aplazado")
+    ok(f"al menos {d.SEMANAS_MINIMAS} ventanas anteriores, es decir, {d.SEMANAS_MINIMAS + d.SEMANAS} semanas de serie" in fc
+       and f"con al menos {d.SEMANAS_MINIMAS} semanas de serie)" not in fc,
+       "el método dice el mismo umbral que el aviso: 52 ventanas anteriores, 65 semanas de serie (27/11/2026)")
     ok(d.calcular(ops, HOY, {"desde": "2018-05-01", "completo_hasta_inicio": True})["percentil_proporcion"] == 0, "calcular: con el registro completo, el percentil sigue igual")
     ok(d._importe_txt({"divisa": "MXN", "volumen": 12100.0, "precio": 215.9, "importe_eur": None}) == "12.100 × 215,90 MXN"
        and d._cifra("1234567", 0) == "1.234.567" and d._cifra(0.0525, 2) == "0,0525" and d._cifra(3, 2) == "3,00",

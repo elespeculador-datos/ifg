@@ -49,7 +49,7 @@ from pathlib import Path
 
 import requests
 
-VERSION = "1.1.1"
+VERSION = "1.1.2"
 PAGINA_WP = "https://elespeculador.com/compras-y-ventas-de-directivos/"
 PAGES = os.environ.get("ESPEC_DATOS_BASE", "https://elespeculador-datos.github.io/ifg/").rstrip("/") + "/directivos/"
 URL_LISTADO = "https://www.cnmv.es/portal/consultas/directivos-resultado.aspx"
@@ -69,7 +69,7 @@ try:
     SECTORES = _sectores.cargar()
 except Exception:  # noqa: BLE001
     _sectores, SECTORES = None, None
-SEMANAS_MINIMAS = 52                 # el percentil solo se publica con un año de serie
+SEMANAS_MINIMAS = 52                 # el percentil solo se publica con 52 ventanas anteriores (SEMANAS_MINIMAS + SEMANAS semanas de serie)
 AVISOS: list[str] = []
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
 
@@ -733,7 +733,8 @@ def fragmento(res: dict, fecha_pub: str) -> str:
                   "las operaciones fuera de mercado, los préstamos y las pignoraciones se guardan con su tipo y no entran en el neto. Cuando una notificación de "
                   "modificación repite las operaciones de una anterior (mismo emisor, fecha, volumen y precio), la anterior deja de contar. La «proporción de compras» es el "
                   f"porcentaje de operaciones discrecionales que son compras en las últimas {SEMANAS} semanas; el percentil compara esa proporción con todas las ventanas "
-                  f"de {SEMANAS} semanas anteriores (solo se publica con al menos {SEMANAS_MINIMAS} semanas de serie). Los importes son volumen por precio, solo en euros. "
+                  f"de {SEMANAS} semanas anteriores (solo se publica con al menos {SEMANAS_MINIMAS} ventanas anteriores, es decir, {SEMANAS_MINIMAS + SEMANAS} semanas de serie). "
+                  "Los importes son volumen por precio, solo en euros. "
                   "Lectura histórica, sin predicción: que los directivos compren o vendan describe lo que han hecho, no lo que hará la acción.</p>"
                   f'<p class="has-small-font-size">Fuente: CNMV, <a href="{URL_REGISTRO}">registro de notificaciones de los directivos y personas vinculadas</a>, reproducido '
                   "fielmente (la CNMV lo ofrece gratis en cnmv.es). Registro leído desde el "
